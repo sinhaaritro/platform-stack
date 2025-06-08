@@ -1,0 +1,17 @@
+# compose/ubuntu-with-nvidia-gpu/compose.yaml
+# Defines a test harness environment for running GPU-accelerated commands.
+version: "3.8"
+
+# Note: We don't include the top-level network file because this is a one-shot
+# task that doesn't need to communicate with other long-running services.
+
+services:
+  # The service is named 'ubuntu-with-nvidia-gpu'. This is the environment we will run commands in.
+  ubuntu-with-nvidia-gpu:
+    # Use the fully qualified image name for Podman compatibility.
+    image: docker.io/nvidia/cuda:12.1.1-base-ubuntu22.04
+    # These settings are directly from your 'podman run' command.
+    privileged: true
+    gpus: all
+    devices:
+      - nvidia.com/gpu=alll
