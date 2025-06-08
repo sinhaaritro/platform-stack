@@ -1,0 +1,33 @@
+# compose/ollama/compose.yaml
+# Defines the Ollama service, adhering to the platform's shared network contract.
+version: "3.8"
+
+include:
+  - ../compose.yaml
+
+services:
+  # The service name 'ollama' is how other services will find it on the network.
+  ollama:
+    image: ollama/ollama
+    container_name: ollama_service
+    # For GPU access. Requires host setup. See README.md.
+    # Note: 'privileged: true' may be needed for some GPU setups with Podman.
+    gpus: all
+    privileged: true
+    volumes:
+      # Use a named volume to persist models, managed by Podman.
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    networks:
+      - stratum_net
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# Define the named volume for this service.
+volumes:
+  ollama_data:
+    name: ollama_data
