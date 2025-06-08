@@ -1,0 +1,39 @@
+# compose/open-webui/compose.yaml
+# Defines the Open WebUI application, which depends on the Ollama service.
+version: "3.8"
+
+# Rule #1: Include the shared network definition and the required Ollama service.
+# The order doesn't matter, Compose merges them intelligently.
+include:
+  - ../compose.yaml          # Includes the 'stratum_net' network definition
+  - ../ollama/compose.yaml     # Includes the 'ollama' service definition
+
+services:
+  # The service name 'open-webui' is how another service could find it (if needed).
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui_service
+    # Use an environment variable for the port, defaulting to 3000 as per docs.
+    ports:
+      - "${WEBUI_PORT:-3000}:8080"
+    environment:
+      # This is how the WebUI finds Ollama. We use the service name 'ollama'
+      # because they are both on the shared 'stratum_net'.
+      - 'OLLAMA_BASE_URL=http://ollama:11434'
+    volumes:
+      # As per the docs, this volume stores WebUI-specific data.
+      - openwebui_data:/app/backend/data
+    networks:
+      # Rule #2: Connect this service to the shared platform network.
+      - stratum_net
+    # This is a critical instruction: Do not start this container until the 'ollama'
+    # service (from the included file) is healthy and ready.
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: always
+
+# Define the named volume for this service.
+volumes:
+  openwebui_data:
+    name: openwebui_data
