@@ -39,7 +39,7 @@ A developer only needs to interact with the files in this directory to run a com
     *(You can replace `deepseek-r1:latest` with any model you wish to use.)*
 
 4.  **Access the WebUI:**
-    Open your browser and navigate to the address below. The default port is `3000`, but it can be overridden by creating a `.env` file in this directory with the line `WEBUI_PORT=your_port`.
+    Open your browser and navigate to the address below. The default port is `11435`, but it can be overridden by creating a `.env` file in this directory with the line `WEBUI_PORT=your_port`.
     
     **http://localhost:3000**
 
@@ -48,3 +48,20 @@ A developer only needs to interact with the files in this directory to run a com
     ```sh
     podman-compose down
     ```
+
+## First-Time Setup: Default Admin User
+
+To avoid the sign-up process during local development, you can create a default admin user automatically on the first run.
+
+1.  **Create a `.env` file** in this directory (`compose/open-webui/`).
+2.  **Add the following content** to the `.env` file:
+    ```
+    # Set the default admin user credentials
+    WEBUI_DEFAULT_USER_EMAIL=admin@local.com
+    WEBUI_DEFAULT_USER_PASSWORD=admin
+
+    # You can also set a custom port
+    WEBUI_PORT=11435
+    ```
+
+**IMPORTANT:** This only works when the database volume is created for the first time. If you have already run this service, you must destroy the old volume by running `podman-compose down -v` before starting it again.

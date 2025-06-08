@@ -1,6 +1,7 @@
 # Ollama Service
 
 This service provides the core Ollama AI engine for the platform.
+Currently works with NVIDIA GPU only
 
 ## Prerequisites
 

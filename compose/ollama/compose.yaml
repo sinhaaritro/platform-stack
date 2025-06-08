@@ -8,12 +8,14 @@ include:
 services:
   # The service name 'ollama' is how other services will find it on the network.
   ollama:
-    image: ollama/ollama
+    image: docker.io/ollama/ollama
     container_name: ollama_service
     # For GPU access. Requires host setup. See README.md.
     # Note: 'privileged: true' may be needed for some GPU setups with Podman.
     gpus: all
     privileged: true
+    devices:
+      - nvidia.com/gpu=all
     volumes:
       # Use a named volume to persist models, managed by Podman.
       - ollama_data:/root/.ollama
