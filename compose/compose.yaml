@@ -1,0 +1,10 @@
+# compose/compose.yaml
+# This is the foundational file for the entire local development environment.
+# Its primary purpose is to define the shared network that all services will join.
+version: "3.8"
+
+networks:
+  # All services in this platform will connect to this single network for easy communication.
+  stratum_net:
+    name: stratum_net # A fixed, predictable name for our network
+    driver: bridge
