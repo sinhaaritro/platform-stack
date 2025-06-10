@@ -1,0 +1,9 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  # This is the magic part: it maps port 8080 on your localhost
+  # to port 30080 on the kind "node" container.
+  extraPortMappings:
+  - containerPort: 30080
+    hostPort: 8080

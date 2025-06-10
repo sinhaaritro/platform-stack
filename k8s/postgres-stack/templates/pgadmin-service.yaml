@@ -1,0 +1,15 @@
+# This file creates a network Service for our pgAdmin Deployment.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-pgadmin-service
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30080
+  # This selector tells the service to route traffic to any Pod
+  # with the label 'app: pgadmin'.
+  selector:
+    app: pgadmin

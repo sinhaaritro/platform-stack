@@ -1,0 +1,29 @@
+# This file defines the pgAdmin Deployment.
+# It creates the Pod that runs the pgAdmin application.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # The name of our deployment
+  name: {{ .Release.Name }}-pgadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgadmin
+  template:
+    metadata:
+      labels:
+        # This label is used by the Service to find this Pod
+        app: pgadmin
+    spec:
+      containers:
+        - name: pgadmin
+          image: dpage/pgadmin4:latest
+          env:
+            # We are injecting the login details from our values.yaml file
+            - name: PGADMIN_DEFAULT_EMAIL
+              value: {{ .Values.pgadmin.email | quote }}
+            - name: PGADMIN_DEFAULT_PASSWORD
+              value: {{ .Values.pgadmin.password | quote }}
+          ports:
+            - containerPort: 80

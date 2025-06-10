@@ -1,0 +1,18 @@
+Your postgres-stack has been deployed.
+
+1. Access pgAdmin:
+
+   The pgAdmin service is not exposed externally. To access it, run the following kubectl port-forward command:
+
+   export PGADMIN_POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app=pgadmin" -o jsonpath="{.items[0].metadata.name}")
+   echo "Visit http://127.0.0.1:8080 to use pgAdmin"
+   kubectl --namespace {{ .Release.Namespace }} port-forward $PGADMIN_POD_NAME 8080:80
+
+2. Connect to PostgreSQL from pgAdmin:
+
+   Once logged into pgAdmin, add a new server with the following details:
+   - Host: {{ .Release.Name }}-postgresql
+   - Port: 5432
+   - Maintenance DB: {{ .Values.postgresql.auth.database }}
+   - Username: {{ .Values.postgresql.auth.username }}
+   - Password: (The password you set in your values.yaml)

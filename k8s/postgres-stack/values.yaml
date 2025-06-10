@@ -1,0 +1,21 @@
+# =================================================================
+# PostgreSQL Configuration
+# These values are passed down to the Bitnami sub-chart.
+# The key 'postgresql' MUST match the dependency name in Chart.yaml
+# =================================================================
+postgresql:
+  auth:
+    # NOTE: In production, use --set or Helm Secrets to provide passwords.
+    postgresPassword: "PostgresSuperPassword"
+    username: "platform_user"
+    password: "UserSuperPassword"
+    database: "platform_db"
+
+# =================================================================
+# pgAdmin Configuration
+# These are our own custom values for our custom templates.
+# =================================================================
+pgadmin:
+  email: "admin@example.com"
+  # NOTE: Change this password for any real deployment.
+  password: "PgAdminSuperPassword"
