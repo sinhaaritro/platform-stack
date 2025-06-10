@@ -1,0 +1,35 @@
+# compose/postgres/compose.yaml
+# Defines the reusable PostgreSQL database service for the platform.
+version: "3.8"
+
+# Include the shared network definition.
+include:
+  - ../compose.yaml
+
+services:
+  postgres:
+    image: docker.io/postgres:16-alpine
+    container_name: postgres_service
+    environment:
+      # These variables MUST be provided by the application stack that includes this file.
+      # The values after ':-' are insecure defaults only for preventing errors if not set.
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-appdb}
+    volumes:
+      # Use a named volume to persist database data. The volume name is scoped
+      # to the project that launches it (e.g., 'n8n_postgres_data').
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - stratum_net
+    healthcheck:
+      # This command checks if the database is ready to accept connections.
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+# Defines the named volume template.
+volumes:
+  postgres_data:

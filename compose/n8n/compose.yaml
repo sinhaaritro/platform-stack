@@ -1,0 +1,48 @@
+# compose/n8n/compose.yaml
+# Defines the n8n automation application, which depends on the PostgreSQL service.
+version: "3.8"
+
+# Include the shared network and the required PostgreSQL service.
+include:
+  - ../compose.yaml
+  - ../postgres/compose.yaml
+  - ../ollama/compose.yaml
+
+services:
+  n8n:
+    image: docker.io/n8nio/n8n
+    container_name: n8n_service
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+    environment:
+      # These variables configure n8n to use the included PostgreSQL database.
+      # They get their values from the .env file in this directory.
+      - DB_TYPE=postgres
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_DATABASE=${POSTGRES_DB}
+      - DB_POSTGRESDB_USER=${POSTGRES_USER}
+      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
+      
+      # Timezone
+      - GENERIC_TIMEZONE=${TIMEZONE:-Europe/Berlin}
+      - TZ=${TIMEZONE:-Europe/Berlin}
+ 
+      # Enable community nodes as tools
+      - N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true
+      
+      # Ollama Host
+      - OLLAMA_HOST=http://ollama:11434
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - stratum_net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    restart: always
+
+# Define the named volume for this service.
+volumes:
+  n8n_data:

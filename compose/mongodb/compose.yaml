@@ -1,0 +1,26 @@
+# compose/mongodb/compose.yaml
+# Defines a reusable, base MongoDB service for the platform.
+version: "3.8"
+
+include:
+  - ../compose.yaml # Include the shared 'stratum_net'
+
+services:
+  # The service name 'mongo' is how other services will find it.
+  mongo:
+    image: docker.io/mongo:latest
+    container_name: mongodb_service
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - stratum_net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  mongodb_data:
+    name: mongodb_data
