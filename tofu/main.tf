@@ -1,106 +1,176 @@
-# This single resource block will create all three VMs
-# by looping over the 'laboon_vms' variable.
-resource "proxmox_vm_qemu" "laboon_server" {
-  # The 'for_each' meta-argument is what enables the loop.
-  for_each = var.laboon_cluster_enabled ? var.laboon_vms : {}
+# -----------------------------------------------------------------------------
+# LOCALS BLOCK
+#
+# This block is the "brain" of our configuration. It processes the complex
+# 'resource_groups' variable and flattens it into two simple, filtered lists:
+# 1. qemu_nodes: A flat map of all QEMU VMs that should be created.
+# 2. lxc_nodes: A flat map of all LXC containers that should be created.
+#
+# This pattern allows us to use a clean 'for_each' in our resource blocks
+# and avoids duplicating code.
+# -----------------------------------------------------------------------------
 
-  # VM Identification and Placement
-  vmid = each.value.vmid
-  name = each.key
-  tags = "laboon"
+locals {
+  # --- Step 1: Flatten the nested data into a single, simple list ---
+  # We create a list where each element is an object containing all the
+  # combined information for a single node (from the group and the node itself).
+  all_nodes_list = flatten([
+    # Loop through each resource group (e.g., "laboon_cluster")...
+    for group_name, group_data in var.resource_groups : [
+      # ...then loop through each node within that group (e.g., "laboon-1").
+      for node_name, node_data in group_data.nodes : {
+        # Combine all the relevant data into a single object.
+        group_name           = group_name
+        hostname             = node_name
+        enabled              = group_data.enabled
+        type                 = group_data.type
+        template             = group_data.template
+        hardware_profile_key = group_data.hardware_profile_key
+        tags                 = group_data.tags
+        id                   = node_data.id
+        ip                   = node_data.ip
+      }
+    ]
+  ])
 
-  target_node = var.target_node
-  clone       = var.template_name
+  # --- Step 2: Create a filtered map for all QEMU nodes ---
+  qemu_nodes = {
+    for node in local.all_nodes_list :
+    "${node.group_name}/${node.hostname}" => merge(
+      node,
+      var.hardware_profiles.qemu[node.hardware_profile_key]
+    )
+    if node.enabled && node.type == "qemu"
+  }
+
+  # --- Step 3: Create a filtered map for all LXC nodes ---
+  lxc_nodes = {
+    for node in local.all_nodes_list :
+    "${node.group_name}/${node.hostname}" => merge(
+      node,
+      var.hardware_profiles.lxc[node.hardware_profile_key]
+    )
+    if node.enabled && node.type == "lxc"
+  }
+}
+
+
+# -----------------------------------------------------------------------------
+# QEMU VIRTUAL MACHINE CREATION
+#
+# This single resource block is responsible for creating ALL QEMU VMs.
+# It iterates over the 'local.qemu_nodes' map we created above.
+# -----------------------------------------------------------------------------
+
+resource "proxmox_vm_qemu" "qemu_servers" {
+  # The for_each loop iterates over our flattened map of QEMU nodes.
+  for_each = local.qemu_nodes
+
+  # --- VM Identification and Placement ---
+  vmid        = each.value.id
+  name        = each.value.hostname
+  tags        = join(",", each.value.tags) # The provider expects a comma-separated string
+  target_node = var.resource_defaults.target_node
+  clone       = each.value.template
   full_clone  = true
+  onboot      = false
+  vm_state    = "stopped"
 
-  # Hardware Configuration
-  bios      = "ovmf"
-  scsihw    = "virtio-scsi-single"
-  agent     = 1                       # Enable the QEMU Guest Agent
-  onboot    = false                   # Start the VM on creation
-  vm_state  = "stopped"
-
-
-  # VM Resources
-  memory    = var.vm_memory
-  # balloon   = 1
+  # --- Hardware Configuration ---
+  bios   = "ovmf"
+  scsihw = "virtio-scsi-single"
+  agent  = 1
+  memory = each.value.memory
   cpu {
-    cores   = var.vm_cores
-    type    = "host"
+    cores = each.value.cores
+    type  = "host"
   }
 
   disks {
     ide {
       ide1 {
         cloudinit {
-          storage = var.storage_pool
+          storage = var.resource_defaults.storage_pool
         }
       }
     }
     virtio {
       virtio0 {
         disk {
-          size      = var.vm_disk_size
-          storage   = var.storage_pool
-          discard   = true
-          backup    = true
-          iothread  = true
+          size     = each.value.disk_size
+          storage  = var.resource_defaults.storage_pool
+          discard  = true
+          backup   = true
+          iothread = true
         }
       }
     }
   }
+
   boot = "order=virtio0;net0"
 
-  # VM Network Configuration
   network {
     id       = 0
     model    = "virtio"
-    bridge   = var.network_bridge
-    firewall = true
+    bridge   = var.resource_defaults.network_bridge
+    firewall = false # Set to true if you have configured the PVE firewall
   }
-
-  # Cloud-Init Configuration
-  os_type = "cloud-init"              # This configures the VM's OS on first boot.
-  
-  ciuser      = var.cloud_init_user.username
-  cipassword  = var.cloud_init_user.password
-  ciupgrade   = var.cloud_init_user.upgrade
-  sshkeys     = var.cloud_init_user.ssh_key
 
   serial {
-    id    = 0
-    type  = "socket"
+    id   = 0
+    type = "socket"
   }
 
-  # Build the IP address string dynamically from our variables.
-  ipconfig0 = "ip=${each.value.ip}/${var.cidr_mask},gw=${var.gateway_ip}"
+  # --- Cloud-Init Configuration ---
+  os_type   = "cloud-init"
+  ipconfig0 = "ip=${each.value.ip}/${var.network_defaults.cidr_mask},gw=${var.network_defaults.gateway}"
 
-  # This section creates a user and adds your SSH key for passwordless access.
-  # cicustom = "user=local:snippets/user-data.yaml"
+  ciuser     = var.user_profile.username
+  cipassword = var.user_credentials.password
+  ciupgrade  = var.user_profile.package_upgrade
+  # The 'join' function correctly formats the list of keys into the multi-line
+  # string format that the provider expects, without needing <<EOF.
+  sshkeys = join("\n", var.user_credentials.ssh_public_keys)
 }
 
-# # Cloud-Init User Data
-# # This defines the user configuration for Cloud-Init.
-# # It's better to manage this as a separate local file for clarity.
-# resource "local_file" "user_data" {
-#   # for_each is needed here as well to create a separate user-data
-#   # file for each VM, which can be useful for customization.
-#   for_each = var.laboon_vms
 
-#   filename = "${path.module}/snippets/user-data.yaml"
-#   content = templatefile("${path.module}/templates/cloud_init.tftpl", {
-#     hostname          = each.key
-#     ssh_public_key    = var.ssh_public_key
-#   })
-# }
+# -----------------------------------------------------------------------------
+# LXC CONTAINER CREATION
+#
+# This single resource block is responsible for creating ALL LXC containers.
+# It iterates over the 'local.lxc_nodes' map.
+# -----------------------------------------------------------------------------
 
-# # This directory ensures the snippet path exists.
-# resource "local_file" "snippets_dir" {
-#   filename = "${path.module}/snippets/.placeholder"
-#   content  = ""
-# }
+resource "proxmox_lxc" "lxc_servers" {
+  for_each = local.lxc_nodes
 
-# resource "local_file" "templates_dir" {
-#   filename = "${path.module}/templates/.placeholder"
-#   content  = ""
-# }
+  # --- Container Identification and Placement ---
+  vmid     = each.value.id
+  hostname = each.value.hostname
+  tags     = join(",", each.value.tags)
+
+  target_node = var.resource_defaults.target_node
+  ostemplate  = each.value.template
+
+  # --- Hardware Configuration ---
+  cores  = each.value.cores
+  memory = each.value.memory
+  rootfs {
+    storage = var.resource_defaults.storage_pool
+    size    = each.value.rootfs_size
+  }
+
+  # --- Network Configuration ---
+  network {
+    name   = "eth0"
+    bridge = var.resource_defaults.network_bridge
+    ip     = "${each.value.ip}/${var.network_defaults.cidr_mask}"
+    gw     = var.network_defaults.gateway
+  }
+
+  # --- Cloud-Init / OS Configuration ---
+  onboot         = false
+  unprivileged   = true
+  start          = true
+  ssh_public_keys = join("\n", var.user_credentials.ssh_public_keys)
+}
