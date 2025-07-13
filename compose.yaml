@@ -1,0 +1,32 @@
+# compose.yaml
+version: '3.8'
+
+services:
+  tofu:
+    # Build configuration: Tells Podman how to build the image.
+    build:
+      context: .  # Use the root of the project as the build context.
+      dockerfile: ./.build/tofu/Containerfile # Path to the Containerfile.
+
+    # Name the resulting image for clarity.
+    image: platform-stack/opentofu
+
+    # This is the key to your "run as a service" request.
+    # This command keeps the container running idly so you can 'exec' into it.
+    command: ["tail", "-f", "/dev/null"]
+
+    # The working directory *inside* the container.
+    # We set it to the tofu code folder for convenience.
+    working_dir: /workspace/tofu
+
+    # Volume mounts: This connects your host files to the container.
+    volumes:
+      # Mount the entire project directory into the container's /workspace.
+      - .:/workspace:z
+      
+      # Mount the SSH agent socket for GitHub authentication inside the container.
+      - ${SSH_AUTH_SOCK}:${SSH_AUTH_SOCK}
+
+    # Environment variables: Pass the SSH agent socket location to the container.
+    environment:
+      - SSH_AUTH_SOCK=${SSH_AUTH_SOCK}
