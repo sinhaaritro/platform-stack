@@ -41,10 +41,21 @@ platform-stack/
     ├── outputs.tf           # Defines what to output after a successful apply
     ├── checks.tf            # Contains the Workspace Guardrail safety check
     │
-    └── environments/          # Contains the DATA for each environment
-        ├── calm-belt.tfvars
-        ├── admin.tfvars
-        └── ...
+    ├── environments/          # Contains the DATA for each environment
+    │   ├── calm-belt.tfvars
+    │   ├── admin.tfvars
+    │   └── ...
+    │
+    └── modules/               # Contains reusable infrastructure components
+        ├── proxmox_qemu_vm/   # Module for creating QEMU VMs
+        │   ├── main.tf
+        │   ├── variables.tf
+        │   ├── outputs.tf
+        │   └── providers.tf
+        │
+        └── proxmox_lxc_container/ # Module for creating LXC containers
+            └── ...
+
 ```
 
 ---
