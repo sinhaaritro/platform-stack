@@ -30,3 +30,26 @@ services:
     # Environment variables: Pass the SSH agent socket location to the container.
     environment:
       - SSH_AUTH_SOCK=${SSH_AUTH_SOCK}
+
+
+  ansible:
+    build:
+      context: .
+      dockerfile: ./.build/ansible/Containerfile
+    
+    image: platform-stack/ansible
+    
+    command: ["tail", "-f", "/dev/null"]
+    
+    working_dir: /workspace/ansible
+    
+    # Mount the entire project so Ansible can access playbooks AND Tofu outputs
+    volumes:
+      - .:/workspace:z
+      
+      # Mount the SSH agent socket for connecting to newly created VMs
+      - ${SSH_AUTH_SOCK}:${SSH_AUTH_SOCK}
+    
+    environment:
+      # Pass the SSH agent socket location to the container
+      - SSH_AUTH_SOCK=${SSH_AUTH_SOCK}

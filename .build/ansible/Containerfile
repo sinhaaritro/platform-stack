@@ -1,0 +1,40 @@
+# .build/ansible/Containerfile
+
+# Start from a consistent, stable base image
+FROM ubuntu:24.04
+
+# Avoid interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install base dependencies: Python, Pip, SSH client (critical for Ansible), and utils
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    python3-venv \
+    openssh-client \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# --- Create and configure the Python Virtual Environment ---
+# 1. Create the virtual environment in a standard location.
+RUN python3 -m venv /opt/venv
+# 2. Add the venv's 'bin' directory to the system's PATH.
+#    This makes 'ansible', 'pip', etc. available directly as commands.
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Install Ansible and the Proxmox collection using Pip for modern versions
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip3 install --no-cache-dir \
+    ansible \
+    proxmoxer
+
+# Install common Ansible collections for community-supported modules
+RUN ansible-galaxy collection install community.general
+RUN ansible-galaxy collection install community.proxmox
+
+# Set a working directory inside the container
+WORKDIR /workspace
+
+# Verify the installation and show the version during the build process
+RUN ansible --version

@@ -1,0 +1,15 @@
+# tofu/ansible_inventory.yml.tftpl
+# This is a template for the Ansible inventory file.
+# It is processed by the templatefile() function in ansible_inventory.tf
+
+all:
+  children:
+%{ for group_name, hosts in inventory_groups ~}
+    ${group_name}:
+      hosts:
+%{ for host in hosts ~}
+        ${host}: {}
+%{ endfor ~}
+%{ endfor ~}
+  vars:
+    ansible_user: ${ansible_user}
