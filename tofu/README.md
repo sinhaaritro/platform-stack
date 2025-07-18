@@ -148,6 +148,10 @@ This is the standard loop you will follow every time you want to deploy, update,
     ```bash
     podman-compose exec tofu tofu apply -var-file="environments/calm-belt.tfvars"
     ```
+    Or, directly approve it
+    ```bash
+    podman-compose exec tofu tofu apply -var-file="environments/calm-belt.tfvars" --auto-approve
+    ```
     After completion, the outputs defined in `outputs.tf` will be displayed.
 
 9.  **Disable the Proxmox User (Manual Step)**

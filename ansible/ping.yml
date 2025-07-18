@@ -1,0 +1,14 @@
+# ansible/ping.yml
+---
+# This is a very simple playbook to verify Ansible connectivity.
+
+- name: Verify Connection to All Provisioned Hosts
+  hosts: all # The 'all' keyword tells Ansible to run this play on every host in the inventory.
+  gather_facts: no # We don't need to gather detailed facts for this simple test.
+
+  tasks:
+    - name: Ping all hosts
+      ansible.builtin.ping:
+        # The ping module tries to connect, executes a basic command,
+        # and returns 'pong' if it is successful. This confirms that
+        # SSH connectivity and python discovery are working.
