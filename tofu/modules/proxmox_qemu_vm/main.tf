@@ -10,7 +10,7 @@ resource "proxmox_vm_qemu" "server" {
   clone       = var.group_data.template
   full_clone  = true
   onboot      = false
-  vm_state    = "stopped"
+  # vm_state    = "stopped"
 
   # --- Hardware Configuration ---
   bios   = "ovmf"

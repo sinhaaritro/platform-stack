@@ -7,8 +7,9 @@ all:
 %{ for group_name, hosts in inventory_groups ~}
     ${group_name}:
       hosts:
-%{ for host in hosts ~}
-        ${host}: {}
+%{ for host_name, host_ip in hosts ~}
+        ${host_name}:
+          ansible_host: ${host_ip}
 %{ endfor ~}
 %{ endfor ~}
   vars:

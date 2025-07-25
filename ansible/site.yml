@@ -1,0 +1,12 @@
+# ansible/site.yml
+---
+# This is the main playbook for the entire platform-stack project.
+# It is organized into "plays", where each play targets a group of hosts
+# from the inventory and applies the necessary roles to them.
+
+- name: Apply Base Configuration to All Hosts
+  hosts: all
+  become: true # This tells Ansible to use 'sudo' for all tasks in this play.
+
+  roles:
+    - role: common-base

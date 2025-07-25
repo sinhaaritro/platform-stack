@@ -27,14 +27,26 @@ locals {
   ])
 
   # --- Transform the Flat List into the Grouped Inventory Map ---
-  # This takes the flat list from above and creates the nested map structure
-  # that Ansible's YAML inventory format expects.
-  inventory_groups = {
-    # Loop over each mapping object from our flattened list...
+  # This just groups hostnames by their tag/type.
+  inventory_groups_with_hosts = {
     for mapping in local.host_group_mappings :
-    # ...and group them by the 'group' attribute. The '...' ellipsis performs the grouping.
     mapping.group => mapping.hostname...
   }
+
+  # --- Create a Master Map of All Node Details ---
+  # This local combines the outputs from both modules into a single,
+  # easy-to-query map of all created nodes.
+  all_created_nodes = merge(
+    # First, create a single flat map of all QEMU nodes from the module outputs.
+    merge([
+      for group_key, module_instance in module.qemu_groups : module_instance.vm_details
+    ]...),
+
+    # Second, do the same for all LXC containers.
+    merge([
+      for group_key, module_instance in module.lxc_groups : module_instance.container_details
+    ]...)
+  )
 }
 
 # --- Create the Ansible Inventory File Directly ---
@@ -42,7 +54,13 @@ resource "local_file" "ansible_inventory" {
   # The 'content' is now rendered from our template file.
   content = templatefile("${path.module}/templates/ansible_inventory.yml.tftpl", {
     # We pass our calculated data into the template as variables.
-    inventory_groups = local.inventory_groups
+    inventory_groups = {
+      for group_name, hostnames in local.inventory_groups_with_hosts :
+      group_name => {
+        for host in hostnames :
+        host => local.all_created_nodes[host].ip_address
+      }
+    }
     ansible_user     = var.user_profile.username
   })
 

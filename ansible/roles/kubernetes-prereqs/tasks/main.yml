@@ -1,0 +1,27 @@
+
+---
+
+- name: Disable swap
+  ansible.posix.mount:
+    name: none
+  fstype: swap
+  state: absent
+
+- name: Load required kernel modules
+  community.general.modprobe:
+    name: "{{ item }}"
+  state: present
+  with_items:
+  - overlay
+  - br_netfilter
+
+- name: Set required sysctl params for Kubernetes networking
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+  sysctl_set: yes
+  state: present
+  reload: yes
+  with_items:
+  - { key: 'net.bridge.bridge-nf-call-iptables', value: '1' }
+  - { key: 'net.ipv4.ip_forward', value: '1' }

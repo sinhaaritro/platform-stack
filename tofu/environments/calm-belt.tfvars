@@ -21,7 +21,7 @@ environment_name = "calm-belt"
 # IMPORTANT: Replace these values with your actual sandbox credentials.
 
 proxmox_connection = {
-  url = "https://192.168.0.2:8006/api2/json"
+  url          = "https://192.168.0.2:8006/api2/json"
   insecure_tls = true
   auth_method  = "password"
   password_auth = {
@@ -57,11 +57,11 @@ resource_groups = {
 
   # --- Laboon Cluster ---
   "laboon_cluster" = {
-    enabled               = true
-    type                  = "qemu"
-    template              = "ubuntu-cloud-init"
-    hardware_profile_key  = "small"
-    tags                  = ["cluster", "laboon", "kubernetes-worker"]
+    enabled              = true
+    type                 = "qemu"
+    template             = "ubuntu-cloud-init"
+    hardware_profile_key = "small"
+    tags                 = ["cluster", "laboon", "kubernetes-worker"]
 
     nodes = {
       "laboon-1" = { id = 1002, ip = "192.168.0.4" },
@@ -73,11 +73,11 @@ resource_groups = {
 
   # --- Lord of the Coast Cluster ---
   "lord_of_the_coast_cluster" = {
-    enabled               = false
-    type                  = "qemu"
-    template              = "ubuntu-cloud-init"
-    hardware_profile_key  = "small"
-    tags                  = ["cluster", "lord-of-the-coast", "testing"]
+    enabled              = false
+    type                 = "qemu"
+    template             = "ubuntu-cloud-init"
+    hardware_profile_key = "small"
+    tags                 = ["cluster", "lord-of-the-coast", "testing"]
 
     nodes = {
       "lord-of-the-coast-1" = { id = 1005, ip = "192.168.0.7" },
@@ -88,11 +88,11 @@ resource_groups = {
 
   # --- Lord of the Coast Cluster ---
   "kung_fu_dugong_cluster" = {
-    enabled               = false
-    type                  = "qemu"
-    template              = "ubuntu-cloud-init"
-    hardware_profile_key  = "small"
-    tags                  = ["cluster", "kung-fu-dugong", "testing"]
+    enabled              = false
+    type                 = "qemu"
+    template             = "ubuntu-cloud-init"
+    hardware_profile_key = "small"
+    tags                 = ["cluster", "kung-fu-dugong", "testing"]
 
     nodes = {
       "kung-fu-dugong-1" = { id = 1008, ip = "192.168.0.10" },
@@ -103,11 +103,11 @@ resource_groups = {
 
   # --- Standalone Web Server ---
   "yuda_server" = {
-    enabled               = true
-    type                  = "qemu"
-    template              = "ubuntu-cloud-init"
-    hardware_profile_key  = "medium"
-    tags                  = ["standalone", "yuda"]
+    enabled              = true
+    type                 = "qemu"
+    template             = "ubuntu-cloud-init"
+    hardware_profile_key = "medium"
+    tags                 = ["standalone", "yuda_server"]
 
     nodes = {
       "yuda" = { id = 1011, ip = "192.168.0.13" },

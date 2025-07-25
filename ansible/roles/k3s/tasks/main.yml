@@ -1,0 +1,10 @@
+
+---
+# This role intentionally left sparse.
+# The core logic of downloading and running the k3s installer script
+# will be handled in the main playbook, as it requires complex logic
+# to handle the server/agent distinction and token management.
+
+- name: Placeholder task for K3s role
+  ansible.builtin.debug:
+  msg: "The k3s role is a dependency placeholder. The main installation logic is in the playbook."

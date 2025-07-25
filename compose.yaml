@@ -17,12 +17,12 @@ services:
 
     # The working directory *inside* the container.
     # We set it to the tofu code folder for convenience.
-    working_dir: /workspace/tofu
+    working_dir: ${PWD}/tofu
 
     # Volume mounts: This connects your host files to the container.
     volumes:
       # Mount the entire project directory into the container's /workspace.
-      - .:/workspace:z
+      - ${PWD}:${PWD}:z
       
       # Mount the SSH agent socket for GitHub authentication inside the container.
       - ${SSH_AUTH_SOCK}:${SSH_AUTH_SOCK}
@@ -33,23 +33,31 @@ services:
 
 
   ansible:
+    # Build configuration: Tells Podman how to build the image.
     build:
       context: .
       dockerfile: ./.build/ansible/Containerfile
     
+    # Name the resulting image for clarity.
     image: platform-stack/ansible
     
+    # This is the key to your "run as a service" request.
+    # This command keeps the container running idly so you can 'exec' into it.
     command: ["tail", "-f", "/dev/null"]
     
-    working_dir: /workspace/ansible
+    # The working directory *inside* the container.
+    # We set it to the ansible code folder for convenience.
+    working_dir: ${PWD}/ansible
     
     # Mount the entire project so Ansible can access playbooks AND Tofu outputs
     volumes:
-      - .:/workspace:z
+      - ${PWD}:${PWD}:z
       
       # Mount the SSH agent socket for connecting to newly created VMs
-      - ${SSH_AUTH_SOCK}:${SSH_AUTH_SOCK}
+      # - ${SSH_AUTH_SOCK}:${SSH_AUTH_SOCK}
+      - ${SSH_AUTH_SOCK}:/ssh-agent
     
     environment:
       # Pass the SSH agent socket location to the container
-      - SSH_AUTH_SOCK=${SSH_AUTH_SOCK}
+      # - SSH_AUTH_SOCK=${SSH_AUTH_SOCK}
+      - SSH_AUTH_SOCK=/ssh-agent

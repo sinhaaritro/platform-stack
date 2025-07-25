@@ -1,0 +1,19 @@
+---
+# ansible/roles/common-base/tasks/main.yml
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: false
+  changed_when: false
+
+- name: Install common utility packages
+  ansible.builtin.apt:
+    name:
+      - htop
+      - neofetch
+      - unzip
+      - jq
+      - git
+      - curl
+      - unattended-upgrades
+    state: present

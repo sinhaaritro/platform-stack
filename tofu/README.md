@@ -1,27 +1,28 @@
 # Proxmox Infrastructure as Code with OpenTofu
 
-This part of the repository contains the Infrastructure as Code (IaC) configuration for managing multiple Proxmox environments using OpenTofu. The entire workflow is containerized with Podman to ensure a consistent and clean execution environment.
+This part of the repository contains the Infrastructure as Code (IaC) configuration for managing multiple Proxmox environments using OpenTofu. The workflow uses OpenTofu installed directly on a dedicated control machine.
 
-The project is designed to be highly structured, reusable, and safe, incorporating best practices such as workspaces for environment separation and guardrails to prevent accidental changes.
+The project is designed to be highly structured, reusable, and safe, incorporating best practices such as modular components, workspaces for environment separation, and guardrails to prevent accidental changes.
 
 ## Core Concepts
 
 This project is built on a few key concepts:
 
-*   **Containerized Tooling:** All `tofu` commands are run from within a Podman container defined in `compose.yaml`. This means you do not need to install OpenTofu on your control machine, only Podman and `podman-compose`.
-*   **Workspaces:** Each Proxmox environment (`internal`, `public`, etc.) is managed by a separate OpenTofu workspace. This creates an independent state file for each environment, providing strong isolation.
-*   **Declarative Data:** The infrastructure for each environment is defined in `.tfvars` files within the `tofu/environments/` directory. The core logic in `main.tf` is generic and simply reads this data.
+*   **Native Tooling:** All `tofu` commands are run as native executables on the control machine. This simplifies the workflow and VSCodium integration.
+*   **Modular & Reusable Components:** The logic for creating resources (like QEMU VMs and LXC containers) is encapsulated in self-contained modules within the `modules/` directory. The root configuration focuses on *what* to build, while the modules define *how* to build it.
+*   **Workspaces:** Each Proxmox environment (`calm-belt`, `public`, etc.) is managed by a separate OpenTofu workspace. This creates an independent state file for each environment, providing strong isolation.
+*   **Declarative Data:** The infrastructure for each environment is defined in `.tfvars` files within the `tofu/environments/` directory. The core logic is generic and simply consumes this data.
 *   **Workspace Guardrail:** A safety check in `checks.tf` prevents you from running a `plan` or `apply` if your current workspace does not match the environment defined in your `.tfvars` file, preventing catastrophic mistakes.
 
 ## Prerequisites
 
 Before you begin, ensure you have the following:
 
-1.  **A Control Machine:** A Linux VM or machine where you will run commands. This can be a central "Control VM" or a dedicated one within each environment.
-2.  **Podman & Podman-Compose:** Installed on the control machine.
+1.  **A Control Machine:** A Linux VM (like `hiking-bear`) where you will run commands.
+2.  **OpenTofu:** Installed directly on the control machine. Follow the `System Setup.md` guide for detailed installation instructions.
 3.  **Git:** Installed and configured with your user information.
 4.  **SSH Access:** Your SSH public key must be authorized for GitHub to clone this private repository.
-5.  **Proxmox API User:** A dedicated user (e.g., `vmprovisioner@pve`) must be created in each Proxmox environment with the necessary permissions. This project uses a security model where this user is normally disabled.
+5.  **Proxmox API User:** A dedicated user (e.g., `vmprovisioner@pve`) must be created in each Proxmox environment with the necessary permissions.
 6.  **VSCodium (Recommended):** The [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh) extension is recommended for editing files on the control machine.
 
 ## Directory Structure
@@ -70,22 +71,19 @@ You only need to perform these steps once when you first clone the repository to
 
 1.  **Clone the Repository**
     ```bash
-    git clone git@github.com:your-username/platform-stack.git
+    git clone git@github.com:sinhaaritro/platform-stack.git
     cd platform-stack/
     ```
 
-2.  **Build the Podman Image**
-    This command reads the `Containerfile` and `compose.yaml` to build the local container image that holds OpenTofu.
+2.  **Go to the tofu folder**
     ```bash
-    podman-compose build
+    # Move into the working directory
+    cd tofu/
     ```
 
 3.  **Create Workspaces**
     You need to create a workspace for each environment you intend to manage.
     ```bash
-    # Move into the working directory
-    cd tofu/
-
     # Create the workspace for your sandbox environment
     tofu workspace new calm-belt
 
@@ -94,6 +92,7 @@ You only need to perform these steps once when you first clone the repository to
     tofu workspace new new-world    # Example for 'public'
     tofu workspace new red-line     # Example for 'admin'
     ```
+    **Note:** You must re-run `tofu init` any time you add a new module or change provider versions.
 
 ### Phase 2: Day-to-Day Operations
 
@@ -112,19 +111,15 @@ This is the standard loop you will follow every time you want to deploy, update,
     git pull
     ```
 
-3.  **Start the Container Service**
-    This starts the `tofu` service in the background.
+3.  **Navigate to the OpenTofu Directory**
     ```bash
-    podman-compose up -d
+    cd tofu/
     ```
 
 4.  **Select Your Target Workspace**
-    This is a critical step. Tell OpenTofu which environment you want to work on.
+    This is a critical step. Tell OpenTofu which environment's state file to use.
     ```bash
-    # Move into the working directory
-    cd tofu/
-
-    podman-compose exec tofu tofu workspace select calm-belt
+    tofu workspace select calm-belt
     ```
 
 5.  **Enable the Proxmox User (Manual Step)**
@@ -133,38 +128,31 @@ This is the standard loop you will follow every time you want to deploy, update,
 6.  **Initialize OpenTofu (If Needed)**
     You only need to do this once per workspace, or if you change provider versions.
     ```bash
-    podman-compose exec tofu tofu init
+    tofu init
     ```
 
 7.  **Plan Your Changes (The Dry Run)**
     This is the most important command. It shows you exactly what OpenTofu will do without making any changes. The `-var-file` flag is **mandatory**.
     ```bash
-    podman-compose exec tofu tofu plan -var-file="environments/calm-belt.tfvars"
+    tofu plan -var-file="environments/calm-belt.tfvars"
     ```
-    Review the output carefully. The Workspace Guardrail in `checks.tf` will run here and stop the plan if your workspace doesn't match the file.
+    Review the output carefully. The Workspace Guardrail will stop the plan if your workspace doesn't match the file.
 
 8.  **Apply Your Changes (The Execution)**
     If the plan looks correct, apply it. You will be prompted to type `yes`.
     ```bash
-    podman-compose exec tofu tofu apply -var-file="environments/calm-belt.tfvars"
+    tofu apply -var-file="environments/calm-belt.tfvars"
     ```
-    Or, directly approve it
+    Or, to approve it directly:
     ```bash
-    podman-compose exec tofu tofu apply -var-file="environments/calm-belt.tfvars" --auto-approve
+    tofu apply -var-file="environments/calm-belt.tfvars" --auto-approve
     ```
     After completion, the outputs defined in `outputs.tf` will be displayed.
 
 9.  **Disable the Proxmox User (Manual Step)**
     For security, go back to the Proxmox UI and **disable** the `vmprovisioner@pve` user.
 
-10. **Stop the Container Service**
-    When you are finished, shut down the container environment to free up resources.
-    ```bash
-    # Make sure you are in the platform-stack/ directory
-    podman-compose down
-    ```
-
-11. **Commit Your Changes**
+10. **Commit Your Changes**
     The `apply` command created or updated a file named `terraform.tfstate.d/calm-belt/terraform.tfstate`. This file is the record of your infrastructure and **must be committed**.
     ```bash
     cd .. # Back to the root of platform-stack/

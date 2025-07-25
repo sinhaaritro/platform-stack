@@ -27,7 +27,8 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip3 install --no-cache-dir \
     ansible \
-    proxmoxer
+    proxmoxer \
+    ansible-lint
 
 # Install common Ansible collections for community-supported modules
 RUN ansible-galaxy collection install community.general
