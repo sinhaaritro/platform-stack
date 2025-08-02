@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  obsidian:
+    # This is the image we want to use
+    image: lscr.io/linuxserver/obsidian:latest
+
+    # This is the equivalent of the --name flag
+    container_name: obsidian
+
+    # This is the restart policy
+    restart: unless-stopped
+
+    # This is the equivalent of --security-opt
+    security_opt:
+      - seccomp=unconfined
+
+    # This is the equivalent of the -e flags for environment variables
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Kolkata
+
+    # This is the equivalent of the -p flags for port mapping
+    ports:
+      - "3000:3000"
+
+    # This is the equivalent of the -v flag for volume mounting
+    # Using a relative path like './' is best practice for IaC.
+    # It will create a folder right next to your docker-compose.yml file.
+    volumes:
+      - /home/dev/obsidian:/config
+
+    # This is the equivalent of --shm-size
+    shm_size: '1gb'
