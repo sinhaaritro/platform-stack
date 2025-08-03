@@ -114,6 +114,18 @@ resource_groups = {
     }
   }
 
+  "megalo_server" = {
+    enabled              = true
+    type                 = "qemu"
+    template             = "ubuntu-cloud-init"
+    hardware_profile_key = "medium"
+    tags                 = ["standalone", "megalo_server", "docker"]
+
+    nodes = {
+      "megalo" = { id = 1012, ip = "192.168.0.14" },
+    }
+  }
+
 
   # --- Standalone Web Server ---
   # "web_server" = {
