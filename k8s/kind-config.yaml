@@ -1,9 +1,16 @@
+# kind-config.yaml
+# This file configures the kind cluster itself
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
 - role: control-plane
-  # This is the magic part: it maps port 8080 on your localhost
-  # to port 30080 on the kind "node" container.
   extraPortMappings:
-  - containerPort: 30080
-    hostPort: 8080
+  - containerPort: 30001 # The port inside the kind node
+    hostPort: 30001      # The port on your VM's localhost
+  extraMounts:
+  # Mount 1: The local path for the obsidians's configuration
+  - hostPath: /home/dev/container-config/obsidian
+    containerPath: /mnt/config
+  # Mount 2: The NFS path for the obsidians's vault data
+  - hostPath: /mnt/nfs/shared/obsidian
+    containerPath: /mnt/vaults

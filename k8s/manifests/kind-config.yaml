@@ -1,0 +1,14 @@
+# kind-config.yaml
+# This file configures the kind cluster itself
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  extraPortMappings:
+  - containerPort: 30001 # The port inside the kind node
+    hostPort: 30001      # The port on your VM's localhost
+  extraMounts:
+  # Path on your VM (the "host") where data will be stored
+  - hostPath: /home/dev/obsidian
+    # Path this creates inside the kind container (the "node")
+    containerPath: /mnt/data

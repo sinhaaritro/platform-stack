@@ -1,0 +1,56 @@
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: obsidian-deployment
+  namespace: obsidian
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: obsidian
+  template:
+    metadata:
+      labels:
+        app: obsidian
+      namespace: obsidian
+    spec:
+      containers:
+        - name: obsidian
+          image: lscr.io/linuxserver/obsidian:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "Asia/Kolkata"
+          securityContext:
+            seccompProfile:
+              type: Unconfined
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m" # 25% of one CPU core
+            limits:
+              memory: "1Gi" # 1 Gibibyte
+              cpu: "1" # 1 full CPU core
+          volumeMounts:
+            # Mount 1: The application config volume.
+            - name: config-storage
+              mountPath: /config
+            # Mount 2: The vaults data volume.
+            - name: vault-storage
+              mountPath: /vaults
+      # This section defines the source of the volumes named above.
+      volumes:
+        # Volume 1: Links to the PVC for the application config.
+        - name: config-storage
+          persistentVolumeClaim:
+            claimName: obsidian-config-pvc
+        # Volume 2: Links to the PVC for the vaults data.
+        - name: vault-storage
+          persistentVolumeClaim:
+            claimName: obsidian-vaults-pvc

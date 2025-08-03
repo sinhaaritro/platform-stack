@@ -1,0 +1,15 @@
+# serive.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: obsidian-service
+  namespace: obsidian
+spec:
+  type: NodePort
+  selector:
+    app: obsidian
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+      nodePort: 30001
