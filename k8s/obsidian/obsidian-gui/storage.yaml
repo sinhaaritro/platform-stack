@@ -1,0 +1,32 @@
+# obsidian-gui/storage.yaml
+# Defines the local, persistent storage for the Obsidian Web GUI's config.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: obsidian-gui-config-pv
+spec:
+  storageClassName: "standard"
+  capacity:
+    storage: 1Gi # Size is required, but less important for hostPath.
+  accessModes:
+    - ReadWriteOnce
+  # The hostPath now points to a subdirectory of our new top-level mount.
+  # MUST MATCH the Mount 1 path in kind-config.yaml
+  hostPath:
+    path: /mnt/config/obsidian
+
+---
+# PVC for Application Config: The "request coupon" for the app config storage.
+# This MUST be in our new namespace.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: obsidian-gui-config-pvc
+  namespace: obsidian
+spec:
+  storageClassName: "standard"
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

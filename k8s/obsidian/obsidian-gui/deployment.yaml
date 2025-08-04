@@ -8,15 +8,15 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: obsidian
+      app: obsidian-gui
   template:
     metadata:
       labels:
-        app: obsidian
+        app: obsidian-gui
       namespace: obsidian
     spec:
       containers:
-        - name: obsidian
+        - name: obsidian-gui
           image: lscr.io/linuxserver/obsidian:latest
           ports:
             - containerPort: 3000
@@ -49,7 +49,7 @@ spec:
         # Volume 1: Links to the PVC for the application config.
         - name: config-storage
           persistentVolumeClaim:
-            claimName: obsidian-config-pvc
+            claimName: obsidian-gui-config-pvc
         # Volume 2: Links to the PVC for the vaults data.
         - name: vault-storage
           persistentVolumeClaim:

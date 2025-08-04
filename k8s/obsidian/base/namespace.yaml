@@ -1,0 +1,6 @@
+# base/namespace.yaml
+# Defines the logical workspace for the entire ecosystem.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: obsidian

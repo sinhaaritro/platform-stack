@@ -1,0 +1,24 @@
+# kustomization.yaml
+# The master manifest that orchestrates the deployment of all services.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# The 'resources' list defines which subdirectories to include in the deployment.
+# Order matters for dependencies. 'base' must come first.
+resources:
+  # Base components
+  - base/namespace.yaml
+  - base/ingress-nginx.yaml
+  - base/vaults-storage.yaml
+  - base/ingress.yaml
+
+  # CouchDB Service
+  - couchdb/secret.yaml
+  - couchdb/storage.yaml
+  - couchdb/service.yaml
+  - couchdb/deployment.yaml # Deployment comes last for services
+
+  # Obsidian GUI Service
+  - obsidian-gui/storage.yaml
+  - obsidian-gui/service.yaml
+  - obsidian-gui/deployment.yaml # Deployment comes last for services

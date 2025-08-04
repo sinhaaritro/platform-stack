@@ -1,0 +1,29 @@
+# couchdb/storage.yaml
+# Defines the local, persistent storage for CouchDB's internal database.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: couchdb-data-pv
+spec:
+  storageClassName: "standard"
+  capacity:
+    storage: 2Gi # Smaller size for local config
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    # This path points to the local directory for CouchDB's config
+    path: /mnt/config/couchdb
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: couchdb-data-pvc
+  namespace: obsidian
+spec:
+  storageClassName: "standard"
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

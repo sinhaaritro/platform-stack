@@ -1,0 +1,33 @@
+# base/vaults-storage.yaml
+# Defines the persistent, shared storage for the Markdown vault files.
+
+# The PersistentVolume (PV) representing the physical NFS storage.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: obsidian-vaults-pv
+spec:
+  storageClassName: "standard"
+  capacity:
+    storage: 10Gi # Can be larger to reflect the share size.
+  accessModes:
+    - ReadWriteOnce # Standard for hostPath
+  # The hostPath now points to a subdirectory of our new top-level mount.
+  # MUST MATCH the Mount 2 path in kind-config.yaml
+  hostPath:
+    path: /mnt/data/obsidian
+
+---
+# PVC for Vaults: The "request coupon" for the vault storage.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: obsidian-vaults-pvc
+  namespace: obsidian
+spec:
+  storageClassName: "standard"
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

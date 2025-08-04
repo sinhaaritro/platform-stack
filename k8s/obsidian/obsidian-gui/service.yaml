@@ -1,0 +1,15 @@
+# obsidian-gui/service.yaml
+# Creates the network endpoint to access the Obsidian Web GUI.
+apiVersion: v1
+kind: Service
+metadata:
+  name: obsidian-gui-service
+  namespace: obsidian
+spec:
+  type: ClusterIP
+  selector:
+    app: obsidian-gui
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000

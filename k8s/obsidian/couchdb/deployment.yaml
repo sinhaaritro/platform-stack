@@ -1,0 +1,49 @@
+# couchdb/deployment.yaml
+# Defines how to run the CouchDB application pod.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: couchdb-deployment
+  namespace: obsidian
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: couchdb
+  template:
+    metadata:
+      labels:
+        app: couchdb
+    spec:
+      containers:
+        - name: couchdb
+          image: couchdb:latest
+          ports:
+            - containerPort: 5984
+          env:
+            - name: COUCHDB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: couchdb-secret
+                  key: COUCHDB_USER
+            - name: COUCHDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: couchdb-secret
+                  key: COUCHDB_PASSWORD
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m" # 10% of one CPU core
+            limits:
+              memory: "512Mi"
+              cpu: "500m" # 50% of one CPU core
+          volumeMounts:
+            - name: data-storage
+              # This is the standard data path inside the official CouchDB container
+              mountPath: /opt/couchdb/data
+      volumes:
+        - name: data-storage
+          persistentVolumeClaim:
+            # This connects to the PVC defined in couchdb/storage.yaml
+            claimName: couchdb-data-pvc

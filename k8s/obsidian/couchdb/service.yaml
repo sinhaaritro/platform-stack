@@ -1,0 +1,15 @@
+# couchdb/service.yaml
+# Creates the network endpoint to access the CouchDB service.
+apiVersion: v1
+kind: Service
+metadata:
+  name: couchdb-service
+  namespace: obsidian
+spec:
+  type: ClusterIP
+  selector:
+    app: couchdb
+  ports:
+    - protocol: TCP
+      port: 5984
+      targetPort: 5984

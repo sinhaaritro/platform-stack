@@ -1,0 +1,37 @@
+# base/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: obsidian-ecosystem-ingress
+  namespace: obsidian
+  annotations:
+    # This annotation is important for NGINX Ingress
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  # This section configures HTTPS using the secret we created
+  tls:
+    - hosts:
+        - couchdb.local
+        - obsidian.local
+      secretName: obsidian-tls # This MUST match the name of the secret you created
+  rules:
+    - host: "couchdb.local"
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: couchdb-service # This forwards traffic to your couchdb service
+                port:
+                  number: 5984
+    - host: "obsidian.local"
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: obsidian-gui-service # This forwards traffic to your gui service
+                port:
+                  number: 3000

@@ -1,16 +1,22 @@
 # kind-config.yaml
-# This file configures the kind cluster itself
+# This version is configured to support an Ingress Controller.
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
-- role: control-plane
-  extraPortMappings:
-  - containerPort: 30001 # The port inside the kind node
-    hostPort: 30001      # The port on your VM's localhost
-  extraMounts:
-  # Mount 1: The local path for the obsidians's configuration
-  - hostPath: /home/dev/container-config/obsidian
-    containerPath: /mnt/config
-  # Mount 2: The NFS path for the obsidians's vault data
-  - hostPath: /mnt/nfs/shared/obsidian
-    containerPath: /mnt/vaults
+  - role: control-plane
+    # These port mappings expose the standard web ports (80/443)
+    # from your VM to the Ingress Controller running inside the cluster.
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 80
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 443
+        protocol: TCP
+    extraMounts:
+      # Mount 1: The entire local configuration directory.
+      - hostPath: /home/dev/container-config/
+        containerPath: /mnt/config
+      # Mount 2: The entire NFS data share.
+      - hostPath: /mnt/nfs/shared/
+        containerPath: /mnt/data
