@@ -68,7 +68,7 @@ variable "resource_defaults" {
   description = "Default placement and storage settings for the environment."
   default = {
     target_node    = "pve"
-    storage_pool   = "local-lvm"
+    storage_pool   = "local-thin"
     network_bridge = "vmbr0"
   }
 }
