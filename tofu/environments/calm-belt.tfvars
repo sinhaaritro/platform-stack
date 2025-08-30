@@ -21,7 +21,7 @@ environment_name = "calm-belt"
 # IMPORTANT: Replace these values with your actual sandbox credentials.
 
 proxmox_connection = {
-  url          = "https://192.168.0.2:8006/api2/json"
+  url          = "https://192.168.0.202:8006/api2/json"
   insecure_tls = true
   auth_method  = "password"
   password_auth = {
@@ -57,7 +57,7 @@ resource_groups = {
 
   # --- Laboon Cluster ---
   "laboon_cluster" = {
-    enabled              = true
+    enabled              = false
     type                 = "qemu"
     template             = "ubuntu-cloud-init"
     hardware_profile_key = "small"
@@ -115,7 +115,7 @@ resource_groups = {
   }
 
   "megalo_server" = {
-    enabled              = true
+    enabled              = false
     type                 = "qemu"
     template             = "ubuntu-cloud-init"
     hardware_profile_key = "medium"
@@ -152,7 +152,7 @@ resource_groups = {
 
 resource_defaults = {
   target_node    = "moo-moo"
-  storage_pool   = "local-lvm"
+  storage_pool   = "local-thin"
   network_bridge = "vmbr0"
 }
 
