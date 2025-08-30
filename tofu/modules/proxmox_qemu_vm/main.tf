@@ -14,7 +14,7 @@ resource "proxmox_vm_qemu" "server" {
 
   # --- Hardware Configuration ---
   bios   = "ovmf"
-  scsihw = "virtio-scsi-single"
+  scsihw = "virtio-scsi-pci"
   agent  = 1
   memory = var.hardware_profile.memory
   cpu {
@@ -22,34 +22,45 @@ resource "proxmox_vm_qemu" "server" {
     type  = "host"
   }
   disks {
-    ide { 
-        ide1 { 
-            cloudinit { 
-                storage = var.storage_pool 
-            } 
-        } 
+    ide {
+      ide2 {
+        cloudinit {
+          storage = var.storage_pool
+        }
+      }
     }
-    virtio {
-      virtio0 {
+    #   virtio {
+    #     virtio0 {
+    #       disk {
+    #         size     = var.hardware_profile.disk_size
+    #         storage  = var.storage_pool
+    #         discard  = true
+    #         backup   = true
+    #         iothread = true
+    #       }
+    #     }
+    #   }
+    scsi {
+      scsi0 {
         disk {
           size     = var.hardware_profile.disk_size
           storage  = var.storage_pool
           discard  = true
-          backup   = true
           iothread = true
+          backup   = true
         }
       }
     }
   }
-  boot = "order=virtio0;net0"
-  
+  # boot = "order=virtio0;net0"
+
   network {
     id       = 0
     model    = "virtio"
     bridge   = var.network_bridge
     firewall = false
   }
-  
+
   serial {
     id   = 0
     type = "socket"
@@ -64,5 +75,5 @@ resource "proxmox_vm_qemu" "server" {
   ciupgrade  = var.user_profile.package_upgrade
   # The 'join' function correctly formats the list of keys into the multi-line
   # string format that the provider expects, without needing <<EOF.
-  sshkeys    = join("\n", var.user_credentials.ssh_public_keys)
+  sshkeys = join("\n", var.user_credentials.ssh_public_keys)
 }
