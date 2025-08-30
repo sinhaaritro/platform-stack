@@ -43,11 +43,11 @@ resource "proxmox_vm_qemu" "server" {
     scsi {
       scsi0 {
         disk {
-          size     = var.hardware_profile.disk_size
-          storage  = var.storage_pool
-          discard  = true
-          iothread = true
-          backup   = true
+          size    = var.hardware_profile.disk_size
+          storage = var.storage_pool
+          discard = true
+          # iothread = true
+          backup = true
         }
       }
     }
