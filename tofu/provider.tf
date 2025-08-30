@@ -12,7 +12,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "telmate/proxmox"
-      version = "3.0.2-rc01"
+      version = "3.0.2-rc04"
     }
 
     # Needed for file output
