@@ -92,7 +92,7 @@ resource_groups = {
   }
 
   "megalo_server" = {
-    enabled              = true
+    enabled              = false
     type                 = "qemu"
     template             = "ubuntu-cloud-init"
     hardware_profile_key = "medium"
