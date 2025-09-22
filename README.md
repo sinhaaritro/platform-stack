@@ -20,11 +20,36 @@ The repository is organized into four main directories, each representing a dist
 
 ```
 platform-stack/
+├── Makefile           # Automates common project setup and operational tasks.
+├── scripts/           # Contains helper scripts for safety, automation, and CI/CD.
 ├── terraform/         # Layer 1: Provisions the core infrastructure (VMs, networks, etc.).
 ├── ansible/           # Layer 2: Configures the provisioned servers (installs software, sets up K8s).
 ├── k8s/               # Layer 3: Deploys applications to the Kubernetes cluster for production.
 └── compose/           # Layer 4: Defines services for local development on a single machine.
 ```
+
+---
+
+## Getting Started: One-Time Project Setup
+
+Before working with any of the layers, every developer **must** perform this one-time setup after cloning the repository. This ensures that the development environment is consistent and that critical safety checks are active.
+
+1.  **Clone the Repository**
+    ```sh
+    git clone <your-repository-url>
+    cd platform-stack/
+    ```
+
+2.  **Install Project Hooks (CRITICAL)**
+    This project uses Git hooks to enforce security policies, such as preventing unencrypted secrets from being committed. The `Makefile` at the root of the project automates the installation of these hooks.
+
+    **Prerequisite:** Ensure you have `make` installed. On Debian/Ubuntu, run: `sudo apt install make`.
+
+    Run the following command from the root of the repository:
+    ```sh
+    make install-hooks
+    ```
+    This command sets up a pre-commit hook that will now run automatically before every commit, safeguarding the repository.
 
 ---
 

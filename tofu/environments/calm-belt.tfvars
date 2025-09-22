@@ -6,7 +6,12 @@
 #
 # USAGE:
 # 1. Ensure you are in the 'calm-belt' workspace: `tofu workspace select calm-belt`
-# 2. Run commands with this file: `tofu plan -var-file="environments/calm-belt.tfvars"`
+# 2. Run commands with this file: 
+#     ```bash
+#     tofu plan \
+#     -var-file="environments/calm-belt.tfvars" \
+#     -var-file=<(ansible-vault view environments/calm-belt.secrets.tfvars)
+#     ```
 # -----------------------------------------------------------------------------
 
 
@@ -15,34 +20,6 @@
 # It is a critical safety feature to prevent cross-environment changes.
 
 environment_name = "calm-belt"
-
-# --- Proxmox Connection ---
-# Defines the API endpoint and credentials for the Calm Belt Proxmox server.
-# IMPORTANT: Replace these values with your actual sandbox credentials.
-
-proxmox_connection = {
-  url          = "https://192.168.0.202:8006/api2/json"
-  insecure_tls = true
-  auth_method  = "password"
-  password_auth = {
-    user     = "vmprovisioner@pve"
-    password = "vmprovisioner"
-  }
-}
-
-
-# --- Default User Configuration ---
-# Defines the non-secret user information.
-user_profile = {
-  username        = "dev"
-  package_upgrade = true
-}
-
-# Defines the secret user information.
-user_credentials = {
-  password        = "dev"
-  ssh_public_keys = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDwC01G8nJScuxp7Cga8uUsnHUW2IpXXiiTw1gzhEL4P RyzenWindows"]
-}
 
 
 # -----------------------------------------------------------------------------
@@ -106,7 +83,7 @@ resource_groups = {
     enabled              = true
     type                 = "qemu"
     template             = "ubuntu-cloud-init"
-    hardware_profile_key = "medium"
+    hardware_profile_key = "large"
     tags                 = ["standalone", "yuda_server"]
 
     nodes = {
@@ -115,7 +92,7 @@ resource_groups = {
   }
 
   "megalo_server" = {
-    enabled              = false
+    enabled              = true
     type                 = "qemu"
     template             = "ubuntu-cloud-init"
     hardware_profile_key = "medium"
@@ -139,6 +116,33 @@ resource_groups = {
   #     "web-01" = { id = 2001, ip = "192.168.0.100" },
   #   }
   # }
+
+  # --- cloudflared-tunnel ---
+  "bananagator-01" = {
+    enabled              = true
+    type                 = "lxc"
+    template             = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
+    hardware_profile_key = "small"
+    tags                 = ["cloudflared-tunnel"]
+
+    nodes = {
+      "bananagator-01" = { id = 2001, ip = "192.168.0.23" },
+    }
+  }
+
+  # --- nginx-proxy-manager ---
+  # Around 23GB storage is needed
+  "bananagator-02" = {
+    enabled              = true
+    type                 = "lxc"
+    template             = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
+    hardware_profile_key = "large"
+    tags                 = ["nginx-proxy-manager"]
+
+    nodes = {
+      "bananagator-02" = { id = 2005, ip = "192.168.0.27" },
+    }
+  }
 
 }
 

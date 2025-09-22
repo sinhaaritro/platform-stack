@@ -27,8 +27,17 @@ resource "proxmox_lxc" "server" {
   }
 
   # --- Cloud-Init / OS Configuration ---
-  onboot         = false
-  unprivileged   = true
-  start          = true
+  onboot          = false
+  unprivileged    = true
+  start           = true
+  password        = var.user_credentials.password
   ssh_public_keys = join("\n", var.user_credentials.ssh_public_keys)
+
+  # --- Cloud-Init / OS Configuration ---
+  features {
+    # fuse    = true
+    nesting = true
+    # keyctl  = true
+    # mount   = "nfs;cifs"
+  }
 }

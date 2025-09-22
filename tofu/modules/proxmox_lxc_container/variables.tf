@@ -24,4 +24,4 @@ variable "gateway" { type = string }
 variable "cidr_mask" { type = number }
 
 # User settings passed down from the root
-variable "user_credentials" { type = object({ ssh_public_keys = list(string) }) }
+variable "user_credentials" { type = object({ password = string, ssh_public_keys = list(string) }) }

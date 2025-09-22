@@ -20,7 +20,7 @@ variable "environment_name" {
 
 variable "proxmox_connection" {
   type = object({
-    url = string
+    url          = string
     insecure_tls = bool
     auth_method  = string # Must be 'password' or 'token'
 
@@ -135,6 +135,11 @@ variable "hardware_profiles" {
         cores       = 2
         memory      = 1024 # 1GB
         rootfs_size = "8G"
+      },
+      "large" = {
+        cores       = 4
+        memory      = 2048 # 2GB
+        rootfs_size = "32G"
       }
     }
   }
@@ -173,11 +178,11 @@ variable "user_credentials" {
 variable "resource_groups" {
   type = map(object({
     # --- Control & Metadata ---
-    enabled               = bool
-    type                  = string # Must be 'qemu' or 'lxc'
-    template              = string
-    hardware_profile_key  = string
-    tags                  = list(string)
+    enabled              = bool
+    type                 = string # Must be 'qemu' or 'lxc'
+    template             = string
+    hardware_profile_key = string
+    tags                 = list(string)
 
     # --- Node Definitions ---
     nodes = map(object({
