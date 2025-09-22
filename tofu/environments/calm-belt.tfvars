@@ -10,7 +10,7 @@
 #     ```bash
 #     tofu plan \
 #     -var-file="environments/calm-belt.tfvars" \
-#     -var-file=<(ansible-vault view environments/calm-belt.secrets.tfvars)
+#     -var-file=<(ansible-vault view --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") environments/calm-belt.secrets.tfvars)
 #     ```
 # -----------------------------------------------------------------------------
 
