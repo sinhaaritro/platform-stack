@@ -92,10 +92,10 @@ resource_groups = {
   }
 
   "megalo_server" = {
-    enabled              = false
+    enabled              = true
     type                 = "qemu"
     template             = "ubuntu-cloud-init"
-    hardware_profile_key = "medium"
+    hardware_profile_key = "large"
     tags                 = ["standalone", "megalo_server", "docker"]
 
     nodes = {
