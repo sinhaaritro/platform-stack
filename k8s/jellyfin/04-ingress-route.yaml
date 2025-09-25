@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: Host(`jellyfin.localhost`)
+    - match: Host(`jellyfin.localhost`) || Host(`jellyfin.strawslabs.com`) || Host(`disha.strawslabs.com`) || Host(`disha-moomoo.strawslabs.com`)
       kind: Rule
       services:
         - name: jellyfin-service
