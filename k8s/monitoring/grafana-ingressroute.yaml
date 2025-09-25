@@ -1,0 +1,15 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  # This route must be in the 'monitoring' namespace to find the service
+  name: grafana-ingressroute
+  namespace: monitoring
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`grafana.localhost`)
+      kind: Rule
+      services:
+        - name: grafana # This is the name of the Grafana service
+          port: 3000 # The Grafana service listens on port 3000
