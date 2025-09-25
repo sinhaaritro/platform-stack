@@ -1,7 +1,15 @@
-# kind-config.yaml
-# This version is configured to support an Ingress Controller.
+# k8s/kind-config.yaml
 kind: Cluster
+
 apiVersion: kind.x-k8s.io/v1alpha4
+
+networking:
+  # This is the default Kind CNI
+  disableDefaultCNI: false
+  # This is the fix. It tells Kind to use a networking mode that is more
+  # compatible with complex Docker network configurations.
+  podSubnet: "10.244.0.0/16"
+
 nodes:
   - role: control-plane
     # These port mappings expose the standard web ports (80/443)
@@ -18,5 +26,5 @@ nodes:
       - hostPath: /home/dev/container-config/
         containerPath: /mnt/config
       # Mount 2: The entire NFS data share.
-      - hostPath: /mnt/nfs/shared/
+      - hostPath: /mnt/nfs/media-share
         containerPath: /mnt/data
