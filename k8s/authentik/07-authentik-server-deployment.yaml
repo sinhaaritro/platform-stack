@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentik-server-deployment
+  namespace: authentik
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authentik-server
+  template:
+    metadata:
+      labels:
+        app: authentik-server
+    spec:
+      serviceAccountName: default
+      containers:
+        # --- CONTAINER 1: THE SERVER ---
+        - name: authentik-server
+          image: ghcr.io/goauthentik/server:latest
+          args: ["server"]
+          envFrom:
+            - secretRef:
+                name: authentik-secret
+          env:
+            - name: AUTHENTIK_POSTGRESQL__HOST
+              value: "postgres-service"
+            - name: AUTHENTIK_REDIS__HOST
+              value: "redis-service"
+            - name: AUTHENTIK_ERROR_REPORTING__ENABLED
+              value: "true"
+          ports:
+            - containerPort: 9000
+              name: http
+            - containerPort: 9443
+              name: https
+          volumeMounts:
+            - name: authentik-storage
+              mountPath: /media
+
+        # --- CONTAINER 2: THE WORKER ---
+        - name: authentik-worker
+          image: ghcr.io/goauthentik/server:latest
+          args: ["worker"]
+          envFrom:
+            - secretRef:
+                name: authentik-secret
+          env:
+            - name: AUTHENTIK_POSTGRESQL__HOST
+              value: "postgres-service"
+            - name: AUTHENTIK_REDIS__HOST
+              value: "redis-service"
+            - name: AUTHENTIK_ERROR_REPORTING__ENABLED
+              value: "true"
+          volumeMounts:
+            - name: authentik-storage
+              mountPath: /media
+
+      volumes:
+        - name: authentik-storage
+          persistentVolumeClaim:
+            claimName: authentik-server-pvc

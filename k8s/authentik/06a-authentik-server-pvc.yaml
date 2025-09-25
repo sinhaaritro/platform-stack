@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: authentik-server-pvc
+  namespace: authentik
+spec:
+  storageClassName: standard # Use your cluster's default
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi # 2GB is plenty for this
