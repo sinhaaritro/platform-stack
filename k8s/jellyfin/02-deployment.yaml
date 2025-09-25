@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jellyfin-deployment
+  namespace: jellyfin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jellyfin
+  template:
+    metadata:
+      labels:
+        app: jellyfin
+    spec:
+      securityContext:
+        # IMPORTANT: This forces the Jellyfin container to run as the 'mediaowner' user.
+        runAsUser: 1302
+        runAsGroup: 1302
+        fsGroup: 1302
+      containers:
+        - name: jellyfin
+          image: jellyfin/jellyfin:latest
+          ports:
+            - containerPort: 8096
+          volumeMounts:
+            # Mount the config storage at /config
+            - name: config-storage
+              mountPath: /config
+            # Mount the media storage at /media
+            - name: media-storage
+              mountPath: /media
+      volumes:
+        - name: config-storage
+          persistentVolumeClaim:
+            claimName: jellyfin-config-pvc
+        - name: media-storage
+          persistentVolumeClaim:
+            claimName: jellyfin-media-pvc

@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jellyfin-media-pvc
+  namespace: jellyfin
+spec:
+  # This MUST match the storageClassName from our PV. This is how they connect.
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      # This is the amount of NFS storage Jellyfin will use.
+      storage: 20Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jellyfin-config-pvc
+  namespace: jellyfin
+spec:
+  # We use the default 'standard' storage class, which is built into Kind.
+  # This will create a small, private storage space for Jellyfin's config.
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      # 5GB is more than enough for the database and metadata images.
+      storage: 5Gi

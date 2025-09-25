@@ -22,7 +22,7 @@ spec:
             - --api.insecure=true
             # - --log.level=DEBUG
             - --providers.kubernetescrd
-            - --providers.kubernetescrd.namespaces=traefik,nginx-test
+            - --providers.kubernetescrd.namespaces=traefik,nginx-test,jellyfin
           ports:
             - name: web
               containerPort: 80
