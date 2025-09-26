@@ -10,3 +10,4 @@ resources:
   - ./sonarr
   - ./lidarr
   - ./readarr
+  - ./whisparr
