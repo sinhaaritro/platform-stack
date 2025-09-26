@@ -12,3 +12,4 @@ resources:
   - ./readarr
   - ./whisparr
   - ./bazarr
+  - ./jellyseerr
