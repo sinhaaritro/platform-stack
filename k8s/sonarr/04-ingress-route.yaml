@@ -1,0 +1,14 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: sonarr-ingressroute
+  namespace: sonarr
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`sonarr.localhost`)
+      kind: Rule
+      services:
+        - name: sonarr-service
+          port: 8989

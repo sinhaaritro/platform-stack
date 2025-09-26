@@ -7,3 +7,4 @@ resources:
   - ./nginx-test
   - ./jellyfin
   - ./radarr
+  - ./sonarr
