@@ -1,0 +1,18 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  # This is the name we will use to refer to our bouncer.
+  name: authentik-proxy
+  namespace: authentik
+spec:
+  forwardAuth:
+    # This is the address of our outpost's service.
+    address: http://authentik-outpost-service.authentik:9000
+    # This tells Traefik to trust the headers sent back from the outpost.
+    trustForwardHeader: true
+    # These are the headers Authentik will send to our applications.
+    authResponseHeaders:
+      - X-Authentik-Username
+      - X-Authentik-Groups
+      - X-Authentik-Email
+      - X-Authentik-Name

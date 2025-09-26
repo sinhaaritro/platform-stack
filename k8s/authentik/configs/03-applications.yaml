@@ -1,0 +1,14 @@
+# # Yes, we can absolutely create an application for Proxmox!
+# # This is a "dummy" application for now. It just creates the tile on the
+# # Authentik dashboard. Later, we'll link it to a proxy outpost to protect it.
+# apiVersion: blueprints.goauthentik.io/v1
+# kind: Application
+# metadata:
+#   name: proxmox
+# spec:
+#   # The user-facing name of the application
+#   name: "Proxmox VE"
+#   # The unique identifier used internally
+#   slug: "proxmox"
+#   # This links the application to our login provider
+#   provider: "custom-local-provider"

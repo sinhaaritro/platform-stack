@@ -1,0 +1,44 @@
+# apiVersion: blueprints.goauthentik.io/v1
+# kind: Flow
+# metadata:
+#   # Give our flow a unique name
+#   name: custom-login-flow
+# spec:
+#   title: "Custom Login Flow"
+#   layout: "stacked"
+#   bindings:
+#     - target: "custom-identification-stage"
+#       order: 10
+#     - target: "custom-password-stage"
+#       order: 20
+# ---
+# apiVersion: blueprints.goauthentik.io/v1
+# kind: Stage
+# metadata:
+#   # Give our stage a unique name
+#   name: "custom-identification-stage"
+# spec:
+#   type: "identification"
+#   # Point to the default user database
+#   sources:
+#     - "default-source"
+# ---
+# apiVersion: blueprints.goauthentik.io/v1
+# kind: Stage
+# metadata:
+#   # Give our stage a unique name
+#   name: "custom-password-stage"
+# spec:
+#   type: "password"
+#   sources:
+#     - "default-source"
+# ---
+# apiVersion: blueprints.goauthentik.io/v1
+# kind: Provider
+# metadata:
+#   # Give our provider a unique name
+#   name: "custom-local-provider"
+# spec:
+#   type: "local"
+#   # Link the provider to our new custom flow
+#   flow: "custom-login-flow"

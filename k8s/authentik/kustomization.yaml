@@ -1,5 +1,20 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+
+# This section creates the ConfigMap named 'authentik-blueprints'
+# configMapGenerator:
+#   - name: authentik-blueprints
+#     namespace: authentik
+#     # It will create a key for each file in the 'configs' directory
+#     files:
+#       - configs/01-users-and-groups.yaml
+#       - configs/02-flows-and-providers.yaml
+#       - configs/03-applications.yaml
+#     options:
+#       # This tells Kustomize not to add a hash suffix to the ConfigMap name
+#       disableNameSuffixHash: true
+
+# This section lists all the Kubernetes resources to deploy
 resources:
   - 00-namespace.yaml
   - 01-secret.yaml
@@ -12,3 +27,6 @@ resources:
   - 07-authentik-server-deployment.yaml
   - 08-authentik-server-service.yaml
   - 09-ingress-route.yaml
+  # - 10-outpost-deployment.yaml
+  # - 11-outpost-service.yaml
+  # - 12-traefik-middleware.yaml

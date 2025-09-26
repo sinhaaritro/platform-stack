@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentik-outpost-deployment
+  namespace: authentik
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authentik-outpost
+  template:
+    metadata:
+      labels:
+        app: authentik-outpost
+    spec:
+      containers:
+        - name: authentik-outpost
+          image: ghcr.io/goauthentik/proxy:latest
+          # This image does not need any 'args' to run correctly.
+          env:
+            # This tells the outpost where to find the main Authentik server.
+            - name: AUTHENTIK_HOST
+              value: "http://authentik-server-service:9000"
+            # This is the secret token the outpost will use to authenticate with the server.
+            # It MUST use the same token you defined for bootstrapping.
+            - name: AUTHENTIK_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-secret
+                  key: AUTHENTIK_BOOTSTRAP_TOKEN
+          ports:
+            - containerPort: 9000
+              name: http
+          # These probes ensure Kubernetes knows if the outpost is healthy.
+          readinessProbe:
+            httpGet:
+              path: /outpost.goauthentik.io/healthz
+              port: 9000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /outpost.goauthentik.io/healthz
+              port: 9000
+            initialDelaySeconds: 15
+            periodSeconds: 20

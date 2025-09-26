@@ -1,0 +1,1 @@
+ kubectl apply --server-side -k k8s/
