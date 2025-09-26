@@ -1,17 +1,19 @@
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: jellyfin-media-pvc
-  namespace: jellyfin
-spec:
-  # This MUST match the storageClassName from our PV. This is how they connect.
-  storageClassName: local-storage
-  accessModes:
-    - ReadWriteMany
-  resources:
-    requests:
-      # This is the amount of NFS storage Jellyfin will use.
-      storage: 20Gi
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: jellyfin-media-pvc
+#   namespace: jellyfin
+# spec:
+#   # This MUST match the storageClassName from our PV. This is how they connect.
+#   # Cant use when multiple different namespace wants to use the same storage
+#   # storageClassName: local-storage
+#   storageClassName: ""
+#   accessModes:
+#     - ReadWriteMany
+#   resources:
+#     requests:
+#       # This is the amount of NFS storage Jellyfin will use.
+#       storage: 20Gi
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

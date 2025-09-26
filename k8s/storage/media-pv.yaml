@@ -1,18 +1,18 @@
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  # A unique name for our NFS media volume
-  name: nfs-media-pv
-spec:
-  # This is the "type" of storage. Our PVC will request this specific class.
-  storageClassName: local-storage
-  # Total capacity of the volume.
-  capacity:
-    storage: 20Gi # Adjust to a reasonable size for your library
-  # "ReadWriteMany" means multiple pods can access this storage at once.
-  accessModes:
-    - ReadWriteMany
-  # This tells Kubernetes that the storage is a path on the host node.
-  hostPath:
-    # IMPORTANT: This path MUST match the 'containerPath' from your kind-config.yaml
-    path: "/mnt/data"
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   # A unique name for our NFS media volume
+#   name: nfs-media-pv
+# spec:
+#   # This is the "type" of storage. Our PVC will request this specific class.
+#   storageClassName: local-storage
+#   # Total capacity of the volume.
+#   capacity:
+#     storage: 20Gi # Adjust to a reasonable size for your library
+#   # "ReadWriteMany" means multiple pods can access this storage at once.
+#   accessModes:
+#     - ReadWriteMany
+#   # This tells Kubernetes that the storage is a path on the host node.
+#   hostPath:
+#     # IMPORTANT: This path MUST match the 'containerPath' from your kind-config.yaml
+#     path: "/mnt/data"
