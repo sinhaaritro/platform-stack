@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qbittorrent-deployment
+  namespace: qbittorrent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qbittorrent
+  template:
+    metadata:
+      labels:
+        app: qbittorrent
+    spec:
+      securityContext:
+        # Run as 'mediaowner' (1302) to ensure it can write to the NFS share
+        runAsUser: 1302
+        runAsGroup: 1302
+        fsGroup: 1302
+      containers:
+        - name: qbittorrent
+          image: lscr.io/linuxserver/qbittorrent:latest
+          ports:
+            # The web UI port
+            - containerPort: 8080
+              name: http
+            # The incoming torrent connection port
+            - containerPort: 6881
+              name: tcp
+            - containerPort: 6881
+              name: udp
+              protocol: UDP
+          env:
+            - name: PUID
+              value: "1302"
+            - name: PGID
+              value: "1302"
+            - name: TZ
+              value: "Etc/UTC" # Change to your timezone
+            - name: WEBUI_PORT
+              value: "8080"
+            - name: WEBUI_PASSWORD
+              value: "KTBAsfSsg"
+          volumeMounts:
+            # Mount qBittorrent's private config storage
+            - name: config-storage
+              mountPath: /config
+            # Mount the SHARED media storage via direct NFS for downloads
+            - name: downloads-storage
+              mountPath: /downloads
+      volumes:
+        - name: config-storage
+          persistentVolumeClaim:
+            claimName: qbittorrent-config-pvc
+        # This is the direct NFS mount, but we name it 'downloads' for clarity
+        - name: downloads-storage
+          nfs:
+            server: 192.168.0.202
+            # We point it to the root of our data share
+            path: /mnt/data
