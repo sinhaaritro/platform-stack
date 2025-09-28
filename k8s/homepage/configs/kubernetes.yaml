@@ -1,0 +1,2 @@
+# This is an empty file for now, but its presence enables the k8s integration.
+# We will point Homepage to this file, and it will automatically discover services.

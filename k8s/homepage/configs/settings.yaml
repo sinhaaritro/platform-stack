@@ -1,0 +1,8 @@
+# For more info, see: https://gethomepage.dev/en/configs/settings
+# This is the crucial setting to fix the "Host validation failed" error
+# server:
+#   hosts:
+#     # - 0.0.0.0
+#     - "homepage.localhost"
+# title: Homelab Dashboard
+# background: https://images.unsplash.com/photo-1502790671504-44e021a878b8

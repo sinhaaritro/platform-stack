@@ -1,0 +1,10 @@
+# For more info, see: https://gethomepage.dev/en/configs/widgets
+- resources:
+    label: Cluster Resources
+    cpu: true
+    memory: true
+    storage: / # Shows the storage of the container's root filesystem
+
+- search:
+    provider: duckduckgo
+    target: _blank

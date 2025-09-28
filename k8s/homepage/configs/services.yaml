@@ -1,0 +1,26 @@
+# For more info, see: https://gethomepage.dev/en/configs/services
+- Media:
+    - Jellyfin:
+        href: http://jellyfin.localhost
+        description: Media Server
+        icon: jellyfin.png # You can find icon names here: https://gethomepage.dev/en/configs/services/#icons
+        # This widget checks if the Jellyfin service is online
+        widget:
+          type: jellyfin
+          url: http://jellyfin-service.jellyfin:8096
+
+    - Radarr:
+        href: http://radarr.localhost
+        description: Movie Manager
+        icon: radarr.png
+        widget:
+          type: radarr
+          url: http://radarr-service.radarr:7878
+          # You will need to get the API key from the Radarr UI (Settings -> General)
+          # For now, we will leave it blank.
+
+- Authentication:
+    - Authentik:
+        href: http://auth.localhost
+        description: Identity Provider
+        icon: authentik.png

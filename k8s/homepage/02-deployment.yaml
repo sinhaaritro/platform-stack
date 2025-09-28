@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homepage-deployment
+  namespace: homepage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homepage
+  template:
+    metadata:
+      labels:
+        app: homepage
+    spec:
+      serviceAccountName: homepage-sa
+      # --- INIT CONTAINER: This runs once before the main container starts ---
+      initContainers:
+        - name: copy-configs
+          image: busybox:1.36
+          # This command copies all files from the read-only ConfigMap volume
+          # to the writable emptyDir volume.
+          command: ["/bin/sh", "-c", "cp -L /tmp/config/* /app/config/"]
+          volumeMounts:
+            # Mount the writable emptyDir volume
+            - name: homepage-config-writable
+              mountPath: /app/config
+            # Mount the read-only ConfigMap volume at a temporary location
+            - name: homepage-config-readonly
+              mountPath: /tmp/config
+
+      # --- MAIN CONTAINER ---
+      containers:
+        - name: homepage
+          image: ghcr.io/gethomepage/homepage:latest
+          env:
+            - name: HOMEPAGE_ALLOWED_HOSTS
+              value: homepage.localhost,localhost # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          volumeMounts:
+            # The main container now mounts the WRITABLE volume
+            - name: homepage-config-writable
+              mountPath: /app/config
+      volumes:
+        # The writable emptyDir volume for the app to use
+        - name: homepage-config-writable
+          emptyDir: {}
+        # The read-only ConfigMap volume for our GitOps configs
+        - name: homepage-config-readonly
+          configMap:
+            name: homepage-config

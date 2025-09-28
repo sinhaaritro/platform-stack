@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: homepage
+
+# This generates the ConfigMap from our local config files
+configMapGenerator:
+  - name: homepage-config
+    namespace: homepage
+    files:
+      - configs/settings.yaml
+      # - configs/widgets.yaml
+      # - configs/services.yaml
+      # - configs/kubernetes.yaml
+    options:
+      disableNameSuffixHash: true
+
+resources:
+  - 00-namespace.yaml
+  - 01-rbac.yaml
+  - 02-deployment.yaml
+  - 03-service.yaml
+  - 04-ingress-route.yaml
