@@ -1,0 +1,17 @@
+# For more info, see: https://gethomepage.dev/configs/bookmarks/
+---
+- Developer:
+    - Github:
+        - abbr: GH
+          href: https://github.com/
+
+- Social:
+    - Reddit:
+        - icon: RD
+          href: https://reddit.com/
+          description: The front page of the internets
+
+- Entertainment:
+    - YouTube:
+        - abbr: YT
+          href: https://youtube.com/

@@ -9,9 +9,14 @@ configMapGenerator:
     namespace: homepage
     files:
       - configs/settings.yaml
-      # - configs/widgets.yaml
-      # - configs/services.yaml
-      # - configs/kubernetes.yaml
+      - configs/bookmarks.yaml
+      - configs/widgets.yaml
+      - configs/services.yaml
+      - configs/kubernetes.yaml
+      - configs/docker.yaml
+      - configs/proxmox.yaml
+      - configs/custom.css
+      - configs/custom.js
     options:
       disableNameSuffixHash: true
 
