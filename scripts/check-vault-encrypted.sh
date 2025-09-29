@@ -24,7 +24,7 @@ echo "--- Running Vault Encryption Check ---"
 
 # Get a list of all staged files (added, copied, modified) that match our secret file pattern.
 # This command correctly handles multiple files, even if they are committed at the same time.
-STAGED_SECRET_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.secrets\.tfvars$')
+STAGED_SECRET_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.secret\.tfvars$')
 
 # If the list of secret files is empty, there's nothing to check.
 if [ -z "$STAGED_SECRET_FILES" ]; then
