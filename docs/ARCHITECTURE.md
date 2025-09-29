@@ -108,6 +108,401 @@ flowchart TD
     orion_cluster -- "Stores Backups" --> S3;
 ```
 
+### 1. Overall Solution Architecture Diagram (The "Map of the World")
+
+*   **Explanation:** Its purpose is to provide the broadest possible overview of the entire system. It shows all the major locations (`asgard`, `wano`, `aws`) and the most significant components within them (Proxmox hosts, Kubernetes cluster, NAS). It's the perfect starting point for anyone new to the project to understand what pieces exist and how they generally relate to each other.
+*   **Audience:** Everyone, especially new contributors.
+
+
+```mermaid
+---
+config:
+  layout: elk
+  theme: redux
+  look: neo
+---
+flowchart TD
+ subgraph Diagram["Diagram"]
+        Internet
+        HomelabNetwork
+  end
+ subgraph Internet["Internet / External World"]
+        UserBrowser["User / Browser"]
+        Cloudflare["<b>Cloudflare</b><br>DNS &amp; Security Proxy"]
+  end
+ subgraph ApplicationLayer["Application Layer"]
+    direction LR
+        OtherServices["Other Services"]
+        Authentication["Authentication"]
+        Monitoring["Monitoring"]
+        MediaStack["Media Stack"]
+  end
+ subgraph InternalStorage["<b>Internal Storage</b><br>(on VM's Disk)"]
+    direction LR
+        PVCs["<br><b>App Config PVCs</b><br>(Jellyfin, Radarr, etc.)<br><i>via local-path provisioner</i>"]
+  end
+ subgraph KubernetesCluster["Kubernetes Cluster"]
+        Traefik["<b>Traefik</b><br>Ingress Controller"]
+        ApplicationLayer
+  end
+ subgraph KubernetesVM["Kubernetes VM"]
+        KubernetesCluster
+        InternalStorage
+  end
+ subgraph ProxmoxHost["Proxmox Host"]
+        CloudflareTunnel["Cloudflare Tunnel LXC"]
+        NginxProxy["Nginx Proxy Manager LXC"]
+        Adguard["Adguard Home LXC<br>DNS Server"]
+        NFS["NFS Share<br>Located on Host"]
+        KubernetesVM
+        PVE["<b>Proxmox Web UI</b><br>(Service on Host)"]
+  end
+ subgraph HomelabNetwork["Homelab Network"]
+        ProxmoxHost
+  end
+    UserBrowser -- HTTPS --> Cloudflare
+    Cloudflare -- Secure Tunnel --> CloudflareTunnel
+    CloudflareTunnel -- HTTP --> Traefik & NginxProxy
+    NginxProxy -- proxies to --> PVE
+    Traefik -- Routes Traffic To --> OtherServices & Authentication & Monitoring & MediaStack
+    UserBrowser -. "DNS QUERY for *.localhost" .-> Adguard
+    ApplicationLayer -- Mount via NFS --> NFS
+    ApplicationLayer -- Mount via PV --> InternalStorage
+    ApplicationLayer <-. Internal DNS Query .-> Adguard
+    style Cloudflare fill:#FFE0B2
+    style PVCs fill:#BBDEFB
+    style Traefik fill:#E1BEE7
+    style CloudflareTunnel fill:#FFE0B2
+    style NginxProxy fill:#C8E6C9
+    style Adguard fill:#C8E6C9
+    style NFS fill:#BBDEFB
+    style KubernetesVM fill:#FFF9C4
+    style PVE fill:transparent
+    style Diagram fill:transparent
+```
+
+
+### 2. Logical Network Architecture Diagram (The "Traffic Cop View")
+
+*   **Explanation:** This diagram focuses exclusively on the logical segmentation of your network. It abstracts away the physical hardware and instead illustrates the **VLANs** (or virtual networks) and the flow of traffic between them. It would show which services and machines connect to which network (e.g., `styx-servers-vlan`, `bifrost-iot-vlan`, "Storage Network"). Crucially, it would also show the **firewall** or router at the center, illustrating the rules that govern which networks are allowed to talk to each other. This diagram answers the question: "Who can talk to whom?"
+*   **Audience:** Network administrators, security auditors, developers deploying services with specific network requirements.
+
+```mermaid
+
+```
+
+### 3. External Access & Ingress Flow Diagram (The "Front Door View")
+
+*   **Explanation:** This diagram details the complete path a user request takes from the public internet to an internal service. It would start with the user, go to Cloudflare DNS, through the Cloudflare Tunnel, and then show the critical split:
+    1.  Traffic destined for infrastructure management (Proxmox UI) goes to the **NGINX Reverse Proxy**.
+    2.  Traffic destined for applications (Grafana, arr-stack) goes to the **Traefik Ingress Controller** inside Kubernetes.
+    This diagram is essential for understanding your security posture and for troubleshooting external connectivity issues.
+*   **Audience:** Anyone managing security, DNS, or deploying a new user-facing service.
+
+```mermaid
+---
+config:
+  layout: elk
+  theme: redux
+  look: neo
+---
+flowchart TD
+ subgraph Diagram["Diagram"]
+        Internet["Internet"]
+        HomelabNetwork["HomelabNetwork"]
+  end
+ subgraph Internet["Internet / External World"]
+        UserBrowser["User"]
+        Cloudflare["<b>Cloudflare</b><br>DNS &amp; Security Proxy"]
+  end
+ subgraph InfrastructureReverseProxy["Infrastructure Reverse Proxy"]
+        NPM_LXC["<b>Nginx Proxy Manager LXC</b>"]
+  end
+ subgraph ApplicationLayer["Application Services (Pods)"]
+        Jellyfin["Jellyfin Service"]
+        Grafana["Grafana Service"]
+        Arrs["*arr Stack Services"]
+  end
+ subgraph KubernetesVM["Kubernetes VM"]
+        Traefik["<b>Traefik Ingress Controller</b><br><i>(Pod)</i>"]
+        ApplicationLayer
+  end
+ subgraph ProxmoxHost["Proxmox Host"]
+        TunnelLXC["<b>Cloudflare Tunnel LXC</b><br>(bananagator-01)<br><i>Receives all traffic from Cloudflare</i>"]
+        DNSplit["DNSplit"]
+        InfrastructureReverseProxy
+        KubernetesVM
+        PVE_Service["<b>Proxmox UI Service</b><br><i>(On Host)</i>"]
+  end
+ subgraph HomelabNetwork["Homelab Network"]
+        ProxmoxHost
+  end
+ subgraph DNSplit["The Critical Split (Inside Tunnel LXC)"]
+    direction LR
+        Splitter{"<b>Traffic is Forwarded Based on Hostname</b>"}
+  end
+    UserBrowser -- "<b>1.</b> Request for service or infrastructure URL" --> Cloudflare
+    Cloudflare -- "<b>2.</b> Sends request securely via Tunnel" --> TunnelLXC
+    TunnelLXC --> Splitter
+    Splitter -- "<b>Path A: Application Traffic</b><br><i>If Host is serice</i>" --> Traefik
+    Splitter -- "<b>Path B: Infrastructure Traffic</b><br><i>If Host is infrastructure</i>" --> NPM_LXC
+    NPM_LXC -- Forwards Request --> PVE_Service
+    Traefik -- Uses IngressRoute to find correct service --> ApplicationLayer
+    UserBrowser@{ shape: rect}
+    style Cloudflare fill:#f38020
+    style NPM_LXC fill:#C8E6C9
+    style Traefik fill:#E1BEE7
+    style TunnelLXC fill:#FFE0B2
+    style Splitter fill:#FFCDD2,stroke:#333,stroke-width:2px
+    style Diagram fill:transparent
+
+```
+
+### 4. Kubernetes Cluster Architecture Diagram (The "Application Platform View")
+
+*   **Explanation:** This diagram zooms in on the `asgard-orion-cluster`. It treats the underlying VMs as a given and instead focuses on the internal components of the Kubernetes platform itself. It would show the relationship between the **Traefik Ingress Controller**, the **GitOps Controller** (ArgoCD/Flux), core services like **Authentik** and the **Prometheus/Grafana** monitoring stack, and how they interact with a sample user application (e.g., `arr-stack`). It would also show how Persistent Volume Claims (PVCs) get their storage.
+*   **Audience:** Developers who are deploying and managing applications inside Kubernetes.
+
+```mermaid
+---
+config:
+  theme: redux
+  look: neo
+  layout: elk
+---
+flowchart TD
+ subgraph Diagram["Diagram"]
+        ExternalSources["External Sources"]
+        KubernetesCluster["Kubernetes Cluster"]
+        OutsideCluster["Outside the Cluster"]
+  end
+ subgraph ExternalSources["External Sources / Dependencies"]
+    direction LR
+        GitRepo["<b>Git Repository</b><br><i>platform-stack</i><br>Source of Truth"]
+        TrafficIn["<b>Incoming Traffic</b><br><i>(from Cloudflare Tunnel / LAN)</i>"]
+  end
+ subgraph IngressLayer["Ingress Layer"]
+        Traefik["<b>Traefik Ingress Controller</b>"]
+  end
+ subgraph AuthStack["Authentication Stack"]
+        AuthentikServer["Authentik Server/Worker Pod"]
+        AuthentikOutpost["Authentik Outpost Pod"]
+        AuthentikService["Authentik Service"]
+        OutpostService["Outpost Service"]
+  end
+ subgraph MonStack["Monitoring Stack"]
+        Prometheus["Prometheus Pod"]
+        Grafana["Grafana Pod"]
+        PrometheusService["Prometheus Service"]
+        GrafanaService["Grafana Service"]
+  end
+ subgraph CoreInfrastructure["Core Infrastructure Services"]
+    direction TB
+        AuthStack
+        MonStack
+  end
+ subgraph UserApps["User Applications"]
+    direction TB
+        Jellyfin["Jellyfin Pod"]
+        Radarr["Radarr Pod"]
+        Sonarr["Sonarr Pod"]
+        JellyfinService["Jellyfin Service"]
+        RadarrService["Radarr Service"]
+        SonarrService["Sonarr Service"]
+  end
+ subgraph LocalPVCs["Local Persistent Storage"]
+        JellyfinConfigPVC["Jellyfin Config PVC"]
+        PrometheusPVC["Prometheus Data PVC"]
+        AuthentikDBPVC["Authentik DB PVC"]
+  end
+ subgraph SharedNFS["Shared Network Storage"]
+        NFSVolume["NFS Volume<br><i>(Direct Mount in Pod Spec)</i>"]
+  end
+ subgraph StorageLayer["Storage Abstraction Layer"]
+    direction LR
+        LocalPVCs
+        SharedNFS
+  end
+ subgraph KubernetesCluster["Kubernetes Cluster"]
+        K8sAPI["<b>Kubernetes API Server</b>"]
+        IngressLayer
+        CoreInfrastructure
+        UserApps
+        StorageLayer
+  end
+ subgraph OutsideCluster["Outside the Cluster"]
+        Developer["<b>Developer</b><br><i>(You)</i>"]
+        ExternalNFS["<b>NFS Share</b><br><i>(on Proxmox Host)</i>"]
+        LocalPath@{ label: "<b>local-path Provisioner</b><br><i>(Uses VM's local disk)</i>" }
+  end
+    GitRepo -- "<b>1.</b> git push" --> Developer
+    Developer -- "<b>2.</b> kubectl apply -k" --> K8sAPI
+    K8sAPI -- "<b>3.</b> Creates/Updates Resources" --> Traefik & CoreInfrastructure & UserApps & StorageLayer
+    TrafficIn -- "<b>1.</b> Request for service or infrastructure URL" --> Traefik
+    Traefik -- "<b>2.</b> Reads IngressRoute, finds Middleware" --> OutpostService
+    OutpostService -- "<b>3.</b> Authenticates User" --> AuthentikServer
+    AuthentikServer -- (If OK) --> OutpostService
+    OutpostService -- "<b>4.</b> Forwards request" --> JellyfinService
+    JellyfinService -- "<b>5.</b> Routes to Pod" --> Jellyfin
+    Jellyfin -- mounts /media --> NFSVolume
+    Radarr -- mounts /media --> NFSVolume
+    Sonarr -- mounts /media --> NFSVolume
+    NFSVolume -- connects to ---> ExternalNFS
+    Jellyfin -- mounts /config --> JellyfinConfigPVC
+    Prometheus -- mounts /data --> PrometheusPVC
+    AuthentikServer -- needs --> AuthentikDBPVC
+    LocalPVCs -- bound to PVs created by --> LocalPath
+    LocalPath@{ shape: rect}
+    style GitRepo fill:#D5F5E3
+    style Traefik fill:#E1BEE7
+    style AuthentikServer fill:#FFCDD2
+    style AuthentikOutpost fill:#FFCDD2
+    style Prometheus fill:#C5CAE9
+    style Grafana fill:#C5CAE9
+    style NFSVolume fill:#BBDEFB
+    style LocalPVCs fill:#BBDEFB
+    style Diagram fill:transparent
+
+```
+
+### 5. Storage Architecture Diagram (The "Data View")
+
+*   **Explanation:** This diagram focuses on a single critical resource: data. It would illustrate where all persistent data lives and how it is accessed. It should show both the **current state** (local SSD storage on Proxmox hosts, `atlas-bedrock`) and the **future state**. The future view would detail:
+    *   The TrueNAS server.
+    *   The "Storage Network" connecting it to the Proxmox hosts.
+    *   How Proxmox accesses storage for VM disks (e.g., via iSCSI or NFS).
+    *   How Kubernetes applications access storage for Persistent Volumes (e.g., via an NFS client).
+    *   The **backup flow**, showing data moving from TrueNAS and Kubernetes to the **AWS S3 bucket** (`babylon`).
+*   **Audience:** Infrastructure managers, anyone concerned with data integrity, backups, and disaster recovery.
+
+```mermaid
+---
+config:
+  theme: redux
+  look: neo
+  layout: elk
+---
+flowchart TD
+ subgraph Diagram["Diagram"]
+        CurrentState["CurrentState"]
+        FutureState["FutureState"]
+        KubeAppsCurrent("Kubernetes Pods (Current)")
+  end
+ subgraph ProxmoxHostC["Proxmox Host (current)"]
+        LocalSSD["<br><b>Local SSD/NVMe</b><br><i>(On Host)</i>"]
+  end
+ subgraph KubernetesVMC["Kubernetes VM"]
+        VMDisk["<br><b>VM Virtual Disk</b><br><i>(40GB, lives on Local SSD)</i>"]
+  end
+ subgraph CurrentState["Current State"]
+    direction LR
+        ProxmoxHostC
+        KubernetesVMC
+        NFSShare["<br><b>NFS Share</b><br><i>/mnt/data</i><br>(Directory on Local SSD)"]
+  end
+ subgraph TrueNASServer["<b>TrueNAS Server</b><br><i>Dedicated Data Storage</i>"]
+        NASPool["<br><b>TrueNAS ZFS Pool</b><br><i>(Bulk Storage)</i>"]
+        iSCSI["<br><b>iSCSI LUNs</b><br><i>(Block Storage)</i>"]
+        NFSFuture["<br><b>NFS Share</b><br><i>(File Storage)</i>"]
+  end
+ subgraph ProxmoxHost["Proxmox Host"]
+        PVEFuture("<b>Proxmox Host</b>")
+  end
+ subgraph KubernetesCluster["Kubernetes Cluster (Future)"]
+        K8sFuture("<b>Kubernetes Pods</b><br>(Jellyfin, Radarr, etc.)")
+  end
+ subgraph OffSiteBackup["Off-site Backup (AWS)"]
+        S3["<br><b>AWS S3 Bucket</b><br><i>(online)</i>"]
+  end
+ subgraph FutureState["Future State (Planned)"]
+    direction LR
+        TrueNASServer
+        ProxmoxHost
+        StorageNetwork["<br><b>Dedicated Storage Network</b><br><i>(10GbE or faster)</i>"]
+        KubernetesCluster
+        OffSiteBackup
+  end
+    LocalSSD -- Hosts VM Disk File --> VMDisk
+    LocalSSD -- Provides Directory For --> NFSShare
+    NASPool --> iSCSI & NFSFuture
+    PVEFuture -- Mounts iSCSI LUN for VM Disks --> StorageNetwork
+    StorageNetwork --> iSCSI & NFSFuture
+    K8sFuture -- Mounts NFS for Media Data --> StorageNetwork
+    NASPool -- "Periodic Backups (e.g., Duplicati/Restic)" --> S3
+    VMDisk -- "Stores App Configs via local-path PVCs" --o KubeAppsCurrent
+    NFSShare -- Mounted Directly by Pods for Media --o KubeAppsCurrent
+    PVEFuture -- Hosts Kubernetes VM --> K8sFuture
+    style LocalSSD fill:#BBDEFB,stroke:#333,stroke-width:2px
+    style NFSShare fill:#BBDEFB,stroke:#333,stroke-width:2px
+    style NASPool fill:#3498db,stroke:#333,stroke-width:2px
+    style S3 fill:#f38020,stroke:#333,stroke-width:2px
+    style StorageNetwork fill:#9b59b6,stroke:#333,stroke-width:2px
+    style Diagram fill:transparent
+
+```
+
+
+### 6. GitOps Workflow & CI/CD Diagram (The "Developer's Journey View")
+
+*   **Explanation:** This is arguably the most important diagram for new developers. It's not a static view of the infrastructure, but a **process flow diagram**. It shows what happens after a developer runs `git push`. It would illustrate two key paths:
+    1.  **Infrastructure Path (Manual/Gated):** A change to the `tofu/` or `ansible/` directories is pushed, a Pull Request is reviewed, and an administrator must manually run a `task tofu:apply` or `task ansible:playbook` command to enact the change.
+    2.  **Application Path (Automated):** A change to the `k8s/` directory is merged, which is automatically detected by the **in-cluster GitOps controller**, which then pulls the change and applies it to the cluster without any manual intervention.
+    This diagram explains *how to use this repository* to make changes happen.
+*   **Audience:** All developers and contributors.
+
+```mermaid
+---
+config:
+  theme: redux
+  look: neo
+  layout: dagre
+---
+flowchart TD
+ subgraph Diagram["Diagram"]
+        Developer["Developer"]
+        GitPlatform["GitPlatform"]
+        Production["Production"]
+        ManualProcess["ManualProcess"]
+        Decision{{"<b>Check Changed Files</b>"}}
+  end
+ subgraph Developer["Developer's Local Machine"]
+        DevPC["<b>Developer</b><br><i>Writes code in<br>VS Code</i>"]
+  end
+ subgraph GitPlatform["Git Platform (e.g., GitHub)"]
+    direction LR
+        GitRepo["<b>Git Repository</b><br><i>platform-stack</i>"]
+        PR["<b>Pull Request</b><br><i>Code Review &amp; Approval</i>"]
+        Merge@{ label: "<b>Merge to <b>main</b> branch</b>" }
+  end
+ subgraph ProxmoxInfra["Proxmox Infrastructure"]
+        Proxmox["<b>Proxmox Hosts</b>"]
+  end
+ subgraph K8sInfra["Kubernetes Cluster"]
+        GitOpsController["<b>GitOps Controller</b><br><i>(ArgoCD / Flux)</i><br>Watches Git Repo"]
+        K8sCluster["<b>Kubernetes API</b>"]
+  end
+ subgraph Production["Production Environments"]
+    direction TB
+        ProxmoxInfra
+        K8sInfra
+  end
+ subgraph ManualProcess["Manual/Gated Process"]
+        Admin["<b>Administrator</b><br><i>(You)</i>"]
+  end
+    DevPC -- "<b>1.</b> git push" --> GitRepo
+    GitRepo -- "<b>2.</b> Open Pull Request" --> PR
+    PR -- "<b>3.</b> Code is Reviewed &amp; Approved" --> Merge
+    Merge -- "<b>4.</b> TRIGGER" --> Decision
+    Decision -- <b>Path A: Infrastructure Change</b><br><i>(files in <b>tofu/</b> or <b>ansible/</b>)</i> --> ManualProcess
+    Admin -- "<b>6a.</b> Runs <b>task tofu:apply</b> or <b>task ansible:playbook</b>" --> ProxmoxInfra
+    Decision -- <b>Path B: Application Change</b><br><i>(files in <b>k8s/</b>)</i> --> GitOpsController
+    GitOpsController -- "<b>5b.</b> Automatically detects change to <b>main</b> branch" --> Merge
+    Merge@{ shape: rect}
+    style DevPC fill:#BBDEFB
+    style GitRepo fill:#C8E6C9
+
+```
+
 ---
 
 ## 1. Physical & Virtualization Layer
