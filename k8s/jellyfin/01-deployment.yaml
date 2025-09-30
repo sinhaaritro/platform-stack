@@ -32,8 +32,9 @@ spec:
               mountPath: /media
       volumes:
         - name: config-storage
-          persistentVolumeClaim:
-            claimName: jellyfin-config-pvc
+          nfs:
+            server: 192.168.0.202
+            path: /mnt/data/config/jellyfin
         # This is direct NFS mount for sharing data across multiple namespace
         - name: media-storage
           nfs:
