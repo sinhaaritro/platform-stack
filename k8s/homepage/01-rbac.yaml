@@ -10,7 +10,7 @@ metadata:
   name: homepage-cr
 rules:
   - apiGroups: [""] # Core API group
-    resources: ["services", "pods", "nodes"]
+    resources: ["services", "pods", "nodes", "secrets"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["traefik.io"] # Traefik's API group for IngressRoutes
     resources: ["ingressroutes"]

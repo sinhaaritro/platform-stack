@@ -34,3 +34,8 @@ ansible/inventory.yml
 *.tfvars.decrypted
 secrets.decrypted
 *.tfvars.bak
+
+
+
+# Kubernetes SealedSecretes
+master.key

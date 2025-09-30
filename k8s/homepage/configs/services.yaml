@@ -1,34 +1,37 @@
 # For more info, see: https://gethomepage.dev/configs/services/
 - Media:
-      - Jellyfin:
-            href: http://jellyfin.localhost
-            description: Media Server
-            icon: jellyfin.png
-            widget:
-                type: jellyfin
-                url: http://jellyfin-service.jellyfin:8096
+    - Jellyfin:
+        href: http://jellyfin.localhost
+        description: Media Server
+        icon: jellyfin.png
+        widget:
+          type: jellyfin
+          url: http://jellyfin-service.jellyfin:8096
+          key: apikeyapikey
 
-      - Radarr:
-            icon: radarr.png
-            href: http://radarr.localhost
-            description: Movie Manager
-            widget:
-                type: radarr
-                url: http://radarr-service.radarr:7878
+    - Radarr:
+        icon: radarr.png
+        href: http://radarr.localhost
+        description: Movie Manager
+        widget:
+          type: radarr
+          url: http://radarr-service.radarr:7878
+          key: "${RADARR_API_KEY}"
+          enableQueue: true
 
 - Authentication:
-      - Authentik:
-            href: http://auth.localhost
-            description: Identity Provider
-            icon: authentik.png
+    - Authentik:
+        href: http://auth.localhost
+        description: Identity Provider
+        icon: authentik.png
 
 - Group A:
-      - Service A:
+    - Service A:
+        href: http://localhost/
+
+    - Group B:
+        - Service B:
             href: http://localhost/
 
-      - Group B:
-            - Service B:
-                  href: http://localhost/
-
-            - Service C:
-                  href: http://localhost/
+        - Service C:
+            href: http://localhost/

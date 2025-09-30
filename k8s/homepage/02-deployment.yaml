@@ -16,18 +16,44 @@ spec:
       serviceAccountName: homepage-sa
       # --- INIT CONTAINER: This runs once before the main container starts ---
       initContainers:
-        - name: copy-configs
-          image: busybox:1.36
-          # This command copies all files from the read-only ConfigMap volume
-          # to the writable emptyDir volume.
-          command: ["/bin/sh", "-c", "cp -L /tmp/config/* /app/config/"]
+        - name: config-templater
+          # This is a small image that includes the 'envsubst' tool. 'gettext' is the package name.
+          image: alpine:3.18
+          # This command runs once to install the tool.
+          command:
+            [
+              "/bin/sh",
+              "-c",
+              "apk add gettext && cp -L /config-templates/* /processed-config/",
+            ]
           volumeMounts:
-            # Mount the writable emptyDir volume
-            - name: homepage-config-writable
-              mountPath: /app/config
-            # Mount the read-only ConfigMap volume at a temporary location
-            - name: homepage-config-readonly
-              mountPath: /tmp/config
+            # Mount the source templates (from a ConfigMap)
+            - name: config-templates-vol
+              mountPath: /config-templates
+            - name: processed-config-vol
+              mountPath: /processed-config
+        - name: config-substituter
+          image: alpine:3.18
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              # This script is now much cleaner and more powerful.
+              # First, install the envsubst tool.
+              apk add gettext
+              # Define which variables to substitute. This is a crucial step to prevent
+              # envsubst from replacing other legitimate '$' characters in your files.
+              VARS_TO_SUBSTITUTE=$(env | grep '_API_KEY' | awk -F= '{print "${" $1 "}"}' | tr '\n' ' ')
+
+              # Use envsubst to process the template and output the final file.
+              envsubst "$VARS_TO_SUBSTITUTE" < /processed-config/services.yaml > /processed-config/services.tmp && mv /processed-config/services.tmp /processed-config/services.yaml
+
+          envFrom:
+            - secretRef:
+                name: homepage-secrets
+          volumeMounts:
+            # Mount the destination (the shared emptyDir volume)
+            - name: processed-config-vol
+              mountPath: /processed-config
 
       # --- MAIN CONTAINER ---
       containers:
@@ -36,19 +62,20 @@ spec:
           env:
             - name: HOMEPAGE_ALLOWED_HOSTS
               value: homepage.localhost,localhost # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
+
           ports:
             - name: http
               containerPort: 3000
               protocol: TCP
           volumeMounts:
-            # The main container now mounts the WRITABLE volume
-            - name: homepage-config-writable
+            # Mount the shared volume containing the finished config files
+            - name: processed-config-vol
               mountPath: /app/config
       volumes:
-        # The writable emptyDir volume for the app to use
-        - name: homepage-config-writable
-          emptyDir: {}
-        # The read-only ConfigMap volume for our GitOps configs
-        - name: homepage-config-readonly
+        # Volume for the source templates, populated by a ConfigMap
+        - name: config-templates-vol
           configMap:
-            name: homepage-config
+            name: homepage-config-template
+        # The shared, writable emptyDir volume that both containers can access
+        - name: processed-config-vol
+          emptyDir: {}
