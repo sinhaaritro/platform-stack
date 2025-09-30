@@ -1,14 +1,26 @@
 # For more info, see: https://gethomepage.dev/configs/services/
 - Media:
     - Jellyfin:
-        href: http://jellyfin.localhost
-        description: Media Server
         icon: jellyfin.png
-        widget:
-          type: jellyfin
-          url: http://jellyfin-service.jellyfin:8096
-          key: apikeyapikey
+        href: http://jellyfin.localhost
+        description: Media streaming
 
+    - Immich:
+        icon: immich.png
+        href: http://radarr.localhost
+        description: Image hosting
+
+    - PaperlessNgx:
+        icon: paperless-ngx.png
+        href: http://radarr.localhost
+        description: Document hosting
+
+    - Obsidian:
+        icon: obsidian.png
+        href: http://radarr.localhost
+        description: Notes hosting
+
+- Media Management:
     - Radarr:
         icon: radarr.png
         href: http://radarr.localhost
@@ -19,19 +31,190 @@
           key: "${RADARR_API_KEY}"
           enableQueue: true
 
+    - Sonarr:
+        icon: sonarr.png
+        href: http://sonarr.localhost
+        description: Show Manager
+        widget:
+          type: sonarr
+          url: http://sonarr-service.sonarr:8989 # kubectl get service -n sonarr
+          key: "${SONARR_API_KEY}"
+          enableQueue: true
+
+    - Bazarr:
+        icon: bazarr.png
+        href: http://bazarr.localhost
+        description: Subtitle Manager
+        widget:
+          type: bazarr
+          url: http://bazarr-service.bazarr:6767
+          key: "${BAZARR_API_KEY}"
+          enableQueue: true
+
+    - Lidarr:
+        icon: lidarr.png
+        href: http://lidarr.localhost
+        description: Music Manager
+        widget:
+          type: lidarr
+          url: http://lidarr-service.lidarr:8686
+          key: "${LIDARR_API_KEY}"
+          enableQueue: true
+
+    - Readarr:
+        icon: readarr.png
+        href: http://readarr.localhost
+        description: Books Manager
+        widget:
+          type: readarr
+          url: http://readarr-service.readarr:8787
+          key: "${READARR_API_KEY}"
+          enableQueue: true
+
+    - Whisparr:
+        icon: whisparr.png
+        href: http://whisparr.localhost
+        description: Stuff Manager
+        widget:
+          type: whisparr
+          url: http://whisparr-service.whisparr:6969
+          key: "${WHISPARR_API_KEY}"
+          enableQueue: true
+
+    - Prowlarr:
+        icon: prowlarr.png
+        href: http://prowlarr.localhost
+        description: Movie Manager
+        widget:
+          type: prowlarr
+          url: http://prowlarr-service.prowlarr:7878
+          key: "${WHISPARR_API_KEY}"
+          enableQueue: true
+
+    - Jellyseerr:
+        icon: jellyseerr.png
+        href: http://jellyseerr.localhost
+        description: Movie and Show Requester
+        widget:
+          type: jellyseerr
+          url: http://jellyseerr-service.jellyseerr:5055
+          key: "${JELLYSEERR_API_KEY}"
+          enableQueue: true
+
+    - Tdarr:
+        icon: tdarr.png
+        href: http://tdarr.localhost
+        description: Movie Manager
+        widget:
+          type: tdarr
+          url: http://tdarr-service.tdarr:7878
+          key: "${JELLYSEERR_API_KEY}"
+          enableQueue: true
+
 - Authentication:
     - Authentik:
         href: http://auth.localhost
         description: Identity Provider
         icon: authentik.png
 
-- Group A:
-    - Service A:
-        href: http://localhost/
+- Internet Links:
+    - Jellyfin:
+        icon: jellyfin.png
+        href: http://jellyfin.localhost
+        description: Media streaming
 
-    - Group B:
-        - Service B:
-            href: http://localhost/
+    - Immich:
+        icon: immich.png
+        href: http://radarr.localhost
+        description: Image hosting
 
-        - Service C:
-            href: http://localhost/
+    - PaperlessNgx:
+        icon: paperless-ngx.png
+        href: http://radarr.localhost
+        description: Document hosting
+
+    - Obsidian:
+        icon: obsidian.png
+        href: http://radarr.localhost
+        description: Notes hosting
+
+- Local Links:
+    - Treafik:
+        icon: traefik.png
+        href: http://traefik.localhost
+        description: Ingress controller
+
+    - Jellyfin:
+        icon: jellyfin.png
+        href: http://jellyfin.localhost
+        description: Media streaming
+
+    - Grafana:
+        icon: grafana.png
+        href: http://grafana.localhost
+        description: Analytics visualization
+
+    - Authentik:
+        icon: authentik.png
+        href: http://auth.localhost
+        description: Authorization
+
+    - Radarr:
+        icon: radarr.png
+        href: http://radarr.localhost
+        description: Movie manager
+
+    - Sonarr:
+        icon: sonarr.png
+        href: http://sonarr.localhost
+        description: Show manager
+
+    - Lidarr:
+        icon: lidarr.png
+        href: http://lidarr.localhost
+        description: Music manager
+
+    - Readarr:
+        icon: readarr.png
+        href: http://readarr.localhost
+        description: Books manager
+
+    - Whisparr:
+        icon: whisparr.png
+        href: http://whisparr.localhost
+        description: Stuff manager
+
+    - Bazarr:
+        icon: bazarr.png
+        href: http://bazarr.localhost
+        description: Subtitle manager
+
+    - Jellyseerr:
+        icon: jellyseerr.png
+        href: http://jellyseerr.localhost
+        description: Request manager
+
+    - qbittorrent:
+        icon: qbittorrent.png
+        href: http://qbittorrent.localhost
+        description: Torrent
+
+    - Homepage:
+        icon: homepage.png
+        href: http://homepage.localhost
+        description: This
+
+    - Immich:
+        icon: immich.png
+        href: http://radarr.localhost
+        description: Image hosting
+
+    - PaperlessNgx:
+        icon: paperless-ngx.png
+        href: http://radarr.localhost
+        description: Document hosting
+
+    - Obsidian:
+        icon: obsidian.png
+        href: http://radarr.localhost
+        description: Notes hosting

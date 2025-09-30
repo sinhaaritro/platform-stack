@@ -14,44 +14,53 @@ spec:
         app: homepage
     spec:
       serviceAccountName: homepage-sa
-      # --- INIT CONTAINER: This runs once before the main container starts ---
       initContainers:
-        - name: config-templater
+        - name: config-initializer
           # This is a small image that includes the 'envsubst' tool. 'gettext' is the package name.
           image: alpine:3.18
-          # This command runs once to install the tool.
-          command:
-            [
-              "/bin/sh",
-              "-c",
-              "apk add gettext && cp -L /config-templates/* /processed-config/",
-            ]
-          volumeMounts:
-            # Mount the source templates (from a ConfigMap)
-            - name: config-templates-vol
-              mountPath: /config-templates
-            - name: processed-config-vol
-              mountPath: /processed-config
-        - name: config-substituter
-          image: alpine:3.18
           command: ["/bin/sh", "-c"]
+          # This multi-line script performs all the setup steps in order.
           args:
             - |
-              # This script is now much cleaner and more powerful.
-              # First, install the envsubst tool.
-              apk add gettext
-              # Define which variables to substitute. This is a crucial step to prevent
-              # envsubst from replacing other legitimate '$' characters in your files.
-              VARS_TO_SUBSTITUTE=$(env | grep '_API_KEY' | awk -F= '{print "${" $1 "}"}' | tr '\n' ' ')
+              # Exit immediately if a command fails
+              set -e
 
-              # Use envsubst to process the template and output the final file.
-              envsubst "$VARS_TO_SUBSTITUTE" < /processed-config/services.yaml > /processed-config/services.tmp && mv /processed-config/services.tmp /processed-config/services.yaml
+              # 1. Install the necessary tool
+              apk add gettext
+
+              # 2. Copy the original template from the read-only ConfigMap volume
+              #    to the writable shared volume.
+              echo "Copying template..."
+              cp /config-templates/services.yaml /processed-config/services.yaml
+
+              # 3. Run envsubst on the copied file in the shared volume.
+              #    This replaces the ${VARS} with the actual secret values.
+              echo "Substituting variables..."
+              envsubst < /processed-config/services.yaml > /processed-config/services.tmp
+
+              # 4. Overwrite the original with the processed version
+              mv /processed-config/services.tmp /processed-config/services.yaml
+
+              # 5. Move the other files
+              cp /config-templates/settings.yaml /processed-config/settings.yaml
+              cp /config-templates/bookmarks.yaml /processed-config/bookmarks.yaml
+              cp /config-templates/widgets.yaml /processed-config/widgets.yaml
+              cp /config-templates/kubernetes.yaml /processed-config/kubernetes.yaml
+              cp /config-templates/docker.yaml /processed-config/docker.yaml
+              cp /config-templates/proxmox.yaml /processed-config/proxmox.yaml
+              cp /config-templates/custom.css /processed-config/custom.css
+              cp /config-templates/custom.js /processed-config/custom.js
+
+              echo "Config initialization complete."
 
           envFrom:
             - secretRef:
                 name: homepage-secrets
           volumeMounts:
-            # Mount the destination (the shared emptyDir volume)
+            # Mount the source templates (from the ConfigMap, read-only)
+            - name: config-templates-vol
+              mountPath: /config-templates
+            # Mount the destination (the shared emptyDir, writable)
             - name: processed-config-vol
               mountPath: /processed-config
 

@@ -5,3 +5,36 @@ title: Strawslabs Dashboard
 
 headerStyle: boxed
 language: en-IN
+
+layout:
+  First Service Group:
+    tab: Overview
+    style: row
+    columns: 4
+
+  Media:
+    tab: Services
+    style: row
+    columns: 4
+
+  Media Management:
+    tab: Services
+    style: row
+    columns: 4
+
+  Authentication:
+    tab: Services
+
+  Third Service Group:
+    tab: Monitoring
+    style: row
+
+  Internet Links:
+    tab: Links
+    style: row
+    columns: 8
+
+  Local Links:
+    tab: Links
+    style: row
+    columns: 8

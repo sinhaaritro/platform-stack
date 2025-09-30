@@ -1,17 +1,54 @@
 # For more info, see: https://gethomepage.dev/configs/bookmarks/
 ---
 - Developer:
+    - Website:
+        - abbr: WS
+          href: https://aritrosinha.dpdns.org
+          description: Personal Website
+
     - Github:
-        - abbr: GH
-          href: https://github.com/
+        - icon: github.png
+          href: https://github.com/sinhaaritro
+          description: Personal Github
+
+    - Notion:
+        - icon: notion.png
+          href: https://www.notion.so/aritro
 
 - Social:
     - Reddit:
-        - icon: RD
+        - icon: reddit.png
           href: https://reddit.com/
           description: The front page of the internets
 
+    - Stream:
+        - icon: prime-video.png
+          href: https://www.primevideo.com/
+
+    - EpicGames:
+        - icon: prime-video.png
+          href: https://www.primevideo.com/
+
+    - Discord1:
+        - icon: prime-video.png
+          href: https://www.primevideo.com/
+          description: Discord Profile
+
+    - Discord2:
+        - icon: prime-video.png
+          href: https://www.primevideo.com/
+          description: Discord Server
+
+    - MyAnimeList:
+        - icon: prime-video.png
+          href: https://www.primevideo.com/
+
 - Entertainment:
     - YouTube:
-        - abbr: YT
-          href: https://youtube.com/
+        - icon: youtube.png
+          href: https://www.youtube.com/@luciferleviathn
+          description: Lucifer Plays Channel
+
+    - Prime Video:
+        - icon: prime-video.png
+          href: https://www.primevideo.com/
