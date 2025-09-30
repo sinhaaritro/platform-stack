@@ -40,8 +40,9 @@ spec:
               mountPath: /media
       volumes:
         - name: config-storage
-          persistentVolumeClaim:
-            claimName: sonarr-config-pvc
+          nfs:
+            server: 192.168.0.202
+            path: /mnt/data/config/sonarr
         # This is the direct NFS mount, identical to Jellyfin and Radarr
         - name: media-storage
           nfs:
