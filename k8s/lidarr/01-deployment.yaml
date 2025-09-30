@@ -40,8 +40,9 @@ spec:
               mountPath: /media
       volumes:
         - name: config-storage
-          persistentVolumeClaim:
-            claimName: lidarr-config-pvc
+          nfs:
+            server: 192.168.0.202
+            path: /mnt/data/config/lidarr
         # This is the direct NFS mount, identical to the other apps
         - name: media-storage
           nfs:
