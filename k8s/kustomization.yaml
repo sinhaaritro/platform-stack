@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - ./traefik
+  - ./sealed-secrets
   - ./monitoring
   - ./authentik
   - ./nginx-test

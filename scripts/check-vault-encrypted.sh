@@ -10,7 +10,7 @@
 # It works by:
 # 1. Getting a list of all STAGED files for the current commit.
 # 2. Filtering that list to find files that match our secret naming
-#    convention (ending in '.secrets.tfvars').
+#    convention (ending in '.secret.tfvars').
 # 3. For each of those files, it checks if the first line of content
 #    starts with the Ansible Vault header ('$ANSIBLE_VAULT;').
 # 4. If any secret file is missing this header, it's considered unencrypted.

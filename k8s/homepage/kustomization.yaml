@@ -5,7 +5,7 @@ namespace: homepage
 
 # This generates the ConfigMap from our local config files
 configMapGenerator:
-  - name: homepage-config
+  - name: homepage-config-template
     namespace: homepage
     files:
       - configs/settings.yaml
@@ -26,3 +26,4 @@ resources:
   - 02-deployment.yaml
   - 03-service.yaml
   - 04-ingress-route.yaml
+  - 05-homepage-sealed-secret.yaml
