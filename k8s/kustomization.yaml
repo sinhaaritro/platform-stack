@@ -15,5 +15,6 @@ resources:
   - ./whisparr
   - ./bazarr
   - ./jellyseerr
+  - ./prowlarr
   - ./qbittorrent
   - ./homepage
