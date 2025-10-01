@@ -40,8 +40,15 @@ spec:
               value: "Etc/UTC" # Change to your timezone
             - name: WEBUI_PORT
               value: "8080"
-            - name: WEBUI_PASSWORD
-              value: "KTBAsfSsg"
+            # VPN Config
+            - name: QB_PROXY_TYPE
+              value: "socks5" # Use SOCKS5
+            - name: QB_PROXY_HOST
+              value: "192.168.0.28" # The IP of your Gluetun LXC
+            - name: QB_PROXY_PORT
+              value: "1080" # The SOCKS5 port
+            - name: QB_PROXY_TORRENT_ONLY
+              value: "true" # Ensure only torrent traffic goes through the VPN
           volumeMounts:
             # Mount qBittorrent's private config storage
             - name: config-storage
@@ -51,8 +58,9 @@ spec:
               mountPath: /downloads
       volumes:
         - name: config-storage
-          persistentVolumeClaim:
-            claimName: qbittorrent-config-pvc
+          nfs:
+            server: 192.168.0.202
+            path: /mnt/data/config/qbittorrent
         # This is the direct NFS mount, but we name it 'downloads' for clarity
         - name: downloads-storage
           nfs:
