@@ -13,6 +13,11 @@ spec:
       labels:
         app: prowlarr
     spec:
+      dnsPolicy: "None" # This is the key. It tells the pod not to use the host's DNS.
+      dnsConfig:
+        nameservers:
+          - "1.1.1.1" # Cloudflare DNS
+          - "8.8.8.8" # Google DNS
       securityContext:
         # IMPORTANT: This forces the container to run as 'mediaowner' (1302)
         # to ensure it has permission to read/write to the NFS share.
