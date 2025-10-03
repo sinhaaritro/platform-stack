@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: qbittorrent-ingress
+  namespace: vpntorrent
+spec:
+  rules:
+    - host: "qbittorrent.yourdomain.com" # <-- IMPORTANT: CHANGE THIS
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: qbittorrent-service
+                port:
+                  number: 8080

@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpntorrent-deployment
+  namespace: vpntorrent
+  labels:
+    app: vpntorrent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vpntorrent
+  template:
+    metadata:
+      labels:
+        app: vpntorrent
+    spec:
+      containers:
+        - name: gluetun
+          image: qmcgaw/gluetun
+          imagePullPolicy: IfNotPresent
+          # This is the Kubernetes equivalent of --cap-add=NET_ADMIN
+          securityContext:
+            capabilities:
+              add: ["NET_ADMIN"]
+          env:
+            - name: VPN_SERVICE_PROVIDER
+              value: "protonvpn"
+            - name: OPENVPN_USER
+              value: "rebwfiyYEu7nU3yb"
+            - name: OPENVPN_PASSWORD
+              value: "oMHDx1PCK1HUCoxBqqT62ANiRdUTYPUi"
+            - name: SERVER_COUNTRIES
+              value: "Netherlands"
+            - name: FREE_ONLY
+              value: "on"
+            - name: DOT
+              value: "off"
+            # Set Timezone to match your other containers
+            - name: TZ
+              value: "Etc/UTC"
+          volumeMounts: # <-- ADD THIS SECTION
+            - name: tun-device
+              mountPath: /dev/net/tun
+
+        - name: qbittorrent
+          image: lscr.io/linuxserver/qbittorrent:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "Etc/UTC"
+            - name: WEBUI_PORT
+              value: "8080"
+          ports:
+            # This port is exposed from the pod for the Service to target
+            - name: webui
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: qb-config
+              mountPath: /config
+            - name: qb-downloads
+              mountPath: /downloads
+      volumes:
+        - name: tun-device
+          hostPath:
+            path: /dev/net/tun
+            type: CharDevice
+        - name: qb-config
+          persistentVolumeClaim:
+            claimName: qbittorrent-config-pvc
+        - name: qb-downloads
+          persistentVolumeClaim:
+            claimName: qbittorrent-downloads-pvc
