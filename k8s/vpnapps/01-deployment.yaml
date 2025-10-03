@@ -1,0 +1,144 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpnapps-deployment
+  namespace: vpnapps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vpnapps
+  template:
+    metadata:
+      labels:
+        app: vpnapps
+    spec:
+      # # This security context applies to ALL containers in the pod, ensuring
+      # # consistent permissions for the NFS shares.
+      securityContext:
+        #   runAsUser: 1302
+        #   runAsGroup: 1302
+        fsGroup: 1302
+      containers:
+        # --- The Sidecar Container ---
+        - name: gluetun
+          image: qmcgaw/gluetun
+          securityContext:
+            capabilities:
+              add: ["NET_ADMIN"]
+          env:
+            - name: VPN_SERVICE_PROVIDER
+              value: "protonvpn"
+            - name: OPENVPN_USER
+              value: "rebwfiyYEu7nU3yb"
+            - name: OPENVPN_PASSWORD
+              value: "oMHDx1PCK1HUCoxBqqT62ANiRdUTYPUi"
+            - name: SERVER_COUNTRIES
+              value: "Netherlands"
+            - name: FREE_ONLY
+              value: "on"
+            # Disable DNS-over-TLS for better compatibility with Kubernetes networking
+            - name: DOT
+              value: "off"
+            - name: OPENVPN_PROTOCOL
+              value: "tcp"
+            - name: FIREWALL_OUTBOUND_SUBNETS
+              value: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+            - name: FIREWALL_INPUT_PORTS
+              value: "8080,9696"
+            - name: HEALTH_TARGET_ADDRESS
+              value: "1.1.1.1:443" # Use the IP address directly
+            - name: DNS_KEEP_NAMESERVER
+              value: "on"
+            - name: TZ
+              value: "Etc/UTC"
+          volumeMounts:
+            - name: tun-device
+              mountPath: /dev/net/tun
+
+        # --- Main Application Containers ---
+        - name: qbittorrent
+          image: lscr.io/linuxserver/qbittorrent:latest
+          securityContext:
+            runAsUser: 1302
+            runAsGroup: 1302
+          ports:
+            - containerPort: 8080
+              name: qb-http
+            - containerPort: 6881
+              name: torrent-tcp
+            - containerPort: 6881
+              name: torrent-udp
+              protocol: UDP
+          env:
+            - name: PUID
+              value: "1302"
+            - name: PGID
+              value: "1302"
+            - name: TZ
+              value: "Etc/UTC"
+            - name: WEBUI_PORT
+              value: "8080"
+          volumeMounts:
+            - name: config-qbittorrent
+              mountPath: /config
+            - name: media-downloads
+              mountPath: /downloads
+
+        - name: prowlarr
+          image: lscr.io/linuxserver/prowlarr:latest
+          securityContext:
+            runAsUser: 1302
+            runAsGroup: 1302
+          ports:
+            - containerPort: 9696
+              name: prowlarr-http
+          env:
+            - name: PUID
+              value: "1302"
+            - name: PGID
+              value: "1302"
+            - name: TZ
+              value: "Etc/UTC"
+          volumeMounts:
+            - name: config-prowlarr
+              mountPath: /config
+            # Prowlarr doesn't need write access to downloads, but mounting the
+            # media root can be useful for some integrations.
+            - name: media-downloads
+              mountPath: /data
+
+        - name: flaresolverr
+          image: flaresolverr/flaresolverr:latest
+          container_name: flaresolverr
+          ports:
+            - containerPort: 8191
+              name: fs-http
+          env:
+            - name: LOG_LEVEL
+              value: "info"
+            - name: TZ
+              value: "Etc/UTC"
+
+      # --- Volume Definitions ---
+      volumes:
+        # Required for the TUN device for OpenVPN
+        - name: tun-device
+          hostPath:
+            path: /dev/net/tun
+            type: CharDevice
+        # NFS mount for qBittorrent's configuration
+        - name: config-qbittorrent
+          nfs:
+            server: 192.168.0.202
+            path: /mnt/data/config/qbittorrent
+        # NFS mount for Prowlarr's configuration
+        - name: config-prowlarr
+          nfs:
+            server: 192.168.0.202
+            path: /mnt/data/config/prowlarr
+        # The shared NFS mount for all media and downloads
+        - name: media-downloads
+          nfs:
+            server: 192.168.0.202
+            path: /mnt/data
