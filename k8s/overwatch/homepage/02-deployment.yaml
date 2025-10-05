@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homepage-deployment
+  namespace: overwatch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homepage
+  template:
+    metadata:
+      labels:
+        app: homepage
+    spec:
+      serviceAccountName: homepage-sa
+      initContainers:
+        - name: config-initializer
+          # This is a small image that includes the 'envsubst' tool. 'gettext' is the package name.
+          image: alpine:3.18
+          command: ["/bin/sh", "-c"]
+          # This multi-line script performs all the setup steps in order.
+          args:
+            - |
+              # Exit immediately if a command fails
+              set -e
+
+              # 1. Install the necessary tool
+              apk add gettext
+
+              # 2. Copy the original template from the read-only ConfigMap volume
+              #    to the writable shared volume.
+              echo "Copying template..."
+              cp /config-templates/services.yaml /processed-config/services.yaml
+
+              # 3. Run envsubst on the copied file in the shared volume.
+              #    This replaces the ${VARS} with the actual secret values.
+              echo "Substituting variables..."
+              envsubst < /processed-config/services.yaml > /processed-config/services.tmp
+
+              # 4. Overwrite the original with the processed version
+              mv /processed-config/services.tmp /processed-config/services.yaml
+
+              # 5. Move the other files
+              cp /config-templates/settings.yaml /processed-config/settings.yaml
+              cp /config-templates/bookmarks.yaml /processed-config/bookmarks.yaml
+              cp /config-templates/widgets.yaml /processed-config/widgets.yaml
+              cp /config-templates/kubernetes.yaml /processed-config/kubernetes.yaml
+              cp /config-templates/docker.yaml /processed-config/docker.yaml
+              cp /config-templates/proxmox.yaml /processed-config/proxmox.yaml
+              cp /config-templates/custom.css /processed-config/custom.css
+              cp /config-templates/custom.js /processed-config/custom.js
+
+              echo "Config initialization complete."
+
+          envFrom:
+            - secretRef:
+                name: homepage-secrets
+          volumeMounts:
+            # Mount the source templates (from the ConfigMap, read-only)
+            - name: config-templates-vol
+              mountPath: /config-templates
+            # Mount the destination (the shared emptyDir, writable)
+            - name: processed-config-vol
+              mountPath: /processed-config
+
+      # --- MAIN CONTAINER ---
+      containers:
+        - name: homepage
+          image: ghcr.io/gethomepage/homepage:latest
+          env:
+            - name: HOMEPAGE_ALLOWED_HOSTS
+              value: homepage.localdev,localhost # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
+
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          volumeMounts:
+            # Mount the shared volume containing the finished config files
+            - name: processed-config-vol
+              mountPath: /app/config
+      volumes:
+        # Volume for the source templates, populated by a ConfigMap
+        - name: config-templates-vol
+          configMap:
+            name: homepage-config-template
+        # The shared, writable emptyDir volume that both containers can access
+        - name: processed-config-vol
+          emptyDir: {}

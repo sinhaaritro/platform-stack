@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentik-server-deployment
+  namespace: auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authentik-server
+  template:
+    metadata:
+      labels:
+        app: authentik-server
+    spec:
+      serviceAccountName: default
+      containers:
+        # --- CONTAINER 1: THE SERVER ---
+        - name: authentik-server
+          image: ghcr.io/goauthentik/server:latest
+          args: ["server"]
+          envFrom:
+            - secretRef:
+                name: authentik-secret
+          env:
+            - name: AUTHENTIK_POSTGRESQL__HOST
+              value: "postgres-service"
+            - name: AUTHENTIK_REDIS__HOST
+              value: "redis-service"
+            - name: AUTHENTIK_ERROR_REPORTING__ENABLED
+              value: "true"
+            - name: AUTHENTIK_BOOTSTRAP_USERNAME
+              value: "akadmin"
+            - name: AUTHENTIK_BOOTSTRAP_EMAIL
+              value: "sinhaaritro@gmail.com"
+          ports:
+            - containerPort: 9000
+              name: http
+            - containerPort: 9443
+              name: https
+          volumeMounts:
+            - name: authentik-storage
+              mountPath: /media
+          resources:
+            requests:
+              # Guarantees the container at least 1/2 of a CPU core and 512MB of RAM
+              cpu: "500m" # "m" stands for millicores. 1000m = 1 full CPU core
+              memory: "512Mi"
+            limits:
+              # Prevents the container from using more than 2 CPU cores or 2GB of RAM
+              cpu: "2000m"
+              memory: "2Gi"
+          startupProbe:
+            # This probe checks the health endpoint every 10 seconds.
+            httpGet:
+              path: /-/health/ready/
+              port: http
+            # Kubernetes will try this 60 times before giving up (30 * 10s = 5 minutes).
+            # This gives Authentik plenty of time for its first-time setup.
+            failureThreshold: 30
+            periodSeconds: 10
+          readinessProbe:
+            # Once the startupProbe succeeds, this probe takes over.
+            httpGet:
+              path: /-/health/ready/
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /-/health/live/
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+
+        # --- CONTAINER 2: THE WORKER ---
+        - name: authentik-worker
+          image: ghcr.io/goauthentik/server:latest
+          args: ["worker"]
+          envFrom:
+            - secretRef:
+                name: authentik-secret
+          env:
+            - name: AUTHENTIK_POSTGRESQL__HOST
+              value: "postgres-service"
+            - name: AUTHENTIK_REDIS__HOST
+              value: "redis-service"
+            - name: AUTHENTIK_ERROR_REPORTING__ENABLED
+              value: "true"
+            - name: AUTHENTIK_BOOTSTRAP_USERNAME
+              value: "akadmin"
+            - name: AUTHENTIK_BOOTSTRAP_EMAIL
+              value: "sinhaaritro@gmail.com"
+          volumeMounts:
+            - name: authentik-storage
+              mountPath: /media
+            # - name: authentik-blueprints
+            #   mountPath: /blueprints
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"
+          livenessProbe:
+            exec:
+              command: ["ak", "healthcheck"]
+            initialDelaySeconds: 60
+            periodSeconds: 30
+      volumes:
+        - name: authentik-storage
+          persistentVolumeClaim:
+            claimName: authentik-server-pvc
+        # - name: authentik-blueprints
+        #   configMap:
+        #     name: authentik-blueprints
+        #     optional: true

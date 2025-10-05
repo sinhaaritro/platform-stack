@@ -137,12 +137,11 @@ All secrets in this repository must be encrypted as `SealedSecret` objects. The 
     Use `kubeseal` to encrypt the file, saving the output to a temporary file, and then replacing the original.
     ```bash
     # This encrypts the file and saves it as a SealedSecret
-    kubeseal --format=yaml < k8s/some-app/06-new-secret.yaml > temp.yaml
-    
     # This replaces the original plain-text file with the encrypted version
-    mv temp.yaml k8s/some-app/06-new-secret.yaml
+    # Replace <path-to-your-file>
+    kubeseal --format=yaml < <path-to-your-file> > temp.yaml && mv temp.yaml <path-to-your-file>
     ```
-    The file `06-new-secret.yaml` now contains a `kind: SealedSecret` and is safe to commit.
+    The file <path-to-your-file> now contains a `kind: SealedSecret` and is safe to commit.
 
 3.  **Add the file** to the appropriate `kustomization.yaml` and run `kubectl apply -k k8s/`.
 

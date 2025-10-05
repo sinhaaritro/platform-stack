@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whisparr-deployment
+  namespace: media-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: whisparr
+  template:
+    metadata:
+      labels:
+        app: whisparr
+    spec:
+      securityContext:
+        # Start the container as root, but ensure the config volume is group-owned by 'mediaowner'
+        fsGroup: 1302
+      containers:
+        - name: whisparr
+          image: ghcr.io/hotio/whisparr:latest
+          ports:
+            # Whisparr's default port is 6969
+            - containerPort: 6969
+          env:
+            # The PUID/PGID tells the container's init script to run the
+            # final application process as the 'mediaowner' user.
+            - name: PUID
+              value: "1302"
+            - name: PGID
+              value: "1302"
+            - name: TZ
+              value: "Etc/UTC" # Change to your timezone
+          volumeMounts:
+            # Mount Whisparr's private config storage
+            - name: config-storage
+              mountPath: /config
+            # Mount the SHARED media storage via direct NFS
+            - name: media-storage
+              mountPath: /media
+      volumes:
+        - name: config-storage
+          nfs:
+            server: 192.168.0.202
+            path: /mnt/data/config/whisparr
+        # This is the direct NFS mount, identical to the other apps
+        - name: media-storage
+          nfs:
+            server: 192.168.0.202
+            path: /mnt/data

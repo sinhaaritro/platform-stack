@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: overwatch
+
+# This generates the ConfigMap from our local config files
+configMapGenerator:
+  - name: homepage-config-template
+    namespace: overwatch
+    files:
+      - configs/settings.yaml
+      - configs/bookmarks.yaml
+      - configs/widgets.yaml
+      - configs/services.yaml
+      - configs/kubernetes.yaml
+      - configs/docker.yaml
+      - configs/proxmox.yaml
+      - configs/custom.css
+      - configs/custom.js
+    options:
+      labels:
+        type: generated
+      annotations:
+        note: generated
+
+resources:
+  - 01-rbac.yaml
+  - 02-deployment.yaml
+  - 03-service.yaml
+  - 04-ingress-route.yaml
+  - 05-homepage-sealed-secret.yaml

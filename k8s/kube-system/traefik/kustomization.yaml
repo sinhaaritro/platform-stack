@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - 01-crd.yaml
+  - 02-rbac.yaml
+  - 03-daemonset.yaml
+  - 04-service.yaml
+  - 05-dashboard-ingress-route.yaml

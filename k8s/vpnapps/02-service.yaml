@@ -17,15 +17,15 @@ spec:
       targetPort: prowlarr-http
     # The torrent port needs to be exposed on the service for port forwarding rules
     # in Traefik or your router if you want to enable active torrenting.
-    - name: torrent-tcp
-      protocol: TCP
-      port: 6881
-      targetPort: torrent-tcp
-    - name: torrent-udp
-      protocol: UDP
-      port: 6881
-      targetPort: torrent-udp
-    - name: flaresolverr-http
-      protocol: TCP
-      port: 8191
-      targetPort: fs-http
+    # - name: torrent-tcp
+    #   protocol: TCP
+    #   port: 6881
+    #   targetPort: torrent-tcp
+    # - name: torrent-udp
+    #   protocol: UDP
+    #   port: 6881
+    #   targetPort: torrent-udp
+    # - name: flaresolverr-http
+    #   protocol: TCP
+    #   port: 8191
+    #   targetPort: fs-http

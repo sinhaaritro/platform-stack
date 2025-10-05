@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: traefik-ingress-controller
+      containers:
+        - name: traefik
+          image: traefik:v3.0
+          args:
+            - --accesslog=true
+            - --entrypoints.web.address=:80
+            - --api.insecure=true
+            # - --log.level=DEBUG
+            - --providers.kubernetescrd
+            - --providers.kubernetescrd.namespaces=kube-system,auth,overwatch,monitoring,media,vpnapps,media-manager,personal,development,nginx-test
+          ports:
+            - name: web
+              containerPort: 80
+              hostPort: 80 # This matches the port in your Kind config
+            - name: admin
+              containerPort: 8080
+      terminationGracePeriodSeconds: 60
