@@ -1,10 +1,3 @@
-
-Excellent point. That's a critical implementation detail that makes the process much more robust. The documentation must reflect the actual tooling and enforcement mechanisms.
-
-Here is the updated `SECRETS.md` file, rewritten to incorporate your specific file-naming convention and the pre-commit hook that enforces it.
-
-***
-
 # Secrets Management Policy
 
 This document is the single source of truth for the policy and procedures related to managing all sensitive information within this project. Adherence to this policy is mandatory.
