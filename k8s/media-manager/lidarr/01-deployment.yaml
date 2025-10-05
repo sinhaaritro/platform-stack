@@ -36,15 +36,15 @@ spec:
             - name: config-storage
               mountPath: /config
             # Mount the SHARED media storage via direct NFS
-            - name: media-storage
-              mountPath: /media
+            - name: data-storage
+              mountPath: /data
       volumes:
         - name: config-storage
           nfs:
             server: 192.168.0.202
             path: /mnt/data/config/lidarr
         # This is the direct NFS mount, identical to the other apps
-        - name: media-storage
+        - name: data-storage
           nfs:
             server: 192.168.0.202
-            path: /mnt/data
+            path: /mnt/data/contents/public

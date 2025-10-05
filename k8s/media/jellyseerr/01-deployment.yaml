@@ -37,8 +37,16 @@ spec:
             # Mount Jellyseerr's private config storage
             - name: config-storage
               mountPath: /app/config
+            # Mount the media storage at /media
+            - name: data-storage
+              mountPath: /data
       volumes:
         - name: config-storage
           nfs:
             server: 192.168.0.202
             path: /mnt/data/config/jellyseerr
+        # This is direct NFS mount for sharing data across multiple namespace. Not neeed but still there
+        - name: data-storage
+          nfs:
+            server: 192.168.0.202
+            path: /mnt/data/contents/public

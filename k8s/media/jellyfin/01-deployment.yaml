@@ -28,15 +28,15 @@ spec:
             - name: config-storage
               mountPath: /config
             # Mount the media storage at /media
-            - name: media-storage
-              mountPath: /media
+            - name: data-storage
+              mountPath: /data
       volumes:
         - name: config-storage
           nfs:
             server: 192.168.0.202
             path: /mnt/data/config/jellyfin
         # This is direct NFS mount for sharing data across multiple namespace
-        - name: media-storage
+        - name: data-storage
           nfs:
             server: 192.168.0.202
-            path: /mnt/data
+            path: /mnt/data/contents/public

@@ -82,8 +82,8 @@ spec:
         #   volumeMounts:
         #     - name: config-qbittorrent
         #       mountPath: /config
-        #     - name: media-downloads
-        #       mountPath: /downloads
+        #     - name: data-storage
+        #       mountPath: /data
 
         - name: prowlarr
           image: lscr.io/linuxserver/prowlarr:latest
@@ -105,7 +105,7 @@ spec:
               mountPath: /config
             # Prowlarr doesn't need write access to downloads, but mounting the
             # media root can be useful for some integrations.
-            - name: media-downloads
+            - name: data-storage
               mountPath: /data
 
         - name: flaresolverr
@@ -137,7 +137,7 @@ spec:
             server: 192.168.0.202
             path: /mnt/data/config/prowlarr
         # The shared NFS mount for all media and downloads
-        - name: media-downloads
+        - name: data-storage
           nfs:
             server: 192.168.0.202
-            path: /mnt/data
+            path: /mnt/data/contents/public

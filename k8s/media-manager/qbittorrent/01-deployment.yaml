@@ -54,16 +54,16 @@ spec:
             - name: config-storage
               mountPath: /config
             # Mount the SHARED media storage via direct NFS for downloads
-            - name: downloads-storage
-              mountPath: /downloads
+            - name: data-storage
+              mountPath: /data
       volumes:
         - name: config-storage
           nfs:
             server: 192.168.0.202
             path: /mnt/data/config/qbittorrent
         # This is the direct NFS mount, but we name it 'downloads' for clarity
-        - name: downloads-storage
+        - name: data-storage
           nfs:
             server: 192.168.0.202
             # We point it to the root of our data share
-            path: /mnt/data
+            path: /mnt/data/contents/public
