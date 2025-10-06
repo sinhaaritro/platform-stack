@@ -30,7 +30,7 @@ spec:
             - name: PGID
               value: "1302"
             - name: TZ
-              value: "Etc/UTC" # Change to your timezone
+              value: "Asia/Kolkata"
           volumeMounts:
             # Mount Bazarr's private config storage
             - name: config-storage

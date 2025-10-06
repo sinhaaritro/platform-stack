@@ -30,9 +30,9 @@ spec:
             - name: PGID
               value: "1302"
             - name: TZ
-              value: "Etc/UTC" # Change to your timezone
+              value: "Asia/Kolkata"
             - name: LOG_LEVEL
-              value: "info"
+              value: "error"
           volumeMounts:
             # Mount Jellyseerr's private config storage
             - name: config-storage

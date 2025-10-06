@@ -35,7 +35,7 @@ spec:
             - name: PGID
               value: "1302"
             - name: TZ
-              value: "Etc/UTC" # Change to your timezone, e.g., "America/New_York"
+              value: "Asia/Kolkata"
           volumeMounts:
             # Mount Prowlarr's private config storage
             - name: config-storage

@@ -22,7 +22,6 @@ spec:
         - name: sonarr
           image: lscr.io/linuxserver/sonarr:latest
           ports:
-            # Sonarr's default port is 8989
             - containerPort: 8989
           env:
             - name: PUID
@@ -30,7 +29,7 @@ spec:
             - name: PGID
               value: "1302"
             - name: TZ
-              value: "Etc/UTC" # Change to your timezone
+              value: "Asia/Kolkata"
           volumeMounts:
             # Mount Sonarr's private config storage
             - name: config-storage

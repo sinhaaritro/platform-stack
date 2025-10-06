@@ -76,7 +76,7 @@ spec:
         #     - name: PGID
         #       value: "1302"
         #     - name: TZ
-        #       value: "Etc/UTC"
+        #       value: "Asia/Kolkata"
         #     - name: WEBUI_PORT
         #       value: "8080"
         #   volumeMounts:
@@ -99,7 +99,7 @@ spec:
             - name: PGID
               value: "1302"
             - name: TZ
-              value: "Etc/UTC"
+              value: "Asia/Kolkata"
           volumeMounts:
             - name: config-prowlarr
               mountPath: /config
@@ -115,9 +115,9 @@ spec:
               name: fs-http
           env:
             - name: LOG_LEVEL
-              value: "info"
+              value: "error"
             - name: TZ
-              value: "Etc/UTC"
+              value: "Asia/Kolkata"
 
       # --- Volume Definitions ---
       volumes:
