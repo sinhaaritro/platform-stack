@@ -20,7 +20,7 @@ spec:
         fsGroup: 1302
       containers:
         - name: readarr
-          image: ghcr.io/hotio/readarr
+          image: ghcr.io/hotio/readarr:testing-7c26878
           ports:
             # Readarr's default port is 8787
             - containerPort: 8787

@@ -15,7 +15,8 @@ spec:
     spec:
       containers:
         - name: authentik-outpost
-          image: ghcr.io/goauthentik/proxy:latest
+          # https://github.com/goauthentik/authentik/pkgs/container/proxy
+          image: ghcr.io/goauthentik/proxy:2025.8.4
           # This image does not need any 'args' to run correctly.
           env:
             # This tells the outpost where to find the main Authentik server.

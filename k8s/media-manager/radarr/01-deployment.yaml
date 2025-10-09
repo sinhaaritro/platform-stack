@@ -21,7 +21,7 @@ spec:
         fsGroup: 1302
       containers:
         - name: radarr
-          image: lscr.io/linuxserver/radarr:latest
+          image: lscr.io/linuxserver/radarr:version-5.27.5.10198
           ports:
             - containerPort: 7878
           env:

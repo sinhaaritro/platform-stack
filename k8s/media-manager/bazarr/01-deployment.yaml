@@ -20,7 +20,7 @@ spec:
         fsGroup: 1302
       containers:
         - name: bazarr
-          image: lscr.io/linuxserver/bazarr:latest
+          image: lscr.io/linuxserver/bazarr:1.5.3
           ports:
             # Bazarr's default port is 6767
             - containerPort: 6767

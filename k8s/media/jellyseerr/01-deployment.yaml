@@ -20,7 +20,7 @@ spec:
         fsGroup: 1302
       containers:
         - name: jellyseerr
-          image: fallenbagel/jellyseerr:latest
+          image: fallenbagel/jellyseerr:sha-9ca63ba
           ports:
             # Jellyseerr's default port is 5055
             - containerPort: 5055

@@ -22,7 +22,7 @@ spec:
       containers:
         # --- The Sidecar Container ---
         - name: gluetun
-          image: qmcgaw/gluetun
+          image: qmcgaw/gluetun:pr-2878
           securityContext:
             capabilities:
               add: ["NET_ADMIN"]
@@ -58,7 +58,7 @@ spec:
 
         # --- Main Application Containers ---
         # - name: qbittorrent
-        #   image: lscr.io/linuxserver/qbittorrent:latest
+        #   image: lscr.io/linuxserver/qbittorrent:5.1.2
         #   securityContext:
         #     runAsUser: 1302
         #     runAsGroup: 1302
@@ -86,7 +86,7 @@ spec:
         #       mountPath: /data
 
         - name: prowlarr
-          image: lscr.io/linuxserver/prowlarr:latest
+          image: lscr.io/linuxserver/prowlarr:2.0.5
           securityContext:
             runAsUser: 1302
             runAsGroup: 1302
@@ -109,7 +109,7 @@ spec:
               mountPath: /data
 
         - name: flaresolverr
-          image: flaresolverr/flaresolverr:latest
+          image: flaresolverr/flaresolverr:v3.4.1
           ports:
             - containerPort: 8191
               name: fs-http

@@ -20,7 +20,8 @@ spec:
         fsGroup: 1302
       containers:
         - name: qbittorrent
-          image: lscr.io/linuxserver/qbittorrent:latest
+          # https://hub.docker.com/r/linuxserver/qbittorrent
+          image: lscr.io/linuxserver/qbittorrent:5.1.2
           ports:
             # The web UI port
             - containerPort: 8080

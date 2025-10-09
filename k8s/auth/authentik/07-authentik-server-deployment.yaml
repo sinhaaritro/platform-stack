@@ -17,7 +17,8 @@ spec:
       containers:
         # --- CONTAINER 1: THE SERVER ---
         - name: authentik-server
-          image: ghcr.io/goauthentik/server:latest
+          # https://github.com/goauthentik/authentik/pkgs/container/server
+          image: ghcr.io/goauthentik/server:2025.8.4
           args: ["server"]
           envFrom:
             - secretRef:
@@ -75,7 +76,8 @@ spec:
 
         # --- CONTAINER 2: THE WORKER ---
         - name: authentik-worker
-          image: ghcr.io/goauthentik/server:latest
+          # https://github.com/goauthentik/authentik/pkgs/container/server
+          image: ghcr.io/goauthentik/server:2025.8.4
           args: ["worker"]
           envFrom:
             - secretRef:
