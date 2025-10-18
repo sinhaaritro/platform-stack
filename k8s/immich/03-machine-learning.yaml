@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: machine-learning-deployment
+  namespace: immich
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: machine-learning
+  template:
+    metadata:
+      labels:
+        app: machine-learning
+    spec:
+      securityContext:
+        runAsUser: 1302
+        runAsGroup: 1302
+        fsGroup: 1302
+      containers:
+        - name: machine-learning
+          image: ghcr.io/immich-app/immich-machine-learning:v1.143.1
+          ports:
+            - containerPort: 3003
+          env:
+            # This points the model cache to the NFS volume
+            - name: TRANSFORMERS_CACHE
+              value: "/cache"
+          volumeMounts:
+            - name: ml-cache-storage
+              mountPath: /cache
+      volumes:
+        - name: ml-cache-storage
+          nfs:
+            server: 192.168.0.202
+            # IMPORTANT: You must create this directory on your NFS server
+            path: /mnt/data/config/immich/ml-cache
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: machine-learning-service
+  namespace: immich
+spec:
+  selector:
+    app: machine-learning
+  ports:
+    - protocol: TCP
+      port: 3003
+      targetPort: 3003

@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: valkey-deployment
+  namespace: immich
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: valkey
+  template:
+    metadata:
+      labels:
+        app: valkey
+    spec:
+      containers:
+        - name: valkey
+          image: docker.io/valkey/valkey:8.0-alpine@sha256:21edf5ca7cec694ee226f18fa8f86a312d149ddaf2006fd77d84f58211df864c
+          ports:
+            - containerPort: 6379
+          args: ["--requirepass", "secret"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: valkey-service
+  namespace: immich
+spec:
+  selector:
+    app: valkey
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379

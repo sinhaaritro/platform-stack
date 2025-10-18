@@ -12,3 +12,5 @@ resources:
   # - ./development
 
   # - ./nginx-test
+  - ./immich
+  - ./obsidian

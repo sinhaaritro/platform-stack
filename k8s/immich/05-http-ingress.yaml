@@ -1,0 +1,14 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: immich-http-ingress # Renamed for clarity
+  namespace: immich
+spec:
+  entryPoints:
+    - web # Listens on the insecure 'web' entrypoint
+  routes:
+    - match: Host(`immich.localdev`) || Host(`immich.strawslabs.com`)
+      kind: Rule
+      services:
+        - name: immich-server-service
+          port: 2283
