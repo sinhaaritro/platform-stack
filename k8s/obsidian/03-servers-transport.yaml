@@ -1,0 +1,7 @@
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: obsidian-http1-transport
+  namespace: obsidian
+spec:
+  disableHTTP2: true
