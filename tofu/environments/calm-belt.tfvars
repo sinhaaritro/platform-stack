@@ -103,6 +103,17 @@ resource_groups = {
     }
   }
 
+  "smiley_server" = {
+    enabled              = true
+    type                 = "qemu"
+    template             = "ubuntu-cloud-init"
+    hardware_profile_key = "large"
+    tags                 = ["standalone", "smiley_server", "docker"]
+
+    nodes = {
+      "smiley" = { id = 1013, ip = "192.168.0.16" },
+    }
+  }
 
   # --- Standalone Web Server ---
   # "web_server" = {

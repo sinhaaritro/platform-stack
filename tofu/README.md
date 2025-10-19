@@ -191,7 +191,7 @@ This is the standard loop you will follow every time you want to deploy, update,
     # You will be prompted for your Ansible Vault password here
     tofu plan \
       -var-file="environments/calm-belt.tfvars" \
-      -var-file=<(ansible-vault view --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") environments/calm-belt.secrets.tfvars)
+      -var-file=<(ansible-vault view --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") environments/calm-belt.secret.tfvars)
     ```
     Review the output carefully. The Workspace Guardrail will still protect you from cross-environment mistakes.
 
@@ -201,12 +201,12 @@ This is the standard loop you will follow every time you want to deploy, update,
     # For interactive approval (typing 'yes')
     tofu apply \
       -var-file="environments/calm-belt.tfvars" \
-      -var-file=<(ansible-vault view --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") environments/calm-belt.secrets.tfvars)
+      -var-file=<(ansible-vault view --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") environments/calm-belt.secret.tfvars)
 
     # To approve it directly
     tofu apply \
       -var-file="environments/calm-belt.tfvars" \
-      -var-file=<(ansible-vault view --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") environments/calm-belt.secrets.tfvars) \
+      -var-file=<(ansible-vault view --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") environments/calm-belt.secret.tfvars) \
       --auto-approve
     ```
     After completion, the outputs defined in `outputs.tf` will be displayed.
