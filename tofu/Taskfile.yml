@@ -1,0 +1,14 @@
+# tofu/Taskfile.yml
+# Contains all tasks related to Infrastructure installation and management.
+
+version: "3"
+
+tasks:
+  init-tofu:
+    desc: "Initialize OpenTofu (If Needed)"
+    cmds:
+      - |
+        tofu -chdir="tofu/stacks/onprem/proxmox_meru" init
+    preconditions:
+      - sh: "command -v tofu"
+        msg: "OpenTofu is already installed."
