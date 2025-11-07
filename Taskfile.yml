@@ -14,7 +14,7 @@ tasks:
     cmds:
       - task --list-all
 
-  clone-repository:
+  git:clone-repository:
     desc: "Clone the github repository"
     cmds:
       - |
@@ -27,7 +27,7 @@ tasks:
       - sh: "! command -v git"
         msg: "Git is already installed."
 
-  pull-git-changes:
+  git:pull-git-changes:
     desc: "Pull Latest Changes"
     cmds:
       - |
