@@ -40,23 +40,23 @@ output "DEBUG_Diagnostic" {
 }
 
 
-# output "created_qemu_vms" {
-#   description = "A map of all QEMU virtual machines created by this stack, keyed by their names."
+output "created_qemu_vms" {
+  description = "A map of all QEMU virtual machines created by this stack, keyed by their names."
 
-#   # This 'for' expression iterates over the 'proxmox_vms' module instances.
-#   # For each instance, it creates an entry in the output map.
-#   value = {
-#     for vm_name, vm_instance in module.proxmox_vms :
-#     vm_name => {
-#       id         = vm_instance.vm_details.id
-#       name       = vm_instance.vm_details.name
-#       node_name  = vm_instance.vm_details.node_name
-#       tags       = vm_instance.vm_details.tags
-#       ip_address = try([for addr in flatten(vm_instance.vm_details.ipv4_addresses) : addr if addr != "127.0.0.1"][0], "pending")
-#     }
-#   }
+  # This 'for' expression iterates over the 'proxmox_vms' module instances.
+  # For each instance, it creates an entry in the output map.
+  value = {
+    for vm_name, vm_instance in module.proxmox_vms :
+    vm_name => {
+      id         = vm_instance.vm_details.id
+      name       = vm_instance.vm_details.name
+      node_name  = vm_instance.vm_details.node_name
+      tags       = vm_instance.vm_details.tags
+      ip_address = try([for addr in flatten(vm_instance.vm_details.ipv4_addresses) : addr if addr != "127.0.0.1"][0], "pending")
+    }
+  }
 
-#   # Mark the output as sensitive if it contains sensitive data.
-#   # Since the module output includes the cloud-init user/pass, this is crucial.
-#   sensitive = false
-# }
+  # Mark the output as sensitive if it contains sensitive data.
+  # Since the module output includes the cloud-init user/pass, this is crucial.
+  sensitive = false
+}
