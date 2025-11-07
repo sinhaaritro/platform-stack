@@ -86,30 +86,52 @@ variable "target_datastore" {
 # TODO: Add hardware template
 variable "resources" {
   description = "A map of virtual machines or LXC to create. The map key is used as the default VM name."
-  # This type definition is now a complete and accurate blueprint of the expected data.
-  type = map(object({
-    # Control & Metadata
-    enabled = optional(bool, true)
-    type    = string # Must be 'vm' or 'lxc'
-    tags    = optional(list(string))
 
-    # We can define a this cluster level that will be passed down at the node level.
+  type = map(object({
+    # --- Common Metadata (applies to both VM and LXC) ---
+    enabled               = optional(bool, true)
+    type                  = string # Must be 'vm' or 'lxc'
     node_name             = optional(string)
     description           = optional(string, "Managed by OpenTofu")
+    tags                  = optional(list(string))
     on_boot               = optional(bool, false)
     started               = optional(bool, true)
-    cpu_cores             = optional(number, 1)
-    cpu_sockets           = optional(number, 1)
-    memory_size           = optional(number, 1024)
-    disk_datastore_id     = optional(string)
-    source_image_path     = optional(string)
-    disk_size             = optional(number, 8)
-    disk_ssd              = optional(bool, false)
-    vlan_bridge           = optional(string, "vmbr0")
-    vlan_id               = optional(number, 1)
     cloud_init_secret_key = optional(string)
 
-    # Node Definitions
+    # We can define a this cluster level that will be passed down at the node level.
+    # --- Discriminating Union: VM Configuration ---
+    # This block should ONLY be provided if type = "vm".
+    vm_config = optional(object({
+      cpu_cores         = optional(number, 1)
+      cpu_sockets       = optional(number, 1)
+      memory_size       = optional(number, 1024)
+      disk_datastore_id = optional(string)
+      source_image_path = optional(string)
+      disk_size         = optional(number, 8)
+      disk_ssd          = optional(bool, false)
+      vlan_bridge       = optional(string, "vmbr0")
+      vlan_id           = optional(number, 1)
+    }))
+
+    # --- Discriminating Union: LXC Configuration ---
+    # This block should ONLY be provided if type = "lxc".
+    lxc_config = optional(object({
+      unprivileged      = optional(bool, true)
+      nesting           = optional(bool, true)
+      fuse              = optional(bool, false)
+      keyctl            = optional(bool, true)
+      template_file_id  = optional(string)
+      os_type           = optional(string)
+      disk_datastore_id = optional(string)
+      disk_size         = optional(number, 2)
+      cpu_cores         = optional(number, 1)
+      memory_size       = optional(number, 1024)
+      vlan_bridge       = optional(string, "vmbr0")
+      vlan_id           = optional(number, 1)
+    }))
+
+
+    # --- Node Definitions ---
     # We can define a node level that will be override the values passed from the cluster level.
     nodes = map(object({
       vm_id                 = number
@@ -119,26 +141,49 @@ variable "resources" {
       tags                  = optional(list(string))
       on_boot               = optional(bool)
       started               = optional(bool)
-      cpu_cores             = optional(number)
-      cpu_sockets           = optional(number)
-      memory_size           = optional(number)
-      disk_datastore_id     = optional(string)
-      source_image_path     = optional(string)
-      disk_size             = optional(number)
-      disk_ssd              = optional(bool)
-      vlan_bridge           = optional(string)
-      vlan_id               = optional(number)
-      ipv4_address          = optional(string, "dhcp")
       cloud_init_secret_key = optional(string)
+
+      # --- Node-level Overrides (also a discriminating union) ---
+      vm_config = optional(object({
+        cpu_cores         = optional(number)
+        cpu_sockets       = optional(number)
+        memory_size       = optional(number)
+        disk_datastore_id = optional(string)
+        source_image_path = optional(string)
+        disk_size         = optional(number)
+        disk_ssd          = optional(bool)
+        vlan_bridge       = optional(string)
+        vlan_id           = optional(number)
+        ipv4_address      = optional(string, "dhcp")
+      }))
+
+      lxc_config = optional(object({
+        unprivileged      = optional(bool)
+        nesting           = optional(bool)
+        fuse              = optional(bool)
+        keyctl            = optional(bool)
+        template_file_id  = optional(string)
+        os_type           = optional(string)
+        disk_datastore_id = optional(string)
+        disk_size         = optional(number)
+        cpu_cores         = optional(number)
+        memory_size       = optional(number)
+        vlan_bridge       = optional(string)
+        vlan_id           = optional(number)
+        ipv4_address      = optional(string, "dhcp")
+      }))
     }))
   }))
 
   validation {
     condition = alltrue([
       for cluster in var.resources :
-      cluster.type == "vm" || cluster.type == "lxc"
+      # Rule: If type is "vm", vm_config must exist and lxc_config must NOT.
+      (cluster.type == "vm" && cluster.vm_config != null && cluster.lxc_config == null) ||
+      # Rule: If type is "lxc", lxc_config must exist and vm_config must NOT.
+      (cluster.type == "lxc" && cluster.lxc_config != null && cluster.vm_config == null)
     ])
-    error_message = "Validation failed for 'type'. Each cluster entry must be of 'vm' or 'lxc'."
+    error_message = "Validation failed: For each resource, you must provide the configuration block that matches its 'type' ('vm_config' for 'vm', 'lxc_config' for 'lxc') and omit the other."
   }
 
   default = {}

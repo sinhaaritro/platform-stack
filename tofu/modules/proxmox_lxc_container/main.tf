@@ -1,43 +1,60 @@
-# It creates a set of containers based on the 'nodes' map passed into the module.
-resource "proxmox_lxc" "server" {
-  for_each = var.group_data.nodes
+resource "proxmox_virtual_environment_container" "example_lxc" {
+  # --- General Settings ---
+  node_name     = "moo-moo"
+  vm_id         = 800
+  description   = "Example LXC"
+  start_on_boot = true
+  started       = true
+  unprivileged  = true
+  features {
+    nesting = true
+  }
 
-  # --- Container Identification and Placement ---
-  vmid     = each.value.id
-  hostname = each.key
-  tags     = join(",", var.group_data.tags)
+  # --- OS Template ---
+  operating_system {
+    template_file_id = "local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst"
+    type             = "debian"
+  }
 
-  target_node = var.target_node
-  ostemplate  = var.group_data.template
+  # --- Disk Configuration ---
+  disk {
+    datastore_id = "local-thin"
+    size         = 8
+  }
 
-  # --- Hardware Configuration ---
-  cores  = var.hardware_profile.cores
-  memory = var.hardware_profile.memory
-  rootfs {
-    storage = var.storage_pool
-    size    = var.hardware_profile.rootfs_size
+  # --- Hardware Resources ---
+  cpu {
+    cores = 1
+  }
+  memory {
+    dedicated = 512
   }
 
   # --- Network Configuration ---
-  network {
-    name   = "eth0"
-    bridge = var.network_bridge
-    ip     = "${each.value.ip}/${var.cidr_mask}"
-    gw     = var.gateway
+  network_interface {
+    name    = "net0"
+    bridge  = "vmbr0"
+    vlan_id = 1
   }
 
-  # --- Cloud-Init / OS Configuration ---
-  onboot          = false
-  unprivileged    = true
-  start           = true
-  password        = var.user_credentials.password
-  ssh_public_keys = join("\n", var.user_credentials.ssh_public_keys)
+  # --- THIS IS THE CORRECT INITIALIZATION BLOCK ---
+  initialization {
+    hostname = "example-lxc-01"
+    ip_config {
+      ipv4 {
+        address = "192.168.0.101/24"
+      }
+    }
 
-  # --- Cloud-Init / OS Configuration ---
-  features {
-    # fuse    = true
-    nesting = true
-    # keyctl  = true
-    # mount   = "nfs;cifs"
+    user_account {
+      password = "A-Secure-Password-You-Will-Change"
+      keys     = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDwC01G8nJScuxp7Cga8uUsnHUW2IpXXiiTw1gzhEL4P RyzenWindows"]
+    }
+  }
+  # ----------------------------------------------
+
+  # --- Lifecycle Management ---
+  lifecycle {
+    prevent_destroy = true
   }
 }

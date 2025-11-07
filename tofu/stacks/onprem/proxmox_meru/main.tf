@@ -140,8 +140,7 @@ resource "proxmox_virtual_environment_file" "ubuntu_custom_image" {
 # -----------------------------------------------------------------------------
 
 locals {
-  # 1. Filter the main 'resources' map into separate groups for VM and LXC,
-  #    only including the ones that are marked as 'enabled'.
+  # 1. This section splits the main 'var.resources' map into separate maps for VM and LXC
   vm_groups = {
     for key, group in var.resources : key => group
     if group.type == "vm"
@@ -152,8 +151,18 @@ locals {
   }
 
   # 2. Flatten the nested structure into an intermediate list.
-  flattened_vm_list = flatten([
+  flattened_vms = flatten([
     for app_key, app_group in local.vm_groups : [
+      for node_key, node_override in app_group.nodes : {
+        app_key       = app_key
+        node_key      = node_key
+        app_group     = app_group
+        node_override = node_override
+      }
+    ]
+  ])
+  flattened_lxcs = flatten([
+    for app_key, app_group in local.lxc_groups : [
       for node_key, node_override in app_group.nodes : {
         app_key       = app_key
         node_key      = node_key
@@ -166,7 +175,7 @@ locals {
   # 3. Iterate over the flat list and build the final, clean objects.
   # We are creating a list of objects
   all_potential_vms = {
-    for item in local.flattened_vm_list :
+    for item in local.flattened_vms :
     item.node_key => {
       # For each attribute, we use coalesce() to implement the inheritance.
       # It takes the specific node value first, and if that's null,
@@ -195,22 +204,22 @@ locals {
       started = coalesce(item.node_override.started, item.app_group.started)
 
       # Hardware
-      cpu_cores   = coalesce(item.node_override.cpu_cores, item.app_group.cpu_cores)
-      cpu_sockets = coalesce(item.node_override.cpu_sockets, item.app_group.cpu_sockets)
-      memory_size = coalesce(item.node_override.memory_size, item.app_group.memory_size)
+      cpu_cores   = coalesce(item.node_override.vm_config.cpu_cores, item.app_group.vm_config.cpu_cores)
+      cpu_sockets = coalesce(item.node_override.vm_config.cpu_sockets, item.app_group.vm_config.cpu_sockets)
+      memory_size = coalesce(item.node_override.vm_config.memory_size, item.app_group.vm_config.memory_size)
 
       # Disk
-      disk_datastore_id = coalesce(item.node_override.disk_datastore_id, item.app_group.disk_datastore_id, var.target_datastore)
+      disk_datastore_id = coalesce(item.node_override.vm_config.disk_datastore_id, item.app_group.vm_config.disk_datastore_id, var.target_datastore)
       # source_image_path         = proxmox_virtual_environment_file.ubuntu_custom_image[count.index],
-      disk_size = coalesce(item.node_override.disk_size, item.app_group.disk_size)
-      disk_ssd  = coalesce(item.node_override.disk_ssd, item.app_group.disk_ssd)
+      disk_size = coalesce(item.node_override.vm_config.disk_size, item.app_group.vm_config.disk_size)
+      disk_ssd  = coalesce(item.node_override.vm_config.disk_ssd, item.app_group.vm_config.disk_ssd)
 
       # Network
-      vlan_bridge = coalesce(item.node_override.vlan_bridge, item.app_group.vlan_bridge)
-      vlan_id     = coalesce(item.node_override.vlan_id, item.app_group.vlan_id)
+      vlan_bridge = coalesce(item.node_override.vm_config.vlan_bridge, item.app_group.vm_config.vlan_bridge)
+      vlan_id     = coalesce(item.node_override.vm_config.vlan_id, item.app_group.vm_config.vlan_id)
 
       # Cloud-Init
-      ipv4_address = item.node_override.ipv4_address
+      ipv4_address = item.node_override.vm_config.ipv4_address
       user_account_username = ((var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")] != null &&
         var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].username != null &&
         trimspace(var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].username) != "") ?
@@ -232,11 +241,69 @@ locals {
     }
   }
 
+  all_potential_lxc = {
+    for item in local.flattened_lxcs :
+    item.node_key => {
+      # --- Now, construct the final, flat object for the LXC module ---
+      app_key = item.app_key
+      name    = item.node_key
+      type    = item.app_group.type
+      enabled = coalesce(item.node_override.enabled, item.app_group.enabled)
+      vm_id   = item.node_override.vm_id
+
+      node_name    = coalesce(item.node_override.node_name, item.app_group.node_name, var.target_node)
+      description  = coalesce(item.node_override.description, item.app_group.description)
+      tags         = distinct(concat(["OpenTofu"], coalesce(item.app_group.tags, []), coalesce(item.node_override.tags, [])))
+      on_boot      = coalesce(item.node_override.on_boot, item.app_group.on_boot)
+      started      = coalesce(item.node_override.started, item.app_group.started)
+      unprivileged = coalesce(item.node_override.lxc_config.unprivileged, item.app_group.lxc_config.unprivileged)
+
+
+      # Get LXC features from the merged_config
+      nesting = coalesce(item.node_override.lxc_config.nesting, item.app_group.lxc_config.nesting)
+      fuse    = coalesce(item.node_override.lxc_config.fuse, item.app_group.lxc_config.fuse)
+      keyctl  = coalesce(item.node_override.lxc_config.keyctl, item.app_group.lxc_config.keyctl)
+
+      # Hardware
+      cpu_cores   = coalesce(item.node_override.lxc_config.cpu_cores, item.app_group.lxc_config.cpu_cores)
+      memory_size = coalesce(item.node_override.lxc_config.memory_size, item.app_group.lxc_config.memory_size)
+
+      # Disk
+      disk_datastore_id = coalesce(item.node_override.lxc_config.disk_datastore_id, item.app_group.lxc_config.disk_datastore_id, var.target_datastore)
+      #  template_file_id         = proxmox_virtual_environment_file.ubuntu_custom_image[count.index],
+      os_type   = coalesce(item.node_override.lxc_config.os_type, item.app_group.lxc_config.os_type)
+      disk_size = coalesce(item.node_override.lxc_config.disk_size, item.app_group.lxc_config.disk_size)
+
+      # Network
+      vlan_bridge = coalesce(item.node_override.lxc_config.vlan_bridge, item.app_group.lxc_config.vlan_bridge)
+      vlan_id     = coalesce(item.node_override.lxc_config.vlan_id, item.app_group.lxc_config.vlan_id)
+
+      # Cloud-Init
+      ipv4_address = item.node_override.lxc_config.ipv4_address
+      user_account_password = ((var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")] != null &&
+        var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].password != null &&
+        trimspace(var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].password) != "") ?
+        var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].password :
+        "ERROR: A valid 'password' could not be found for VM '${item.node_key}'. The secret '${coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")}' is either missing from 'user_credentials' or does not contain the key 'password'." [999]
+      ),
+      user_account_keys = ((var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")] != null &&
+        var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].ssh_public_keys != null &&
+        var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].ssh_public_keys != []) ?
+        var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].ssh_public_keys :
+        "ERROR: A valid 'ssh_public_keys' could not be found for VM '${item.node_key}'. The secret '${coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")}' is either missing from 'user_credentials' or does not contain the key 'ssh_public_keys'." [999]
+    ), }
+  }
+
   #    We iterate over our fully resolved list of all potential VMs.
   final_vm_list = {
     for vm in local.all_potential_vms :
     vm.name => vm
     if vm.enabled && vm.type == "vm"
+  }
+  final_lxc_list = {
+    for lxc in local.all_potential_lxc :
+    lxc.name => lxc
+    if lxc.enabled && lxc.type == "lxc"
   }
 }
 
@@ -285,11 +352,55 @@ module "proxmox_vms" {
 }
 
 # -----------------------------------------------------------------------------
-# STEP 7: CREATE CONTAINERS (LXC) - Placeholder for the Future
+# STEP 7: CREATE CONTAINERS (LXC)
 # -----------------------------------------------------------------------------
 # This is where you would add a similar 'module "lxc_containers"' block.
 # It would iterate over 'local.lxc_groups' and call a new 'proxmox_lxc' module.
 # -----------------------------------------------------------------------------
+module "module_lxc" {
+  source   = "../../../modules/proxmox_lxc"
+  for_each = local.final_lxc_list
+
+  depends_on = [proxmox_virtual_environment_file.ubuntu_custom_image]
+
+  # Main info
+  vm_id       = each.value.vm_id
+  app_key     = each.value.app_key
+  node_name   = each.value.node_name
+  description = each.value.description
+  tags        = each.value.tags
+  on_boot     = each.value.on_boot
+  started     = each.value.started
+
+  unprivileged = each.value.unprivileged
+
+  # Features 
+  nesting = true
+  fuse    = true
+  keyctl  = true
+
+  # --- OS Template ---
+  template_file_id = "local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst"
+  os_type          = "debian"
+
+  # Hardware
+  cpu_cores = each.value.cpu_cores
+  memory    = each.value.memory_size
+
+  # Disk
+  disk_datastore_id = each.value.disk_datastore_id
+  disk_size         = each.value.disk_size
+
+  # Network
+  vlan_bridge = each.value.vlan_bridge
+  vlan_id     = each.value.vlan_id
+
+  # Cloud-Init
+  hostname              = each.value.name
+  ipv4_address          = each.value.ipv4_address
+  user_account_password = each.value.user_account_password
+  user_account_keys     = each.value.user_account_keys
+}
 
 # # -----------------------------------------------------------------------------
 # # STEP 7: CREATE THE VM BY IMPORTING THE UPLOADED DISK
