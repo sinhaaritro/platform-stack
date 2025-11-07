@@ -101,18 +101,17 @@ tasks:
     cmds:
       - tofu fmt -recursive ./tofu
 
+  fmt:without-secrets:
+    desc: "Formats all OpenTofu configuration files without secrets in the project for consistency."
+    cmds:
+      - find ./tofu -type f \( -name "*.tf" -o -name "*.tfvars" \) | grep -v ".secret.tfvars$" | xargs -r tofu fmt
+
   validate:
     desc: "Validates the OpenTofu configuration for the target stack for syntax errors."
     dir: "{{.STACK_DIR}}"
     deps: [init]
     cmds:
       - tofu validate
-
-  secrets:edit:
-    desc: "Securely edits the encrypted secrets file for the target stack."
-    cmds:
-      - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
-      - ansible-vault edit --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") {{.STACK_DIR}}/{{.SECRET_FILE}}
 
   state:list:
     desc: "Lists all resources currently managed in the target stack's state."
@@ -133,3 +132,64 @@ tasks:
       # The '--' is crucial. It tells Task to pass all subsequent arguments
       # directly to the command as {{.CLI_ARGS}}.
       - tofu taint '{{.CLI_ARGS}}'
+
+  # ---------------------------------------------------------------------------
+  # SECRET MANAGEMENT (ANSIBLE VAULT)
+  # ---------------------------------------------------------------------------
+  # This 'secrets' task is a namespace for all Ansible Vault operations.
+  # Usage: task tofu:secrets:<sub-task>
+  secrets:
+    desc: "Namespace for all Ansible Vault secret management tasks."
+    cmds:
+      # If a user just types 'task tofu:secrets', list the available sub-tasks.
+      - task -l {{.TASK}}
+
+  # --- Create a new, encrypted secrets file ---
+  secrets:create:
+    desc: "Creates a new, empty, encrypted secrets file for the target stack."
+    summary: |
+      Creates a new, empty, encrypted secrets file.
+      It will prompt you to set a new vault password.
+      NOTE: This will fail if the file already exists.
+    dir: "{{.STACK_DIR}}"
+    cmds:
+      - ansible-vault create {{.SECRET_FILE}}
+
+  # --- Edit an existing secrets file ---
+  secrets:edit:
+    desc: "Securely edits the encrypted secrets file for the target stack."
+    dir: "{{.STACK_DIR}}"
+    cmds:
+      - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
+      - ansible-vault edit --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") {{.SECRET_FILE}}
+
+  # --- View the decrypted content of a secrets file ---
+  secrets:view:
+    desc: "Displays the decrypted content of the secrets file in the terminal."
+    dir: "{{.STACK_DIR}}"
+    cmds:
+      - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
+      - ansible-vault view --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") {{.SECRET_FILE}}
+
+  # --- Manually re-encrypt a secrets file ---
+  secrets:encrypt:
+    desc: "Re-encrypts a plain-text secrets file. USE WITH CAUTION."
+    summary: |
+      Re-encrypts a file that is currently in plain text.
+      This is useful for recovery or if you accidentally decrypted a file.
+      NOTE: Assumes the file exists and is not currently encrypted.
+    dir: "{{.STACK_DIR}}"
+    cmds:
+      - ansible-vault encrypt {{.SECRET_FILE}}
+
+  # --- Manually decrypt a secrets file ---
+  secrets:decrypt:
+    desc: "Decrypts a secrets file to plain text. USE WITH EXTREME CAUTION."
+    summary: |
+      DECRYPTS the secrets file and saves it as plain text.
+      WARNING: NEVER commit a decrypted file to Git.
+      This is only for emergency debugging. Re-encrypt it immediately.
+    dir: "{{.STACK_DIR}}"
+    cmds:
+      - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
+      - ansible-vault decrypt --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") {{.SECRET_FILE}}
