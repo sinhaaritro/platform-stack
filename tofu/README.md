@@ -1,224 +1,283 @@
+
 # Proxmox Infrastructure as Code with OpenTofu
 
 This part of the repository contains the Infrastructure as Code (IaC) configuration for managing multiple Proxmox environments using OpenTofu. The workflow uses OpenTofu installed directly on a dedicated control machine.
 
 The project is designed to be highly structured, reusable, and safe, incorporating best practices such as modular components, workspaces for environment separation, and guardrails to prevent accidental changes.
 
-## Core Concepts
+## 1. Summary & System Purpose
+### Core Principles
+This system is a direct implementation of our core principles, realized through the following key concepts:
 
-This project is built on a few key concepts:
+*   **Infrastructure as Code (IaC) & GitOps:** The `main` branch of the Git repository is the single source of truth. All infrastructure is defined as code, and changes are introduced exclusively via peer-reviewed pull requests, which trigger automated deployment upon merging.
+*   **Stack-Based Isolation (Blast Radius):** The infrastructure is divided into "stacks" (e.g., `proxmox_server_A`, `aws_global`), each in its own directory with an independent state file. This ensures that changes to one part of the infrastructure cannot accidentally impact another.
+*   **Modular & Reusable Components:** The logic for creating resources (like QEMU VMs) is encapsulated in self-contained modules within the `modules/` directory. The stack configurations focus on *what* to build, while the modules define *how* to build it.
+*   **Automation:** The entire lifecycle, from planning changes to applying them and generating inventory, is fully automated through a CI/CD pipeline.
+*   **Declarative, Data-Driven Configuration:** The resources for each stack are defined in `.tfvars` files. The core OpenTofu logic is generic and simply consumes this data, making it easy to add or modify resources without changing the underlying code.
+*   **Native Tooling:** All `tofu` commands are run as native executables on a central Control Machine. This simplifies the workflow, enhances performance, and allows for seamless integration with development tools.
+*   **Secure Secret Management (Ansible Vault):** Plain-text secrets are never committed to Git. We use Ansible Vault to encrypt sensitive data. For each stack, we maintain two files:
+    *   `vms.tfvars` (or similar): Contains non-secret configuration and is committed to Git directly.
+    *   `secrets.tfvars`: Contains all sensitive data and is encrypted with Ansible Vault before being committed. We use **Process Substitution** to decrypt secrets in-memory during `plan` and `apply` operations.
+*   **CI/CD Change Detection:** The automation pipeline acts as a guardrail. It is configured to detect changes within specific stack directories and will only run `plan` or `apply` against the stack that has been modified, preventing accidental cross-environment operations.
 
-*   **Native Tooling:** All `tofu` commands are run as native executables on the control machine. This simplifies the workflow and VSCodium integration.
-*   **Modular & Reusable Components:** The logic for creating resources (like QEMU VMs and LXC containers) is encapsulated in self-contained modules within the `modules/` directory. The root configuration focuses on *what* to build, while the modules define *how* to build it.
-*   **Workspaces:** Each Proxmox environment (`calm-belt`, `public`, etc.) is managed by a separate OpenTofu workspace. This creates an independent state file for each environment, providing strong isolation.
-*   **Declarative Data:** The infrastructure for each environment is defined in `.tfvars` files within the `tofu/environments/` directory. The core logic is generic and simply consumes this data.
-*   **Workspace Guardrail:** A safety check in `checks.tf` prevents you from running a `plan` or `apply` if your current workspace does not match the environment defined in your `.tfvars` file, preventing catastrophic mistakes.
-*   **Secure Secret Management:** Plain-text secrets (like API keys and passwords) must never be committed to Git. We use **Ansible Vault** to encrypt our secrets. For each environment, we maintain two variable files:
-    *   `environments/<env>.tfvars`: Contains non-secret configuration (VM names, sizes, etc.). This file is committed to Git.
-    *   `environments/<env>.secrets.tfvars`: Contains all sensitive data. This file is encrypted with Ansible Vault before being committed to Git.
-    *   During `plan` and `apply`, we use a shell feature called **Process Substitution** (`<(...)`) to decrypt the secrets file in-memory and pass it to OpenTofu, ensuring no secrets are ever written to disk in plain text.
 
-## Prerequisites
+###  Scope
+*   **In Scope:** The management of all VMs and containers across Proxmox clusters, AWS EC2 instances, and Oracle Cloud VM. This includes networking and storage definitions where applicable.
+*   **Out of Scope:** Kubernetes cluster management, application-level configuration (handled by Ansible), and database administration.
 
-Before you begin, ensure you have the following:
+### Prerequisites
+Before operating this system, ensure the following are in place:
 
-1.  **A Control Machine:** A Linux VM (like `hiking-bear`) where you will run commands.
-2.  **OpenTofu:** Installed directly on the control machine. Follow the `System Setup.md` guide for detailed installation instructions.
-3.  **Ansible:** Required for the `ansible-vault` tool to manage encrypted secrets.
+1.  **A Control Machine:** A dedicated Linux VM that acts as the code runner for all operations. This machine **must have network connectivity** to all Proxmox nodes, as well as outbound internet access to reach the AWS and Oracle Cloud APIs.
+2.  **OpenTofu:** Installed directly as a native executable on the Control Machine.
+3.  **Ansible:** Required specifically for the `ansible-vault` tool to manage encrypted secrets.
 4.  **Git:** Installed and configured with your user information.
-5.  **SSH Access:** Your SSH public key must be authorized for GitHub to clone this private repository.
-6.  **Proxmox API User:** A dedicated user (e.g., `vmprovisioner@pve`) must be created in each Proxmox environment with the necessary permissions.
-7.  **VSCodium (Recommended):** The [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh) extension is recommended for editing files on the control machine.
+5.  **Access & Credentials:**
+    *   **Git Repository Access:** Your SSH public key must be authorized to clone the infrastructure repository.
+    *   **Proxmox API User:** A dedicated user (e.g., `vmprovisioner@pve`) with appropriate permissions must exist in each Proxmox environment.
+6.  **VSCodium (Recommended):** For development, the [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh) extension is highly recommended for securely editing files on the Control Machine.
 
-## Directory Structure
+---
+## 2. System Architecture & Implementation Details
 
-The key files and directories for this part of the project are located within the `tofu/` folder.
+This section provides a technical description of the system's components and their interactions, covering how the configuration is stored, how its state is managed, and how changes are executed.
+
+### Source Control and Repository Structure
+
+The Git repository is the definitive source for all infrastructure configuration. It is a monorepo containing all code required to provision and manage the infrastructure.
+
+*   **Repository Location:** `https://github.com/sinhaaritro/platform-stack`
+*   **Directory Structure:**
+    *   `stacks/`: This directory contains subdirectories, each representing an isolated infrastructure component (e.g., `proxmox_server_A_gpu`, `aws_global`). Each subdirectory is a self-contained OpenTofu configuration, complete with its own backend configuration, variable definitions, and logic. This structure enforces strict separation between different parts of the infrastructure.
+    *   `modules/`: This directory contains reusable, parameterized OpenTofu modules. These modules provide standardized definitions for creating resources (e.g., a QEMU VM). Stacks invoke these modules to ensure consistency and reduce code duplication.
+
+### Remote State Management
+
+OpenTofu uses a state file to map the resources defined in the code to the real-world resources that have been created.
+
+*   **Remote Backend:** The state files are stored remotely in an **AWS S3 bucket**. This provides a centralized, persistent location for the state, accessible by all authorized users and automation, rather than being stored on a local machine.
+*   **State Isolation per Stack:** A key architectural feature is that each stack has its own independent state file. This is configured in the `backend.tf` file within each stack's directory. The `key` attribute in the backend configuration block defines a unique object path in the S3 bucket for that stack's state file.
+    *   *Example:* The `backend.tf` for `proxmox_server_A_gpu` sets `key = "onprem/proxmox_server_A.tfstate"`.
+    *   This strict separation ensures that OpenTofu operations executed against one stack have no knowledge of or ability to impact the resources managed by another stack.
+*   **Concurrency Control via State Locking:** To prevent data corruption from simultaneous operations on the same state file, state locking is enabled using an **AWS DynamoDB table**. Before OpenTofu performs any operation that writes to a state file, it creates a lock entry in the DynamoDB table. The lock is removed once the operation is complete, ensuring that only one process can modify a given state file at any time.
+
+### Automation and Execution Workflow
+
+The process of applying infrastructure changes is automated through a CI/CD pipeline that interacts with a dedicated runner.
+
+1.  **CI/CD Platform (Workflow Orchestration):**
+    *   The CI/CD service (e.g., GitHub Actions, GitLab CI) monitors the Git repository for events, specifically pull requests and merges to the `main` branch.
+    *   Upon detecting a relevant event, it initiates a pre-defined pipeline based on the changes in the commit. The pipeline is configured to identify which stack directory (`stacks/*`) has been modified.
+
+2.  **Control Machine (Job Execution):**
+    *   A dedicated Linux VM is configured as the **runner** for the CI/CD platform.
+    *   The CI/CD pipeline assigns jobs to this runner. A job consists of specific commands to be executed.
+    *   For an infrastructure change, the pipeline sends a command to the runner, such as `tofu -chdir="stacks/onprem/proxmox_server_A_gpu" apply`. The `-chdir` flag instructs OpenTofu to operate within the context of that specific stack directory.
+    *   The runner executes the command using its locally installed OpenTofu binary. It authenticates to the target APIs (Proxmox, AWS, etc.) using credentials supplied by the CI/CD platform and applies the planned changes.
+
+## 3. Environment & Change Validation Strategy
+
+This section outlines the formal strategy for introducing, testing, and applying all infrastructure changes. The model is designed for maximum safety and predictability, even without full duplicate hardware environments.
+
+### Model: Pull Request Validation
+Given that full hardware duplication for dev/staging is not feasible, we use the **Pull Request (PR) validation model**. This model treats the automated `tofu plan` within a pull request as the primary testing and review stage. The output of the plan is the exact set of changes that will be applied, serving as a high-fidelity preview.
+
+### Workflow Implementation
+Every change to the infrastructure, without exception, must follow this GitOps workflow:
+
+1.  **Branching:** To introduce any change (e.g., adding a VM, modifying a network setting), the engineer must create a new feature branch from `main` (e.g., `feature/add-analytics-vm`). Direct commits to `main` are blocked.
+
+2.  **Pull Request & Automated Plan:** A pull request is opened, targeting the `main` branch. The CI/CD system automatically detects which stack directory has been changed and executes a `tofu plan` *only* for that specific stack.
+
+3.  **Review (Primary Safety Check):**
+    *   The output of the `tofu plan` is posted as a comment directly within the pull request.
+    *   This plan output is the **single source of truth for the review**. The team reviews the exact changes proposed (e.g., "1 to add, 0 to change, 0 to destroy").
+    *   Approval of the pull request signifies approval of the plan's execution.
+
+4.  **Merge & Automated Apply:** Once the pull request is approved and merged into the `main` branch, the CI/CD system triggers the deployment stage. It runs `tofu apply` against the same stack, executing the exact changes that were reviewed and approved in the plan.
+
+This structured process ensures that every change is documented, peer-reviewed, and automatically validated before it impacts the production infrastructure.
+
+## 4. Project Structure and Resource Management
+
+The project is organized into a single monorepo that combines a data-driven approach with a logical stack structure.
 
 ```
-platform-stack/
-├── .build/
-│   └── tofu/
-│       └── Containerfile    # Blueprint for our OpenTofu container image
-├── compose.yaml             # Defines the OpenTofu service for Podman
-└── tofu/                      # Your primary working directory
-    ├── main.tf              # Core logic for creating QEMU VMs and LXC Containers
-    ├── provider.tf          # Proxmox provider configuration
-    ├── variables.tf         # DECLARATIONS of all possible input variables
-    ├── outputs.tf           # Defines what to output after a successful apply
-    ├── checks.tf            # Contains the Workspace Guardrail safety check
+/tofu/
+├── modules/
+│   ├── proxmox_qemu_vm/       # Standardized module for creating a single Proxmox VM
+│   ├── proxmox_lxc_container/ # Standardized module for creating a single LXC container
+│   └── aws_ec2_instance/      # Standardized module for creating a single EC2 instance
+│
+└── stacks/
+    ├── onprem/
+    │   ├── proxmox_server_A_gpu/    # STACK 1: Manages only Server A (with GPU)
+    │   │   ├── main.tf              # Logic to create resources from data (using for_each)
+    │   │   ├── variables.tf         # Defines the 'resource_groups' variable structure
+    │   │   ├── backend.tf           # S3 backend config for Server A's state file
+    │   │   └── vms.tfvars           # DATA file defining all VMs/LXCs on Server A
+    │   │
+    │   ├── proxmox_server_B_no_gpu/ # STACK 2: Manages only Server B (no GPU)
+    │   │   ├── main.tf              # Can be an identical copy of the other main.tf
+    │   │   ├── variables.tf         # Identical copy
+    │   │   ├── backend.tf           # S3 backend config for Server B's state file
+    │   │   └── vms.tfvars           # DATA file defining all VMs/LXCs on Server B
     │
-    ├── environments/          # Contains the DATA for each environment
-    │   ├── calm-belt.tfvars
-    │   ├── calm-belt.secrets.tfvars  # Encrypted secrets for Calm Belt
-    │   ├── admin.tfvars
-    │   ├── admin.secrets.tfvars      # Encrypted secrets for Admin
-    │   └── ...
-    │
-    └── modules/               # Contains reusable infrastructure components
-        ├── proxmox_qemu_vm/   # Module for creating QEMU VMs
-        │   ├── main.tf
-        │   ├── variables.tf
-        │   ├── outputs.tf
-        │   └── providers.tf
-        │
-        └── proxmox_lxc_container/ # Module for creating LXC containers
-            └── ...
+    └── cloud/
+        └── aws_global/              # STACK 3: Manages all AWS resources
+            ├── main.tf              # Logic to create EC2, S3, etc. from data
+            ├── variables.tf
+            ├── backend.tf
+            └── resources.tfvars     # DATA file defining EC2 instances, S3 buckets, etc.
+```
 
+
+
+## 5. Operational Guide (How-To Recipes)
+
+This section provides concrete, command-line examples for the most common operational tasks. All commands are expected to be run from the root of the Git repository on the Control Machine.
+
+### Daily Workflow: Adding or Modifying a Resource
+
+This is the standard procedure for making any change to an existing stack.
+
+1.  **Create a Branch:** Always start by creating a new feature branch from the latest `main`.
+    ```bash
+    git checkout main
+    git pull
+    git checkout -b feature/add-web-vm-03
+    ```
+
+2.  **Edit Configuration Files:** Navigate to the specific stack directory you intend to change.
+    *   For **non-sensitive** values (like CPU count, memory, VM name), edit the primary `.tfvars` file directly:
+        ```bash
+        vim stacks/onprem/proxmox_server_A_gpu/vms.tfvars
+        ```
+    *   For **sensitive** values (like passwords or API keys), use `ansible-vault` to safely edit the encrypted secrets file:
+        ```bash
+        ansible-vault edit stacks/onprem/proxmox_server_A_gpu/secrets.tfvars
+        ```
+
+3.  **Run a Plan:** From the **repository root**, run `tofu plan` using the `-chdir` flag to target your stack. Use process substitution (`<(...)`) to feed the decrypted secrets to the command in-memory.
+    ```bash
+    # This command targets the 'proxmox_server_A_gpu' stack
+    tofu -chdir="stacks/onprem/proxmox_server_A_gpu" plan \
+      -var-file="vms.tfvars" \
+      -var-file=<(ansible-vault view secrets.tfvars)
+    ```
+
+4.  **Review the Plan:** Carefully inspect the output. Confirm that the proposed changes are exactly what you expect.
+
+5.  **Commit and Open a Pull Request:** Commit your changes and push them to the remote repository. Open a PR and await the automated validation and team review.
+    ```bash
+    git add .
+    git commit -m "feat: Add new web-vm-03 to proxmox server A"
+    git push --set-upstream origin feature/add-web-vm-03
+    ```
+6.  **Merge:** Once the PR is approved, merge it. The CI/CD pipeline will automatically run the corresponding `apply` command to execute the change.
+
+### Structural Workflow: Adding a New Stack
+
+This procedure is for initializing a new, isolated set of resources (e.g., bringing a new Proxmox server under management).
+
+1.  **Copy an Existing Stack:** Duplicate an existing stack directory to use as a template.
+    ```bash
+    cp -r stacks/onprem/proxmox_server_B_no_gpu/ stacks/onprem/proxmox_server_C_storage/
+    ```
+2.  **Update Backend Configuration (CRITICAL):** Open the `backend.tf` file in the new directory and change the `key` to a new, unique value. **This step is essential for state isolation.**
+    ```terraform
+    # In stacks/onprem/proxmox_server_C_storage/backend.tf
+    
+    terraform {
+      backend "s3" {
+        bucket = "your-opentofu-state-bucket-name"
+        key    = "onprem/proxmox_server_C.tfstate" # <-- CHANGED TO A UNIQUE PATH
+        # ... other settings
+      }
+    }
+    ```
+3.  **Populate Configuration:** Edit the `.tfvars` and `secrets.tfvars` files in the new directory to define the resources for the new stack.
+4.  **Initialize and Apply:** Follow the "Daily Workflow" (steps 3-6) for this new stack directory to initialize, plan, and apply its configuration for the first time.
+
+---
+
+## 6. Network & Architecture Diagram
+
+The following diagram illustrates the data and command flow of the GitOps system, from developer action to infrastructure change.
+
+```mermaid
+flowchart TD
+    subgraph "Developer Environment"
+        A[Developer Workstation]
+    end
+
+    subgraph "Control Plane"
+        B[Git Repository on GitHub/GitLab]
+        C[CI/CD Platform]
+        D[Control Machine / Runner VM]
+    end
+
+    subgraph "Managed Infrastructure"
+        E[Proxmox Cluster A API]
+        F[Proxmox Cluster B API]
+        G[AWS API Endpoint]
+        H[Oracle Cloud API]
+    end
+
+    A -- "1. git push" --> B
+    B -- "2. Triggers Pipeline on PR/Merge" --> C
+    C -- "3. Assigns Job" --> D
+    D -- "4. Executes 'tofu -chdir ...'" --> E
+    D -- "4. Executes 'tofu -chdir ...'" --> F
+    D -- "4. Executes 'tofu -chdir ...'" --> G
+    D -- "4. Executes 'tofu -chdir ...'" --> H
+
+    style D fill:#f9f,stroke:#333,stroke-width:2px
 ```
 
 ---
 
-## Step-by-Step Workflow
+## 7. Module Development & Usage Policy
 
-Follow these steps to deploy and manage your infrastructure. All commands should be run from the `platform-stack/tofu/` directory on your control machine.
+To ensure consistency, security, and maintainability, all OpenTofu modules must adhere to the following policies.
 
-### Phase 1: Initial Setup (One-Time Only)
+### Module Usage Rules
+*   **Permitted Sources:** Modules may only be sourced from two locations:
+    1.  The internal `/modules` directory for company-standard components.
+    2.  The official OpenTofu Registry for verified, third-party modules. Sourcing modules directly from other Git repositories is prohibited.
+*   **Version Pinning:** All module sources **must** be pinned using the pessimistic version constraint operator (`~>`). This prevents unexpected breaking changes from minor or major version updates.
+    ```terraform
+    module "standard_vm" {
+      source  = "./modules/proxmox_qemu_vm"
+      # No version needed for local modules
 
-You only need to perform these steps once when you first clone the repository to a new control machine.
-
-1.  **Clone the Repository**
-    ```bash
-    git clone git@github.com:sinhaaritro/platform-stack.git
-    cd platform-stack/
-    ```
-
-2.  **Go to the tofu folder**
-    ```bash
-    # Move into the working directory
-    cd tofu/
-    ```
-
-3.  **Create Workspaces**
-    You need to create a workspace for each environment you intend to manage.
-    ```bash
-    # Create the workspace for your sandbox environment
-    tofu workspace new calm-belt
-
-    # Create workspaces for your other environments
-    tofu workspace new grand-line  # Example for 'internal'
-    tofu workspace new new-world    # Example for 'public'
-    tofu workspace new red-line     # Example for 'admin'
-    ```
-    **Note:** You must re-run `tofu init` any time you add a new module or change provider versions.
-
-### Phase 1.5: Creating and Managing Secrets
-
-For each environment, you must create an encrypted file to hold its secrets.
-
-1.  **Create an Encrypted Secrets File**
-    Use `ansible-vault create` to make a new, encrypted `.tfvars` file. You will be prompted to set a vault password.
-    ```bash
-    # Example for the 'calm-belt' environment
-    ansible-vault create environments/calm-belt.secrets.tfvars
-    ```
-    When the editor opens, add your secret variables **in HCL format**. For example:
-    ```hcl
-    # environments/calm-belt.secrets.tfvars (decrypted view)
-
-    proxmox_connection = {
-      password_auth = {
-        user     = "vmprovisioner@pve"
-        password = "vmprovisioner"
-      }
+      # ...
     }
 
-    user_credentials = {
-      password        = "devdevdev"
-      ssh_public_keys = ["ssh-ed25519 AAA..."]
+    module "vpc" {
+      source  = "terraform-aws-modules/vpc/aws"
+      version = "~> 5.1.0" # Version pinning is mandatory
+      
+      # ...
     }
     ```
 
-2.  **Viewing and Editing Secrets (Day-to-Day)**
-    You will use these commands to manage your secrets without ever decrypting them to disk.
-    ```bash
-    # To view the decrypted content in your terminal
-    ansible-vault view environments/calm-belt.secrets.tfvars
+### Internal Module Creation Standards
+*   **Required Files:** Every new module in the `/modules` directory must include `main.tf`, `variables.tf`, `outputs.tf`, and a `README.md`.
+*   **Strict Variable Definitions:** Every variable must include a `description` and an explicit `type`. Default values should be provided where sensible.
+*   **Comprehensive Outputs:** Modules must declare outputs for all essential resource attributes (e.g., IP addresses, instance IDs, ARNs) that might be needed by other configurations or for inventory generation.
+*   **Documentation (`README.md`):** The README must clearly explain the module's purpose and include auto-generated or manually created tables detailing all input variables and outputs.
 
-    # To securely edit the file in your default editor (e.g., nano, vim)
-    ansible-vault edit environments/calm-belt.secrets.tfvars
-    ```
+---
 
-3.  **Encrypting and Decrypting (Manual Operations)**
-    These commands are for manually encrypting a plain-text file or decrypting a vault file. **Use with caution.**
-    ```bash
-    # To encrypt an existing plain-text file
-    ansible-vault encrypt environments/some_plain_file.tfvars
+## 8. Maintenance & Lifecycle Management
 
-    # To decrypt a vault file to plain-text (avoid this if possible)
-    ansible-vault decrypt environments/calm-belt.secrets.tfvars
-    ```
+This section outlines procedures for keeping the IaC system and its dependencies current and healthy.
 
-### Phase 2: Day-to-Day Operations
+### Dependency Management
+*   **Provider Versioning:** Like modules, all providers defined in the `terraform` block of each stack must have their versions pinned with `~>`.
+*   **Quarterly Upgrade Review:** On a quarterly basis, the team will review all providers and modules for available minor updates. These updates often contain important security patches and bug fixes and should be applied proactively through the standard PR workflow.
+*   **Major Version Upgrades:** Major version upgrades (e.g., from `5.x.x` to `6.0.0`) are treated as a planned project. They must be tested in a non-critical stack first, as they often contain breaking changes that require code modifications.
 
-This is the standard loop you will follow every time you want to deploy, update, or destroy resources in an environment. We will use the `calm-belt` environment as our example.
-
-1.  **Connect to Your Control Machine**
-    Ensure you connect with SSH Agent Forwarding enabled if you need to perform `git` operations.
-    ```powershell
-    # From your Windows PC
-    ssh -A your_user@<control_vm_ip>
-    ```
-
-2.  **Navigate and Pull Latest Changes**
-    ```bash
-    cd ~/platform-stack/
-    git pull
-    ```
-
-3.  **Navigate to the OpenTofu Directory**
-    ```bash
-    cd tofu/
-    ```
-
-4.  **Select Your Target Workspace**
-    This is a critical step. Tell OpenTofu which environment's state file to use.
-    ```bash
-    tofu workspace select calm-belt
-    ```
-
-5.  **Enable the Proxmox User (Manual Step)**
-    As per our security model, log in to the Proxmox UI for the `calm-belt` environment and **enable** the `vmprovisioner@pve` user.
-
-6.  **Initialize OpenTofu (If Needed)**
-    You only need to do this once per workspace, or if you change provider versions.
-    ```bash
-    tofu init
-    ```
-
-7.  **Plan Your Changes (The Dry Run)**
-    This command now uses **two `-var-file` flags**. The first points to your standard variables file. The second uses Process Substitution (`<(...)`) to securely decrypt and pass your secrets file.
-    ```bash
-    # You will be prompted for your Ansible Vault password here
-    tofu plan \
-      -var-file="environments/calm-belt.tfvars" \
-      -var-file=<(ansible-vault view --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") environments/calm-belt.secret.tfvars)
-    ```
-    Review the output carefully. The Workspace Guardrail will still protect you from cross-environment mistakes.
-
-8.  **Apply Your Changes (The Execution)**
-    If the plan looks correct, apply it using the same command structure. You will be prompted for your vault password again.
-    ```bash
-    # For interactive approval (typing 'yes')
-    tofu apply \
-      -var-file="environments/calm-belt.tfvars" \
-      -var-file=<(ansible-vault view --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") environments/calm-belt.secret.tfvars)
-
-    # To approve it directly
-    tofu apply \
-      -var-file="environments/calm-belt.tfvars" \
-      -var-file=<(ansible-vault view --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") environments/calm-belt.secret.tfvars) \
-      --auto-approve
-    ```
-    After completion, the outputs defined in `outputs.tf` will be displayed.
-
-9.  **Disable the Proxmox User (Manual Step)**
-    For security, go back to the Proxmox UI and **disable** the `vmprovisioner@pve` user.
-
-10. **Commit Your Changes**
-    The `apply` command created or updated a file named `terraform.tfstate.d/calm-belt/terraform.tfstate`. This file is the record of your infrastructure and **must be committed**.
-    ```bash
-    cd .. # Back to the root of platform-stack/
-    git add .
-    git commit -m "feat(feature): message"
-    git push
-    ```
+### State File Maintenance
+Direct manipulation of the state file is high-risk and should be avoided. These commands are a last resort and require peer review.

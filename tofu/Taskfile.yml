@@ -1,0 +1,195 @@
+# tofu/Taskfile.yml
+# -----------------------------------------------------------------------------
+# Taskfile for Managing the OpenTofu Infrastructure
+#
+# This file provides a standardized, GitOps-friendly command interface for
+# managing all infrastructure stacks in this repository.
+#
+# PREREQUISITES:
+#   - OpenTofu, Ansible, and Task are installed.
+#   - You MUST export the Ansible Vault password as an environment variable:
+#     export ANSIBLE_VAULT_PASSWORD="your-vault-password"
+#
+# USAGE:
+#   - List all available tasks: task -l
+#   - Plan changes for a stack: task plan STACK_NAME=proxmox_gana
+#   - Apply changes (non-interactive): task apply STACK_NAME=proxmox_meru -- -auto-approve
+# -----------------------------------------------------------------------------
+
+version: "3"
+
+# --- GLOBAL VARIABLES ---
+# These variables define the context for the tasks.
+vars:
+  # STACK_NAME: The target stack to operate on.
+  # This defaults to 'proxmox_meru' but should be overridden for other stacks.
+  # Example: task apply STACK_NAME=proxmox_other_node
+  STACK_NAME: proxmox_meru
+
+  # STACK_DIR: Constructs the full path to the target stack directory.
+  STACK_DIR: "./tofu/stacks/onprem/{{.STACK_NAME}}"
+
+  # CONFIG_FILE: The name of the non-secret .tfvars file for the stack.
+  CONFIG_FILE: "{{.STACK_NAME}}.tfvars"
+
+  # SECRET_FILE: The name of the encrypted secrets file for the stack.
+  SECRET_FILE: "{{.STACK_NAME}}.secret.tfvars"
+
+  # This is the secure command for decrypting the vault file in memory,
+  # using the environment variable for the password.
+  TF_SECRET_ARGS: '-var-file=<(ansible-vault view --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") {{.SECRET_FILE}})'
+
+tasks:
+  default:
+    desc: "Lists all available tasks for OpenTofu."
+    cmds:
+      - task -l
+
+  # ---------------------------------------------------------------------------
+  # CORE WORKFLOW TASKS
+  # ---------------------------------------------------------------------------
+
+  init:
+    desc: "Initializes the OpenTofu backend and downloads providers for the target stack."
+    dir: "{{.STACK_DIR}}"
+    cmds:
+      - tofu init -upgrade
+
+  plan:
+    desc: "Generates an execution plan to show pending infrastructure changes."
+    dir: "{{.STACK_DIR}}"
+    deps: [init]
+    cmds:
+      # Guardrail: Ensure the vault password is set before proceeding.
+      - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
+      # 'eval' is required to correctly process the process substitution '<()'.
+      # Example:task tofu:plan STACK_NAME=proxmox_gana
+      - eval "tofu plan -var-file={{.CONFIG_FILE}} {{.TF_SECRET_ARGS}}"
+
+  apply:
+    desc: "Applies infrastructure changes and generates the Ansible inventory in a single run. Needs approval"
+    dir: "{{.STACK_DIR}}"
+    deps: [init]
+    cmds:
+      - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
+      # Any arguments after '--' will be passed to the end of the command (e.g., -auto-approve).
+      # Example: task tofu:apply -- -auto-approve
+      - eval "tofu apply  -var-file={{.CONFIG_FILE}} {{.TF_SECRET_ARGS}} {{.CLI_ARGS}}"
+
+  apply:approve:
+    desc: "Applies infrastructure changes and generates the Ansible inventory in a single run."
+    dir: "{{.STACK_DIR}}"
+    deps: [init]
+    cmds:
+      - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
+      - eval "tofu apply -auto-approve -var-file={{.CONFIG_FILE}} {{.TF_SECRET_ARGS}} {{.CLI_ARGS}}"
+
+  destroy:
+    desc: "Destroys all infrastructure managed by the target stack."
+    dir: "{{.STACK_DIR}}"
+    deps: [init]
+    cmds:
+      - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
+      - eval "tofu destroy -var-file={{.CONFIG_FILE}} {{.TF_SECRET_ARGS}} {{.CLI_ARGS}}"
+
+  # ---------------------------------------------------------------------------
+  # UTILITY & MAINTENANCE TASKS
+  # ---------------------------------------------------------------------------
+
+  fmt:
+    desc: "Formats all OpenTofu configuration files in the project for consistency."
+    cmds:
+      - tofu fmt -recursive ./tofu
+
+  fmt:without-secrets:
+    desc: "Formats all OpenTofu configuration files without secrets in the project for consistency."
+    cmds:
+      - find ./tofu -type f \( -name "*.tf" -o -name "*.tfvars" \) | grep -v ".secret.tfvars$" | xargs -r tofu fmt
+
+  validate:
+    desc: "Validates the OpenTofu configuration for the target stack for syntax errors."
+    dir: "{{.STACK_DIR}}"
+    deps: [init]
+    cmds:
+      - tofu validate
+
+  state:list:
+    desc: "Lists all resources currently managed in the target stack's state."
+    dir: "{{.STACK_DIR}}"
+    deps: [init]
+    cmds:
+      - tofu state list
+
+  taint:
+    desc: "Marks a resource as 'tainted', forcing it to be recreated on the next apply."
+    summary: |
+      Marks a resource as 'tainted', forcing it to be recreated on the next apply.
+      Usage: task taint -- 'resource.address'
+      Example: task taint -- 'module.qemu_vms["web-server-01"]'
+    dir: "{{.STACK_DIR}}"
+    deps: [init]
+    cmds:
+      # The '--' is crucial. It tells Task to pass all subsequent arguments
+      # directly to the command as {{.CLI_ARGS}}.
+      - tofu taint '{{.CLI_ARGS}}'
+
+  # ---------------------------------------------------------------------------
+  # SECRET MANAGEMENT (ANSIBLE VAULT)
+  # ---------------------------------------------------------------------------
+  # This 'secrets' task is a namespace for all Ansible Vault operations.
+  # Usage: task tofu:secrets:<sub-task>
+  secrets:
+    desc: "Namespace for all Ansible Vault secret management tasks."
+    cmds:
+      # If a user just types 'task tofu:secrets', list the available sub-tasks.
+      - task -l {{.TASK}}
+
+  # --- Create a new, encrypted secrets file ---
+  secrets:create:
+    desc: "Creates a new, empty, encrypted secrets file for the target stack."
+    summary: |
+      Creates a new, empty, encrypted secrets file.
+      It will prompt you to set a new vault password.
+      NOTE: This will fail if the file already exists.
+    dir: "{{.STACK_DIR}}"
+    cmds:
+      - ansible-vault create {{.SECRET_FILE}}
+
+  # --- Edit an existing secrets file ---
+  secrets:edit:
+    desc: "Securely edits the encrypted secrets file for the target stack."
+    dir: "{{.STACK_DIR}}"
+    cmds:
+      - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
+      - ansible-vault edit --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") {{.SECRET_FILE}}
+
+  # --- View the decrypted content of a secrets file ---
+  secrets:view:
+    desc: "Displays the decrypted content of the secrets file in the terminal."
+    dir: "{{.STACK_DIR}}"
+    cmds:
+      - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
+      - ansible-vault view --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") {{.SECRET_FILE}}
+
+  # --- Manually re-encrypt a secrets file ---
+  secrets:encrypt:
+    desc: "Re-encrypts a plain-text secrets file. USE WITH CAUTION."
+    summary: |
+      Re-encrypts a file that is currently in plain text.
+      This is useful for recovery or if you accidentally decrypted a file.
+      NOTE: Assumes the file exists and is not currently encrypted.
+    dir: "{{.STACK_DIR}}"
+    cmds:
+      - ansible-vault encrypt {{.SECRET_FILE}}
+
+  # --- Manually decrypt a secrets file ---
+  secrets:decrypt:
+    desc: "Decrypts a secrets file to plain text. USE WITH EXTREME CAUTION."
+    summary: |
+      DECRYPTS the secrets file and saves it as plain text.
+      WARNING: NEVER commit a decrypted file to Git.
+      This is only for emergency debugging. Re-encrypt it immediately.
+    dir: "{{.STACK_DIR}}"
+    cmds:
+      - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
+      - ansible-vault decrypt --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") {{.SECRET_FILE}}

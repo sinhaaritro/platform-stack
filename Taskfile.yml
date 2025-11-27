@@ -2,11 +2,37 @@
 
 version: "3"
 
-vars:
-  GREETING: Hello, World!
+includes:
+  tofu:
+    taskfile: ./tofu/Taskfile.yml
+    dir: .
 
 tasks:
   default:
-    cmds:
-      - echo "{{.GREETING}}"
+    desc: "Lists all available tasks from all included files."
     silent: true
+    cmds:
+      - task --list-all
+
+  git:clone-repository:
+    desc: "Clone the github repository"
+    cmds:
+      - |
+        echo "Clone the github repository..."
+        git clone git@github.com:sinhaaritro/platform-stack.git
+        echo "Moving to the folder"
+        cd platform-stack/
+        echo "Use other tasks like `task --list-all`"
+    preconditions:
+      - sh: "! command -v git"
+        msg: "Git is already installed."
+
+  git:pull-git-changes:
+    desc: "Pull Latest Changes"
+    cmds:
+      - |
+        cd ~/platform-stack/
+        git pull
+    preconditions:
+      - sh: "! command -v git"
+        msg: "Git is already installed."

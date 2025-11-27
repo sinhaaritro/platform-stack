@@ -1,0 +1,5 @@
+# Rename this file to terraform.tfvars and fill in your Proxmox details.
+# Make sure to add terraform.tfvars to your .gitignore file to avoid committing secrets.
+
+proxmox_api_url = "https://your-proxmox-server:8006/api2/json"
+proxmox_api_token = "your-api-token"
