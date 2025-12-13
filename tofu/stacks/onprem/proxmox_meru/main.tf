@@ -67,16 +67,34 @@ resource "null_resource" "image_builder" {
           i=$((i+1))
         done
 
-        # Step 3c: Run virt-customize to perform the offline installation.
-        echo "--- Customizing image with virt-customize ---"
-        sudo virt-customize -a "$IMAGE_FILE" \
-          --upload "dependency-0.deb:/tmp/dependency-0.deb" \
-          --upload "guest-agent.deb:/tmp/guest-agent.deb" \
-          --run-command "dpkg -i /tmp/dependency-0.deb" \
-          --run-command "dpkg -i /tmp/guest-agent.deb" \
-          --timezone "Asia/Kolkata" \
-          --run-command "cloud-init clean --logs --seed" \
-          --run-command "truncate -s 0 /etc/machine-id"
+        # Step 3c: Build the virt-customize command dynamically
+        echo "--- Constructing virt-customize command ---"
+        
+        VIRT_CMD="sudo virt-customize -a $IMAGE_FILE"
+        
+        # Add guest agent
+        VIRT_CMD="$VIRT_CMD --upload guest-agent.deb:/tmp/guest-agent.deb --run-command 'dpkg -i /tmp/guest-agent.deb'"
+
+        # Add all dependencies
+        for deb in dependency-*.deb; do
+          if [ -f "$deb" ]; then
+             VIRT_CMD="$VIRT_CMD --upload $deb:/tmp/$deb --run-command 'dpkg -i /tmp/$deb'"
+          fi
+        done
+
+        # Add System Configuration changes
+        # 1. Enable SSH (Critical Fix) - using manual symlink for reliability in chroot
+        # 2. Set Timezone
+        # 3. Clean Cloud-Init logs
+        VIRT_CMD="$VIRT_CMD --run-command 'mkdir -p /etc/systemd/system/multi-user.target.wants'"
+        VIRT_CMD="$VIRT_CMD --run-command 'ln -sf /usr/lib/systemd/system/ssh.service /etc/systemd/system/multi-user.target.wants/ssh.service'"
+        VIRT_CMD="$VIRT_CMD --timezone Asia/Kolkata"
+        VIRT_CMD="$VIRT_CMD --run-command 'cloud-init clean --logs --seed'"
+        VIRT_CMD="$VIRT_CMD --run-command 'truncate -s 0 /etc/machine-id'"
+
+        echo "--- Executing: $VIRT_CMD ---"
+        eval "$VIRT_CMD"
+
       else
         echo "--- Image file '$IMAGE_FILE' already exists locally. Skipping download and customization. ---"
       fi

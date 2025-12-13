@@ -29,7 +29,7 @@ locals {
         )) : {
 
         # 3. Create the simple mapping object for each group.
-        group = group_name
+        group = replace(group_name, "-", "_")
         host  = vm.name
       } if group_name != null
     ]

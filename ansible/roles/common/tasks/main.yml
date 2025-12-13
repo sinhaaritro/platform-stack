@@ -1,0 +1,13 @@
+# tasks/main.yml
+
+- name: Configure system settings
+  ansible.builtin.include_tasks: system.yml
+
+- name: Install packages
+  ansible.builtin.include_tasks: packages.yml
+
+- name: Manage users
+  ansible.builtin.include_tasks: users.yml
+
+- name: Configure SSH
+  ansible.builtin.include_tasks: ssh.yml

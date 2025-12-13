@@ -55,7 +55,7 @@ resource "proxmox_virtual_environment_vm" "module_vm" {
   network_device {
     bridge   = var.vlan_bridge
     vlan_id  = var.vlan_id
-    firewall = true
+    firewall = false
     model    = "virtio"
   }
 

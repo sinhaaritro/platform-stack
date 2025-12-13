@@ -9,4 +9,4 @@
   become: true # This tells Ansible to use 'sudo' for all tasks in this play.
 
   roles:
-    - role: common-base
+    - role: common

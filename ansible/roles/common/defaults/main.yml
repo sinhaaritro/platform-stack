@@ -1,0 +1,36 @@
+# defaults/main.yml
+
+# List of packages to install
+common_packages:
+  - htop
+  - neofetch
+  - unzip
+  - jq
+  - git
+  - curl
+  - unattended-upgrades
+  - vim
+  - wget
+  - tree
+
+# List of users to create
+# Example:
+# common_users:
+#   - name: dev
+#     groups: sudo
+#     shell: /bin/bash
+#     ssh_key: "ssh-rsa ..."
+common_users: []
+
+# SSH Configuration
+common_ssh_config:
+  PermitRootLogin: "no"
+  PasswordAuthentication: "no"
+  X11Forwarding: "no"
+
+# System Configuration
+common_timezone: "UTC"
+
+# Git Configuration
+common_git_name: "aritrosinha"
+common_git_email: "sinhaaritro@gmail.com"

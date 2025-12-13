@@ -1,0 +1,18 @@
+galaxy_info:
+  author: Aritro
+  role_name: common
+  namespace: internal
+  description: Common role for base system configuration
+  company: None
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+  galaxy_tags:
+    - common
+    - system
+    - security
+
+dependencies: []
