@@ -88,18 +88,18 @@ variable "resources" {
   description = "A map of virtual machines or LXC to create. The map key is used as the default VM name."
 
   type = map(object({
-    # --- Common Metadata (applies to both VM and LXC) ---
-    enabled               = optional(bool, true)
-    type                  = string # Must be 'vm' or 'lxc'
-    node_name             = optional(string)
-    description           = optional(string, "Managed by OpenTofu")
-    tags                  = optional(list(string))
-    on_boot               = optional(bool, false)
-    started               = optional(bool, true)
-    cloud_init_secret_key = optional(string)
+    # Common Metadata (applies to both VM and LXC)
+    enabled         = optional(bool, true)
+    type            = string # Must be 'vm' or 'lxc'
+    node_name       = optional(string)
+    description     = optional(string, "Managed by OpenTofu")
+    tags            = optional(list(string))
+    on_boot         = optional(bool, false)
+    started         = optional(bool, true)
+    cloud_init_user = optional(string)
 
     # We can define a this cluster level that will be passed down at the node level.
-    # --- Discriminating Union: VM Configuration ---
+    # Discriminating Union: VM Configuration
     # This block should ONLY be provided if type = "vm".
     vm_config = optional(object({
       cpu_cores         = optional(number, 1)
@@ -110,10 +110,11 @@ variable "resources" {
       disk_size         = optional(number, 8)
       disk_ssd          = optional(bool, false)
       vlan_bridge       = optional(string, "vmbr0")
-      vlan_id           = optional(number, 1)
+      vlan_id           = optional(number, 0)
+      os_version        = optional(string)
     }))
 
-    # --- Discriminating Union: LXC Configuration ---
+    # Discriminating Union: LXC Configuration
     # This block should ONLY be provided if type = "lxc".
     lxc_config = optional(object({
       unprivileged      = optional(bool, true)
@@ -127,23 +128,23 @@ variable "resources" {
       cpu_cores         = optional(number, 1)
       memory_size       = optional(number, 1024)
       vlan_bridge       = optional(string, "vmbr0")
-      vlan_id           = optional(number, 1)
+      vlan_id           = optional(number, 0)
     }))
 
 
-    # --- Node Definitions ---
+    # Node Definitions
     # We can define a node level that will be override the values passed from the cluster level.
     nodes = map(object({
-      vm_id                 = number
-      enabled               = optional(bool)
-      node_name             = optional(string)
-      description           = optional(string)
-      tags                  = optional(list(string))
-      on_boot               = optional(bool)
-      started               = optional(bool)
-      cloud_init_secret_key = optional(string)
+      vm_id           = number
+      enabled         = optional(bool)
+      node_name       = optional(string)
+      description     = optional(string)
+      tags            = optional(list(string))
+      on_boot         = optional(bool)
+      started         = optional(bool)
+      cloud_init_user = optional(string)
 
-      # --- Node-level Overrides (also a discriminating union) ---
+      # Node-level Overrides (also a discriminating union)
       vm_config = optional(object({
         cpu_cores         = optional(number)
         cpu_sockets       = optional(number)
@@ -155,6 +156,7 @@ variable "resources" {
         vlan_bridge       = optional(string)
         vlan_id           = optional(number)
         ipv4_address      = optional(string, "dhcp")
+        os_version        = optional(string)
       }))
 
       lxc_config = optional(object({

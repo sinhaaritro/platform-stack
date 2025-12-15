@@ -6,15 +6,20 @@
 # to decide how to act.
 # -----------------------------------------------------------------------------
 
-# --- STEP 3: PREPARE LOCAL IMAGE ON CONTROL MACHINE (CONDITIONAL) ---
+# STEP 3: PREPARE LOCAL IMAGE ON CONTROL MACHINE (CONDITIONAL)
 # This resource only runs if the 'image_needs_to_be_built' flag (calculated
 # in 'locals.tf') is set to 1. Its job is to ensure the customized .qcow2
 # file is present and ready on the local disk of the Control Machine.
 resource "null_resource" "image_builder" {
+  for_each = local.final_image_defs
+
   # The trigger ensures that if the upstream hash changes (forcing a rebuild),
   # this resource will be replaced, causing the provisioner to run again.
   triggers = {
-    image_sha256 = local.upstream_image_hash
+    image_sha256 = each.value.upstream_hash
+    # Check physical file existence to detect manual deletion.
+    # If file goes missing, this value changes (due to timestamp), forcing rebuild.
+    file_state = fileexists(each.value.target_path) ? "exists" : "missing-${timestamp()}"
   }
 
   # The 'create' provisioner runs only when this resource is first created
@@ -25,39 +30,47 @@ resource "null_resource" "image_builder" {
       set -e
 
       # This is the flag passed from our locals.tf calculation
-      BUILD_NEEDED=${local.image_needs_to_be_built}
+      BUILD_NEEDED=${local.build_decisions[each.key]}
 
-      # --- First Check: Is a build needed at all? ---
+      # -----------------------------------------------------------------------
+      # PARTIAL FAILURE HANDLING:
+      # Since we use for_each, each image build is an independent OpenTofu resource.
+      # If one version fails (e.g. 24.04 succeeds, 25.04 fails):
+      # 1. The successful resource is saved to state.
+      # 2. The failed resource is marked 'tainted' (or not saved).
+      # 3. The script cleans up the corrupted artifact (exit 1 + rm).
+      # 4. On the NEXT 'tofu apply', OpenTofu will only retry the failed one.
+      # -----------------------------------------------------------------------
+
+      # First Check: Is a build needed at all?
       if [ "$BUILD_NEEDED" -eq 0 ]; then
-        echo "Image already exists on Proxmox. All local preparation is skipped."
+        echo "Image for version ${each.key} already exists on Proxmox. Local preparation skipped."
         exit 0
       fi
 
       # If we are here, a build/upload is required.
       ARTIFACT_DIR="${local.temp_artifacts_path}"
-      IMAGE_FILE="${local.target_image_filename}"
+      IMAGE_FILE="${each.value.target_path}"
+      SOURCE_URL="${each.value.base_url}/${each.value.upstream_filename}"
 
       # Create the temp directory if it doesn't exist
-      echo "--- Ensuring temp artifact directory exists: $ARTIFACT_DIR ---"
+      echo "Ensuring temp artifact directory exists: $ARTIFACT_DIR"
       mkdir -p "$ARTIFACT_DIR"
       cd "$ARTIFACT_DIR"
-      
+
       # Step 3a: Check if the target file already exists locally.
       if [ ! -f "$IMAGE_FILE" ]; then
 
-        # Step 3b: If not, download the base image and dependencies.
-        SOURCE_URL="${local.base_url}/${local.upstream_image_filename}"
-        
-        echo "--- Image not found locally. Downloading from $SOURCE_URL ---"
+        echo "Image not found locally. Downloading from $SOURCE_URL"
         wget -O "$IMAGE_FILE" "$SOURCE_URL"
 
-        echo "--- Downloading guest agent and its dependencies ---"
+        echo "Downloading guest agent and its dependencies"
         apt-get download ${local.agent_package}
         for dep in ${join(" ", local.agent_dependencies)}; do
           apt-get download $dep
         done
 
-        echo "--- Renaming downloaded packages for consistency ---"
+        echo "Renaming downloaded packages for consistency"
         AGENT_DEB_SRC=$(ls ${local.agent_package}*.deb | head -n 1)
         mv "$AGENT_DEB_SRC" "guest-agent.deb"
         i=0
@@ -68,35 +81,44 @@ resource "null_resource" "image_builder" {
         done
 
         # Step 3c: Build the virt-customize command dynamically
-        echo "--- Constructing virt-customize command ---"
-        
-        VIRT_CMD="sudo virt-customize -a $IMAGE_FILE"
-        
-        # Add guest agent
-        VIRT_CMD="$VIRT_CMD --upload guest-agent.deb:/tmp/guest-agent.deb --run-command 'dpkg -i /tmp/guest-agent.deb'"
+        echo "Constructing virt-customize command"
 
-        # Add all dependencies
+        VIRT_CMD="sudo virt-customize -a $IMAGE_FILE"
+
+        # 1. Install Dependencies FIRST
         for deb in dependency-*.deb; do
           if [ -f "$deb" ]; then
              VIRT_CMD="$VIRT_CMD --upload $deb:/tmp/$deb --run-command 'dpkg -i /tmp/$deb'"
           fi
         done
 
-        # Add System Configuration changes
-        # 1. Enable SSH (Critical Fix) - using manual symlink for reliability in chroot
-        # 2. Set Timezone
-        # 3. Clean Cloud-Init logs
+        # 2. Install Guest Agent SECOND
+        VIRT_CMD="$VIRT_CMD --upload guest-agent.deb:/tmp/guest-agent.deb --run-command 'dpkg -i /tmp/guest-agent.deb'"
+
+        # 3. Add System Configuration changes
+        # - Enable SSH (Critical Fix)
+        # - Set Timezone
+        # - Clean Cloud-Init logs
         VIRT_CMD="$VIRT_CMD --run-command 'mkdir -p /etc/systemd/system/multi-user.target.wants'"
         VIRT_CMD="$VIRT_CMD --run-command 'ln -sf /usr/lib/systemd/system/ssh.service /etc/systemd/system/multi-user.target.wants/ssh.service'"
         VIRT_CMD="$VIRT_CMD --timezone Asia/Kolkata"
         VIRT_CMD="$VIRT_CMD --run-command 'cloud-init clean --logs --seed'"
         VIRT_CMD="$VIRT_CMD --run-command 'truncate -s 0 /etc/machine-id'"
 
-        echo "--- Executing: $VIRT_CMD ---"
-        eval "$VIRT_CMD"
+        # 4. Verify Installation
+        VIRT_CMD="$VIRT_CMD --run-command 'dpkg -s qemu-guest-agent'"
+
+        echo "Executing: $VIRT_CMD"
+        
+        # Execute and check for failure. If failed, delete the corrupt image so we don't skip build next time.
+        if ! eval "$VIRT_CMD"; then
+          echo "ERROR: Customization failed. Deleting corrupted artifact '$IMAGE_FILE'..."
+          rm -f "$IMAGE_FILE"
+          exit 1
+        fi
 
       else
-        echo "--- Image file '$IMAGE_FILE' already exists locally. Skipping download and customization. ---"
+        echo "Image file '$IMAGE_FILE' already exists locally. Skipping download and customization."
       fi
     EOT
   }
@@ -126,15 +148,15 @@ resource "null_resource" "image_builder" {
 # Proxmox datastore. It is also controlled by the 'image_needs_to_be_built'
 # flag and will be completely skipped if the image already exists on Proxmox.
 # -----------------------------------------------------------------------------
-resource "proxmox_virtual_environment_file" "ubuntu_custom_image" {
-  # This resource only runs if the image_builder was scheduled to run.
-  count = max(local.image_needs_to_be_built, length(proxmox_virtual_environment_file.ubuntu_custom_image))
+resource "proxmox_virtual_environment_file" "custom_image_upload" {
+  # Only create this resource for versions that actually need to be built/uploaded
+  # Remove conditional filtering to prevent creation/deletion loop.
+  # The resource must always be defined so Tofu manages it.
+  for_each = local.final_image_defs
 
-  # This ensures that the file upload does not start until the local
-  # image preparation script (Step 3) has finished successfully.
-  # depends_on = [null_resource.image_builder]
+  depends_on = [null_resource.image_builder]
 
-  # --- Configuration for the upload ---
+  # Configuration for the upload
   node_name    = var.target_node
   datastore_id = var.target_datastore
   # 'import' is the correct content type for staging disk images.
@@ -142,10 +164,8 @@ resource "proxmox_virtual_environment_file" "ubuntu_custom_image" {
 
   # The source file on the local Control Machine.
   source_file {
-    # This is the key: We are forcing this path to be computed only AFTER
-    # the null_resource has run by including one of its attributes.
-    # The id changes on every run, forcing the provider to re-evaluate the path.
-    path = null_resource.image_builder.id != "" ? local.target_image_path : local.target_image_path
+    # We reference the image_builder to ensure ordering, though depends_on handles it too.
+    path = null_resource.image_builder[each.key].id != "" ? each.value.target_path : each.value.target_path
   }
 }
 
@@ -228,33 +248,34 @@ locals {
 
       # Disk
       disk_datastore_id = coalesce(item.node_override.vm_config.disk_datastore_id, item.app_group.vm_config.disk_datastore_id, var.target_datastore)
-      # source_image_path         = proxmox_virtual_environment_file.ubuntu_custom_image[count.index],
+      # source_image_path         = proxmox_virtual_environment_file.custom_image_upload[count.index],
       disk_size = coalesce(item.node_override.vm_config.disk_size, item.app_group.vm_config.disk_size)
       disk_ssd  = coalesce(item.node_override.vm_config.disk_ssd, item.app_group.vm_config.disk_ssd)
 
       # Network
       vlan_bridge = coalesce(item.node_override.vm_config.vlan_bridge, item.app_group.vm_config.vlan_bridge)
       vlan_id     = coalesce(item.node_override.vm_config.vlan_id, item.app_group.vm_config.vlan_id)
+      os_version  = coalesce(item.node_override.vm_config.os_version, item.app_group.vm_config.os_version)
 
       # Cloud-Init
       ipv4_address = item.node_override.vm_config.ipv4_address
-      user_account_username = ((var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")] != null &&
-        var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].username != null &&
-        trimspace(var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].username) != "") ?
-        var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].username :
-        "ERROR: A valid 'username' could not be found for VM '${item.node_key}'. The secret '${coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")}' is either missing from 'user_credentials' or does not contain the key 'username'." [999]
+      user_account_username = ((var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")] != null &&
+        var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].username != null &&
+        trimspace(var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].username) != "") ?
+        var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].username :
+        "ERROR: A valid 'username' could not be found for VM '${item.node_key}'. The secret '${coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")}' is either missing from 'user_credentials' or does not contain the key 'username'." [999]
       ),
-      user_account_password = ((var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")] != null &&
-        var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].password != null &&
-        trimspace(var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].password) != "") ?
-        var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].password :
-        "ERROR: A valid 'password' could not be found for VM '${item.node_key}'. The secret '${coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")}' is either missing from 'user_credentials' or does not contain the key 'password'." [999]
+      user_account_password = ((var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")] != null &&
+        var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].password != null &&
+        trimspace(var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].password) != "") ?
+        var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].password :
+        "ERROR: A valid 'password' could not be found for VM '${item.node_key}'. The secret '${coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")}' is either missing from 'user_credentials' or does not contain the key 'password'." [999]
       ),
-      user_account_keys = ((var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")] != null &&
-        var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].ssh_public_keys != null &&
-        var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].ssh_public_keys != []) ?
-        var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].ssh_public_keys :
-        "ERROR: A valid 'ssh_public_keys' could not be found for VM '${item.node_key}'. The secret '${coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")}' is either missing from 'user_credentials' or does not contain the key 'ssh_public_keys'." [999]
+      user_account_keys = ((var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")] != null &&
+        var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].ssh_public_keys != null &&
+        var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].ssh_public_keys != []) ?
+        var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].ssh_public_keys :
+        "ERROR: A valid 'ssh_public_keys' could not be found for VM '${item.node_key}'. The secret '${coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")}' is either missing from 'user_credentials' or does not contain the key 'ssh_public_keys'." [999]
       ),
     }
   }
@@ -262,7 +283,7 @@ locals {
   all_potential_lxc = {
     for item in local.flattened_lxcs :
     item.node_key => {
-      # --- Now, construct the final, flat object for the LXC module ---
+      # Now, construct the final, flat object for the LXC module
       app_key = item.app_key
       name    = item.node_key
       type    = item.app_group.type
@@ -288,7 +309,7 @@ locals {
 
       # Disk
       disk_datastore_id = coalesce(item.node_override.lxc_config.disk_datastore_id, item.app_group.lxc_config.disk_datastore_id, var.target_datastore)
-      #  template_file_id         = proxmox_virtual_environment_file.ubuntu_custom_image[count.index],
+      #  template_file_id         = proxmox_virtual_environment_file.custom_image_upload[count.index],
       os_type   = coalesce(item.node_override.lxc_config.os_type, item.app_group.lxc_config.os_type)
       disk_size = coalesce(item.node_override.lxc_config.disk_size, item.app_group.lxc_config.disk_size)
 
@@ -298,18 +319,19 @@ locals {
 
       # Cloud-Init
       ipv4_address = item.node_override.lxc_config.ipv4_address
-      user_account_password = ((var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")] != null &&
-        var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].password != null &&
-        trimspace(var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].password) != "") ?
-        var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].password :
-        "ERROR: A valid 'password' could not be found for VM '${item.node_key}'. The secret '${coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")}' is either missing from 'user_credentials' or does not contain the key 'password'." [999]
+      user_account_password = ((var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")] != null &&
+        var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].password != null &&
+        trimspace(var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].password) != "") ?
+        var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].password :
+        "ERROR: A valid 'password' could not be found for VM '${item.node_key}'. The secret '${coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")}' is either missing from 'user_credentials' or does not contain the key 'password'." [999]
       ),
-      user_account_keys = ((var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")] != null &&
-        var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].ssh_public_keys != null &&
-        var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].ssh_public_keys != []) ?
-        var.user_credentials[coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")].ssh_public_keys :
-        "ERROR: A valid 'ssh_public_keys' could not be found for VM '${item.node_key}'. The secret '${coalesce(item.node_override.cloud_init_secret_key, item.app_group.cloud_init_secret_key, "default_user")}' is either missing from 'user_credentials' or does not contain the key 'ssh_public_keys'." [999]
-    ), }
+      user_account_keys = ((var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")] != null &&
+        var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].ssh_public_keys != null &&
+        var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].ssh_public_keys != []) ?
+        var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].ssh_public_keys :
+        "ERROR: A valid 'ssh_public_keys' could not be found for VM '${item.node_key}'. The secret '${coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")}' is either missing from 'user_credentials' or does not contain the key 'ssh_public_keys'." [999]
+      ),
+    }
   }
 
   #    We iterate over our fully resolved list of all potential VMs.
@@ -335,7 +357,7 @@ module "proxmox_vms" {
   source   = "../../../modules/proxmox_vm"
   for_each = local.final_vm_list
 
-  depends_on = [proxmox_virtual_environment_file.ubuntu_custom_image]
+  depends_on = [proxmox_virtual_environment_file.custom_image_upload]
 
   # Main info
   vm_id       = each.value.vm_id
@@ -354,9 +376,10 @@ module "proxmox_vms" {
 
   # Disk
   disk_datastore_id = each.value.disk_datastore_id
-  source_image_path = local.final_image_path
   disk_size         = each.value.disk_size
   disk_ssd          = each.value.disk_ssd
+  source_image_path = local.final_image_paths[each.value.os_version]
+
 
   # Network
   vlan_bridge = each.value.vlan_bridge
@@ -379,7 +402,7 @@ module "module_lxc" {
   source   = "../../../modules/proxmox_lxc"
   for_each = local.final_lxc_list
 
-  depends_on = [proxmox_virtual_environment_file.ubuntu_custom_image]
+  depends_on = [proxmox_virtual_environment_file.custom_image_upload]
 
   # Main info
   vm_id       = each.value.vm_id
@@ -456,7 +479,7 @@ module "module_lxc" {
 #   disk {
 #     interface    = "scsi0"
 #     datastore_id = "local-thin"
-#     import_from  = proxmox_virtual_environment_file.ubuntu_custom_image.id
+#     import_from  = proxmox_virtual_environment_file.custom_image_upload.id
 #     size         = 10
 #     cache        = "writeback"
 #     discard      = "on"

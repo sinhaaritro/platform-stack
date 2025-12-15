@@ -23,51 +23,54 @@ resources = {
     type        = "vm"
     node_name   = "moo-moo"
     description = "Web servers. Ubuntu 24.04."
-    tags        = ["web", "Ansible"]
+    tags        = ["web", "ansible"]
 
     vm_config = {
       disk_datastore_id = "local-thin"
+      os_version        = "24.04"
     }
 
     nodes = {
       "web-server-01" = {
-        vm_id                 = 700
-        tags                  = ["web", "ubuntu"]
-        cloud_init_secret_key = "web_admins"
+        vm_id           = 700
+        tags            = ["web", "ubuntu"]
+        cloud_init_user = "web_admins"
 
         vm_config = {
           disk_datastore_id = "data-storage"
-          ipv4_address      = "192.168.0.101/24"
+          ipv4_address      = "192.168.0.96/24"
         }
       },
       "web-server-02" = {
-        vm_id                 = 701
-        tags                  = ["web", "ubuntu"]
-        cloud_init_secret_key = "dev"
+        vm_id           = 701
+        tags            = ["web", "ubuntu"]
+        cloud_init_user = "web_admins"
         vm_config = {
           disk_datastore_id = "data-storage"
-          ipv4_address      = "192.168.0.102/24"
+          ipv4_address      = "192.168.0.97/24"
         }
       }
     }
   },
 
   "db_server" = {
-    enabled               = true
-    type                  = "vm"
-    node_name             = "moo-moo"
-    description           = "Primary database servers. Ubuntu 24.04."
-    tags                  = ["db", "Ansible"]
-    cloud_init_secret_key = "dev"
+    enabled         = true
+    type            = "vm"
+    node_name       = "moo-moo"
+    description     = "Primary database servers. Ubuntu 24.04."
+    tags            = ["db", "ansible"]
+    cloud_init_user = "db_admins"
 
-    vm_config = {}
+    vm_config = {
+      os_version = "25.04"
+    }
 
     nodes = {
       "db-server-01" = {
         vm_id = 600
         tags  = ["mongo"]
         vm_config = {
-          ipv4_address = "192.168.0.103/24"
+          ipv4_address = "192.168.0.98/24"
         }
       },
       "db-server-02" = {
@@ -76,19 +79,19 @@ resources = {
         tags        = ["pg"]
         vm_config = {
           disk_size    = 16
-          ipv4_address = "192.168.0.104/24"
+          ipv4_address = "192.168.0.99/24"
         }
       },
     }
   },
 
   "support_servers" = {
-    enabled               = true
-    type                  = "lxc"
-    node_name             = "moo-moo"
-    description           = "Primary database servers. Ubuntu 24.04."
-    tags                  = ["db", "Ansible"]
-    cloud_init_secret_key = "dev"
+    enabled         = false
+    type            = "lxc"
+    node_name       = "moo-moo"
+    description     = "Primary database servers. Ubuntu 24.04."
+    tags            = ["db", "ansible"]
+    cloud_init_user = "dev"
 
     lxc_config = {
       template_file_id = "local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst"

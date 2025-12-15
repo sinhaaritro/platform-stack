@@ -9,39 +9,39 @@ output "DEBUG_Diagnostic" {
 
   value = {
     "STEP_1_GATHER_INFO" = {
-      "a_Upstream_Checksum_URL"   = local.checksum_url
+      "a_OS_Images_Config"        = local.os_images
       "b_Proxmox_Datastore_Files" = local.existing_files_on_proxmox
     }
     "STEP_2_DECISION_MAKING" = {
-      "a_Upstream_Image_Hash"        = local.upstream_image_hash
-      "b_Target_Image_Filename"      = local.target_image_filename
-      "c_Image_Exists_on_Proxmox"    = local.image_already_exists_on_proxmox
-      "d_Decision_Build_Image_Count" = local.image_needs_to_be_built
+      "a_Image_State_Hashes"       = local.image_state
+      "b_Target_Image_Definitions" = local.final_image_defs
+      "c_Build_Decisions" = {
+        for k, v in local.build_decisions : k => (v == 1 ? "Build Required" : "No Build Needed")
+      }
     }
     "STEP_3_PREPARE_LOCAL_IMAGE" = {
-      "a_Image_Prepper_Action"           = local.image_needs_to_be_built == 1 ? "Resource will be created/run." : "Skipped (image already exists on Proxmox)."
-      "b_Local_File_Exists_Before_Apply" = fileexists(local.target_image_path)
+      "a_Description" = "Check 'null_resource.image_builder' state for per-version build status."
     }
     "STEP_4_UPLOAD_IMAGE" = {
-      "a_Image_Upload_Action" = local.image_needs_to_be_built == 1 ? "Image was uploaded with ID: ${proxmox_virtual_environment_file.ubuntu_custom_image[0].id}" : "Skipped (image already exists on Proxmox)."
+      "a_Description" = "Check 'proxmox_virtual_environment_file.custom_image_upload' state for per-version upload status."
     }
     "STEP_5_FLATTEN_AND_MERGE" = {
       # "resources"              = var.resources
-      "a_Filtered_QEMU_Groups" = local.vm_groups
-      "b_Filtered_LXC_Groups"  = local.lxc_groups
-      "c_Flattened_VM_Map"     = local.flattened_vms
-      "d_Flattened_LXC_Map"    = local.flattened_lxcs
-      "e_Potential_VM_List"    = local.all_potential_vms
-      "f_Potential_LXC_List"   = local.all_potential_lxc
-      "g_VM_List"              = local.final_vm_list
-      "h_LXC_List"             = local.final_lxc_list
+      "a_Filtered_VM_Groups"  = local.vm_groups
+      "b_Filtered_LXC_Groups" = local.lxc_groups
+      "c_Flattened_VM_Map"    = local.flattened_vms
+      "d_Flattened_LXC_Map"   = local.flattened_lxcs
+      "e_Potential_VM_List"   = local.all_potential_vms
+      "f_Potential_LXC_List"  = local.all_potential_lxc
+      "g_VM_List"             = local.final_vm_list
+      "h_LXC_List"            = local.final_lxc_list
     }
   }
 }
 
 
-output "created_qemu_vms" {
-  description = "A map of all QEMU virtual machines created by this stack, keyed by their names."
+output "created_vms" {
+  description = "A map of all virtual machines created by this stack, keyed by their names."
 
   # This 'for' expression iterates over the 'proxmox_vms' module instances.
   # For each instance, it creates an entry in the output map.

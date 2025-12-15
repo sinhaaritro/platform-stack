@@ -59,7 +59,7 @@ resource "proxmox_virtual_environment_container" "module_lxc" {
   # ----------------------------------------------
 
   # --- Lifecycle Management ---
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
