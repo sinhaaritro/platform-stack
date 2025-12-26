@@ -111,6 +111,7 @@ variable "resources" {
       disk_ssd          = optional(bool, false)
       vlan_bridge       = optional(string, "vmbr0")
       vlan_id           = optional(number, 0)
+      ipv4_gateway      = optional(string)
       os_version        = optional(string)
     }))
 
@@ -129,6 +130,7 @@ variable "resources" {
       memory_size       = optional(number, 1024)
       vlan_bridge       = optional(string, "vmbr0")
       vlan_id           = optional(number, 0)
+      ipv4_gateway      = optional(string)
     }))
 
 
@@ -156,6 +158,7 @@ variable "resources" {
         vlan_bridge       = optional(string)
         vlan_id           = optional(number)
         ipv4_address      = optional(string, "dhcp")
+        ipv4_gateway      = optional(string)
         os_version        = optional(string)
       }))
 
@@ -173,6 +176,7 @@ variable "resources" {
         vlan_bridge       = optional(string)
         vlan_id           = optional(number)
         ipv4_address      = optional(string, "dhcp")
+        ipv4_gateway      = optional(string)
       }))
     }))
   }))

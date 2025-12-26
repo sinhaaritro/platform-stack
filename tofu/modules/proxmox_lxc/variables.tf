@@ -127,6 +127,11 @@ variable "ipv4_address" {
   type        = string
 }
 
+variable "ipv4_gateway" {
+  description = "The IPv4 gateway for the network interface (e.g., '1.2.3.1')."
+  type        = string
+}
+
 variable "user_account_password" {
   description = "The root password for the container."
   type        = string

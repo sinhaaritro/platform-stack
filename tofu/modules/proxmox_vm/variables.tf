@@ -102,6 +102,11 @@ variable "ipv4_address" {
   type        = string
 }
 
+variable "ipv4_gateway" {
+  description = "The IPv4 gateway for cloud-init (e.g., '1.2.3.1')."
+  type        = string
+}
+
 variable "user_account_username" {
   description = "The username for the default cloud-init user."
   type        = string

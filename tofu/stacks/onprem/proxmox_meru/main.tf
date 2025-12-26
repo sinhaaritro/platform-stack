@@ -259,6 +259,7 @@ locals {
 
       # Cloud-Init
       ipv4_address = item.node_override.vm_config.ipv4_address
+      ipv4_gateway = coalesce(item.node_override.vm_config.ipv4_gateway, item.app_group.vm_config.ipv4_gateway, "192.168.0.1")
       user_account_username = ((var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")] != null &&
         var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].username != null &&
         trimspace(var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].username) != "") ?
@@ -319,6 +320,7 @@ locals {
 
       # Cloud-Init
       ipv4_address = item.node_override.lxc_config.ipv4_address
+      ipv4_gateway = coalesce(item.node_override.lxc_config.ipv4_gateway, item.app_group.lxc_config.ipv4_gateway, "192.168.0.1")
       user_account_password = ((var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")] != null &&
         var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].password != null &&
         trimspace(var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].password) != "") ?
@@ -387,6 +389,7 @@ module "proxmox_vms" {
 
   # Cloud-Init
   ipv4_address          = each.value.ipv4_address
+  ipv4_gateway          = each.value.ipv4_gateway
   user_account_username = each.value.user_account_username
   user_account_password = each.value.user_account_password
   user_account_keys     = each.value.user_account_keys
@@ -439,6 +442,7 @@ module "module_lxc" {
   # Cloud-Init
   hostname              = each.value.name
   ipv4_address          = each.value.ipv4_address
+  ipv4_gateway          = each.value.ipv4_gateway
   user_account_password = each.value.user_account_password
   user_account_keys     = each.value.user_account_keys
 }
