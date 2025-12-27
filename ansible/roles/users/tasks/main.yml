@@ -1,0 +1,10 @@
+# tasks/main.yml
+---
+- name: Manage user accounts
+  ansible.builtin.include_tasks: accounts.yml
+
+- name: Manage SSH keys
+  ansible.builtin.include_tasks: ssh_keys.yml
+
+- name: Configure user Git settings
+  ansible.builtin.include_tasks: git_config.yml

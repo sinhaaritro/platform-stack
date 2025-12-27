@@ -1,0 +1,7 @@
+# tasks/main.yml
+---
+- name: Install security packages
+  ansible.builtin.include_tasks: packages.yml
+
+- name: Configure SSH
+  ansible.builtin.include_tasks: ssh.yml

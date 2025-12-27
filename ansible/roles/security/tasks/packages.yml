@@ -1,0 +1,11 @@
+# tasks/packages.yml
+---
+- name: Install security packages
+  ansible.builtin.apt:
+    name:
+      - unattended-upgrades
+      # - fail2ban  # We will enable these later for robustness
+      # - ufw       # We will enable these later for robustness
+    state: present
+    update_cache: true
+  tags: [security, packages]

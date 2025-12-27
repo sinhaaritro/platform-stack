@@ -1,0 +1,18 @@
+# tasks/packages.yml
+---
+- name: Install base utilities
+  ansible.builtin.apt:
+    name: "{{ base_packages }}"
+    state: present
+  tags: [base, packages]
+
+# Useful cleanup to keep VM disk images smaller
+- name: Remove useless packages from the cache
+  ansible.builtin.apt:
+    autoclean: true
+  tags: [base, maintenance]
+
+- name: Remove dependencies that are no longer required
+  ansible.builtin.apt:
+    autoremove: true
+  tags: [base, maintenance]

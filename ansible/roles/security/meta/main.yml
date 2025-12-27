@@ -1,8 +1,11 @@
+# meta/main.yml
+# TODO: Add Firewall management (UFW) and Fail2Ban to ensure your VMs are actually secure
+
 galaxy_info:
   author: Aritro
-  role_name: common
+  role_name: security
   namespace: internal
-  description: Common role for base system configuration
+  description: Basic system security hardening (SSH and Updates)
   company: None
   license: MIT
   min_ansible_version: "2.9"
@@ -11,8 +14,8 @@ galaxy_info:
       versions:
         - all
   galaxy_tags:
-    - common
-    - system
     - security
+    - ssh
+    - hardening
 
 dependencies: []

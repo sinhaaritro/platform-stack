@@ -1,6 +1,0 @@
-# tasks/system.yml
-
-- name: Set timezone
-  community.general.timezone:
-    name: "{{ common_timezone }}"
-  tags: [system, timezone]
