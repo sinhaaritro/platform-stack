@@ -4,40 +4,40 @@
 # This file contains outputs used for debugging and verifying the plan.
 # -----------------------------------------------------------------------------
 
-# output "DEBUG_Diagnostic" {
-#   description = "A summary of the data gathering and decision-making steps."
+output "DEBUG_Diagnostic" {
+  description = "A summary of the data gathering and decision-making steps."
 
-#   value = {
-#     "STEP_1_GATHER_INFO" = {
-#       "a_OS_Images_Config"        = local.os_images
-#       "b_Proxmox_Datastore_Files" = local.existing_files_on_proxmox
-#     }
-#     "STEP_2_DECISION_MAKING" = {
-#       "a_Image_State_Hashes"       = local.image_state
-#       "b_Target_Image_Definitions" = local.final_image_defs
-#       "c_Build_Decisions" = {
-#         for k, v in local.build_decisions : k => (v == 1 ? "Build Required" : "No Build Needed")
-#       }
-#     }
-#     "STEP_3_PREPARE_LOCAL_IMAGE" = {
-#       "a_Description" = "Check 'null_resource.image_builder' state for per-version build status."
-#     }
-#     "STEP_4_UPLOAD_IMAGE" = {
-#       "a_Description" = "Check 'proxmox_virtual_environment_file.custom_image_upload' state for per-version upload status."
-#     }
-#     "STEP_5_FLATTEN_AND_MERGE" = {
-#       # "resources"              = var.resources
-#       "a_Filtered_VM_Groups"  = local.vm_groups
-#       "b_Filtered_LXC_Groups" = local.lxc_groups
-#       "c_Flattened_VM_Map"    = local.flattened_vms
-#       "d_Flattened_LXC_Map"   = local.flattened_lxcs
-#       "e_Potential_VM_List"   = local.all_potential_vms
-#       "f_Potential_LXC_List"  = local.all_potential_lxc
-#       "g_VM_List"             = local.final_vm_list
-#       "h_LXC_List"            = local.final_lxc_list
-#     }
-#   }
-# }
+  value = {
+    #     "STEP_1_GATHER_INFO" = {
+    #       "a_OS_Images_Config"        = local.os_images
+    #       "b_Proxmox_Datastore_Files" = local.existing_files_on_proxmox
+    #     }
+    #     "STEP_2_DECISION_MAKING" = {
+    #       "a_Image_State_Hashes"       = local.image_state
+    #       "b_Target_Image_Definitions" = local.final_image_defs
+    #       "c_Build_Decisions" = {
+    #         for k, v in local.build_decisions : k => (v == 1 ? "Build Required" : "No Build Needed")
+    #       }
+    #     }
+    #     "STEP_3_PREPARE_LOCAL_IMAGE" = {
+    #       "a_Description" = "Check 'null_resource.image_builder' state for per-version build status."
+    #     }
+    #     "STEP_4_UPLOAD_IMAGE" = {
+    #       "a_Description" = "Check 'proxmox_virtual_environment_file.custom_image_upload' state for per-version upload status."
+    #     }
+    "STEP_5_FLATTEN_AND_MERGE" = {
+      #       # "resources"              = var.resources
+      #       "a_Filtered_VM_Groups"  = local.vm_groups
+      #       "b_Filtered_LXC_Groups" = local.lxc_groups
+      #       "c_Flattened_VM_Map"    = local.flattened_vms
+      #       "d_Flattened_LXC_Map"   = local.flattened_lxcs
+      #       "e_Potential_VM_List"   = local.all_potential_vms
+      #       "f_Potential_LXC_List"  = local.all_potential_lxc
+      "g_VM_List" = local.final_vm_list
+      #       "h_LXC_List"            = local.final_lxc_list
+    }
+  }
+}
 
 
 output "created_vms" {

@@ -97,6 +97,7 @@ variable "resources" {
     on_boot         = optional(bool, false)
     started         = optional(bool, true)
     cloud_init_user = optional(string)
+    ansible_groups  = optional(map(map(string)))
 
     # We can define a this cluster level that will be passed down at the node level.
     # Discriminating Union: VM Configuration
@@ -145,6 +146,7 @@ variable "resources" {
       on_boot         = optional(bool)
       started         = optional(bool)
       cloud_init_user = optional(string)
+      ansible_groups  = optional(map(map(string)))
 
       # Node-level Overrides (also a discriminating union)
       vm_config = optional(object({

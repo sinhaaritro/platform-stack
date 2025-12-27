@@ -10,7 +10,8 @@ output "vm_details" {
   # to all computed values like IP/MAC addresses, final disk paths, etc.
   value = merge(proxmox_virtual_environment_vm.module_vm,
     {
-      "app_key" = var.app_key
+      "app_key"        = var.app_key
+      "ansible_groups" = var.ansible_groups
     }
   )
 }

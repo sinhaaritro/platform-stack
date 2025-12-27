@@ -278,6 +278,13 @@ locals {
         var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].ssh_public_keys :
         "ERROR: A valid 'ssh_public_keys' could not be found for VM '${item.node_key}'. The secret '${coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")}' is either missing from 'user_credentials' or does not contain the key 'ssh_public_keys'." [999]
       ),
+      ansible_groups = {
+        for group_name in distinct(concat(keys(coalesce(item.app_group.ansible_groups, {})), keys(coalesce(item.node_override.ansible_groups, {})))) :
+        group_name => merge(
+          lookup(coalesce(item.app_group.ansible_groups, {}), group_name, {}),
+          lookup(coalesce(item.node_override.ansible_groups, {}), group_name, {})
+        )
+      }
     }
   }
 
@@ -362,14 +369,15 @@ module "proxmox_vms" {
   depends_on = [proxmox_virtual_environment_file.custom_image_upload]
 
   # Main info
-  vm_id       = each.value.vm_id
-  name        = each.value.name
-  app_key     = each.value.app_key
-  node_name   = each.value.node_name
-  description = each.value.description
-  tags        = each.value.tags
-  on_boot     = each.value.on_boot
-  started     = each.value.started
+  vm_id          = each.value.vm_id
+  name           = each.value.name
+  app_key        = each.value.app_key
+  node_name      = each.value.node_name
+  description    = each.value.description
+  tags           = each.value.tags
+  on_boot        = each.value.on_boot
+  started        = each.value.started
+  ansible_groups = each.value.ansible_groups
 
   # Hardware
   cpu_cores   = each.value.cpu_cores
