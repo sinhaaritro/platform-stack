@@ -1,10 +1,9 @@
 # meta/main.yml
----
 galaxy_info:
   author: Aritro
-  role_name: kind
+  role_name: kubectl
   namespace: internal
-  description: Installs the Kind cluster manager for Kubernetes.
+  description: Installs the Kubernetes command-line tool (kubectl) with checksum verification.
   company: None
   license: MIT
   min_ansible_version: "2.9"
@@ -18,8 +17,7 @@ galaxy_info:
   galaxy_tags:
     - kubernetes
     - k8s
-    - kind
-    - cluster
+    - client
+    - cli
 
-dependencies:
-  - role: docker
+dependencies: []

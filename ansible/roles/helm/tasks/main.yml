@@ -1,15 +1,13 @@
-
+# tasks/main.yml
 ---
+- name: Fail if architecture is not supported
+  ansible.builtin.fail:
+    msg: "System architecture {{ ansible_architecture }} is not mapped in defaults/main.yml"
+  when: helm_arch_mapping[ansible_architecture] is not defined
 
-- name: Download Helm binary tarball
-  ansible.builtin.unarchive:
-  src: https://get.helm.sh/helm-v3.15.2-linux-amd64.tar.gz
-  dest: /tmp/
-  remote_src: yes
+- name: Install Helm binary
+  ansible.builtin.include_tasks: install.yml
 
-- name: Move Helm binary to a directory in the PATH
-  ansible.builtin.copy:
-  src: /tmp/linux-amd64/helm
-  dest: /usr/local/bin/helm
-  mode: '0755'
-  remote_src: yes
+- name: Configure Helm repositories
+  ansible.builtin.include_tasks: repos.yml
+  when: helm_add_stable_repos | bool

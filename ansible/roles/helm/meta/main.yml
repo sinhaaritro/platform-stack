@@ -1,10 +1,11 @@
 # meta/main.yml
 ---
+
 galaxy_info:
   author: Aritro
-  role_name: kind
+  role_name: helm
   namespace: internal
-  description: Installs the Kind cluster manager for Kubernetes.
+  description: Installs the Helm package manager for Kubernetes.
   company: None
   license: MIT
   min_ansible_version: "2.9"
@@ -18,8 +19,7 @@ galaxy_info:
   galaxy_tags:
     - kubernetes
     - k8s
-    - kind
-    - cluster
+    - helm
+    - packagemanager
 
-dependencies:
-  - role: docker
+dependencies: []

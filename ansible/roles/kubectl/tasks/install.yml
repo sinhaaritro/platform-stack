@@ -1,0 +1,47 @@
+# tasks/install.yml
+---
+- name: Check if kubectl is installed
+  ansible.builtin.stat:
+    path: "{{ kubectl_bin_path }}"
+  register: kubectl_bin
+
+- name: Get current kubectl version
+  ansible.builtin.command: "{{ kubectl_bin_path }} version --client --output=yaml"
+  register: kubectl_current_version
+  changed_when: false
+  failed_when: false
+  when: kubectl_bin.stat.exists
+
+- name: Download and Install kubectl
+  # Logic: Run only if binary missing OR version mismatch
+  when: >
+    not kubectl_bin.stat.exists or
+    (kubectl_version not in kubectl_current_version.stdout)
+  vars:
+    _k_arch: "{{ kubectl_arch_mapping[ansible_architecture] }}"
+    _k_url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/{{ _k_arch }}/kubectl"
+    _k_sum_url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/{{ _k_arch }}/kubectl.sha256"
+  block:
+    - name: Download kubectl checksum file
+      ansible.builtin.get_url:
+        url: "{{ _k_sum_url }}"
+        dest: "/tmp/kubectl.sha256"
+        mode: "0644"
+
+    - name: Read checksum from file
+      ansible.builtin.slurp:
+        src: "/tmp/kubectl.sha256"
+      register: kubectl_sha256_content
+
+    - name: Download kubectl binary with verification
+      ansible.builtin.get_url:
+        url: "{{ _k_url }}"
+        dest: "{{ kubectl_bin_path }}"
+        mode: "0755"
+        # Decodes the base64 content from slurp and cleans whitespace
+        checksum: "sha256:{{ kubectl_sha256_content.content | b64decode | trim }}"
+
+    - name: Remove temporary checksum file
+      ansible.builtin.file:
+        path: "/tmp/kubectl.sha256"
+        state: absent

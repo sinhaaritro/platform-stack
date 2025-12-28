@@ -1,0 +1,20 @@
+# templates/kind-config.yaml.j2
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
+  extraPortMappings:
+{% for port in kind_expose_ports %}
+  - containerPort: {{ port.container_port }}
+    hostPort: {{ port.host_port }}
+    protocol: TCP
+{% endfor %}
+networking:
+  # Allow the cluster to listen on all interfaces so external traffic works
+  apiServerAddress: "0.0.0.0"

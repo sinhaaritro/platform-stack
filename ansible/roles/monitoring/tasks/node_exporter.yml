@@ -28,26 +28,30 @@
   when: node_exporter_bin.stat.exists
 
 - name: Download and Unarchive Node Exporter
+  when: >
+    not node_exporter_bin.stat.exists or
+    (monitoring_node_exporter_version not in node_exporter_version_check.stdout)
+  vars:
+    _ne_arch: "{{ monitoring_arch_map[ansible_architecture] }}"
+    _ne_dist: "node_exporter-{{ monitoring_node_exporter_version }}.linux-{{ _ne_arch }}"
+    _ne_url: "https://github.com/prometheus/node_exporter/releases/download/v{{ monitoring_node_exporter_version }}/{{ _ne_dist }}.tar.gz"
   block:
     - name: Download Node Exporter tarball
       ansible.builtin.unarchive:
-        src: "https://github.com/prometheus/node_exporter/releases/download/v{{ monitoring_node_exporter_version }}/node_exporter-{{ monitoring_node_exporter_version }}.linux-{{ monitoring_arch_map[ansible_architecture] }}.tar.gz"
+        src: "{{ _ne_url }}"
         dest: "/tmp"
         remote_src: true
-        creates: "/tmp/node_exporter-{{ monitoring_node_exporter_version }}.linux-{{ monitoring_arch_map[ansible_architecture] }}/node_exporter"
+        creates: "/tmp/{{ _ne_dist }}/node_exporter"
 
     - name: Move binary to /usr/local/bin
       ansible.builtin.copy:
-        src: "/tmp/node_exporter-{{ monitoring_node_exporter_version }}.linux-{{ monitoring_arch_map[ansible_architecture] }}/node_exporter"
+        src: "/tmp/{{ _ne_dist }}/node_exporter"
         dest: "/usr/local/bin/node_exporter"
         mode: "0755"
         owner: "{{ monitoring_node_exporter_user }}"
         group: "{{ monitoring_node_exporter_group }}"
         remote_src: true
       notify: Restart node_exporter
-  when: >
-    not node_exporter_bin.stat.exists or
-    (monitoring_node_exporter_version not in node_exporter_version_check.stdout)
 
 - name: Create Systemd Service for Node Exporter
   ansible.builtin.template:

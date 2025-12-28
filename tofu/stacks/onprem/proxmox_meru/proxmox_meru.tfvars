@@ -18,12 +18,52 @@ target_datastore = "data-storage"
 # This map defines all the VMs to be created by this stack. The map key is
 # used as the default name for the VM.
 resources = {
+  "ruth" = {
+    enabled     = true
+    type        = "vm"
+    node_name   = "moo-moo"
+    description = "Kubernets servers. Ubuntu 24.04."
+    tags        = ["ruth", "ansible", "kind"]
+    ansible_groups = {
+      "timezone" = {
+        "user_timezone" = "Asia/Kolkata"
+        "user_locale"   = "en_US.UTF-8"
+      }
+    }
+
+    vm_config = {
+      disk_datastore_id = "local-thin"
+      os_version        = "24.04"
+    }
+
+    nodes = {
+      "ruth-01" = {
+        vm_id           = 900
+        tags            = ["ubuntu"]
+        cloud_init_user = "dev"
+        vm_config = {
+          disk_datastore_id = "data-storage"
+          ipv4_address      = "192.168.0.90/24"
+        }
+      },
+      "ruth-02" = {
+        vm_id           = 901
+        tags            = ["ubuntu"]
+        cloud_init_user = "dev"
+        vm_config = {
+          disk_datastore_id = "data-storage"
+          ipv4_address      = "192.168.0.91/24"
+        }
+      }
+    }
+  },
+
   "web_server" = {
     enabled     = true
     type        = "vm"
     node_name   = "moo-moo"
     description = "Web servers. Ubuntu 24.04."
-    tags        = ["web", "ansible"]
+    tags        = ["server", "ansible"]
     ansible_groups = {
       "timezone" = {
         "user_timezone" = "GMT"
@@ -39,7 +79,7 @@ resources = {
     nodes = {
       "web-server-01" = {
         vm_id           = 700
-        tags            = ["web", "ubuntu"]
+        tags            = ["server", "ubuntu"]
         cloud_init_user = "web_admins"
         ansible_groups = {
           "timezone" = {
@@ -54,7 +94,7 @@ resources = {
       },
       "web-server-02" = {
         vm_id           = 701
-        tags            = ["web", "ubuntu"]
+        tags            = ["server", "ubuntu"]
         cloud_init_user = "web_admins"
         vm_config = {
           disk_datastore_id = "data-storage"
@@ -87,7 +127,7 @@ resources = {
       "db-server-02" = {
         vm_id       = 601
         description = "Primary database servers, for postgress. Ubuntu 24.04."
-        tags        = ["pg"]
+        tags        = ["postgres"]
         vm_config = {
           disk_size    = 16
           ipv4_address = "192.168.0.99/24"
@@ -121,7 +161,7 @@ resources = {
       "support-servers-02" = {
         vm_id       = 801
         description = "Primary database servers, for postgress. Ubuntu 24.04."
-        tags        = ["pg"]
+        tags        = ["postgres"]
         lxc_config = {
           hostname     = "support-servers-02"
           disk_size    = 16

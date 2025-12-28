@@ -1,0 +1,21 @@
+# tasks/completion.yml
+---
+- name: Ensure bash-completion package is installed
+  ansible.builtin.apt:
+    name: bash-completion
+    state: present
+  tags: [kubectl, completion]
+
+- name: Check if kubectl completion exists
+  ansible.builtin.stat:
+    path: /etc/bash_completion.d/kubectl
+  register: kubectl_completion_file
+  tags: [kubectl, completion]
+
+- name: Generate and install kubectl completion script
+  ansible.builtin.shell: "{{ kubectl_bin_path }} completion bash > /etc/bash_completion.d/kubectl"
+  args:
+    creates: /etc/bash_completion.d/kubectl
+  # Only run if binary exists, but completion file doesn't
+  when: not kubectl_completion_file.stat.exists
+  tags: [kubectl, completion]

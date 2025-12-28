@@ -1,10 +1,9 @@
 # meta/main.yml
----
 galaxy_info:
   author: Aritro
-  role_name: kind
+  role_name: docker
   namespace: internal
-  description: Installs the Kind cluster manager for Kubernetes.
+  description: Installs Docker Engine with secure defaults and log rotation.
   company: None
   license: MIT
   min_ansible_version: "2.9"
@@ -16,10 +15,8 @@ galaxy_info:
       versions:
         - all
   galaxy_tags:
-    - kubernetes
-    - k8s
-    - kind
-    - cluster
+    - docker
+    - containers
+    - virtualization
 
-dependencies:
-  - role: docker
+dependencies: []
