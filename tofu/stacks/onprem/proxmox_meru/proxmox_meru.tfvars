@@ -10,16 +10,16 @@
 #   -var-file=<(ansible-vault view --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") tofu/stacks/onprem/proxmox_meru/proxmox_meru.secret.tfvars)
 # ```
 
-# --- Target Proxmox Environment ---
+# Target Proxmox Environment
 target_node      = "moo-moo"
 target_datastore = "data-storage"
 
-# --- Resource Definations ---
+# Resource Definations
 # This map defines all the VMs to be created by this stack. The map key is
 # used as the default name for the VM.
 resources = {
   "ruth" = {
-    enabled     = true
+    enabled     = false
     type        = "vm"
     node_name   = "moo-moo"
     description = "Kubernets servers. Ubuntu 24.04."
@@ -59,7 +59,7 @@ resources = {
   },
 
   "web_server" = {
-    enabled     = true
+    enabled     = false
     type        = "vm"
     node_name   = "moo-moo"
     description = "Web servers. Ubuntu 24.04."
