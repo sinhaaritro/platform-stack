@@ -1,0 +1,39 @@
+# tasks/install.yml
+---
+# 1. Create Namespace
+- name: Create ArgoCD Namespace
+  kubernetes.core.k8s:
+    name: "{{ argocd_namespace }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+  environment:
+    &k8s_env # We use the config created by the 'kubeadm' or 'kind' role
+    KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
+  become: true
+  become_user: "{{ ansible_user }}"
+
+# 2. Apply Manifests
+- name: Install ArgoCD Core Manifests
+  kubernetes.core.k8s:
+    namespace: "{{ argocd_namespace }}"
+    definition: "{{ lookup('url', argocd_manifest_url, split_lines=False) }}"
+    state: present
+  environment: *k8s_env
+  become: true
+  become_user: "{{ ansible_user }}"
+
+# 3. Verify
+- name: Wait for ArgoCD Server to be ready
+  kubernetes.core.k8s_info:
+    kind: Pod
+    namespace: "{{ argocd_namespace }}"
+    label_selectors:
+      - app.kubernetes.io/name=argocd-server
+  register: argocd_pods
+  until: "argocd_pods.resources | length > 0 and argocd_pods.resources[0].status.phase == 'Running'"
+  retries: 20
+  delay: 15
+  environment: *k8s_env
+  become: true
+  become_user: "{{ ansible_user }}"

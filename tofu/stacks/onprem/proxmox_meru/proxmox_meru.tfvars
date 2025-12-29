@@ -19,11 +19,11 @@ target_datastore = "data-storage"
 # used as the default name for the VM.
 resources = {
   "ruth" = {
-    enabled     = false
+    enabled     = true
     type        = "vm"
     node_name   = "moo-moo"
     description = "Kubernets servers. Ubuntu 24.04."
-    tags        = ["ruth", "ansible", "kind"]
+    tags        = ["ruth", "ansible", "ubuntu"]
     ansible_groups = {
       "timezone" = {
         "user_timezone" = "Asia/Kolkata"
@@ -32,6 +32,8 @@ resources = {
     }
 
     vm_config = {
+      cpu_cores         = 2
+      memory_size       = 2048
       disk_datastore_id = "local-thin"
       os_version        = "24.04"
     }
@@ -39,7 +41,7 @@ resources = {
     nodes = {
       "ruth-01" = {
         vm_id           = 900
-        tags            = ["ubuntu"]
+        tags            = ["kind"]
         cloud_init_user = "dev"
         vm_config = {
           disk_datastore_id = "data-storage"
@@ -48,11 +50,38 @@ resources = {
       },
       "ruth-02" = {
         vm_id           = 901
-        tags            = ["ubuntu"]
+        tags            = ["kubeadm", "k_management", "k_control"]
         cloud_init_user = "dev"
         vm_config = {
           disk_datastore_id = "data-storage"
           ipv4_address      = "192.168.0.91/24"
+        }
+      },
+      "ruth-03" = {
+        vm_id           = 902
+        tags            = ["kubeadm", "k_management", "k_worker"]
+        cloud_init_user = "dev"
+        vm_config = {
+          disk_datastore_id = "data-storage"
+          ipv4_address      = "192.168.0.92/24"
+        }
+      },
+      "ruth-04" = {
+        vm_id           = 903
+        tags            = ["kubeadm", "k_fleet", "k_control", "k_arr"]
+        cloud_init_user = "dev"
+        vm_config = {
+          disk_datastore_id = "data-storage"
+          ipv4_address      = "192.168.0.93/24"
+        }
+      },
+      "ruth-05" = {
+        vm_id           = 904
+        tags            = ["kubeadm", "k_fleet", "k_worker", "k_arr"]
+        cloud_init_user = "dev"
+        vm_config = {
+          disk_datastore_id = "data-storage"
+          ipv4_address      = "192.168.0.94/24"
         }
       }
     }
@@ -105,7 +134,7 @@ resources = {
   },
 
   "db_server" = {
-    enabled         = true
+    enabled         = false
     type            = "vm"
     node_name       = "moo-moo"
     description     = "Primary database servers. Ubuntu 24.04."

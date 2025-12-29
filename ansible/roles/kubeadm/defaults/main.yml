@@ -1,0 +1,20 @@
+# defaults/main.yml
+
+# Kubernetes Version
+# Note: apt package versions often have a suffix (e.g., "1.32.0-1.1")
+kubeadm_version: "1.32.0-1.1"
+kubeadm_k8s_version: "v1.32" # Used for repo URL
+
+# Pod Network CIDR (Default for Flannel)
+# If you use Calico, you might want 192.168.0.0/16
+kubeadm_pod_network_cidr: "10.244.0.0/16"
+
+# Architecture mapping
+kubeadm_arch_mapping:
+  x86_64: amd64
+  aarch64: arm64
+
+# Taint Configuration
+# Set to 'true' to allow workloads on Control Plane (Single-Node Clusters / Home Lab)
+# Set to 'false' to keep Taint (Production Multi-Node)
+kubeadm_allow_scheduling_on_cp: false

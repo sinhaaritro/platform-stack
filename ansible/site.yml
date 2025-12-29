@@ -19,11 +19,11 @@
     - role: monitoring    # Node Exporter, QEMU Agent
 
 # ==============================================================================
-# PLAY 2: KUBERNETES INFRASTRUCTURE
+# PLAY 2: DEV/TEST KUBERNETES (KIND)
 # Target: Kind (Kubernetes) Server
-# Purpose: Composes the Kubernetes environment using modular roles.
+# Purpose: Ephemeral clusters. Manual app deployment for testing.
 # ==============================================================================
-- name: Configure Kind (Kubernetes) Server
+- name: Configure Dev Kubernetes (Kind)
   hosts: kind
   become: true
   roles:
@@ -33,7 +33,35 @@
     - role: kind          # Cluster Manager (Provisions the cluster)
 
 # ==============================================================================
-# PLAY 3: WEB LAYER
+# PLAY 3: PRODUCTION KUBERNETES - INFRASTRUCTURE
+# Target: All Production Clusters (Management + Fleet)
+# Purpose: Installs Docker, Kubeadm, and initializes the cluster.
+# ==============================================================================
+- name: Configure Production Kubernetes (Kubeadm)
+  hosts: kubeadm
+  become: true
+  vars:
+    # Set to true to allow apps to run on the Control Plane node (Brain)
+    # Essential for Single-Node clusters or small Home Labs
+    kubeadm_allow_scheduling_on_cp: true
+  roles:
+    - role: docker        # Runtime Dependency (Must run first)
+    - role: kubeadm       # Cluster Bootstrap
+    - role: helm          # Useful to have on the Control Plane
+
+# ==============================================================================
+# PLAY 4: PRODUCTION KUBERNETES - MANAGEMENT LAYER
+# Target: The Hub Server Only (k_management)
+# Purpose: Installs ArgoCD. (UI exposure and Fleet connect delayed).
+# ==============================================================================
+- name: Configure Management Layer (ArgoCD)
+  hosts: k_management
+  become: true
+  roles:
+    - role: argocd
+
+# ==============================================================================
+# PLAY 5: WEB LAYER
 # Target: Web Server
 # ==============================================================================
 - name: Configure Web Server
@@ -43,7 +71,7 @@
     - role: nginx
 
 # ==============================================================================
-# PLAY 4: DATA LAYER
+# PLAY 6: DATA LAYER
 # Target: Postgres Database
 # ==============================================================================
 - name: Configure Postgres Database

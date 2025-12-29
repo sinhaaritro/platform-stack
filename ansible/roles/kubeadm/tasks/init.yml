@@ -1,0 +1,57 @@
+# tasks/init.yml
+---
+- name: Check if Kubernetes is already initialized
+  ansible.builtin.stat:
+    path: /etc/kubernetes/admin.conf
+  register: kubeadm_admin_conf
+
+- name: Initialize Kubernetes Control Plane
+  ansible.builtin.command:
+    cmd: >
+      kubeadm init
+      --pod-network-cidr={{ kubeadm_pod_network_cidr }}
+      --cri-socket=unix:///var/run/containerd/containerd.sock
+  become: true
+  # Only run if admin.conf does NOT exist
+  when: not kubeadm_admin_conf.stat.exists
+  register: kubeadm_init_output
+  changed_when: "'Your Kubernetes control-plane has initialized successfully' in kubeadm_init_output.stdout"
+  notify: Install Flannel CNI
+  tags: [kubeadm, init]
+
+- name: Ensure .kube directory exists for Ansible User
+  ansible.builtin.file:
+    path: "/home/{{ ansible_user }}/.kube"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
+  tags: [kubeadm, kubeconfig]
+
+- name: Copy Admin Kubeconfig to Ansible User
+  ansible.builtin.copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "/home/{{ ansible_user }}/.kube/config"
+    remote_src: true
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0600"
+  tags: [kubeadm, kubeconfig]
+
+# DYNAMIC TAINT HANDLING
+# If true: We REMOVE the taint (-) so apps can run.
+# If false: We ADD the taint (:NoSchedule) so apps CANNOT run.
+- name: Configure Control Plane Taint
+  ansible.builtin.command:
+    cmd: >-
+      kubectl taint nodes --all
+      node-role.kubernetes.io/control-plane{{ '-' if kubeadm_allow_scheduling_on_cp else ':NoSchedule' }}
+      --overwrite
+  become: true
+  become_user: "{{ ansible_user }}"
+  # We ignore failure because:
+  # 1. If we try to remove (-) and it's already gone -> error (safe to ignore)
+  # 2. If we try to add (:NoSchedule) and it's already there -> error (safe to ignore)
+  failed_when: false
+  changed_when: false
+  tags: [kubeadm, init, taint]

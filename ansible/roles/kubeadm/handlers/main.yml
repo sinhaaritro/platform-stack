@@ -1,0 +1,20 @@
+# handlers/main.yml
+
+- name: Restart kubelet
+  ansible.builtin.service:
+    name: kubelet
+    state: restarted
+    enabled: true
+
+- name: Restart containerd
+  ansible.builtin.service:
+    name: containerd
+    state: restarted
+
+- name: Install Flannel CNI
+  ansible.builtin.command:
+    cmd: kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+  become: true
+  become_user: "{{ ansible_user }}"
+  # We assume if this runs, it changes the cluster state
+  changed_when: true

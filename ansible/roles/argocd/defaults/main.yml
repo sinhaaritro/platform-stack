@@ -1,0 +1,8 @@
+# defaults/main.yml
+
+# ArgoCD Version (Manifest URL)
+# We use the stable release manifest
+argocd_manifest_url: "https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml"
+
+# Namespace
+argocd_namespace: "argocd"

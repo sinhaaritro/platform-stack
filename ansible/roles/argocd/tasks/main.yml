@@ -1,0 +1,10 @@
+# tasks/main.yml
+---
+# 1. Install Prerequisites (Python Libs)
+- name: Install ArgoCD Dependencies
+  ansible.builtin.include_tasks: dependencies.yml
+
+# 2. Proceed with Installation
+- name: Install ArgoCD
+  ansible.builtin.include_tasks: install.yml
+  tags: [argocd, install]

@@ -1,0 +1,10 @@
+# tasks/dependencies.yml
+---
+- name: Install Python dependencies for K8s modules
+  ansible.builtin.apt:
+    name:
+      - python3-kubernetes # Required for kubernetes.core.k8s
+      - python3-yaml # Often required for parsing
+    state: present
+    update_cache: true
+  tags: [argocd, dependencies]
