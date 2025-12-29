@@ -1,0 +1,12 @@
+# tasks/ssh.yml
+---
+- name: Apply SSH configuration
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^{{ item.key }}"
+    line: "{{ item.key }} {{ item.value }}"
+    validate: "sshd -t -f %s"
+    state: present
+  loop: "{{ security_ssh_config | dict2items }}"
+  notify: Restart ssh
+  tags: [security, ssh]

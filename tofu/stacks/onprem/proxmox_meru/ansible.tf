@@ -25,11 +25,12 @@ locals {
         try(vm.tags, []),
         [try(vm.app_key, null)],
         [try(vm.node_name, null)],
-        [try(vm.type, null)]
+        [try(vm.type, null)],
+        keys(try(vm.ansible_groups, {}))
         )) : {
 
         # 3. Create the simple mapping object for each group.
-        group = group_name
+        group = replace(group_name, "-", "_")
         host  = vm.name
       } if group_name != null
     ]
@@ -61,16 +62,25 @@ resource "local_file" "ansible_inventory" {
 
     # This is the second phase of the render. This expression is evaluated
     # during the 'apply' phase, after the VMs have been created.
-    inventory_groups = {
+    inventory_data = {
       for group_name, hostnames in local.inventory_groups_with_hosts :
       group_name => {
-        for host in hostnames :
-        # For each host, we look up its details in the master map and get its IP.
-        host => {
-          # The 'try' function provides a safe fallback in case the IP is not ready.
-          ansible_host = try([for addr in flatten(local.all_created_vms[host].ipv4_addresses) : addr if addr != "127.0.0.1"][0], "IP_PENDING")
-          # We look up the final, merged username for this specific host.
-          ansible_user = local.final_vm_list[host].user_account_username
+        # 1. GENERATE GROUP VARIABLES
+        # We do not generate group-level variables from the individual host definitions
+        # to prevent conflicts and overwrites. Instead, we push these down as host-level variables.
+        vars = {}
+
+        # 2. GENERATE HOSTS, USER AND IPs
+        hosts = {
+          for host in hostnames :
+          host => merge(
+            {
+              ansible_host = try([for addr in flatten(local.all_created_vms[host].ipv4_addresses) : addr if addr != "127.0.0.1"][0], "IP_PENDING")
+              ansible_user = local.final_vm_list[host].user_account_username
+            },
+            # Merge in the variables for this specific group from the host's definition
+            try(local.final_vm_list[host].ansible_groups[group_name], {})
+          )
         }
       }
     }

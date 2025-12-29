@@ -48,6 +48,7 @@ resource "proxmox_virtual_environment_container" "module_lxc" {
     ip_config {
       ipv4 {
         address = var.ipv4_address
+        gateway = var.ipv4_gateway
       }
     }
 
@@ -59,7 +60,7 @@ resource "proxmox_virtual_environment_container" "module_lxc" {
   # ----------------------------------------------
 
   # --- Lifecycle Management ---
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }

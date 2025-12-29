@@ -1,0 +1,25 @@
+# defaults/main.yml
+
+# Kind Version
+# https://github.com/kubernetes-sigs/kind/releases
+kind_version: "v0.26.0"
+
+# Architecture mapping
+kind_arch_mapping:
+  x86_64: amd64
+  aarch64: arm64
+
+# Installation path
+kind_bin_path: "/usr/local/bin/kind"
+
+# Cluster Configuration
+kind_cluster_name: "platform-cluster"
+kind_k8s_version: "v1.32.0" # Node image version
+
+# Port Mappings (Host -> Container)
+# Essential for Ingress Controllers (Nginx/Traefik) to work
+kind_expose_ports:
+  - host_port: 80
+    container_port: 80
+  - host_port: 443
+    container_port: 443

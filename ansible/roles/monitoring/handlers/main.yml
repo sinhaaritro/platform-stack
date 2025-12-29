@@ -1,0 +1,14 @@
+# handlers/main.yml
+
+- name: Restart node_exporter
+  ansible.builtin.service:
+    name: node_exporter
+    state: restarted
+    enabled: true
+    daemon_reload: true
+
+- name: Restart qemu-guest-agent
+  ansible.builtin.service:
+    name: qemu-guest-agent
+    state: restarted
+    enabled: true

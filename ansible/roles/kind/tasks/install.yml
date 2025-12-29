@@ -1,0 +1,27 @@
+# tasks/install.yml
+---
+- name: Check if kind is installed
+  ansible.builtin.stat:
+    path: "{{ kind_bin_path }}"
+  register: kind_bin
+
+- name: Get current kind version
+  ansible.builtin.command: "{{ kind_bin_path }} version"
+  register: kind_current_version
+  changed_when: false
+  failed_when: false
+  when: kind_bin.stat.exists
+
+- name: Download and Install Kind
+  when: >
+    not kind_bin.stat.exists or
+    (kind_version not in kind_current_version.stdout)
+  vars:
+    _k_arch: "{{ kind_arch_mapping[ansible_architecture] }}"
+    _k_bin_url: "https://github.com/kubernetes-sigs/kind/releases/download/{{ kind_version }}/kind-linux-{{ _k_arch }}"
+  block:
+    - name: Download Kind binary with verification
+      ansible.builtin.get_url:
+        url: "{{ _k_bin_url }}"
+        dest: "{{ kind_bin_path }}"
+        mode: "0755"

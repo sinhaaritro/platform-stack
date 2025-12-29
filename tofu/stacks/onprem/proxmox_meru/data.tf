@@ -6,16 +6,25 @@
 # -----------------------------------------------------------------------------
 
 
-# --- 1a. Fetch Upstream Manifest ---
+# 1a. Fetch Upstream Manifest
 # Makes an API call to the Ubuntu website to download the latest SHA256SUMS
 # file. This file acts as our "desired version" manifest, telling us the
 # official checksum for the cloud image we want to use.
 data "http" "ubuntu_checksums" {
-  url = local.checksum_url
+  for_each = local.os_images
+
+  url = each.value.checksum_url
+
+  lifecycle {
+    postcondition {
+      condition     = self.status_code == 200
+      error_message = "Error validating Ubuntu version '${each.key}'. The URL '${self.url}' returned status ${self.status_code}. Please check that '${each.key}' is a valid Ubuntu release version."
+    }
+  }
 }
 
 
-# --- 1b. Fetch Proxmox Datastore Manifest ---
+# 1b. Fetch Proxmox Datastore Manifest
 # Makes an authenticated API call to the Proxmox server to get a JSON list
 # of all files currently on the target datastore. This serves as our
 # "current state" manifest, telling us what images already exist.

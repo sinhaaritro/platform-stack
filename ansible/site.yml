@@ -4,9 +4,50 @@
 # It is organized into "plays", where each play targets a group of hosts
 # from the inventory and applies the necessary roles to them.
 
-- name: Apply Base Configuration to All Hosts
-  hosts: all
-  become: true # This tells Ansible to use 'sudo' for all tasks in this play.
-
+# ==============================================================================
+# PLAY 1: FOUNDATION LAYER
+# Target: All Virtual Machines (Group: vm)
+# Purpose: Universal configuration. Minimal footprint. No heavy runtimes.
+# ==============================================================================
+- name: Apply Base and Security Configuration
+  hosts: vm
+  become: true
   roles:
-    - role: common-base
+    - role: base          # System basics (Timezone, Locales, Packages)
+    - role: security      # SSH Hardening, UFW, Fail2Ban
+    - role: users         # User creation, Git config, SSH Keys
+    - role: monitoring    # Node Exporter, QEMU Agent
+
+# ==============================================================================
+# PLAY 2: KUBERNETES INFRASTRUCTURE
+# Target: Kind (Kubernetes) Server
+# Purpose: Composes the Kubernetes environment using modular roles.
+# ==============================================================================
+- name: Configure Kind (Kubernetes) Server
+  hosts: kind
+  become: true
+  roles:
+    - role: docker        # Runtime Dependency (Must run first)
+    - role: kubectl       # CLI Interface (Only installs the client)
+    - role: helm          # Package Manager (Only installs Helm)
+    - role: kind          # Cluster Manager (Provisions the cluster)
+
+# ==============================================================================
+# PLAY 3: WEB LAYER
+# Target: Web Server
+# ==============================================================================
+- name: Configure Web Server
+  hosts: server
+  become: true
+  roles:
+    - role: nginx
+
+# ==============================================================================
+# PLAY 4: DATA LAYER
+# Target: Postgres Database
+# ==============================================================================
+- name: Configure Postgres Database
+  hosts: postgres
+  become: true
+  roles:
+    - role: postgres

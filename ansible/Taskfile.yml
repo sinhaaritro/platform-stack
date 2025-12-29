@@ -1,0 +1,75 @@
+# ansible/Taskfile.yml
+# -----------------------------------------------------------------------------
+# Taskfile for Managing Ansible Configuration
+#
+# This file provides a standardized command interface for running Ansible
+# playbooks and ad-hoc commands against the infrastructure.
+#
+# PREREQUISITES:
+#   - Ansible and Task are installed.
+#   - SSH access to the target hosts is configured (keys loaded or agent active).
+#
+# USAGE:
+#   - List all available tasks: task -l
+#   - Ping all hosts: task ansible:ping
+#   - Run the main site playbook: task ansible:apply
+# -----------------------------------------------------------------------------
+
+version: "3"
+
+# GLOBAL VARIABLES
+vars:
+  # INVENTORY_FILE: Path to the inventory file.
+  INVENTORY_FILE: "inventory.yml"
+  # PLAYBOOK_FILE: Path to the main site playbook.
+  PLAYBOOK_FILE: "site.yml"
+
+tasks:
+  default:
+    desc: "Lists all available tasks for Ansible."
+    cmds:
+      - task -l
+
+  # ---------------------------------------------------------------------------
+  # CORE WORKFLOW TASKS
+  # ---------------------------------------------------------------------------
+
+  ping:
+    desc: "Pings all hosts in the inventory to verify connectivity."
+    dir: "{{.USER_WORKING_DIR}}/ansible"
+    cmds:
+      - ansible all -m ping -i {{.INVENTORY_FILE}}
+
+  apply:
+    desc: "Runs the main site playbook to apply configurations."
+    dir: "{{.USER_WORKING_DIR}}/ansible"
+    cmds:
+      - ansible-playbook -i {{.INVENTORY_FILE}} {{.PLAYBOOK_FILE}} {{.CLI_ARGS}}
+
+  check:
+    desc: "Runs the main site playbook in 'check' (dry-run) mode."
+    dir: "{{.USER_WORKING_DIR}}/ansible"
+    cmds:
+      - ansible-playbook -i {{.INVENTORY_FILE}} {{.PLAYBOOK_FILE}} --check --diff {{.CLI_ARGS}}
+
+  lint:
+    desc: "Runs ansible-lint to check for best practices and errors."
+    dir: "{{.USER_WORKING_DIR}}/ansible"
+    cmds:
+      - ansible-lint
+
+  # ---------------------------------------------------------------------------
+  # UTILITY TASKS
+  # ---------------------------------------------------------------------------
+
+  inventory:
+    desc: "Lists the full inventory structure."
+    dir: "{{.USER_WORKING_DIR}}/ansible"
+    cmds:
+      - ansible-inventory -i {{.INVENTORY_FILE}} --graph
+
+  galaxy:
+    desc: "Installs required Ansible collections and roles from galaxy."
+    dir: "{{.USER_WORKING_DIR}}/ansible"
+    cmds:
+      - ansible-galaxy install -r requirements.yml

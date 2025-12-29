@@ -1,8 +1,12 @@
-
+# tasks/main.yml
 ---
+- name: Fail if architecture is not supported
+  ansible.builtin.fail:
+    msg: "System architecture {{ ansible_architecture }} is not mapped in defaults/main.yml"
+  when: kind_arch_mapping[ansible_architecture] is not defined
 
-- name: Download and install Kind binary
-  ansible.builtin.get_url:
-  url: "https://kind.sigs.k8s.io/dl/v0.23.0/kind-linux-amd64"
-  dest: /usr/local/bin/kind
-  mode: '0755'
+- name: Install Kind binary
+  ansible.builtin.include_tasks: install.yml
+
+- name: Configure and Create Cluster
+  ansible.builtin.include_tasks: cluster.yml

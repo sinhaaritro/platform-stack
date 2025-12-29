@@ -1,30 +1,12 @@
-
+# tasks/main.yml
 ---
+- name: Fail if architecture is not supported
+  ansible.builtin.fail:
+    msg: "System architecture {{ ansible_architecture }} is not mapped in defaults/main.yml"
+  when: docker_arch_mapping[ansible_architecture] is not defined
 
-- name: Add Docker GPG apt Key
-  ansible.builtin.get_url:
-  url: https://download.docker.com/linux/ubuntu/gpg
-  dest: /etc/apt/trusted.gpg.d/docker.asc
-  mode: '0644'
-  force: true
+- name: Install Docker prerequisites and packages
+  ansible.builtin.include_tasks: install.yml
 
-- name: Add Docker Repository
-  ansible.builtin.apt_repository:
-  repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
-  state: present
-
-- name: Install Docker packages
-  ansible.builtin.apt:
-    name:
-    - docker-ce
-    - docker-ce-cli
-    - containerd.io
-  state: present
-  update_cache: yes
-
-- name: Add dev user to the docker group
-  ansible.builtin.user:
-
-- name: dev
-  groups: docker
-  append: yes
+- name: Configure Docker daemon and users
+  ansible.builtin.include_tasks: configure.yml

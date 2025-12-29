@@ -1,0 +1,23 @@
+# meta/main.yml
+galaxy_info:
+  author: Aritro
+  role_name: base
+  namespace: internal
+  description: Foundational system configuration (Packages, Time, Locale, Hostname).
+  company: None
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - base
+    - common
+    - system
+    - bootstrap
+
+dependencies: []

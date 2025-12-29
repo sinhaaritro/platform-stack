@@ -102,6 +102,11 @@ variable "ipv4_address" {
   type        = string
 }
 
+variable "ipv4_gateway" {
+  description = "The IPv4 gateway for cloud-init (e.g., '1.2.3.1')."
+  type        = string
+}
+
 variable "user_account_username" {
   description = "The username for the default cloud-init user."
   type        = string
@@ -117,4 +122,10 @@ variable "user_account_keys" {
   description = "A list of public SSH keys for the default cloud-init user."
   type        = list(string)
   sensitive   = true
+}
+
+variable "ansible_groups" {
+  description = "Map of Ansible groups and vars to add this host to. Structure: { group_name = { var_name = val } }"
+  type        = map(map(string))
+  default     = {}
 }

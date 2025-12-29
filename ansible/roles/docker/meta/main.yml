@@ -1,0 +1,22 @@
+# meta/main.yml
+galaxy_info:
+  author: Aritro
+  role_name: docker
+  namespace: internal
+  description: Installs Docker Engine with secure defaults and log rotation.
+  company: None
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - docker
+    - containers
+    - virtualization
+
+dependencies: []

@@ -1,0 +1,21 @@
+# meta/main.yml
+
+galaxy_info:
+  author: Aritro
+  role_name: monitoring
+  namespace: internal
+  description: Installs Node Exporter and QEMU Guest Agent for observability.
+  company: None
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+  galaxy_tags:
+    - monitoring
+    - prometheus
+    - nodeexporter
+    - proxmox
+
+dependencies: []

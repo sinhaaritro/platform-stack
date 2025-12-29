@@ -1,0 +1,12 @@
+# tasks/main.yml
+---
+- name: Fail if architecture is not supported
+  ansible.builtin.fail:
+    msg: "System architecture {{ ansible_architecture }} is not mapped in defaults/main.yml"
+  when: kubectl_arch_mapping[ansible_architecture] is not defined
+
+- name: Install kubectl binary
+  ansible.builtin.include_tasks: install.yml
+
+- name: Configure shell completion
+  ansible.builtin.include_tasks: completion.yml

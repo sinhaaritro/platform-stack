@@ -4,7 +4,7 @@
 
 - name: Verify Connection to All Provisioned Hosts
   hosts: all # The 'all' keyword tells Ansible to run this play on every host in the inventory.
-  gather_facts: no # We don't need to gather detailed facts for this simple test.
+  gather_facts: true # We don't need to gather detailed facts for this simple test.
 
   tasks:
     - name: Ping all hosts

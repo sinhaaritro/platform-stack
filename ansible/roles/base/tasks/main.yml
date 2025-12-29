@@ -1,0 +1,10 @@
+# tasks/main.yml
+---
+- name: Run pre-installation checks
+  ansible.builtin.include_tasks: pre_tasks.yml
+
+- name: Configure system settings (Time, Locale, Hostname)
+  ansible.builtin.include_tasks: system.yml
+
+- name: Install base packages
+  ansible.builtin.include_tasks: packages.yml

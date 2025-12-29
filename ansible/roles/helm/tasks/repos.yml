@@ -1,0 +1,35 @@
+# tasks/repos.yml
+---
+# We need to run this as the Ansible User (not root) usually,
+# or ensure the helm cache is accessible.
+# However, 'helm repo add' sets up repos for the current user config.
+# If you want this global, it's tricky.
+# Ideally, run this for the 'ansible_user' (admin).
+
+- name: Add Bitnami Helm repository
+  kubernetes.core.helm_repository:
+    name: bitnami
+    repo_url: https://charts.bitnami.com/bitnami
+  become: true
+  become_user: "{{ ansible_user }}"
+  # Skip if ansible_user is not defined or root (optional safety)
+  when:
+    - ansible_user is defined
+    - ansible_user != 'root'
+  tags: [helm, repos]
+
+# Note: This task requires the collection 'kubernetes.core'.
+# You can install it via: ansible-galaxy collection install kubernetes.core
+# Or use 'command' if you don't want the dependency:
+
+- name: Add Bitnami Helm repository (Shell fallback)
+  ansible.builtin.command:
+    cmd: "{{ helm_bin_path }} repo add bitnami https://charts.bitnami.com/bitnami"
+  become: true
+  become_user: "{{ ansible_user }}"
+  register: helm_repo_add
+  changed_when: "'has been added' in helm_repo_add.stdout"
+  when:
+    - ansible_user is defined
+    - ansible_user != 'root'
+  tags: [helm, repos]

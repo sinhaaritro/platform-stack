@@ -55,7 +55,7 @@ resource "proxmox_virtual_environment_vm" "module_vm" {
   network_device {
     bridge   = var.vlan_bridge
     vlan_id  = var.vlan_id
-    firewall = true
+    firewall = false
     model    = "virtio"
   }
 
@@ -73,6 +73,7 @@ resource "proxmox_virtual_environment_vm" "module_vm" {
     ip_config {
       ipv4 {
         address = var.ipv4_address
+        gateway = var.ipv4_gateway
       }
       ipv6 {
         address = "dhcp"

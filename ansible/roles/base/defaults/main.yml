@@ -1,0 +1,27 @@
+# defaults/main.yml
+
+# Timezone
+base_timezone: "UTC"
+
+# Locale settings (Prevents Perl warnings during installs)
+base_locale: "en_US.UTF-8"
+
+# Essential utility packages
+base_packages:
+  - curl
+  - wget
+  - vim
+  - git
+  - htop
+  - neofetch
+  - unzip
+  - zip
+  - tar
+  - jq
+  - tree
+  - ca-certificates
+  - gnupg
+  - lsb-release
+  - software-properties-common
+  - net-tools   # valid for debugging network issues
+  - dnsutils    # contains dig/nslookup

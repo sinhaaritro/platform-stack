@@ -1,0 +1,21 @@
+# meta/main.yml
+# TODO: Add Firewall management (UFW) and Fail2Ban to ensure your VMs are actually secure
+
+galaxy_info:
+  author: Aritro
+  role_name: security
+  namespace: internal
+  description: Basic system security hardening (SSH and Updates)
+  company: None
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+  galaxy_tags:
+    - security
+    - ssh
+    - hardening
+
+dependencies: []

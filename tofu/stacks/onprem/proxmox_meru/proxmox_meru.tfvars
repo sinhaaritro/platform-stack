@@ -10,85 +10,139 @@
 #   -var-file=<(ansible-vault view --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") tofu/stacks/onprem/proxmox_meru/proxmox_meru.secret.tfvars)
 # ```
 
-# --- Target Proxmox Environment ---
+# Target Proxmox Environment
 target_node      = "moo-moo"
 target_datastore = "data-storage"
 
-# --- Resource Definations ---
+# Resource Definations
 # This map defines all the VMs to be created by this stack. The map key is
 # used as the default name for the VM.
 resources = {
-  "web_server" = {
-    enabled     = true
+  "ruth" = {
+    enabled     = false
     type        = "vm"
     node_name   = "moo-moo"
-    description = "Web servers. Ubuntu 24.04."
-    tags        = ["web", "Ansible"]
+    description = "Kubernets servers. Ubuntu 24.04."
+    tags        = ["ruth", "ansible", "kind"]
+    ansible_groups = {
+      "timezone" = {
+        "user_timezone" = "Asia/Kolkata"
+        "user_locale"   = "en_US.UTF-8"
+      }
+    }
 
     vm_config = {
       disk_datastore_id = "local-thin"
+      os_version        = "24.04"
+    }
+
+    nodes = {
+      "ruth-01" = {
+        vm_id           = 900
+        tags            = ["ubuntu"]
+        cloud_init_user = "dev"
+        vm_config = {
+          disk_datastore_id = "data-storage"
+          ipv4_address      = "192.168.0.90/24"
+        }
+      },
+      "ruth-02" = {
+        vm_id           = 901
+        tags            = ["ubuntu"]
+        cloud_init_user = "dev"
+        vm_config = {
+          disk_datastore_id = "data-storage"
+          ipv4_address      = "192.168.0.91/24"
+        }
+      }
+    }
+  },
+
+  "web_server" = {
+    enabled     = false
+    type        = "vm"
+    node_name   = "moo-moo"
+    description = "Web servers. Ubuntu 24.04."
+    tags        = ["server", "ansible"]
+    ansible_groups = {
+      "timezone" = {
+        "user_timezone" = "GMT"
+        "user_locale"   = "en_US.UTF-8"
+      }
+    }
+
+    vm_config = {
+      disk_datastore_id = "local-thin"
+      os_version        = "24.04"
     }
 
     nodes = {
       "web-server-01" = {
-        vm_id                 = 700
-        tags                  = ["web", "ubuntu"]
-        cloud_init_secret_key = "web_admins"
-
+        vm_id           = 700
+        tags            = ["server", "ubuntu"]
+        cloud_init_user = "web_admins"
+        ansible_groups = {
+          "timezone" = {
+            "user_timezone" = "Asia/Kolkata"
+            "user_locale"   = "en_US.UTF-8"
+          }
+        }
         vm_config = {
           disk_datastore_id = "data-storage"
-          ipv4_address      = "192.168.0.101/24"
+          ipv4_address      = "192.168.0.96/24"
         }
       },
       "web-server-02" = {
-        vm_id                 = 701
-        tags                  = ["web", "ubuntu"]
-        cloud_init_secret_key = "dev"
+        vm_id           = 701
+        tags            = ["server", "ubuntu"]
+        cloud_init_user = "web_admins"
         vm_config = {
           disk_datastore_id = "data-storage"
-          ipv4_address      = "192.168.0.102/24"
+          ipv4_address      = "192.168.0.97/24"
         }
       }
     }
   },
 
   "db_server" = {
-    enabled               = true
-    type                  = "vm"
-    node_name             = "moo-moo"
-    description           = "Primary database servers. Ubuntu 24.04."
-    tags                  = ["db", "Ansible"]
-    cloud_init_secret_key = "dev"
+    enabled         = true
+    type            = "vm"
+    node_name       = "moo-moo"
+    description     = "Primary database servers. Ubuntu 24.04."
+    tags            = ["db", "ansible"]
+    cloud_init_user = "db_admins"
 
-    vm_config = {}
+    vm_config = {
+      os_version = "25.04"
+    }
 
     nodes = {
       "db-server-01" = {
         vm_id = 600
         tags  = ["mongo"]
         vm_config = {
-          ipv4_address = "192.168.0.103/24"
+          ipv4_address = "192.168.0.98/24"
         }
       },
       "db-server-02" = {
         vm_id       = 601
         description = "Primary database servers, for postgress. Ubuntu 24.04."
-        tags        = ["pg"]
+        tags        = ["postgres"]
         vm_config = {
           disk_size    = 16
-          ipv4_address = "192.168.0.104/24"
+          ipv4_address = "192.168.0.99/24"
         }
       },
     }
   },
 
   "support_servers" = {
-    enabled               = true
-    type                  = "lxc"
-    node_name             = "moo-moo"
-    description           = "Primary database servers. Ubuntu 24.04."
-    tags                  = ["db", "Ansible"]
-    cloud_init_secret_key = "dev"
+    enabled         = false
+    type            = "lxc"
+    node_name       = "moo-moo"
+    description     = "Primary database servers. Ubuntu 24.04."
+    tags            = ["db", "ansible"]
+    cloud_init_user = "dev"
 
     lxc_config = {
       template_file_id = "local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst"
@@ -107,7 +161,7 @@ resources = {
       "support-servers-02" = {
         vm_id       = 801
         description = "Primary database servers, for postgress. Ubuntu 24.04."
-        tags        = ["pg"]
+        tags        = ["postgres"]
         lxc_config = {
           hostname     = "support-servers-02"
           disk_size    = 16

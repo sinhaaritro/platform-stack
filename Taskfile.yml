@@ -6,6 +6,9 @@ includes:
   tofu:
     taskfile: ./tofu/Taskfile.yml
     dir: .
+  ansible:
+    taskfile: ./ansible/Taskfile.yml
+    dir: .
 
 tasks:
   default:
