@@ -1,7 +1,22 @@
 # defaults/main.yml
 
+# Toggles for Environment State
+security_ssh_restricted_mode: false  # false = Allow SSH from anywhere; true = Restricted to list
+security_fail2ban_enabled: false     # Toggle for brute-force protection
+
+# Access Control Lists
+security_ssh_allowed_networks:
+  - "192.168.0.0/24"
+  - "127.0.0.1"
+
+# SSH Hardening Configuration
 security_ssh_config:
   PermitRootLogin: "no"
   PasswordAuthentication: "no"
+  PubkeyAuthentication: "yes"
   X11Forwarding: "no"
-  # Port: 22  # Uncomment if you want to change the port later
+  MaxAuthTries: "4"
+
+# Fail2Ban Settings
+security_fail2ban_bantime: 3600
+security_fail2ban_maxretry: 5

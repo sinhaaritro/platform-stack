@@ -1,37 +1,40 @@
 # tasks/firewall.yml
 ---
-- name: Allow Kubernetes API (6443/tcp)
+- name: Set UFW default policies
+  community.general.ufw:
+    direction: "{{ item.direction }}"
+    policy: "{{ item.policy }}"
+  loop:
+    - { direction: "incoming", policy: "deny" }
+    - { direction: "outgoing", policy: "allow" }
+  tags: [security, ufw]
+
+- name: Allow SSH from anywhere (Permissive Mode)
   community.general.ufw:
     rule: allow
-    port: "6443"
+    port: "22"
     proto: tcp
+  when: not security_ssh_restricted_mode
   tags: [security, ufw]
 
-- name: Allow Kubelet API (10250/tcp)
+- name: Allow SSH from restricted networks (Hardened Mode)
   community.general.ufw:
     rule: allow
-    port: "10250"
+    port: "22"
     proto: tcp
+    src: "{{ item }}"
+  loop: "{{ security_ssh_allowed_networks }}"
+  when: security_ssh_restricted_mode
   tags: [security, ufw]
 
-- name: Allow Flannel VXLAN (8472/udp)
+- name: Allow ICMP (Ping) from local network
   community.general.ufw:
     rule: allow
-    port: "8472"
-    proto: udp
-  tags: [security, ufw]
-
-- name: Allow NodePort Services (30000-32767)
-  # Required for ArgoCD UI (NodePort) to be accessible
-  community.general.ufw:
-    rule: allow
-    port: "30000:32767"
-    proto: tcp
-  tags: [security, ufw]
-
-# Optional: If you trust your LAN, this is the easiest fix
-- name: Allow all traffic from internal LAN
-  community.general.ufw:
-    rule: allow
+    proto: any
     src: "192.168.0.0/24"
+  tags: [security, ufw]
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled
   tags: [security, ufw]

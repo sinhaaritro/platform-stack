@@ -1,10 +1,13 @@
 # tasks/main.yml
 ---
-- name: Install security packages
-  ansible.builtin.include_tasks: packages.yml
+- name: Handle Security Packages
+  ansible.builtin.import_tasks: packages.yml
 
-- name: Configure SSH
-  ansible.builtin.include_tasks: ssh.yml
+- name: Handle SSH Lockdown
+  ansible.builtin.import_tasks: ssh.yml
 
-- name: Configure Firewall (UFW)
-  ansible.builtin.include_tasks: firewall.yml
+- name: Handle Firewall Rules
+  ansible.builtin.import_tasks: firewall.yml
+
+- name: Handle Intrusion Prevention
+  ansible.builtin.import_tasks: fail2ban.yml

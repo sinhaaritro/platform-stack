@@ -1,9 +1,9 @@
 # tasks/ssh.yml
 ---
-- name: Apply SSH configuration
+- name: Apply SSH hardening via lineinfile
   ansible.builtin.lineinfile:
     path: /etc/ssh/sshd_config
-    regexp: "^{{ item.key }}"
+    regexp: "^#?{{ item.key }}"
     line: "{{ item.key }} {{ item.value }}"
     validate: "sshd -t -f %s"
     state: present

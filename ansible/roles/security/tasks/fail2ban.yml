@@ -1,0 +1,24 @@
+# tasks/fail2ban.yml
+---
+- name: Configure Fail2Ban SSH Jail
+  ansible.builtin.copy:
+    dest: /etc/fail2ban/jail.local
+    content: |
+      [sshd]
+      enabled = true
+      port = 22
+      filter = sshd
+      logpath = /var/log/auth.log
+      maxretry = {{ security_fail2ban_maxretry }}
+      bantime = {{ security_fail2ban_bantime }}
+    mode: "0644"
+  when: security_fail2ban_enabled
+  notify: Restart fail2ban
+  tags: [security, fail2ban]
+
+- name: Ensure Fail2Ban service state
+  ansible.builtin.service:
+    name: fail2ban
+    state: "{{ security_fail2ban_enabled | ternary('started', 'stopped') }}"
+    enabled: "{{ security_fail2ban_enabled }}"
+  tags: [security, fail2ban]

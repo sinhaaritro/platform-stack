@@ -25,3 +25,4 @@ base_packages:
   - software-properties-common
   - net-tools   # valid for debugging network issues
   - dnsutils    # contains dig/nslookup
+  - unattended-upgrades

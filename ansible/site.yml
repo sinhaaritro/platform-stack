@@ -14,7 +14,7 @@
   become: true
   roles:
     - role: base          # System basics (Timezone, Locales, Packages)
-    # - role: security      # SSH Hardening, UFW, Fail2Ban
+    - role: security      # SSH Hardening, UFW, Fail2Ban
     # - role: users         # User creation, Git config, SSH Keys
     # - role: monitoring    # Node Exporter, QEMU Agent
 
