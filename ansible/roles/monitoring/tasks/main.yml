@@ -1,9 +1,13 @@
 # tasks/main.yml
 ---
-- name: Install QEMU Guest Agent
-  ansible.builtin.include_tasks: qemu_agent.yml
+- name: Configure QEMU Guest Agent
+  ansible.builtin.import_tasks: qemu_agent.yml
   when: monitoring_qemu_agent_enabled
 
-- name: Install Node Exporter
-  ansible.builtin.include_tasks: node_exporter.yml
+- name: Configure Node Exporter
+  ansible.builtin.import_tasks: node_exporter.yml
+  when: monitoring_node_exporter_enabled
+
+- name: Configure Monitoring Firewall Rules
+  ansible.builtin.import_tasks: firewall.yml
   when: monitoring_node_exporter_enabled

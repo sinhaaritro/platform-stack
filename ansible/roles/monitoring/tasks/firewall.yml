@@ -1,0 +1,11 @@
+# tasks/firewall.yml
+---
+- name: Allow Node Exporter metrics port
+  community.general.ufw:
+    rule: allow
+    port: "{{ monitoring_node_exporter_port | string }}"
+    proto: tcp
+    src: "{{ item }}"
+    comment: "Allow Prometheus Scrapers"
+  loop: "{{ monitoring_allowed_networks }}"
+  tags: [monitoring, ufw]

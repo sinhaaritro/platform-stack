@@ -15,37 +15,32 @@
     create_home: false
     state: present
 
-- name: Check if Node Exporter binary exists
+- name: Check for existing binary
   ansible.builtin.stat:
     path: /usr/local/bin/node_exporter
   register: node_exporter_bin
 
-- name: Get current Node Exporter version
+- name: Verify existing version
   ansible.builtin.command: "/usr/local/bin/node_exporter --version"
   register: node_exporter_version_check
   changed_when: false
   failed_when: false
   when: node_exporter_bin.stat.exists
 
-- name: Download and Unarchive Node Exporter
+- name: Install Node Exporter Binary
   when: >
     not node_exporter_bin.stat.exists or
-    (monitoring_node_exporter_version not in node_exporter_version_check.stdout)
-  vars:
-    _ne_arch: "{{ monitoring_arch_map[ansible_architecture] }}"
-    _ne_dist: "node_exporter-{{ monitoring_node_exporter_version }}.linux-{{ _ne_arch }}"
-    _ne_url: "https://github.com/prometheus/node_exporter/releases/download/v{{ monitoring_node_exporter_version }}/{{ _ne_dist }}.tar.gz"
+    (monitoring_node_exporter_version not in node_exporter_version_check.stdout | default(''))
   block:
-    - name: Download Node Exporter tarball
+    - name: Download and Unarchive tarball
       ansible.builtin.unarchive:
-        src: "{{ _ne_url }}"
+        src: "https://github.com/prometheus/node_exporter/releases/download/v{{ monitoring_node_exporter_version }}/node_exporter-{{ monitoring_node_exporter_version }}.linux-{{ monitoring_arch_map[ansible_architecture] }}.tar.gz"
         dest: "/tmp"
         remote_src: true
-        creates: "/tmp/{{ _ne_dist }}/node_exporter"
 
-    - name: Move binary to /usr/local/bin
+    - name: Deploy binary to /usr/local/bin
       ansible.builtin.copy:
-        src: "/tmp/{{ _ne_dist }}/node_exporter"
+        src: "/tmp/node_exporter-{{ monitoring_node_exporter_version }}.linux-{{ monitoring_arch_map[ansible_architecture] }}/node_exporter"
         dest: "/usr/local/bin/node_exporter"
         mode: "0755"
         owner: "{{ monitoring_node_exporter_user }}"
@@ -53,10 +48,21 @@
         remote_src: true
       notify: Restart node_exporter
 
-- name: Create Systemd Service for Node Exporter
+    - name: Cleanup temporary files
+      ansible.builtin.file:
+        path: "/tmp/node_exporter-{{ monitoring_node_exporter_version }}.linux-{{ monitoring_arch_map[ansible_architecture] }}"
+        state: absent
+
+- name: Create Systemd Service
   ansible.builtin.template:
     src: node_exporter.service.j2
     dest: /etc/systemd/system/node_exporter.service
     mode: "0644"
   notify: Restart node_exporter
   tags: [monitoring, systemd]
+
+- name: Ensure Node Exporter is enabled and started
+  ansible.builtin.service:
+    name: node_exporter
+    state: started
+    enabled: true

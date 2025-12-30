@@ -7,7 +7,11 @@ monitoring_node_exporter_user: "node_exporter"
 monitoring_node_exporter_group: "node_exporter"
 monitoring_node_exporter_port: 9100
 
-# Architecture mapping for download URLs
+# Network Security
+monitoring_allowed_networks:
+  - "192.168.0.0/24"
+
+# Architecture mapping
 monitoring_arch_map:
   x86_64: "amd64"
   aarch64: "arm64"
