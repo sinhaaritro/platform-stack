@@ -1,17 +1,11 @@
 # tasks/pre_tasks.yml
 ---
-- name: Wait for apt lock to be released
-  ansible.builtin.shell: |
-    while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
-      echo "Waiting for apt lock...";
-      sleep 5;
-    done
-  changed_when: false
-  timeout: 300
-  tags: [base, apt]
-
-- name: Ensure apt cache is updated
+- name: Update apt cache (with retry for lock)
   ansible.builtin.apt:
     update_cache: true
-    cache_valid_time: 3600 # Won't update if updated in the last hour
+    cache_valid_time: 3600
+  register: apt_status
+  until: apt_status is success
+  retries: 10
+  delay: 5
   tags: [base, apt]

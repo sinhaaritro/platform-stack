@@ -16,3 +16,13 @@
 
 - name: Initialize Control Plane
   ansible.builtin.include_tasks: init.yml
+
+# IF host is in 'k_control', Run Init (Create Cluster)
+- name: Initialize Control Plane
+  ansible.builtin.include_tasks: init.yml
+  when: "'k_control' in group_names"
+
+# IF host is in 'k_worker', Run Join (Connect to Cluster)
+- name: Join Worker Nodes
+  ansible.builtin.include_tasks: join.yml
+  when: "'k_worker' in group_names"

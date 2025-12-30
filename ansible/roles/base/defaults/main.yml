@@ -1,10 +1,10 @@
 # defaults/main.yml
 
 # Timezone
-base_timezone: "UTC"
+user_timezone: "UTC"
 
 # Locale settings (Prevents Perl warnings during installs)
-base_locale: "en_US.UTF-8"
+user_locale: "en_US.UTF-8"
 
 # Essential utility packages
 base_packages:

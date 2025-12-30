@@ -18,12 +18,43 @@ target_datastore = "data-storage"
 # This map defines all the VMs to be created by this stack. The map key is
 # used as the default name for the VM.
 resources = {
+  "kind" = {
+    enabled     = true
+    type        = "vm"
+    node_name   = "moo-moo"
+    description = "Kubernetes servers. Ubuntu 24.04."
+    tags        = ["kind", "ansible", "ubuntu", "kind"]
+    ansible_groups = {
+      "timezone" = {
+        "user_timezone" = "Etc/GMT"
+        "user_locale"   = "en_US.UTF-8"
+      }
+    }
+
+    vm_config = {
+      cpu_cores         = 2
+      memory_size       = 2048
+      disk_datastore_id = "local-thin"
+      os_version        = "24.04"
+    }
+
+    nodes = {
+      "kind-01" = {
+        vm_id           = 700
+        cloud_init_user = "dev"
+        vm_config = {
+          disk_datastore_id = "data-storage"
+          ipv4_address      = "192.168.0.70/24"
+        }
+      }
+    }
+  },
   "ruth" = {
     enabled     = true
     type        = "vm"
     node_name   = "moo-moo"
     description = "Kubernets servers. Ubuntu 24.04."
-    tags        = ["ruth", "ansible", "ubuntu"]
+    tags        = ["ruth", "ansible", "ubuntu", "kubeadm", "k_management_local"]
     ansible_groups = {
       "timezone" = {
         "user_timezone" = "Asia/Kolkata"
@@ -40,50 +71,100 @@ resources = {
 
     nodes = {
       "ruth-01" = {
-        vm_id           = 900
-        tags            = ["kind"]
+        vm_id           = 801
+        tags            = ["k_control"]
         cloud_init_user = "dev"
         vm_config = {
           disk_datastore_id = "data-storage"
-          ipv4_address      = "192.168.0.90/24"
+          ipv4_address      = "192.168.0.81/24"
         }
       },
       "ruth-02" = {
+        vm_id           = 802
+        tags            = ["k_worker"]
+        cloud_init_user = "dev"
+        vm_config = {
+          disk_datastore_id = "data-storage"
+          ipv4_address      = "192.168.0.82/24"
+        }
+      },
+      "ruth-03" = {
+        vm_id           = 803
+        tags            = ["k_worker"]
+        cloud_init_user = "dev"
+        vm_config = {
+          disk_datastore_id = "data-storage"
+          ipv4_address      = "192.168.0.83/24"
+        }
+      },
+      "ruth-04" = {
+        vm_id           = 804
+        tags            = ["k_worker"]
+        cloud_init_user = "dev"
+        vm_config = {
+          disk_datastore_id = "data-storage"
+          ipv4_address      = "192.168.0.84/24"
+        }
+      }
+    }
+  },
+  "arr" = {
+    enabled     = true
+    type        = "vm"
+    node_name   = "moo-moo"
+    description = "Kubernets servers. Ubuntu 24.04."
+    tags        = ["arr", "ansible", "ubuntu", "kubeadm", "k_fleet_local", "k_arr"]
+    ansible_groups = {
+      "timezone" = {
+        "user_timezone" = "Asia/Kolkata"
+        "user_locale"   = "en_US.UTF-8"
+      }
+    }
+
+    vm_config = {
+      cpu_cores         = 2
+      memory_size       = 2048
+      disk_datastore_id = "local-thin"
+      os_version        = "24.04"
+    }
+
+    nodes = {
+      "arr-01" = {
         vm_id           = 901
-        tags            = ["kubeadm", "k_management", "k_control"]
+        tags            = ["k_control"]
         cloud_init_user = "dev"
         vm_config = {
           disk_datastore_id = "data-storage"
           ipv4_address      = "192.168.0.91/24"
         }
       },
-      "ruth-03" = {
+      "arr-02" = {
         vm_id           = 902
-        tags            = ["kubeadm", "k_management", "k_worker"]
+        tags            = ["k_worker"]
         cloud_init_user = "dev"
         vm_config = {
           disk_datastore_id = "data-storage"
           ipv4_address      = "192.168.0.92/24"
         }
       },
-      "ruth-04" = {
+      "arr-03" = {
         vm_id           = 903
-        tags            = ["kubeadm", "k_fleet", "k_control", "k_arr"]
+        tags            = ["k_worker"]
         cloud_init_user = "dev"
         vm_config = {
           disk_datastore_id = "data-storage"
           ipv4_address      = "192.168.0.93/24"
         }
       },
-      "ruth-05" = {
+      "arr-04" = {
         vm_id           = 904
-        tags            = ["kubeadm", "k_fleet", "k_worker", "k_arr"]
+        tags            = ["k_worker"]
         cloud_init_user = "dev"
         vm_config = {
           disk_datastore_id = "data-storage"
           ipv4_address      = "192.168.0.94/24"
         }
-      }
+      },
     }
   },
 

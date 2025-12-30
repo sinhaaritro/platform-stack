@@ -5,6 +5,54 @@
     path: /etc/kubernetes/admin.conf
   register: kubeadm_admin_conf
 
+# ------------------------------------------------------------------------------
+# 1. SANITIZATION (Clean up Dirty State)
+# Logic: If I am supposed to Init (start fresh), but I lack admin.conf AND
+#        I have old etcd data or kubelet config, I must be wiped first.
+# ------------------------------------------------------------------------------
+- name: Check for dirty state (etcd or kubelet)
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - /var/lib/etcd
+    - /etc/kubernetes/kubelet.conf
+  register: dirty_check
+
+- name: Reset node if it is dirty but meant to be a new Control Plane
+  # Run this block IF:
+  # 1. admin.conf DOES NOT exist (implies we want to create a cluster)
+  # 2. BUT either /var/lib/etcd OR kubelet.conf DOES exist (implies old data)
+  when:
+    - not kubeadm_admin_conf.stat.exists
+    - (dirty_check.results[0].stat.exists or dirty_check.results[1].stat.exists)
+  block:
+    - name: Run kubeadm reset (Force)
+      ansible.builtin.command: kubeadm reset -f
+      changed_when: true
+
+    - name: Remove CNI, Etcd, and Kubernetes Config directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /var/lib/etcd
+        - /etc/cni/net.d
+        - /root/.kube
+        - "/home/{{ ansible_user }}/.kube"
+        - /etc/kubernetes
+
+# ------------------------------------------------------------------------------
+# 2. INIT LOGIC
+# ------------------------------------------------------------------------------
+- name: Configure Control Plane Taint
+  # DYNAMIC TAINT HANDLING (Moved up to run before Init/After Reset check logic if needed,
+  # but usually runs after init. Keeping it clean.)
+  # Note: The original taint task was fine at the end.
+  # We just need the init task to succeed first.
+  ansible.builtin.command: >-
+    echo "Placeholder for Taint logic if needed"
+  changed_when: false
+
 - name: Initialize Kubernetes Control Plane
   ansible.builtin.command:
     cmd: >
@@ -12,7 +60,7 @@
       --pod-network-cidr={{ kubeadm_pod_network_cidr }}
       --cri-socket=unix:///var/run/containerd/containerd.sock
   become: true
-  # Only run if admin.conf does NOT exist
+  # Only run if admin.conf does NOT exist (we might have just deleted it above)
   when: not kubeadm_admin_conf.stat.exists
   register: kubeadm_init_output
   changed_when: "'Your Kubernetes control-plane has initialized successfully' in kubeadm_init_output.stdout"
@@ -39,8 +87,6 @@
   tags: [kubeadm, kubeconfig]
 
 # DYNAMIC TAINT HANDLING
-# If true: We REMOVE the taint (-) so apps can run.
-# If false: We ADD the taint (:NoSchedule) so apps CANNOT run.
 - name: Configure Control Plane Taint
   ansible.builtin.command:
     cmd: >-
@@ -49,9 +95,6 @@
       --overwrite
   become: true
   become_user: "{{ ansible_user }}"
-  # We ignore failure because:
-  # 1. If we try to remove (-) and it's already gone -> error (safe to ignore)
-  # 2. If we try to add (:NoSchedule) and it's already there -> error (safe to ignore)
   failed_when: false
   changed_when: false
   tags: [kubeadm, init, taint]

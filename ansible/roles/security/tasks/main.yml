@@ -5,3 +5,6 @@
 
 - name: Configure SSH
   ansible.builtin.include_tasks: ssh.yml
+
+- name: Configure Firewall (UFW)
+  ansible.builtin.include_tasks: firewall.yml

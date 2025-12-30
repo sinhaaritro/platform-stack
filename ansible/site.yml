@@ -14,68 +14,68 @@
   become: true
   roles:
     - role: base          # System basics (Timezone, Locales, Packages)
-    - role: security      # SSH Hardening, UFW, Fail2Ban
-    - role: users         # User creation, Git config, SSH Keys
-    - role: monitoring    # Node Exporter, QEMU Agent
+    # - role: security      # SSH Hardening, UFW, Fail2Ban
+    # - role: users         # User creation, Git config, SSH Keys
+    # - role: monitoring    # Node Exporter, QEMU Agent
 
-# ==============================================================================
-# PLAY 2: DEV/TEST KUBERNETES (KIND)
-# Target: Kind (Kubernetes) Server
-# Purpose: Ephemeral clusters. Manual app deployment for testing.
-# ==============================================================================
-- name: Configure Dev Kubernetes (Kind)
-  hosts: kind
-  become: true
-  roles:
-    - role: docker        # Runtime Dependency (Must run first)
-    - role: kubectl       # CLI Interface (Only installs the client)
-    - role: helm          # Package Manager (Only installs Helm)
-    - role: kind          # Cluster Manager (Provisions the cluster)
+# # ==============================================================================
+# # PLAY 2: DEV/TEST KUBERNETES (KIND)
+# # Target: Kind (Kubernetes) Server
+# # Purpose: Ephemeral clusters. Manual app deployment for testing.
+# # ==============================================================================
+# - name: Configure Dev Kubernetes (Kind)
+#   hosts: kind
+#   become: true
+#   roles:
+#     - role: docker        # Runtime Dependency (Must run first)
+#     - role: kubectl       # CLI Interface (Only installs the client)
+#     - role: helm          # Package Manager (Only installs Helm)
+#     - role: kind          # Cluster Manager (Provisions the cluster)
 
-# ==============================================================================
-# PLAY 3: PRODUCTION KUBERNETES - INFRASTRUCTURE
-# Target: All Production Clusters (Management + Fleet)
-# Purpose: Installs Docker, Kubeadm, and initializes the cluster.
-# ==============================================================================
-- name: Configure Production Kubernetes (Kubeadm)
-  hosts: kubeadm
-  become: true
-  vars:
-    # Set to true to allow apps to run on the Control Plane node (Brain)
-    # Essential for Single-Node clusters or small Home Labs
-    kubeadm_allow_scheduling_on_cp: true
-  roles:
-    - role: docker        # Runtime Dependency (Must run first)
-    - role: kubeadm       # Cluster Bootstrap
-    - role: helm          # Useful to have on the Control Plane
+# # ==============================================================================
+# # PLAY 3: PRODUCTION KUBERNETES - INFRASTRUCTURE
+# # Target: All Production Clusters (Management + Fleet)
+# # Purpose: Installs Docker, Kubeadm, and initializes the cluster.
+# # ==============================================================================
+# - name: Configure Production Kubernetes (Kubeadm)
+#   hosts: kubeadm
+#   become: true
+#   vars:
+#     # Set to true to allow apps to run on the Control Plane node (Brain)
+#     # Essential for Single-Node clusters or small Home Labs
+#     kubeadm_allow_scheduling_on_cp: true
+#   roles:
+#     - role: docker        # Runtime Dependency (Must run first)
+#     - role: kubeadm       # Cluster Bootstrap
+#     - role: helm          # Useful to have on the Control Plane
 
-# ==============================================================================
-# PLAY 4: PRODUCTION KUBERNETES - MANAGEMENT LAYER
-# Target: The Hub Server Only (k_management)
-# Purpose: Installs ArgoCD. (UI exposure and Fleet connect delayed).
-# ==============================================================================
-- name: Configure Management Layer (ArgoCD)
-  hosts: k_management
-  become: true
-  roles:
-    - role: argocd
+# # ==============================================================================
+# # PLAY 4: PRODUCTION KUBERNETES - MANAGEMENT LAYER
+# # Target: The Hub Server Only (k_management)
+# # Purpose: Installs ArgoCD. (UI exposure and Fleet connect delayed).
+# # ==============================================================================
+# - name: Configure Management Layer (ArgoCD)
+#   hosts: k_management:&k_control
+#   become: true
+#   roles:
+#     - role: argocd
 
-# ==============================================================================
-# PLAY 5: WEB LAYER
-# Target: Web Server
-# ==============================================================================
-- name: Configure Web Server
-  hosts: server
-  become: true
-  roles:
-    - role: nginx
+# # ==============================================================================
+# # PLAY 5: WEB LAYER
+# # Target: Web Server
+# # ==============================================================================
+# - name: Configure Web Server
+#   hosts: server
+#   become: true
+#   roles:
+#     - role: nginx
 
-# ==============================================================================
-# PLAY 6: DATA LAYER
-# Target: Postgres Database
-# ==============================================================================
-- name: Configure Postgres Database
-  hosts: postgres
-  become: true
-  roles:
-    - role: postgres
+# # ==============================================================================
+# # PLAY 6: DATA LAYER
+# # Target: Postgres Database
+# # ==============================================================================
+# - name: Configure Postgres Database
+#   hosts: postgres
+#   become: true
+#   roles:
+#     - role: postgres
