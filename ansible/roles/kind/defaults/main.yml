@@ -1,25 +1,26 @@
 # defaults/main.yml
+---
+# Cluster Identity
+kind_cluster_name: "dev-cluster"
 
-# Kind Version
-# https://github.com/kubernetes-sigs/kind/releases
+# Kind Binary Version
 kind_version: "v0.26.0"
 
+# Host Port Mapping (Exposed on the VM IP)
+# Override these in your inventory if needed (e.g., if Port 80 is busy)
+kind_port_http: 80
+kind_port_https: 443
+kind_port_extra_1: 8080
+kind_port_extra_2: 8443
+
+# Container Port Mapping (Inside the Kind Node)
+# Usually keeps standard ports to match Ingress Controller defaults
+kind_container_http: 80
+kind_container_https: 443
+kind_container_extra_1: 8080
+kind_container_extra_2: 8443
+
 # Architecture mapping
-kind_arch_mapping:
-  x86_64: amd64
-  aarch64: arm64
-
-# Installation path
-kind_bin_path: "/usr/local/bin/kind"
-
-# Cluster Configuration
-kind_cluster_name: "platform-cluster"
-kind_k8s_version: "v1.32.0" # Node image version
-
-# Port Mappings (Host -> Container)
-# Essential for Ingress Controllers (Nginx/Traefik) to work
-kind_expose_ports:
-  - host_port: 80
-    container_port: 80
-  - host_port: 443
-    container_port: 443
+kind_arch_map:
+  x86_64: "amd64"
+  aarch64: "arm64"

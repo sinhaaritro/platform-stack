@@ -1,25 +1,20 @@
 # meta/main.yml
----
 galaxy_info:
   author: Aritro
   role_name: kind
   namespace: internal
-  description: Installs the Kind cluster manager for Kubernetes.
-  company: None
+  description: Installs Kind (Kubernetes in Docker) and Kubectl for Dev/Test environments.
   license: MIT
   min_ansible_version: "2.9"
   platforms:
     - name: Ubuntu
       versions:
         - all
-    - name: Debian
-      versions:
-        - all
   galaxy_tags:
     - kubernetes
-    - k8s
     - kind
-    - cluster
+    - dev
+    - testing
 
 dependencies:
-  - role: docker
+  - role: k8s_repo

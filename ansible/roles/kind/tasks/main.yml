@@ -1,12 +1,13 @@
 # tasks/main.yml
 ---
-- name: Fail if architecture is not supported
-  ansible.builtin.fail:
-    msg: "System architecture {{ ansible_architecture }} is not mapped in defaults/main.yml"
-  when: kind_arch_mapping[ansible_architecture] is not defined
+- name: Setup Kubectl Client
+  ansible.builtin.include_tasks: kubectl.yml
 
-- name: Install Kind binary
-  ansible.builtin.include_tasks: install.yml
+- name: Setup Kind Binary
+  ansible.builtin.include_tasks: binary.yml
 
-- name: Configure and Create Cluster
+- name: Provision Kind Cluster
   ansible.builtin.include_tasks: cluster.yml
+
+- name: Configure User Access
+  ansible.builtin.include_tasks: access.yml

@@ -1,0 +1,15 @@
+# tasks/kubectl.yml
+---
+- name: Install Kubectl
+  ansible.builtin.apt:
+    # We strip 'v' from k8s_repo_version (e.g. v1.31 -> 1.31) and add wildcard
+    name: "kubectl={{ k8s_repo_version | replace('v', '') }}.*"
+    state: present
+    update_cache: true
+  tags: [kind, kubectl]
+
+- name: Hold Kubectl version
+  ansible.builtin.dpkg_selections:
+    name: kubectl
+    selection: hold
+  tags: [kind, kubectl]

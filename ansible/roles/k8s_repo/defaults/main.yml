@@ -1,0 +1,9 @@
+# defaults/main.yml
+---
+# Kubernetes Version (Must be in format vX.Y)
+# This controls which repository is added.
+k8s_repo_version: "v1.31"
+
+# Paths
+k8s_keyring_dir: "/etc/apt/keyrings"
+k8s_keyring_file: "kubernetes-apt-keyring.asc"

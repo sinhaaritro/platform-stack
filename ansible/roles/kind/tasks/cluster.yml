@@ -1,65 +1,31 @@
-# tasks/cluster.yml
 # yaml-language-server: $schema=https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/tasks
+# tasks/cluster.yml
 ---
-# 1. System Tuning (Required for Elastic/Filebeat/Network heavy workloads in K8s)
-- name: Increase sysctl limits for Kubernetes
-  ansible.posix.sysctl:
-    name: "{{ item.key }}"
-    value: "{{ item.value }}"
-    state: present
-    reload: true
-  loop:
-    - { key: "fs.inotify.max_user_watches", value: "524288" }
-    - { key: "fs.inotify.max_user_instances", value: "512" }
-  tags: [kind, system]
-
-# 2. Config Generation
-- name: Create Kind configuration directory
+- name: Ensure Kind config directory exists
   ansible.builtin.file:
-    path: /etc/kind
+    path: /etc/kubernetes/kind
     state: directory
     mode: "0755"
-  tags: [kind, config]
+  tags: [kind, cluster]
 
 - name: Generate Kind cluster config
   ansible.builtin.template:
     src: kind-config.yaml.j2
-    dest: /etc/kind/config.yaml
+    dest: /etc/kubernetes/kind/config.yml
     mode: "0644"
-  tags: [kind, config]
+  tags: [kind, cluster]
 
-# 3. Idempotency Check
-- name: Check existing Kind clusters
-  ansible.builtin.command: "{{ kind_bin_path }} get clusters"
-  register: kind_clusters
+- name: Check if Kind cluster already exists
+  ansible.builtin.command: kind get clusters
+  register: existing_clusters
   changed_when: false
-  tags: [kind, check]
+  tags: [kind, cluster]
 
-# 4. Creation (Runs as the Ansible User, not root, so kubeconfig ends up in ~/)
-- name: Create Kind Cluster
-  ansible.builtin.command:
-    cmd: >
-      {{ kind_bin_path }} create cluster
-      --name {{ kind_cluster_name }}
-      --config /etc/kind/config.yaml
-      --image kindest/node:{{ kind_k8s_version }}
-  become: true
-  become_user: "{{ ansible_user }}"
-  # Only run if our cluster name is NOT in the list of running clusters
-  when:
-    - ansible_user is defined
-    - ansible_user != 'root'
-    - kind_cluster_name not in kind_clusters.stdout
+- name: Create Kind cluster
+  ansible.builtin.command: >
+    kind create cluster
+    --name {{ kind_cluster_name }}
+    --config /etc/kubernetes/kind/config.yml
+  when: kind_cluster_name not in existing_clusters.stdout
   changed_when: true
-  tags: [kind, create]
-
-- name: Ensure Kubeconfig has correct permissions
-  ansible.builtin.file:
-    path: "/home/{{ ansible_user }}/.kube/config"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: "0600"
-  when:
-    - ansible_user is defined
-    - ansible_user != 'root'
-  tags: [kind, kubeconfig]
+  tags: [kind, cluster]

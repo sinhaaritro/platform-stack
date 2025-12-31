@@ -1,0 +1,24 @@
+# meta/main.yml
+galaxy_info:
+  author: Aritro
+  role_name: k8s_repo
+  namespace: internal
+  description: Configures official Kubernetes APT repositories (pkgs.k8s.io) and GPG keys.
+  company: None
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - kubernetes
+    - k8s
+    - repo
+    - apt
+    - infrastructure
+
+dependencies: []

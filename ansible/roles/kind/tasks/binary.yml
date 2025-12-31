@@ -1,0 +1,8 @@
+# tasks/binary.yml
+---
+- name: Download Kind binary
+  ansible.builtin.get_url:
+    url: "https://github.com/kubernetes-sigs/kind/releases/download/{{ kind_version }}/kind-linux-{{ kind_arch_map[ansible_architecture] }}"
+    dest: /usr/local/bin/kind
+    mode: "0755"
+  tags: [kind, binary]

@@ -1,0 +1,23 @@
+# tasks/access.yml
+---
+- name: Ensure .kube directory exists for dev user
+  ansible.builtin.file:
+    path: "/home/{{ ansible_user }}/.kube"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0700"
+  tags: [kind, access]
+
+- name: Export Kubeconfig to dev user
+  ansible.builtin.shell: "kind get kubeconfig --name {{ kind_cluster_name }} > /home/{{ ansible_user }}/.kube/config"
+  changed_when: true
+  tags: [kind, access]
+
+- name: Set Kubeconfig permissions
+  ansible.builtin.file:
+    path: "/home/{{ ansible_user }}/.kube/config"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0600"
+  tags: [kind, access]

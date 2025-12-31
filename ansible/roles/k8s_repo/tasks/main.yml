@@ -1,0 +1,35 @@
+# tasks/main.yml
+---
+- name: Install APT transport dependencies
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gpg
+    state: present
+    update_cache: true
+  tags: [k8s, repo]
+
+- name: Ensure APT keyring directory exists
+  ansible.builtin.file:
+    path: "{{ k8s_keyring_dir }}"
+    state: directory
+    mode: '0755'
+  tags: [k8s, repo]
+
+- name: Download Kubernetes public signing key
+  ansible.builtin.get_url:
+    url: "https://pkgs.k8s.io/core:/stable:/{{ k8s_repo_version }}/deb/Release.key"
+    dest: "{{ k8s_keyring_dir }}/{{ k8s_keyring_file }}"
+    mode: '0644'
+    force: false # Only download if missing or URL changes
+  tags: [k8s, repo]
+
+- name: Add Kubernetes APT repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by={{ k8s_keyring_dir }}/{{ k8s_keyring_file }}] https://pkgs.k8s.io/core:/stable:/{{ k8s_repo_version }}/deb/ /"
+    filename: kubernetes
+    state: present
+    update_cache: true
+  tags: [k8s, repo]
