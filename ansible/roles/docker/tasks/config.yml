@@ -1,0 +1,57 @@
+# tasks/config.yml
+---
+# 1. Configure Docker Daemon (For Kind & General Usage)
+- name: Create Docker config directory
+  ansible.builtin.file:
+    path: /etc/docker
+    state: directory
+    mode: "0755"
+
+- name: Configure Docker Daemon (Log Rotation & Cgroups)
+  ansible.builtin.copy:
+    dest: /etc/docker/daemon.json
+    content: |
+      {
+        "exec-opts": ["native.cgroupdriver=systemd"],
+        "log-driver": "json-file",
+        "log-opts": {
+          "max-size": "{{ docker_log_max_size }}",
+          "max-file": "{{ docker_log_max_file }}"
+        }
+      }
+    mode: "0644"
+  notify: Restart docker
+
+# 2. Configure Containerd (Critical for Kubeadm/K8s)
+- name: Create Containerd config directory
+  ansible.builtin.file:
+    path: /etc/containerd
+    state: directory
+    mode: "0755"
+
+- name: Check if containerd config exists
+  ansible.builtin.stat:
+    path: /etc/containerd/config.toml
+  register: containerd_stat
+
+- name: Check if SystemdCgroup is configured
+  ansible.builtin.command: grep -q "SystemdCgroup = true" /etc/containerd/config.toml
+  register: containerd_grep
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  when: containerd_stat.stat.exists
+
+- name: Regenerate containerd config if missing or invalid
+  ansible.builtin.shell: containerd config default > /etc/containerd/config.toml
+  # Run if file is missing OR if grep didn't find the string (rc != 0)
+  when: not containerd_stat.stat.exists or (containerd_grep.rc | default(1) != 0)
+  changed_when: true
+  notify: Restart containerd
+
+- name: Apply SystemdCgroup fix (handles indentation)
+  ansible.builtin.replace:
+    path: /etc/containerd/config.toml
+    regexp: '^(\s+)SystemdCgroup = false'
+    replace: '\1SystemdCgroup = true'
+  notify: Restart containerd

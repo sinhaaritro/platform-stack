@@ -1,6 +1,16 @@
 # defaults/main.yml
+---
+# Packages to remove to ensure a clean install
+docker_conflicting_packages:
+  - docker.io
+  - docker-doc
+  - docker-compose
+  - docker-compose-v2
+  - podman-docker
+  - containerd
+  - runc
 
-# Packages to install (Modern Docker setup)
+# Packages to install (Official Docker CE)
 docker_packages:
   - docker-ce
   - docker-ce-cli
@@ -8,20 +18,9 @@ docker_packages:
   - docker-buildx-plugin
   - docker-compose-plugin
 
-# Architecture mapping for APT repository
-docker_arch_mapping:
-  x86_64: amd64
-  aarch64: arm64
+# Log Rotation Settings (Prevents disk exhaustion)
+docker_log_max_size: "10m"
+docker_log_max_file: "3"
 
-# Users to add to the 'docker' group
-docker_users:
-  - "{{ ansible_user | default('root') }}"
-
-# Docker Daemon Configuration (JSON)
-# Enable log rotation by default to prevent disk exhaustion
-docker_daemon_config:
-  log-driver: "json-file"
-  log-opts:
-    max-size: "10m"
-    max-file: "3"
-  # Add insecure-registries or dns settings here via group_vars
+# User Management
+docker_add_ansible_user: true

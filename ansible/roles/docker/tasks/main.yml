@@ -1,12 +1,13 @@
 # tasks/main.yml
 ---
-- name: Fail if architecture is not supported
-  ansible.builtin.fail:
-    msg: "System architecture {{ ansible_architecture }} is not mapped in defaults/main.yml"
-  when: docker_arch_mapping[ansible_architecture] is not defined
+- name: Cleanup old installations
+  ansible.builtin.import_tasks: cleanup.yml
 
-- name: Install Docker prerequisites and packages
-  ansible.builtin.include_tasks: install.yml
+- name: Setup Docker Repository
+  ansible.builtin.import_tasks: repo.yml
 
-- name: Configure Docker daemon and users
-  ansible.builtin.include_tasks: configure.yml
+- name: Install Docker and Containerd
+  ansible.builtin.import_tasks: install.yml
+
+- name: Configure Runtime and CRI
+  ansible.builtin.import_tasks: config.yml

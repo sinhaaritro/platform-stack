@@ -18,36 +18,36 @@
     - role: monitoring    # Node Exporter, QEMU Agent
     - role: users         # User creation, Git config, SSH Keys
 
-# # ==============================================================================
-# # PLAY 2: DEV/TEST KUBERNETES (KIND)
-# # Target: Kind (Kubernetes) Server
-# # Purpose: Ephemeral clusters. Manual app deployment for testing.
-# # ==============================================================================
-# - name: Configure Dev Kubernetes (Kind)
-#   hosts: kind
-#   become: true
-#   roles:
-#     - role: docker        # Runtime Dependency (Must run first)
-#     - role: kubectl       # CLI Interface (Only installs the client)
-#     - role: helm          # Package Manager (Only installs Helm)
-#     - role: kind          # Cluster Manager (Provisions the cluster)
+# ==============================================================================
+# PLAY 2: DEV/TEST KUBERNETES (KIND)
+# Target: Kind (Kubernetes) Server
+# Purpose: Ephemeral clusters. Manual app deployment for testing.
+# ==============================================================================
+- name: Configure Dev Kubernetes (Kind)
+  hosts: kind
+  become: true
+  roles:
+    - role: docker        # Runtime Dependency (Must run first)
+    # - role: kubectl       # CLI Interface (Only installs the client)
+    # - role: helm          # Package Manager (Only installs Helm)
+    # - role: kind          # Cluster Manager (Provisions the cluster)
 
-# # ==============================================================================
-# # PLAY 3: PRODUCTION KUBERNETES - INFRASTRUCTURE
-# # Target: All Production Clusters (Management + Fleet)
-# # Purpose: Installs Docker, Kubeadm, and initializes the cluster.
-# # ==============================================================================
-# - name: Configure Production Kubernetes (Kubeadm)
-#   hosts: kubeadm
-#   become: true
-#   vars:
-#     # Set to true to allow apps to run on the Control Plane node (Brain)
-#     # Essential for Single-Node clusters or small Home Labs
-#     kubeadm_allow_scheduling_on_cp: true
-#   roles:
-#     - role: docker        # Runtime Dependency (Must run first)
-#     - role: kubeadm       # Cluster Bootstrap
-#     - role: helm          # Useful to have on the Control Plane
+# ==============================================================================
+# PLAY 3: PRODUCTION KUBERNETES - INFRASTRUCTURE
+# Target: All Production Clusters (Management + Fleet)
+# Purpose: Installs Docker, Kubeadm, and initializes the cluster.
+# ==============================================================================
+- name: Configure Production Kubernetes (Kubeadm)
+  hosts: kubeadm
+  become: true
+  vars:
+    # Set to true to allow apps to run on the Control Plane node (Brain)
+    # Essential for Single-Node clusters or small Home Labs
+    kubeadm_allow_scheduling_on_cp: true
+  roles:
+    - role: docker        # Runtime Dependency (Must run first)
+    # - role: kubeadm       # Cluster Bootstrap
+    # - role: helm          # Useful to have on the Control Plane
 
 # # ==============================================================================
 # # PLAY 4: PRODUCTION KUBERNETES - MANAGEMENT LAYER

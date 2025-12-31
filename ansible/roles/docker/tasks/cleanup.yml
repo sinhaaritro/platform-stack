@@ -1,0 +1,8 @@
+# tasks/cleanup.yml
+---
+- name: Remove conflicting/outdated packages
+  ansible.builtin.apt:
+    name: "{{ docker_conflicting_packages }}"
+    state: absent
+    purge: true
+  tags: [docker, cleanup]
