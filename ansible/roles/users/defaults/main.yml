@@ -1,20 +1,9 @@
 # defaults/main.yml
 
-# Default shell if not specified for a specific user
-users_default_shell: "/bin/bash"
+# Fallbacks for inventory variables
+users_global: []
+users_tenant: []
 
-# Default Git config (optional fallback if a user doesn't have specific git details)
-# You can leave these empty or remove them if you don't want defaults.
-users_global_git_name: "Aritro Sinha"
-users_global_git_email: "sinhaaritro@gmail.com"
-
-# List of users to create.
-# Robust Structure Example:
-# users_accounts:
-#   - username: "aritro"
-#     groups: ["sudo", "docker"]   # Optional
-#     shell: "/bin/bash"           # Optional
-#     ssh_key: "ssh-rsa AAAA..."   # Optional
-#     git_name: "Aritro Sinha"     # Optional (Overwrites global default)
-#     git_email: "me@example.com"  # Optional (Overwrites global default)
-users_accounts: []
+# Mandatory system groups that should always exist
+users_mandatory_groups:
+  - sudo

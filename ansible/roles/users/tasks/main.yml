@@ -1,10 +1,24 @@
 # tasks/main.yml
 ---
-- name: Manage user accounts
+- name: Merge Global and Tenant users
+  ansible.builtin.set_fact:
+    # We combine both lists. If users_tenant is defined in multiple groups,
+    # Ansible's variable precedence handles the selection.
+    active_users: "{{ users_global + users_tenant }}"
+  tags: [users, always]
+
+- name: Ensure required OS groups exist
+  ansible.builtin.group:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ (active_users | map(attribute='groups') | flatten | unique) + users_mandatory_groups }}"
+  tags: [users, groups]
+
+- name: Handle user accounts
   ansible.builtin.include_tasks: accounts.yml
 
-- name: Manage SSH keys
-  ansible.builtin.include_tasks: ssh_keys.yml
+- name: Handle SSH keys
+  ansible.builtin.include_tasks: ssh.yml
 
-- name: Configure user Git settings
-  ansible.builtin.include_tasks: git_config.yml
+- name: Configure passwordless sudo
+  ansible.builtin.include_tasks: sudo.yml

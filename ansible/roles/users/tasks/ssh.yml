@@ -1,0 +1,11 @@
+# tasks/ssh.yml
+---
+- name: Deploy authorized SSH keys (with exclusivity)
+  ansible.posix.authorized_key:
+    user: "{{ item.name }}"
+    key: "{{ item.ssh_keys | join('\n') }}"
+    state: present
+    exclusive: true # This purges any keys NOT in the users_list
+  loop: "{{ active_users }}"
+  when: item.ssh_keys is defined and item.ssh_keys | length > 0
+  tags: [users, ssh]

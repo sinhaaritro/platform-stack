@@ -16,7 +16,7 @@
     - role: base          # System basics (Timezone, Locales, Packages)
     - role: security      # SSH Hardening, UFW, Fail2Ban
     - role: monitoring    # Node Exporter, QEMU Agent
-    # - role: users         # User creation, Git config, SSH Keys
+    - role: users         # User creation, Git config, SSH Keys
 
 # # ==============================================================================
 # # PLAY 2: DEV/TEST KUBERNETES (KIND)

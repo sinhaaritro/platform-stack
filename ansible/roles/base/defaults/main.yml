@@ -11,7 +11,7 @@ base_packages:
   - curl
   - wget
   - vim
-  - git
+  # - git
   - htop
   - neofetch
   - unzip

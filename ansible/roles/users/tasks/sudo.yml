@@ -1,0 +1,9 @@
+# tasks/sudo.yml
+---
+- name: Allow 'sudo' group to have passwordless access
+  ansible.builtin.copy:
+    dest: /etc/sudoers.d/90-ansible-users
+    content: "%sudo ALL=(ALL) NOPASSWD:ALL"
+    mode: "0440"
+    validate: "/usr/sbin/visudo -cf %s"
+  tags: [users, sudo]

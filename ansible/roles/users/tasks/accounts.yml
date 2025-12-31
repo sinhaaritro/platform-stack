@@ -1,23 +1,12 @@
 # tasks/accounts.yml
 ---
-- name: Ensure specific groups exist
-  # This ensures we don't fail if a user is assigned to a group that doesn't exist yet.
-  # Note: System groups like 'sudo' usually exist, but custom ones might not.
-  ansible.builtin.group:
-    name: "{{ item.1 }}"
-    state: present
-  loop: "{{ users_accounts | subelements('groups', skip_missing=True) }}"
-  tags: [users, groups]
-
 - name: Create or update user accounts
   ansible.builtin.user:
-    name: "{{ item.username }}"
-    groups: "{{ item.groups | default(omit) }}"
-    shell: "{{ item.shell | default(users_default_shell) }}"
-    append: true # Appends groups rather than replacing them (safer)
-    create_home: true
+    name: "{{ item.name }}"
+    groups: "{{ item.groups | default(['sudo']) }}"
+    shell: "{{ item.shell | default('/bin/bash') }}"
     state: present
-  loop: "{{ users_accounts }}"
-  loop_control:
-    label: "{{ item.username }}"
-  tags: [users]
+    create_home: true
+    append: true # Ensures we don't remove them from system groups not in our list
+  loop: "{{ active_users }}"
+  tags: [users, accounts]
