@@ -1,0 +1,16 @@
+# tasks/config.yml
+---
+# This task is intended for the Control Plane nodes once initialized.
+# We use 'failed_when: false' because it will fail if the cluster isn't up yet.
+- name: Handle Control Plane Taint (Scheduling)
+  ansible.builtin.shell: |
+    kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+    kubectl taint nodes --all node-role.kubernetes.io/master-
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  when:
+    - kubeadm_allow_scheduling_on_cp | bool
+    - "'k_control' in group_names"
+  failed_when: false
+  changed_when: true
+  tags: [kubeadm, taint]

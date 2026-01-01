@@ -1,42 +1,24 @@
 # tasks/install.yml
 ---
-- name: Install dependencies
-  ansible.builtin.apt:
-    name: [apt-transport-https, ca-certificates, curl, gpg]
-    state: present
-    update_cache: true
-
-- name: Create Keyrings Directory
-  ansible.builtin.file:
-    path: /etc/apt/keyrings
-    state: directory
-    mode: "0755"
-
-# Using the new pkgs.k8s.io repo logic
-- name: Add Kubernetes GPG key
-  ansible.builtin.get_url:
-    url: "https://pkgs.k8s.io/core:/stable:/{{ kubeadm_k8s_version }}/deb/Release.key"
-    dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
-    mode: "0644"
-
-- name: Add Kubernetes Repository
-  ansible.builtin.apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.asc] https://pkgs.k8s.io/core:/stable:/{{ kubeadm_k8s_version }}/deb/ /"
-    filename: kubernetes
-    state: present
-
-- name: Install Kubeadm, Kubelet, Kubectl
+- name: Install Kubelet, Kubeadm, and Kubectl
   ansible.builtin.apt:
     name:
-      - "kubelet={{ kubeadm_version }}"
-      - "kubeadm={{ kubeadm_version }}"
-      - "kubectl={{ kubeadm_version }}"
+      - "kubelet={{ kubeadm_package_version }}"
+      - "kubeadm={{ kubeadm_package_version }}"
+      - "kubectl={{ kubeadm_package_version }}"
     state: present
     update_cache: true
+  tags: [kubeadm, install]
 
-- name: Hold Kubernetes packages (Prevent auto-upgrades)
+- name: Hold Kubernetes packages at current version
   ansible.builtin.dpkg_selections:
     name: "{{ item }}"
     selection: hold
   loop: [kubelet, kubeadm, kubectl]
-  notify: Restart kubelet
+  tags: [kubeadm, install]
+
+- name: Ensure Kubelet is enabled
+  ansible.builtin.service:
+    name: kubelet
+    enabled: true
+    state: started

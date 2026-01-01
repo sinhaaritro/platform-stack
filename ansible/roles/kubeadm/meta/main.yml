@@ -1,25 +1,15 @@
 # meta/main.yml
+---
 galaxy_info:
   author: Aritro
   role_name: kubeadm
   namespace: internal
-  description: Installs and initializes a Kubernetes cluster using Kubeadm.
-  company: None
+  description: Installs Kubelet, Kubeadm, and Kubectl with system hardening for production.
   license: MIT
   min_ansible_version: "2.9"
   platforms:
     - name: Ubuntu
-      versions:
-        - all
-    - name: Debian
-      versions:
-        - all
-  galaxy_tags:
-    - kubernetes
-    - k8s
-    - kubeadm
-    - production
+      versions: [all]
 
 dependencies:
-  # We need a container runtime. The 'docker' role installs containerd.io.
-  - role: docker
+  - role: k8s_repo

@@ -47,7 +47,7 @@
   roles:
     - role: docker        # Runtime Dependency (Must run first)
     - role: k8s_repo      # Manage the official Kubernetes Apt repositories.
-    # - role: kubeadm       # Cluster Manager (Provisions the cluster)
+    - role: kubeadm       # Cluster Manager (Provisions the cluster)
     # - role: helm          # Package Manager (Only installs Helm)
 
 # # ==============================================================================

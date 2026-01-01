@@ -1,28 +1,10 @@
 # tasks/main.yml
 ---
-- name: Fail if architecture is not supported
-  ansible.builtin.fail:
-    msg: "System architecture {{ ansible_architecture }} is not mapped in defaults/main.yml"
-  when: kubeadm_arch_mapping[ansible_architecture] is not defined
+- name: Prepare System (Swap, Kernel, Sysctl)
+  ansible.builtin.include_tasks: system.yml
 
-- name: Configure System Prerequisites (Swap, Kernel Modules)
-  ansible.builtin.include_tasks: prerequisites.yml
-
-- name: Configure Container Runtime (containerd)
-  ansible.builtin.include_tasks: configure_containerd.yml
-
-- name: Install Kubernetes Packages
+- name: Install Kubernetes Trinity
   ansible.builtin.include_tasks: install.yml
 
-- name: Initialize Control Plane
-  ansible.builtin.include_tasks: init.yml
-
-# IF host is in 'k_control', Run Init (Create Cluster)
-- name: Initialize Control Plane
-  ansible.builtin.include_tasks: init.yml
-  when: "'k_control' in group_names"
-
-# IF host is in 'k_worker', Run Join (Connect to Cluster)
-- name: Join Worker Nodes
-  ansible.builtin.include_tasks: join.yml
-  when: "'k_worker' in group_names"
+- name: Configure Node Scheduling
+  ansible.builtin.include_tasks: config.yml
