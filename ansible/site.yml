@@ -30,7 +30,7 @@
     - role: docker        # Runtime Dependency (Must run first)
     - role: k8s_repo      # Manage the official Kubernetes Apt repositories.
     - role: kind          # Cluster Manager (Provisions the cluster)
-    # - role: helm          # Package Manager (Only installs Helm)
+    - role: helm          # Package Manager (Only installs Helm)
 
 # ==============================================================================
 # PLAY 3: PRODUCTION KUBERNETES - INFRASTRUCTURE
@@ -48,7 +48,7 @@
     - role: docker        # Runtime Dependency (Must run first)
     - role: k8s_repo      # Manage the official Kubernetes Apt repositories.
     - role: kubeadm       # Cluster Manager (Provisions the cluster)
-    # - role: helm          # Package Manager (Only installs Helm)
+    - role: helm          # Package Manager (Only installs Helm)
 
 # # ==============================================================================
 # # PLAY 4: PRODUCTION KUBERNETES - MANAGEMENT LAYER

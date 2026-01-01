@@ -1,0 +1,23 @@
+# tasks/completion.yml
+---
+- name: Ensure bash-completion is installed
+  ansible.builtin.apt:
+    name: bash-completion
+    state: present
+
+- name: Generate Helm bash completion
+  ansible.builtin.shell: helm completion bash > /etc/bash_completion.d/helm
+  args:
+    creates: /etc/bash_completion.d/helm
+  changed_when: true
+
+- name: Ensure Helm completion is sourced in user .bashrc
+  ansible.builtin.lineinfile:
+    path: "/home/{{ helm_user }}/.bashrc"
+    line: "source <(helm completion bash)"
+    state: present
+    create: true
+    owner: "{{ helm_user }}"
+    group: "{{ helm_user }}"
+    mode: "0644"
+  tags: [helm, completion]

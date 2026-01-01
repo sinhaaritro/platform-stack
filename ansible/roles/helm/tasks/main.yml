@@ -1,13 +1,7 @@
 # tasks/main.yml
 ---
-- name: Fail if architecture is not supported
-  ansible.builtin.fail:
-    msg: "System architecture {{ ansible_architecture }} is not mapped in defaults/main.yml"
-  when: helm_arch_mapping[ansible_architecture] is not defined
+- name: Install Helm via Binary
+  ansible.builtin.include_tasks: binary.yml
 
-- name: Install Helm binary
-  ansible.builtin.include_tasks: install.yml
-
-- name: Configure Helm repositories
-  ansible.builtin.include_tasks: repos.yml
-  when: helm_add_stable_repos | bool
+- name: Setup Shell Completion
+  ansible.builtin.include_tasks: completion.yml

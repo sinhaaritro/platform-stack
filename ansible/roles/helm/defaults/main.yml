@@ -1,17 +1,12 @@
 # defaults/main.yml
+---
+# Version to install (Must be exact version now, not 'latest')
+helm_version: "v3.16.2"
 
-# Version to install (Pinned for stability)
-# Check https://github.com/helm/helm/releases for latest
-helm_version: "v3.16.4"
+# Architecture Mapping
+helm_arch_map:
+  x86_64: "amd64"
+  aarch64: "arm64"
 
-# Architecture mapping (Ansible -> Helm naming)
-helm_arch_mapping:
-  x86_64: amd64
-  aarch64: arm64
-
-# Installation path
-helm_bin_path: "/usr/local/bin/helm"
-
-# Optional: Initialize standard repositories
-# Set to false if you want a purely clean installation
-helm_add_stable_repos: true
+# User for shell completion
+helm_user: "{{ ansible_user }}"
