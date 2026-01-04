@@ -1,16 +1,30 @@
 # tasks/config.yml
 ---
-# This task is intended for the Control Plane nodes once initialized.
-# We use 'failed_when: false' because it will fail if the cluster isn't up yet.
-- name: Handle Control Plane Taint (Scheduling)
-  ansible.builtin.shell: |
-    kubectl taint nodes --all node-role.kubernetes.io/control-plane-
-    kubectl taint nodes --all node-role.kubernetes.io/master-
+- name: Check Taint Status
+  ansible.builtin.command: kubectl describe node {{ inventory_hostname }}
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: node_desc
+  changed_when: false
+  delegate_to: "{{ inventory_hostname }}"
+  when: "'k_control' in group_names"
+
+- name: Allow Scheduling (Remove Taint)
+  ansible.builtin.command: >
+    kubectl taint nodes {{ inventory_hostname }} node-role.kubernetes.io/control-plane-
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
   when:
     - kubeadm_allow_scheduling_on_cp | bool
-    - "'k_control' in group_names"
-  failed_when: false
+    - "'NoSchedule' in node_desc.stdout" # Only run if currently tainted
   changed_when: true
-  tags: [kubeadm, taint]
+
+- name: Block Scheduling (Add Taint)
+  ansible.builtin.command: >
+    kubectl taint nodes {{ inventory_hostname }} node-role.kubernetes.io/control-plane:NoSchedule
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  when:
+    - not kubeadm_allow_scheduling_on_cp | bool
+    - "'NoSchedule' not in node_desc.stdout" # Only run if currently NOT tainted
+  changed_when: true

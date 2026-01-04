@@ -6,6 +6,8 @@
       - "kubelet={{ kubeadm_package_version }}"
       - "kubeadm={{ kubeadm_package_version }}"
       - "kubectl={{ kubeadm_package_version }}"
+      - "conntrack"
+      - "socat"
     state: present
     update_cache: true
   tags: [kubeadm, install]
