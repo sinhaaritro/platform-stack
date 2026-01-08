@@ -1,0 +1,66 @@
+# tasks/safety_checks.yml
+---
+# 1. Detect Current State
+- name: Check if Node is currently a Control Plane
+  ansible.builtin.stat:
+    path: /etc/kubernetes/admin.conf
+  register: current_is_cp
+
+- name: Check if Node is currently joined (any role)
+  ansible.builtin.stat:
+    path: /etc/kubernetes/kubelet.conf
+  register: current_is_joined
+
+# 2. Define Conflicts
+- name: Detect Role Conflicts
+  ansible.builtin.set_fact:
+    # Conflict 1: Was Master, now wants to be Worker
+    conflict_downgrade: "{{ current_is_cp.stat.exists and 'k_worker' in group_names }}"
+    # Conflict 2: Was Worker (only), now wants to be Master
+    conflict_upgrade: "{{ (current_is_joined.stat.exists and not current_is_cp.stat.exists) and 'k_control' in group_names }}"
+
+# 3. Handle Destructive Reset (If Allowed)
+- name: DESTRUCTIVE ACTION - Reset Node
+  ansible.builtin.shell: |
+    kubeadm reset -f
+    rm -rf /etc/cni/net.d
+    rm -rf /etc/kubernetes
+    iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+  when:
+    - (conflict_downgrade or conflict_upgrade)
+    - allow_destructive_reset | bool
+  changed_when: true
+
+# 4. Error Out (If Reset Needed but Not Allowed)
+- name: FAIL - Unsafe Role Change Detected
+  ansible.builtin.fail:
+    msg: >-
+      SAFETY LOCK TRIGGERED:
+      Node {{ inventory_hostname }} has a role conflict (Master <-> Worker).
+      Ansible will NOT wipe a running node automatically.
+      To force this change (Data Loss!), set 'allow_destructive_reset: true' for this host.
+  when:
+    - (conflict_downgrade or conflict_upgrade)
+    - not allow_destructive_reset | bool
+
+# 5. HA Validation (Refined for Multi-Cluster)
+# Logic: We calculate how many Control Planes exist specifically for THIS cluster (sharing the same bootstrap node).
+- name: Calculate Cluster Control Plane Count
+  ansible.builtin.set_fact:
+    my_cluster_cp_count: >-
+      {{ groups['k_control']
+      | map('extract', hostvars)
+      | selectattr('kubeadm_bootstrap_node', 'defined')
+      | selectattr('kubeadm_bootstrap_node', 'equalto', kubeadm_bootstrap_node)
+      | list | length }}
+  when: "'k_control' in group_names"
+
+- name: FAIL - HA requires Endpoint
+  ansible.builtin.fail:
+    msg: >-
+      Cluster '{{ kubeadm_bootstrap_node }}' has {{ my_cluster_cp_count }} Control Planes
+      but 'kubeadm_control_plane_endpoint' is empty. Set a Load Balancer IP/DNS.
+  when:
+    - "'k_control' in group_names"
+    - my_cluster_cp_count | int > 1
+    - kubeadm_control_plane_endpoint | length == 0

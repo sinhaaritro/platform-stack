@@ -33,22 +33,37 @@
     - role: helm          # Package Manager (Only installs Helm)
 
 # ==============================================================================
-# PLAY 3: PRODUCTION KUBERNETES - INFRASTRUCTURE
-# Target: All Production Clusters (Management + Fleet)
-# Purpose: Installs Docker, Kubeadm, and initializes the cluster.
+# PLAY 3A: PRODUCTION KUBERNETES - CONTROL PLANE BOOTSTRAP
+# Target: Control Plane Nodes Only
+# Purpose: Init Cluster, Install CNI, Generate Certs
+# Serial: 1 ensures HA clusters initialize the 1st node completely
+# before the 2nd/3rd node try to join it.
 # ==============================================================================
-- name: Configure Production Kubernetes (Kubeadm)
-  hosts: kubeadm
+- name: Bootstrap Control Plane (Init & CNI)
+  hosts: k_control
   become: true
-  vars:
-    # Set to true to allow apps to run on the Control Plane node (Brain)
-    # Essential for Single-Node clusters or small Home Labs
-    kubeadm_allow_scheduling_on_cp: true
+  serial: 1
   roles:
-    - role: docker        # Runtime Dependency (Must run first)
-    - role: k8s_repo      # Manage the official Kubernetes Apt repositories.
-    - role: kubeadm       # Cluster Manager (Provisions the cluster)
-    - role: helm          # Package Manager (Only installs Helm)
+    - role: docker          # Ensure Runtime
+    - role: k8s_repo        # Ensure Repos
+    - role: kubeadm         # Ensure Binaries/Kernel
+    - role: kubeadm_cluster # Execute Init/CNI/Control-Join
+    - role: helm            # Ensure Helm
+
+# ==============================================================================
+# PLAY 3B: PRODUCTION KUBERNETES - WORKER JOIN
+# Target: Worker Nodes Only
+# Purpose: Join the existing healthy cluster
+# ==============================================================================
+- name: Join Worker Nodes
+  hosts: k_worker
+  become: true
+  # Parallel is fine here - all workers can join at once
+  roles:
+    - role: docker
+    - role: k8s_repo
+    - role: kubeadm
+    - role: kubeadm_cluster # Execute Worker-Join
 
 # # ==============================================================================
 # # PLAY 4: PRODUCTION KUBERNETES - MANAGEMENT LAYER

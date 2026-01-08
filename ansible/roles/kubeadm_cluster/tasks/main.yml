@@ -1,0 +1,50 @@
+# tasks/main.yml
+---
+# 1. Run Safety Checks first
+- name: Execute Safety Checks
+  ansible.builtin.include_tasks: safety_checks.yml
+
+# 2. Configure Firewall
+- name: Configure Kubernetes Firewall Rules
+  ansible.builtin.include_tasks: firewall.yml
+
+# 3. Validate Bootstrap Node
+- name: Fail if Bootstrap Node is undefined
+  ansible.builtin.fail:
+    msg: "Variable 'kubeadm_bootstrap_node' is missing for host {{ inventory_hostname }}."
+  when: kubeadm_bootstrap_node | length == 0
+
+# 4. Identify Role
+- name: Check if I am the Bootstrap Node
+  ansible.builtin.set_fact:
+    is_bootstrap: "{{ inventory_hostname == kubeadm_bootstrap_node }}"
+
+# 5. Execution
+- name: Initialize Primary Control Plane
+  ansible.builtin.include_tasks: init.yml
+  when:
+    - "'k_control' in group_names"
+    - is_bootstrap
+
+- name: Install CNI (Calico)
+  ansible.builtin.include_tasks: cni.yml
+  when:
+    - "'k_control' in group_names"
+    - is_bootstrap
+
+# Configure Taints (Scheduling)
+- name: Configure Taints
+  ansible.builtin.include_tasks: taint.yml
+  when:
+    - "'k_control' in group_names"
+    - is_bootstrap
+
+- name: Join Secondary Control Planes (HA)
+  ansible.builtin.include_tasks: join_control.yml
+  when:
+    - "'k_control' in group_names"
+    - not is_bootstrap
+
+- name: Join Worker Nodes
+  ansible.builtin.include_tasks: join_worker.yml
+  when: "'k_worker' in group_names"

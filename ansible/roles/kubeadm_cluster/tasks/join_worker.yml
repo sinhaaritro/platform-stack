@@ -1,0 +1,42 @@
+# tasks/join_worker.yml
+---
+- name: Check if node has already joined
+  ansible.builtin.stat:
+    path: /etc/kubernetes/kubelet.conf
+  register: kubelet_conf
+
+# SAFETY: Wait for the Master API to be reachable
+- name: Wait for Bootstrap Node API (6443)
+  ansible.builtin.wait_for:
+    host: "{{ hostvars[kubeadm_bootstrap_node]['ansible_host'] }}"
+    port: 6443
+    timeout: 300
+    state: started
+  delegate_to: localhost
+  when: not kubelet_conf.stat.exists
+
+- name: Generate Join Command on Primary Master
+  ansible.builtin.command: kubeadm token create --print-join-command
+  delegate_to: "{{ kubeadm_bootstrap_node }}"
+  register: join_command_raw
+  changed_when: false
+  when: not kubelet_conf.stat.exists
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+
+- name: Join Cluster as Worker
+  ansible.builtin.command: "{{ join_command_raw.stdout }}"
+  when: not kubelet_conf.stat.exists
+  changed_when: true
+
+- name: Assign 'worker' label to node
+  ansible.builtin.command: >
+    kubectl label node {{ inventory_hostname }} node-role.kubernetes.io/worker=worker --overwrite
+  delegate_to: "{{ kubeadm_bootstrap_node }}"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  # We run this even if already joined, to ensure labels are consistent.
+  # We suppress 'changed' unless it actually changes the label.
+  register: label_result
+  changed_when: "'labeled' in label_result.stdout"
+  failed_when: false # Don't fail if node isn't ready yet

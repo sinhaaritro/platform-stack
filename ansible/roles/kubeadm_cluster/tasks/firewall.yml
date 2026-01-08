@@ -1,0 +1,30 @@
+# tasks/firewall.yml
+---
+- name: Allow Kubernetes API (Masters)
+  community.general.ufw:
+    rule: allow
+    port: "6443"
+    proto: tcp
+    src: "192.168.0.0/24" # Trust the LAN
+  when: "'k_control' in group_names"
+
+- name: Allow Kubelet API (All Nodes)
+  community.general.ufw:
+    rule: allow
+    port: "10250"
+    proto: tcp
+  when: "'k_control' in group_names"
+
+- name: Allow Calico BGP (Internal Networking)
+  community.general.ufw:
+    rule: allow
+    port: "179"
+    proto: tcp
+    src: "192.168.0.0/24"
+
+- name: Allow Calico VXLAN (Internal Networking)
+  community.general.ufw:
+    rule: allow
+    port: "4789"
+    proto: udp
+    src: "192.168.0.0/24"

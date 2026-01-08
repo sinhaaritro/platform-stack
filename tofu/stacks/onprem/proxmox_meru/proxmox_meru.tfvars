@@ -59,6 +59,9 @@ resources = {
       "timezone" = {
         "user_timezone" = "Asia/Kolkata"
         "user_locale"   = "en_US.UTF-8"
+      },
+      "kubeadm" = {
+        kubeadm_bootstrap_node : "ruth-01"
       }
     }
 
@@ -76,6 +79,7 @@ resources = {
         cloud_init_user = "dev"
         vm_config = {
           disk_datastore_id = "data-storage"
+          disk_size         = "20"
           ipv4_address      = "192.168.0.81/24"
         }
       },
@@ -85,6 +89,7 @@ resources = {
         cloud_init_user = "dev"
         vm_config = {
           disk_datastore_id = "data-storage"
+          disk_size         = "20"
           ipv4_address      = "192.168.0.82/24"
         }
       },
@@ -118,6 +123,9 @@ resources = {
       "timezone" = {
         "user_timezone" = "Asia/Kolkata"
         "user_locale"   = "en_US.UTF-8"
+      },
+      "kubeadm" = {
+        kubeadm_bootstrap_node : "arr-01"
       }
     }
 
@@ -135,6 +143,7 @@ resources = {
         cloud_init_user = "dev"
         vm_config = {
           disk_datastore_id = "data-storage"
+          disk_size         = "20"
           ipv4_address      = "192.168.0.91/24"
         }
       },

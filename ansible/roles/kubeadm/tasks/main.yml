@@ -5,6 +5,3 @@
 
 - name: Install Kubernetes Trinity
   ansible.builtin.include_tasks: install.yml
-
-- name: Configure Node Scheduling
-  ansible.builtin.include_tasks: config.yml

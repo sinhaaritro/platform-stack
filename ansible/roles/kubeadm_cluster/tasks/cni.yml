@@ -1,0 +1,33 @@
+# tasks/cni.yml
+---
+# We only run this if the cluster was just initialized OR if we explicitly ask for it
+- name: Check if Calico is installed
+  ansible.builtin.command: kubectl get ds -n kube-system calico-node
+  register: calico_check
+  changed_when: false
+  failed_when: false
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+
+- name: Download Calico Manifest
+  ansible.builtin.get_url:
+    url: "{{ calico_manifest_url }}"
+    dest: /tmp/calico.yaml
+    mode: "0644"
+  when: calico_check.rc != 0
+
+# Note: If your kubeadm_pod_network_cidr is NOT 192.168.0.0/16, Calico needs patching.
+# By default Calico uses 192.168.0.0/16. If we use 10.244.0.0/16, we must update the YAML.
+- name: Patch Calico CIDR in Manifest
+  ansible.builtin.replace:
+    path: /tmp/calico.yaml
+    regexp: "192.168.0.0/16"
+    replace: "{{ kubeadm_pod_network_cidr }}"
+  when: calico_check.rc != 0
+
+- name: Apply Calico Manifest
+  ansible.builtin.command: kubectl apply -f /tmp/calico.yaml
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  when: calico_check.rc != 0
+  changed_when: true
