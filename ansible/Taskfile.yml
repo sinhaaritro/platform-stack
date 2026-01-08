@@ -24,6 +24,15 @@ vars:
   # PLAYBOOK_FILE: Path to the main site playbook.
   PLAYBOOK_FILE: "site.yml"
 
+# Environment variables applied to ALL tasks
+env:
+  # Force Ansible to use the local config file
+  ANSIBLE_CONFIG: "{{.USER_WORKING_DIR}}/ansible/ansible.cfg"
+  # Disable host key checking strictly (Solves the "Yes/No" prompt)
+  ANSIBLE_HOST_KEY_CHECKING: "False"
+  # Ensure SSH ignores known_hosts (Solves the "Offending key" error)
+  ANSIBLE_SSH_ARGS: "-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+
 tasks:
   default:
     desc: "Lists all available tasks for Ansible."
@@ -59,6 +68,24 @@ tasks:
       - ansible-lint
 
   # ---------------------------------------------------------------------------
+  # DYNAMIC COMMANDS
+  # ---------------------------------------------------------------------------
+
+  shell:
+    desc: "Run an ad-hoc shell command on a group of hosts."
+    summary: |
+      Usage: task ansible:shell group=<target> cmd="<command>" [become=true]
+      Example: task ansible:shell group=k_control cmd="kubectl get nodes"
+    dir: "{{.USER_WORKING_DIR}}/ansible"
+    vars:
+      # Default to 'all' if group is not specified
+      GROUP: '{{.group | default "all"}}'
+      # Default to empty (no sudo), set become=true to enable
+      BECOME_FLAG: '{{if eq .become "true"}}-b{{end}}'
+    cmds:
+      - ansible {{.GROUP}} -i {{.INVENTORY_FILE}} -m shell -a "{{.cmd}}" {{.BECOME_FLAG}}
+
+  # ---------------------------------------------------------------------------
   # UTILITY TASKS
   # ---------------------------------------------------------------------------
 
@@ -73,3 +100,18 @@ tasks:
     dir: "{{.USER_WORKING_DIR}}/ansible"
     cmds:
       - ansible-galaxy install -r requirements.yml
+
+  setup-ssh:
+    desc: "Configures local SSH client to ignore keys for Lab IPs (Optional Manual Fix)"
+    cmds:
+      - echo "Configuring ~/.ssh/config for 192.168.0.*..."
+      - |
+        echo "
+        Host 192.168.0.*
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+            User dev
+            LogLevel ERROR
+        " >> ~/.ssh/config
+    status:
+      - grep -q "Host 192.168.0.*" ~/.ssh/config
