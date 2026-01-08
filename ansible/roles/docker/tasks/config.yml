@@ -1,6 +1,6 @@
 # tasks/config.yml
 ---
-# 1. Configure Docker Daemon (For Kind & General Usage)
+# 1. Docker Daemon Configuration
 - name: Create Docker config directory
   ansible.builtin.file:
     path: /etc/docker
@@ -22,36 +22,20 @@
     mode: "0644"
   notify: Restart docker
 
-# 2. Configure Containerd (Critical for Kubeadm/K8s)
-- name: Create Containerd config directory
+# 2. Containerd Configuration (Template Method)
+- name: Ensure containerd config directory exists
   ansible.builtin.file:
     path: /etc/containerd
     state: directory
     mode: "0755"
 
-- name: Check if containerd config exists
-  ansible.builtin.stat:
-    path: /etc/containerd/config.toml
-  register: containerd_stat
-
-- name: Check if SystemdCgroup is configured
-  ansible.builtin.command: grep -q "SystemdCgroup = true" /etc/containerd/config.toml
-  register: containerd_grep
-  changed_when: false
-  failed_when: false
-  check_mode: false
-  when: containerd_stat.stat.exists
-
-- name: Regenerate containerd config if missing or invalid
-  ansible.builtin.shell: containerd config default > /etc/containerd/config.toml
-  # Run if file is missing OR if grep didn't find the string (rc != 0)
-  when: not containerd_stat.stat.exists or (containerd_grep.rc | default(1) != 0)
-  changed_when: true
+- name: Apply Containerd Configuration (Template)
+  ansible.builtin.template:
+    src: containerd-config.toml.j2
+    dest: /etc/containerd/config.toml
+    mode: "0644"
   notify: Restart containerd
 
-- name: Apply SystemdCgroup fix (handles indentation)
-  ansible.builtin.replace:
-    path: /etc/containerd/config.toml
-    regexp: '^(\s+)SystemdCgroup = false'
-    replace: '\1SystemdCgroup = true'
-  notify: Restart containerd
+# Force restart immediately to ensure socket is ready for Kubeadm
+- name: Flush Handlers
+  ansible.builtin.meta: flush_handlers
