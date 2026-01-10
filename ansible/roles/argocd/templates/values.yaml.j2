@@ -1,0 +1,12 @@
+# Helm Values Override
+server:
+  extraArgs:
+    - --insecure # Disables internal TLS, allows Cloudflare to handle it
+  service:
+    type: {{ argocd_service_type }}
+    nodePortHttp: {{ argocd_node_port_http }}
+    nodePortHttps: {{ argocd_node_port_https }}
+
+configs:
+  params:
+    server.insecure: "{{ argocd_server_insecure | lower }}"

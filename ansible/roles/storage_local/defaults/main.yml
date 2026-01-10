@@ -1,0 +1,8 @@
+# defaults/main.yml
+---
+# Version of Rancher Local Path Provisioner
+local_path_version: "v0.0.30"
+local_path_manifest_url: "https://raw.githubusercontent.com/rancher/local-path-provisioner/{{ local_path_version }}/deploy/local-path-storage.yaml"
+
+# The directory on the Node (Host OS) where data will be stored
+local_path_base_dir: "/opt/local-path-provisioner"

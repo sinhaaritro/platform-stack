@@ -1,0 +1,33 @@
+# tasks/security.yml
+---
+- name: Wait for ArgoCD Server to be Ready
+  ansible.builtin.command: >
+    kubectl wait --for=condition=available deployment/argocd-server 
+    -n {{ argocd_namespace }} --timeout=300s
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  changed_when: false
+  when: inventory_hostname == kubeadm_bootstrap_node
+
+- name: Retrieve Initial Admin Password
+  ansible.builtin.shell: |
+    set -o pipefail
+    kubectl -n {{ argocd_namespace }} get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+  args:
+    executable: /bin/bash
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: argocd_password
+  changed_when: false
+  when: inventory_hostname == kubeadm_bootstrap_node
+
+- name: DISPLAY ARGOCD PASSWORD
+  ansible.builtin.debug:
+    msg:
+      - "--------------------------------------------------------"
+      - "ARGO CD IS READY (Cluster: {{ kubeadm_bootstrap_node }})"
+      - "URL: http://{{ ansible_host }}:{{ argocd_node_port_http }}"
+      - "Username: admin"
+      - "Password: {{ argocd_password.stdout }}"
+      - "--------------------------------------------------------"
+  when: inventory_hostname == kubeadm_bootstrap_node

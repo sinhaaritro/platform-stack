@@ -19,3 +19,4 @@ galaxy_info:
 dependencies:
   # Requires a running cluster (handled by kind or kubeadm roles previously)
   - role: kubectl
+  - role: helm

@@ -1,10 +1,20 @@
 # tasks/main.yml
 ---
-# 1. Install Prerequisites (Python Libs)
-- name: Install ArgoCD Dependencies
+- name: Install System Dependencies
   ansible.builtin.include_tasks: dependencies.yml
 
-# 2. Proceed with Installation
-- name: Install ArgoCD
+- name: Install ArgoCD Infrastructure
   ansible.builtin.include_tasks: install.yml
-  tags: [argocd, install]
+
+- name: Verify Readiness and Get Secrets
+  ansible.builtin.include_tasks: security.yml
+
+- name: Bootstrap GitOps (App of Apps)
+  ansible.builtin.include_tasks: gitops.yml
+
+- name: Register Managed Fleets
+  ansible.builtin.include_tasks: register_clusters.yml
+  when:
+    - argocd_managed_fleets is defined
+    - argocd_managed_fleets | length > 0
+    - inventory_hostname == kubeadm_bootstrap_node

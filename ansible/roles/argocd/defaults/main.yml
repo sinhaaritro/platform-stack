@@ -1,8 +1,19 @@
 # defaults/main.yml
-
-# ArgoCD Version (Manifest URL)
-# We use the stable release manifest
-argocd_manifest_url: "https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml"
-
-# Namespace
+---
+# ArgoCD Version (Helm Chart Version)
+# Check artifacthub.io for mapping. 7.7.1 = ArgoCD v2.13.x
+argocd_chart_version: "7.7.1"
 argocd_namespace: "argocd"
+
+# Network Configuration
+argocd_server_insecure: true       # Required for Cloudflare Tunnels (Terminates SSL at edge)
+argocd_service_type: "NodePort"    # Exposes UI on LAN IP
+argocd_node_port_http: 30080       # Fixed port for Web UI (HTTP)
+argocd_node_port_https: 30443      # Fixed port for Web UI (HTTPS)
+
+# GitOps Bootstrap Configuration
+# CHANGE THIS to your repository URL
+argocd_git_repo_url: "https://github.com/sinhaaritro/platform-stack.git"
+argocd_git_repo_path: "kubernetes/clusters/management"
+argocd_git_repo_revision: "HEAD"
+argocd_root_app_name: "platform-root"

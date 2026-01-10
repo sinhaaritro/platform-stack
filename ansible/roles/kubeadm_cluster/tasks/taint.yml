@@ -2,8 +2,8 @@
 ---
 - name: Allow Scheduling on Control Plane (Remove Taint)
   ansible.builtin.shell: |
-    kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
-    kubectl taint nodes --all node-role.kubernetes.io/master- || true
+    kubectl taint nodes -l node-role.kubernetes.io/control-plane- || true
+    kubectl taint nodes -l node-role.kubernetes.io/master- || true
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
   when: kubeadm_allow_scheduling_on_cp | bool
@@ -12,7 +12,7 @@
 - name: Restore Isolation (Add Taint)
   ansible.builtin.shell: |
     # We use || true because if the taint already exists, kubectl returns exit code 1
-    kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule || true
+    kubectl taint nodes -l node-role.kubernetes.io/control-plane:NoSchedule || true
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
   when: not kubeadm_allow_scheduling_on_cp | bool

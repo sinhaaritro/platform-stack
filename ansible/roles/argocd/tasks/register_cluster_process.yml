@@ -1,0 +1,87 @@
+# tasks/register_cluster_process.yml
+---
+# 1. Identify the Remote Master
+- name: "Identify Bootstrap Node: {{ target_cluster_group }}"
+  ansible.builtin.set_fact:
+    # Look at the first host in the target group to find the bootstrap variable
+    remote_master: "{{ hostvars[groups[target_cluster_group][0]]['kubeadm_bootstrap_node'] }}"
+
+- name: "Identify API URL: {{ target_cluster_group }}"
+  ansible.builtin.set_fact:
+    # Use the ansible_host IP of that master. Port 6443 is standard.
+    remote_api_url: "https://{{ hostvars[remote_master]['ansible_host'] }}:6443"
+
+# 2. Execute on Remote Cluster (Create Access)
+- name: "Create ArgoCD Manager ServiceAccount: {{ remote_master }}"
+  ansible.builtin.shell: |
+    set -o pipefail
+    kubectl create sa argocd-manager -n kube-system --dry-run=client -o yaml | kubectl apply -f -
+    kubectl create clusterrolebinding argocd-manager-role \
+      --clusterrole=cluster-admin \
+      --serviceaccount=kube-system:argocd-manager \
+      --dry-run=client -o yaml | kubectl apply -f -
+  args:
+    executable: /bin/bash
+  delegate_to: "{{ remote_master }}"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: sa_create
+  changed_when: "'created' in sa_create.stdout"
+
+- name: "Create Long-Lived Token Secret: {{ remote_master }}"
+  ansible.builtin.shell: |
+    set -o pipefail
+    cat <<EOF | kubectl apply -f -
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: argocd-manager-token
+      namespace: kube-system
+      annotations:
+        kubernetes.io/service-account.name: argocd-manager
+    type: kubernetes.io/service-account-token
+    EOF
+  args:
+    executable: /bin/bash
+  delegate_to: "{{ remote_master }}"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  changed_when: false
+
+- name: "Fetch Token and CA: {{ remote_master }}"
+  ansible.builtin.shell: |
+    set -o pipefail
+    echo $(kubectl get secret argocd-manager-token -n kube-system -o jsonpath='{.data.token}' | base64 --decode)
+    echo "---SPLIT---"
+    echo $(kubectl get secret argocd-manager-token -n kube-system -o jsonpath='{.data.ca\.crt}' | base64 --decode)
+  args:
+    executable: /bin/bash
+  delegate_to: "{{ remote_master }}"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: remote_creds
+  changed_when: false
+
+- name: Parse Credentials
+  ansible.builtin.set_fact:
+    remote_token: "{{ remote_creds.stdout.split('---SPLIT---')[0] | trim }}"
+    remote_ca: "{{ remote_creds.stdout.split('---SPLIT---')[1] | trim }}"
+
+# 3. Execute on Local Management Cluster (Register)
+- name: "Register Cluster in ArgoCD: {{ target_cluster_group }}"
+  ansible.builtin.template:
+    src: cluster-secret.yaml.j2
+    dest: "/tmp/secret-{{ target_cluster_group }}.yaml"
+    mode: "0600"
+
+- name: "Apply Cluster Secret: {{ target_cluster_group }}"
+  ansible.builtin.command: kubectl apply -f "/tmp/secret-{{ target_cluster_group }}.yaml"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: secret_apply
+  changed_when: "'created' in secret_apply.stdout or 'configured' in secret_apply.stdout"
+
+- name: "Cleanup Temp Secret: {{ target_cluster_group }}"
+  ansible.builtin.file:
+    path: "/tmp/secret-{{ target_cluster_group }}.yaml"
+    state: absent

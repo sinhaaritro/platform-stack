@@ -1,0 +1,32 @@
+# tasks/main.yml
+---
+- name: Download Local Path Provisioner Manifest
+  ansible.builtin.get_url:
+    url: "{{ local_path_manifest_url }}"
+    dest: /tmp/local-path-storage.yaml
+    mode: '0644'
+
+- name: Configure Storage Path on Host
+  # We replace the default path in the ConfigMap section of the YAML
+  ansible.builtin.replace:
+    path: /tmp/local-path-storage.yaml
+    regexp: '/opt/local-path-provisioner'
+    replace: "{{ local_path_base_dir }}"
+
+- name: Apply Local Path Provisioner
+  ansible.builtin.command: kubectl apply -f /tmp/local-path-storage.yaml
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: apply_out
+  changed_when: "'created' in apply_out.stdout or 'configured' in apply_out.stdout"
+
+- name: Patch StorageClass to be Default
+  ansible.builtin.command: >
+    kubectl patch storageclass local-path
+    -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: patch_out
+  changed_when: "'patched' in patch_out.stdout"
+  # Don't fail if it's already default
+  failed_when: false

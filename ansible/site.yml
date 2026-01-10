@@ -48,6 +48,7 @@
     - role: k8s_repo        # Ensure Repos
     - role: kubeadm         # Ensure Binaries/Kernel
     - role: kubeadm_cluster # Execute Init/CNI/Control-Join
+    - role: storage_local   # Setup Storage Class
     - role: helm            # Ensure Helm
 
 # ==============================================================================
@@ -65,16 +66,16 @@
     - role: kubeadm
     - role: kubeadm_cluster # Execute Worker-Join
 
-# # ==============================================================================
-# # PLAY 4: PRODUCTION KUBERNETES - MANAGEMENT LAYER
-# # Target: The Hub Server Only (k_management)
-# # Purpose: Installs ArgoCD. (UI exposure and Fleet connect delayed).
-# # ==============================================================================
-# - name: Configure Management Layer (ArgoCD)
-#   hosts: k_management:&k_control
-#   become: true
-#   roles:
-#     - role: argocd
+# ==============================================================================
+# PLAY 4: PRODUCTION KUBERNETES - MANAGEMENT LAYER
+# Target: The Hub Server Only (k_management)
+# Purpose: Installs ArgoCD. (UI exposure and Fleet connect delayed).
+# ==============================================================================
+- name: Configure Management Layer (ArgoCD)
+  hosts: k_management:&k_control
+  become: true
+  roles:
+    - role: argocd
 
 # # ==============================================================================
 # # PLAY 5: WEB LAYER

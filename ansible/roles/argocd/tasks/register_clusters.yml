@@ -1,0 +1,9 @@
+# tasks/register_clusters.yml
+---
+- name: Loop through Managed Fleets
+  ansible.builtin.include_tasks: register_cluster_process.yml
+  loop: "{{ argocd_managed_fleets.split(';') }}"
+  loop_control:
+    loop_var: target_cluster_group
+  # Safety check: Ensure the group actually exists in inventory
+  when: target_cluster_group in groups

@@ -1,39 +1,42 @@
 # tasks/install.yml
 ---
-# 1. Create Namespace
 - name: Create ArgoCD Namespace
-  kubernetes.core.k8s:
-    name: "{{ argocd_namespace }}"
-    api_version: v1
-    kind: Namespace
-    state: present
+  ansible.builtin.shell: |
+    set -o pipefail
+    kubectl create namespace {{ argocd_namespace }} --dry-run=client -o yaml | kubectl apply -f -
+  args:
+    executable: /bin/bash
   environment:
-    &k8s_env # We use the config created by the 'kubeadm' or 'kind' role
-    KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
-  become: true
-  become_user: "{{ ansible_user }}"
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  when: inventory_hostname == kubeadm_bootstrap_node
+  register: argocd_ns
+  changed_when: "'created' in argocd_ns.stdout or 'configured' in argocd_ns.stdout"
 
-# 2. Apply Manifests
-- name: Install ArgoCD Core Manifests
-  kubernetes.core.k8s:
-    namespace: "{{ argocd_namespace }}"
-    definition: "{{ lookup('url', argocd_manifest_url, split_lines=False) }}"
-    state: present
-  environment: *k8s_env
-  become: true
-  become_user: "{{ ansible_user }}"
+- name: Add ArgoCD Helm Repository
+  ansible.builtin.command: helm repo add argo https://argoproj.github.io/argo-helm
+  changed_when: false
+  when: inventory_hostname == kubeadm_bootstrap_node
 
-# 3. Verify
-- name: Wait for ArgoCD Server to be ready
-  kubernetes.core.k8s_info:
-    kind: Pod
-    namespace: "{{ argocd_namespace }}"
-    label_selectors:
-      - app.kubernetes.io/name=argocd-server
-  register: argocd_pods
-  until: "argocd_pods.resources | length > 0 and argocd_pods.resources[0].status.phase == 'Running'"
-  retries: 20
-  delay: 15
-  environment: *k8s_env
-  become: true
-  become_user: "{{ ansible_user }}"
+- name: Update Helm Repos
+  ansible.builtin.command: helm repo update
+  changed_when: false
+  when: inventory_hostname == kubeadm_bootstrap_node
+
+- name: Render ArgoCD Values
+  ansible.builtin.template:
+    src: values.yaml.j2
+    dest: /tmp/argocd-values.yaml
+    mode: "0644"
+  when: inventory_hostname == kubeadm_bootstrap_node
+
+- name: Deploy ArgoCD via Helm
+  ansible.builtin.command: >
+    helm upgrade --install argocd argo/argo-cd
+    --version {{ argocd_chart_version }}
+    --namespace {{ argocd_namespace }}
+    -f /tmp/argocd-values.yaml
+    --wait
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  changed_when: true
+  when: inventory_hostname == kubeadm_bootstrap_node

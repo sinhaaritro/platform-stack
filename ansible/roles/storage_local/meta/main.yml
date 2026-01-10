@@ -1,0 +1,12 @@
+# meta/main.yml
+---
+galaxy_info:
+  author: Aritro
+  role_name: storage_local
+  namespace: internal
+  description: Installs Rancher Local Path Provisioner for persistent storage.
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Ubuntu
+      versions: [all]
