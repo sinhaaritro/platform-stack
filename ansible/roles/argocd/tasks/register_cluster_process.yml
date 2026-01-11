@@ -3,12 +3,10 @@
 # 1. Identify the Remote Master
 - name: "Identify Bootstrap Node: {{ target_cluster_group }}"
   ansible.builtin.set_fact:
-    # Look at the first host in the target group to find the bootstrap variable
     remote_master: "{{ hostvars[groups[target_cluster_group][0]]['kubeadm_bootstrap_node'] }}"
 
 - name: "Identify API URL: {{ target_cluster_group }}"
   ansible.builtin.set_fact:
-    # Use the ansible_host IP of that master. Port 6443 is standard.
     remote_api_url: "https://{{ hostvars[remote_master]['ansible_host'] }}:6443"
 
 # 2. Execute on Remote Cluster (Create Access)
@@ -48,24 +46,29 @@
     KUBECONFIG: /etc/kubernetes/admin.conf
   changed_when: false
 
-- name: "Fetch Token and CA: {{ remote_master }}"
-  ansible.builtin.shell: |
-    set -o pipefail
-    echo $(kubectl get secret argocd-manager-token -n kube-system -o jsonpath='{.data.token}' | base64 --decode)
-    echo "---SPLIT---"
-    echo $(kubectl get secret argocd-manager-token -n kube-system -o jsonpath='{.data.ca\.crt}' | base64 --decode)
-  args:
-    executable: /bin/bash
+# NEW LOGIC: Get Raw JSON to preserve certificate formatting
+- name: "Fetch Service Account Secret (JSON): {{ remote_master }}"
+  ansible.builtin.command: >
+    kubectl get secret argocd-manager-token -n kube-system -o json
   delegate_to: "{{ remote_master }}"
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
-  register: remote_creds
+  register: remote_secret_json
   changed_when: false
 
-- name: Parse Credentials
+- name: Parse Credentials from JSON
   ansible.builtin.set_fact:
-    remote_token: "{{ remote_creds.stdout.split('---SPLIT---')[0] | trim }}"
-    remote_ca: "{{ remote_creds.stdout.split('---SPLIT---')[1] | trim }}"
+    # Decode token so we can put the raw string in the JSON config
+    remote_token: "{{ (remote_secret_json.stdout | from_json).data.token | b64decode }}"
+    # Keep CA as Base64. Do NOT decode. The target secret needs it as Base64.
+    remote_ca_b64: "{{ (remote_secret_json.stdout | from_json).data['ca.crt'] }}"
+
+- name: DEBUG - Inspect CA Cert Format
+  ansible.builtin.debug:
+    msg:
+      - "--- BEGIN CA CHECK ---"
+      - "{{ remote_ca_b64 }}"
+      - "--- END CA CHECK ---"
 
 # 3. Execute on Local Management Cluster (Register)
 - name: "Register Cluster in ArgoCD: {{ target_cluster_group }}"
