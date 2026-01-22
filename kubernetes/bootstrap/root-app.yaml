@@ -11,8 +11,6 @@ spec:
     repoURL: https://github.com/sinhaaritro/platform-stack.git
     targetRevision: HEAD
     path: kubernetes/bootstrap/appsets
-    directory:
-      recurse: true
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
