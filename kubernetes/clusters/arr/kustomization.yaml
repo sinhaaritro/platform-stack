@@ -1,5 +1,7 @@
 resources:
   - ../../apps/services/podinfo
+  - ../../apps/infrastructure/sealed-secrets
+  - ../../apps/infrastructure/cert-manager
 
 patches:
   - target:

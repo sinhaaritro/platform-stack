@@ -1,3 +1,4 @@
 resources:
   - ../../apps/services/podinfo
-namespace: default
+  - ../../apps/infrastructure/sealed-secrets
+  - ../../apps/infrastructure/cert-manager
