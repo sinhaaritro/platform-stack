@@ -63,13 +63,6 @@
     # Keep CA as Base64. Do NOT decode. The target secret needs it as Base64.
     remote_ca_b64: "{{ (remote_secret_json.stdout | from_json).data['ca.crt'] }}"
 
-- name: DEBUG - Inspect CA Cert Format
-  ansible.builtin.debug:
-    msg:
-      - "--- BEGIN CA CHECK ---"
-      - "{{ remote_ca_b64 }}"
-      - "--- END CA CHECK ---"
-
 # 3. Execute on Local Management Cluster (Register)
 - name: "Register Cluster in ArgoCD: {{ target_cluster_group }}"
   ansible.builtin.template:
