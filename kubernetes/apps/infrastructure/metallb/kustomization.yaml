@@ -3,18 +3,11 @@ kind: Kustomization
 
 helmCharts:
   - name: metallb
-    repo: oci://registry-1.docker.io/bitnamicharts
-    version: 6.4.22
+    repo: https://charts.bitnami.com/bitnami
+    version: 4.13.2
     releaseName: metallb
     namespace: metallb-system
     includeCRDs: true
-    valuesInline:
-      controller:
-        image:
-          tag: 0.14.9-debian-12-r7
-      speaker:
-        image:
-          tag: 0.14.9-debian-12-r6
 
 resources:
   - pool.yaml
