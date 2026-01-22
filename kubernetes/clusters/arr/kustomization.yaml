@@ -1,0 +1,11 @@
+resources:
+  - ../../apps/services/podinfo
+
+patches:
+  - target:
+      kind: Deployment
+      name: podinfo
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
