@@ -8,6 +8,13 @@ helmCharts:
     releaseName: metallb
     namespace: metallb-system
     includeCRDs: true
+    valuesInline:
+      controller:
+        image:
+          tag: 0.14.9-debian-12-r0
+      speaker:
+        image:
+          tag: 0.14.9-debian-12-r0
 
 resources:
   - pool.yaml
