@@ -15,13 +15,13 @@ spec:
           - path: kubernetes/clusters/*
   template:
     metadata:
-      name: "{{.path | base}}"
+      name: "{{.path.path | base}}"
     spec:
       project: default
       source:
         repoURL: https://github.com/sinhaaritro/platform-stack.git
         targetRevision: HEAD
-        path: "{{.path}}"
+        path: "{{.path.path}}"
       destination:
         # Dynamically determine destination.
         # For 'ruth', use local cluster. For others, we might need a map or secrets.
@@ -30,7 +30,7 @@ spec:
         # We can use a Go Template conditional if we want, or just rely on ArgoCD cluster secrets triggering.
         # But for this specific task, let's keep it simple.
         # If the folder name is 'ruth', use in-cluster.
-        server: '{{if eq (.path | base) "ruth"}}https://kubernetes.default.svc{{else}}https://{{.path | base}}-api.example.com{{end}}'
+        server: '{{if eq (.path.path | base) "ruth"}}https://kubernetes.default.svc{{else}}https://{{.path.path | base}}-api.example.com{{end}}'
         namespace: default
       syncPolicy:
         automated:
