@@ -25,6 +25,7 @@ spec:
       destination:
         # If the parent directory is 'ruth', use in-cluster.
         server: '{% raw %}{{if eq (.path.path | dir | base) "ruth"}}https://kubernetes.default.svc{{else}}https://{{.path.path | dir | base}}-api.example.com:6443{{end}}{% endraw %}'
+        namespace: '{% raw %}{{if eq (.path.path | base) "podinfo"}}default{{else}}{{.path.path | base}}{{end}}{% endraw %}'
       syncPolicy:
         automated:
           prune: true
