@@ -76,6 +76,7 @@
   become: true
   roles:
     - role: argocd
+      tags: [argocd]
 
 # # ==============================================================================
 # # PLAY 5: WEB LAYER

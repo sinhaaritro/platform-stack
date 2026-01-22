@@ -2,7 +2,7 @@
 ---
 - name: Wait for ArgoCD Server to be Ready
   ansible.builtin.command: >
-    kubectl wait --for=condition=available deployment/argocd-server 
+    kubectl wait --for=condition=available deployment/argocd-server
     -n {{ argocd_namespace }} --timeout=300s
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
