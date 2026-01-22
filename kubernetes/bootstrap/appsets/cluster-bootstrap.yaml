@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cluster-bootstrap
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/sinhaaritro/platform-stack.git
+        revision: HEAD
+        # Only match directories directly under clusters/
+        directories:
+          - path: kubernetes/clusters/*
+  template:
+    metadata:
+      name: "{{.path.basename}}"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/sinhaaritro/platform-stack.git
+        targetRevision: HEAD
+        path: "{{.path.path}}"
+      destination:
+        # Dynamically determine destination.
+        # For 'ruth', use local cluster. For others, we might need a map or secrets.
+        # For now, we hardcode logic or assume name matches a secret.
+        # Since the prompt said: "Found folder ruth? -> Deploy contents to Cluster https://kubernetes.default.svc"
+        # We can use a Go Template conditional if we want, or just rely on ArgoCD cluster secrets triggering.
+        # But for this specific task, let's keep it simple.
+        # If the folder name is 'ruth', use in-cluster.
+        server: '{{if eq .path.basename "ruth"}}https://kubernetes.default.svc{{else}}https://{{.path.basename}}-api.example.com{{end}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
