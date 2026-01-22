@@ -3,7 +3,7 @@ kind: Kustomization
 
 helmCharts:
   - name: metallb
-    repo: https://charts.bitnami.com/bitnami
+    repo: oci://registry-1.docker.io/bitnamicharts
     version: 6.4.22
     releaseName: metallb
     namespace: metallb-system
