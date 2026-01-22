@@ -8,3 +8,6 @@ helmCharts:
     releaseName: metallb
     namespace: metallb-system
     includeCRDs: true
+
+resources:
+  - pool.yaml
