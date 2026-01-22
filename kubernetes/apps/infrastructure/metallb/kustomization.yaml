@@ -4,7 +4,7 @@ kind: Kustomization
 helmCharts:
   - name: metallb
     repo: https://charts.bitnami.com/bitnami
-    version: 4.16.1
+    version: 6.4.22
     releaseName: metallb
     namespace: metallb-system
     includeCRDs: true
