@@ -10,3 +10,18 @@ server:
 configs:
   params:
     server.insecure: "{{ argocd_server_insecure | lower }}"
+
+{% if argocd_managed_fleets is defined %}
+global:
+  hostAliases:
+    # Dynamically inject DNS records for all managed fleets
+    # so ArgoCD can resolve 'arr-api.example.com' to '192.168.0.x'
+{% for fleet in argocd_managed_fleets.split(';') %}
+{% if fleet in groups %}
+{% set fleet_master = groups[fleet][0] %}
+    - ip: {{ hostvars[fleet_master]['ansible_host'] }}
+      hostnames:
+        - {{ fleet }}-api.example.com
+{% endif %}
+{% endfor %}
+{% endif %}

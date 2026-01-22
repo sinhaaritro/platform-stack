@@ -7,7 +7,8 @@
 
 - name: "Identify API URL: {{ target_cluster_group }}"
   ansible.builtin.set_fact:
-    remote_api_url: "https://{{ hostvars[remote_master]['ansible_host'] }}:6443"
+    remote_api_url: "https://{{ target_cluster_group }}-api.example.com:6443"
+    remote_api_ip: "{{ hostvars[remote_master]['ansible_host'] }}"
 
 # 2. Execute on Remote Cluster (Create Access)
 - name: "Create ArgoCD Manager ServiceAccount: {{ remote_master }}"
@@ -64,6 +65,13 @@
     remote_ca_b64: "{{ (remote_secret_json.stdout | from_json).data['ca.crt'] }}"
 
 # 3. Execute on Local Management Cluster (Register)
+- name: "Ensure DNS Resolution for Cluster: {{ target_cluster_group }}"
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "{{ remote_api_ip }} {{ target_cluster_group }}-api.example.com"
+    state: present
+  become: true
+
 - name: "Register Cluster in ArgoCD: {{ target_cluster_group }}"
   ansible.builtin.template:
     src: cluster-secret.yaml.j2
