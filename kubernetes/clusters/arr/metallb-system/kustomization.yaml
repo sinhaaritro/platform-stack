@@ -35,3 +35,10 @@ patches:
           limits:
             cpu: 100m
             memory: 128Mi
+  - target:
+      kind: IPAddressPool
+      name: default-pool
+    patch: |-
+      - op: replace
+        path: /spec/addresses/0
+        value: 192.168.0.230-192.168.0.239
