@@ -27,6 +27,15 @@ helmCharts:
           registry: registry.k8s.io
           repository: kubectl
           tag: v1.30.0
+        securityContext:
+          runAsUser: 1001
+          runAsGroup: 1001
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
 
 resources:
   - namespace.yaml
