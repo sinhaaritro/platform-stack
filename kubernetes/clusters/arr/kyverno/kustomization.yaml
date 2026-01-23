@@ -21,3 +21,10 @@ patches:
           limits:
             cpu: 500m
             memory: 256Mi
+  - target:
+      kind: PodDisruptionBudget
+      name: .*
+    patch: |-
+      - op: replace
+        path: /spec/minAvailable
+        value: 0
