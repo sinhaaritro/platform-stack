@@ -23,10 +23,10 @@ helmCharts:
             tag: v1.30.0
       cleanupController:
         replicas: 1
-        # image:
-        #   registry: registry.k8s.io
-        #   repository: kubectl
-        #   tag: v1.30.0
+        image:
+          registry: registry.k8s.io
+          repository: kubectl
+          tag: v1.30.0
 
 resources:
   - namespace.yaml
