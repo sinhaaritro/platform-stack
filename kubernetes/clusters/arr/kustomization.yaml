@@ -7,5 +7,5 @@ resources:
   - cert-manager/kustomization.yaml
   - metallb-system/kustomization.yaml
   - traefik/kustomization.yaml
-  - longhorn/kustomization.yaml
+  # - longhorn/kustomization.yaml
   - kyverno/kustomization.yaml
