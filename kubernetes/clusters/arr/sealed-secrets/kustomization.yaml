@@ -4,3 +4,21 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - ../../../apps/infrastructure/sealed-secrets
+
+patches:
+  - target:
+      kind: Deployment
+      name: .*
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
