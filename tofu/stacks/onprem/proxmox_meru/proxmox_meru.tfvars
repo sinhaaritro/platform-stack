@@ -81,8 +81,10 @@ resources = {
         tags            = ["k_control"]
         cloud_init_user = "dev"
         vm_config = {
+          cpu_cores         = 4
+          memory_size       = 8192
           disk_datastore_id = "data-storage"
-          disk_size         = "20"
+          disk_size         = "16"
           ipv4_address      = "192.168.0.81/24"
         }
       },
@@ -91,8 +93,9 @@ resources = {
         tags            = ["k_worker"]
         cloud_init_user = "dev"
         vm_config = {
+          memory_size       = 4096
           disk_datastore_id = "data-storage"
-          disk_size         = "20"
+          disk_size         = "16"
           ipv4_address      = "192.168.0.82/24"
         }
       },
@@ -103,15 +106,6 @@ resources = {
         vm_config = {
           disk_datastore_id = "data-storage"
           ipv4_address      = "192.168.0.83/24"
-        }
-      },
-      "ruth-04" = {
-        vm_id           = 804
-        tags            = ["k_worker"]
-        cloud_init_user = "dev"
-        vm_config = {
-          disk_datastore_id = "data-storage"
-          ipv4_address      = "192.168.0.84/24"
         }
       }
     }
@@ -145,8 +139,9 @@ resources = {
         tags            = ["k_control"]
         cloud_init_user = "dev"
         vm_config = {
+          memory_size       = 4096
           disk_datastore_id = "data-storage"
-          disk_size         = "20"
+          disk_size         = "16"
           ipv4_address      = "192.168.0.91/24"
         }
       },
@@ -167,16 +162,7 @@ resources = {
           disk_datastore_id = "data-storage"
           ipv4_address      = "192.168.0.93/24"
         }
-      },
-      "arr-04" = {
-        vm_id           = 904
-        tags            = ["k_worker"]
-        cloud_init_user = "dev"
-        vm_config = {
-          disk_datastore_id = "data-storage"
-          ipv4_address      = "192.168.0.94/24"
-        }
-      },
+      }
     }
   },
 
