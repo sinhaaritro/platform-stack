@@ -15,6 +15,8 @@ helmCharts:
       persistence:
         defaultClass: true
         defaultClassReplicaCount: 2 # Good balance for stability vs resource usage
+      preUpgradeChecker:
+        jobEnabled: false
 
 resources:
   - namespace.yaml
