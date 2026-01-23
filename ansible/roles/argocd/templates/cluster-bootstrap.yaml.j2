@@ -26,9 +26,15 @@ spec:
         # If the parent directory is 'ruth', use in-cluster.
         server: '{% raw %}{{if eq (.path.path | dir | base) "ruth"}}https://kubernetes.default.svc{{else}}https://{{.path.path | dir | base}}-api.example.com:6443{{end}}{% endraw %}'
         namespace: '{% raw %}{{if eq (.path.path | base) "podinfo"}}default{{else}}{{.path.path | base}}{{end}}{% endraw %}'
+      ignoreDifferences:
+        - group: apiextensions.k8s.io
+          kind: CustomResourceDefinition
+          jsonPointers:
+            - /spec/conversion/webhook/clientConfig/caBundle
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
+          - ServerSideApply=true
