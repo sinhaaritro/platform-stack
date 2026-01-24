@@ -5,21 +5,6 @@ namespace: logging
 resources:
   - ../../../apps/infrastructure/promtail
 
-patches:
-  - path: debug-patch.yaml
-    target:
-      kind: DaemonSet
-      name: promtail
-  - target:
-      kind: Namespace
-      name: logging
-    patch: |-
-      $patch: delete
-      apiVersion: v1
-      kind: Namespace
-      metadata:
-        name: logging
-
 secretGenerator:
   - name: promtail
     behavior: replace
@@ -27,3 +12,13 @@ secretGenerator:
       - promtail.yaml=promtail-config.yaml
     options:
       disableNameSuffixHash: true
+
+patches:
+  - path: debug-patch.yaml
+    target:
+      kind: DaemonSet
+      name: promtail
+  - path: probe-patch.yaml
+    target:
+      kind: DaemonSet
+      name: promtail
