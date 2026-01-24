@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: promtail
+  namespace: logging
+spec:
+  template:
+    spec:
+      containers:
+        - name: promtail
+          args:
+            - "-config.file=/etc/promtail/promtail.yaml"
+            - "-log.level=debug"

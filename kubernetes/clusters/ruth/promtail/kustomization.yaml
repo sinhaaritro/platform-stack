@@ -6,6 +6,10 @@ resources:
   - ../../../apps/infrastructure/promtail
 
 patches:
+  - path: debug-patch.yaml
+    target:
+      kind: DaemonSet
+      name: promtail
   - target:
       kind: Namespace
       name: logging
