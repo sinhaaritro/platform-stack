@@ -4,3 +4,14 @@ namespace: logging
 
 resources:
   - ../../../apps/infrastructure/promtail
+
+patches:
+  - target:
+      kind: Namespace
+      name: logging
+    patch: |-
+      $patch: delete
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: logging
