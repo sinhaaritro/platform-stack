@@ -18,3 +18,7 @@ patches:
     target:
       kind: DaemonSet
       name: promtail
+  - path: namespace-delete.yaml
+    target:
+      kind: Namespace
+      name: logging
