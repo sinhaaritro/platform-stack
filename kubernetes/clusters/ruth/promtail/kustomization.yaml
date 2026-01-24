@@ -15,3 +15,11 @@ patches:
       kind: Namespace
       metadata:
         name: logging
+
+secretGenerator:
+  - name: promtail
+    behavior: replace
+    files:
+      - promtail.yaml=promtail-config.yaml
+    options:
+      disableNameSuffixHash: true
