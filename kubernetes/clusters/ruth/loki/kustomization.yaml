@@ -7,6 +7,10 @@ resources:
   - ingress.yaml
 
 patches:
+  - path: sts-patch.yaml
+    target:
+      kind: StatefulSet
+      name: loki
   - target:
       kind: Service
       name: loki
