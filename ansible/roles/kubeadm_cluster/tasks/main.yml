@@ -8,6 +8,10 @@
 - name: Configure Kubernetes Firewall Rules
   ansible.builtin.include_tasks: firewall.yml
 
+# 2.1 Configure Storage Dependencies
+- name: Configure Longhorn Dependencies
+  ansible.builtin.include_tasks: longhorn_deps.yml
+
 # 3. Validate Bootstrap Node
 - name: Fail if Bootstrap Node is undefined
   ansible.builtin.fail:
