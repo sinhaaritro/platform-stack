@@ -7,12 +7,20 @@ spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]
   generators:
-    - git:
-        repoURL: {{ argocd_git_repo_url }}
-        revision: {{ argocd_git_repo_revision }}
-        # Look for two-level subdirectories (cluster/app)
-        directories:
-          - path: kubernetes/clusters/*/*
+    - merge:
+        mergeKeys:
+          - path.path
+        generators:
+          - git:
+              repoURL: {{ argocd_git_repo_url }}
+              revision: {{ argocd_git_repo_revision }}
+              directories:
+                - path: kubernetes/clusters/*/*
+          - git:
+              repoURL: {{ argocd_git_repo_url }}
+              revision: {{ argocd_git_repo_revision }}
+              files:
+                - path: kubernetes/clusters/*/*/app.yaml
   template:
     metadata:
       name: '{% raw %}{{.path.path | dir | base}}-{{.path.path | base}}{% endraw %}'
@@ -25,7 +33,7 @@ spec:
       destination:
         # If the parent directory is 'ruth', use in-cluster.
         server: '{% raw %}{{if eq (.path.path | dir | base) "ruth"}}https://kubernetes.default.svc{{else}}https://{{.path.path | dir | base}}-api.example.com:6443{{end}}{% endraw %}'
-        namespace: '{% raw %}{{if eq (.path.path | base) "podinfo"}}default{{else}}{{.path.path | base}}{{end}}{% endraw %}'
+        namespace: '{% raw %}{{ default (.path.path | base) .namespace }}{% endraw %}'
       ignoreDifferences:
         - group: apiextensions.k8s.io
           kind: CustomResourceDefinition
