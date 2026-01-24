@@ -5,15 +5,11 @@ namespace: logging
 resources:
   - ../../../apps/infrastructure/promtail
 
-secretGenerator:
-  - name: promtail
-    behavior: replace
-    files:
-      - promtail.yaml=promtail-config.yaml
-    options:
-      disableNameSuffixHash: true
-
 patches:
+  - path: secret-patch.yaml
+    target:
+      kind: Secret
+      name: promtail
   - path: debug-patch.yaml
     target:
       kind: DaemonSet
