@@ -1,3 +1,9 @@
 resources:
   - namespace.yaml
   - manifests.yaml
+
+patches:
+  - path: service-patch.yaml
+    target:
+      kind: Service
+      name: loki-memberlist
