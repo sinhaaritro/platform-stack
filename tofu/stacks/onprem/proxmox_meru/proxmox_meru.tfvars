@@ -19,7 +19,7 @@ target_datastore = "data-storage"
 # used as the default name for the VM.
 resources = {
   "kind" = {
-    enabled     = true
+    enabled     = false
     type        = "vm"
     node_name   = "moo-moo"
     description = "Kubernetes servers. Ubuntu 24.04."
