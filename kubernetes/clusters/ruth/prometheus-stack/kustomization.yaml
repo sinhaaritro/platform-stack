@@ -30,8 +30,6 @@ helmCharts:
         service:
           port: 9101
           targetPort: 9101
-        extraArgs:
-          - --web.listen-address=:9101
       grafana:
         enabled: true
         adminPassword: "prom-operator"
@@ -50,3 +48,19 @@ helmCharts:
             enabled: false
         tls:
           enabled: false
+
+patches:
+  - target:
+      kind: DaemonSet
+      name: prometheus-stack-prometheus-node-exporter
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/args
+        value:
+          - --path.procfs=/host/proc
+          - --path.sysfs=/host/sys
+          - --path.rootfs=/host/root
+          - --path.udev.data=/host/root/run/udev/data
+          - --web.listen-address=:9101
+          - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/.+)($|/)
+          - --collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$
