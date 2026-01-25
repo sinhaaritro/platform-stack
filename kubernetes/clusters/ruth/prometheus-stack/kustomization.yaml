@@ -5,5 +5,36 @@ namespace: monitoring
 resources:
   - ../../../apps/infrastructure/prometheus-stack
 
-generators:
-  - manifests.yaml
+helmCharts:
+  - name: kube-prometheus-stack
+    repo: https://prometheus-community.github.io/helm-charts
+    version: 61.3.2
+    releaseName: prometheus-stack
+    namespace: monitoring
+    includeCRDs: true
+    valuesInline:
+      fullnameOverride: prometheus-stack
+      defaultRules:
+        create: true
+        rules:
+          etcd: false
+          kubeScheduler: false
+      kubeControllerManager:
+        enabled: false
+      kubeEtcd:
+        enabled: false
+      kubeScheduler:
+        enabled: false
+      nodeExporter:
+        enabled: true
+      grafana:
+        enabled: true
+        adminPassword: "prom-operator"
+      alertmanager:
+        enabled: true
+      prometheus:
+        enabled: true
+        prometheusSpec:
+          serviceMonitorSelectorNilUsesHelmValues: false
+          serviceMonitorSelector: {}
+          serviceMonitorNamespaceSelector: {}
