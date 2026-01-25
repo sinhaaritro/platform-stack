@@ -5,22 +5,13 @@ metadata:
   namespace: {{ argocd_namespace }}
 spec:
   goTemplate: true
-  goTemplateOptions: ["missingkey=error"]
   generators:
-    - merge:
-        mergeKeys:
-          - path.path
-        generators:
-          - git:
-              repoURL: {{ argocd_git_repo_url }}
-              revision: {{ argocd_git_repo_revision }}
-              directories:
-                - path: kubernetes/clusters/*/*
-          - git:
-              repoURL: {{ argocd_git_repo_url }}
-              revision: {{ argocd_git_repo_revision }}
-              files:
-                - path: kubernetes/clusters/*/*/app.yaml
+  generators:
+    - git:
+        repoURL: {{ argocd_git_repo_url }}
+        revision: {{ argocd_git_repo_revision }}
+        directories:
+          - path: kubernetes/clusters/*/*
   template:
     metadata:
       name: '{% raw %}{{.path.path | dir | base}}-{{.path.path | base}}{% endraw %}'
@@ -33,7 +24,7 @@ spec:
       destination:
         # If the parent directory is 'ruth', use in-cluster.
         server: '{% raw %}{{if eq (.path.path | dir | base) "ruth"}}https://kubernetes.default.svc{{else}}https://{{.path.path | dir | base}}-api.example.com:6443{{end}}{% endraw %}'
-        namespace: '{% raw %}{{ default (.path.path | base) .namespace }}{% endraw %}'
+        namespace: '{% raw %}{{ if or (contains "loki" .path.path) (contains "promtail" .path.path) }}logging{{ else }}{{ .path.path | base }}{{ end }}{% endraw %}'
       ignoreDifferences:
         - group: apiextensions.k8s.io
           kind: CustomResourceDefinition

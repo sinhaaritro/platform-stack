@@ -5,8 +5,5 @@ namespace: monitoring
 resources:
   - ../../../apps/infrastructure/prometheus-stack
 
-patches:
-  - path: values.yaml
-    target:
-      kind: HelmChartInflationGenerator
-      name: kube-prometheus-stack
+generators:
+  - manifests.yaml
