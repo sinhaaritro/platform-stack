@@ -10,7 +10,7 @@ helmCharts:
     includeCRDs: true
     valuesInline:
       defaultSettings:
-        createDefaultDiskLabeledNodes: true
+        createDefaultDiskLabeledNodes: false
         defaultDataPath: /var/lib/longhorn
       persistence:
         defaultClass: true
