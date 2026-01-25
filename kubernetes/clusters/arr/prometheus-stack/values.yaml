@@ -1,15 +1,21 @@
-grafana:
-  enabled: false
+apiVersion: builtin
+kind: HelmChartInflationGenerator
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+valuesInline:
+  grafana:
+    enabled: false
 
-alertmanager:
-  enabled: false
+  alertmanager:
+    enabled: false
 
-prometheus:
-  enabled: true
-  prometheusSpec:
-    serviceMonitorSelectorNilUsesHelmValues: false
-    serviceMonitorSelector: {}
-    serviceMonitorNamespaceSelector: {}
+  prometheus:
+    enabled: true
+    prometheusSpec:
+      serviceMonitorSelectorNilUsesHelmValues: false
+      serviceMonitorSelector: {}
+      serviceMonitorNamespaceSelector: {}
 
-nodeExporter:
-  enabled: true
+  nodeExporter:
+    enabled: true
