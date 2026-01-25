@@ -27,6 +27,9 @@ helmCharts:
         enabled: false
       nodeExporter:
         enabled: true
+        service:
+          port: 9101
+          targetPort: 9101
       grafana:
         enabled: false
       alertmanager:
@@ -42,3 +45,5 @@ helmCharts:
           enabled: false
           patch:
             enabled: false
+        tls:
+          enabled: false
