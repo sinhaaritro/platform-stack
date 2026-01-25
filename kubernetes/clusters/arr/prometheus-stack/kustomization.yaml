@@ -37,3 +37,8 @@ helmCharts:
           serviceMonitorSelectorNilUsesHelmValues: false
           serviceMonitorSelector: {}
           serviceMonitorNamespaceSelector: {}
+      prometheusOperator:
+        admissionWebhooks:
+          enabled: false
+          patch:
+            enabled: false
