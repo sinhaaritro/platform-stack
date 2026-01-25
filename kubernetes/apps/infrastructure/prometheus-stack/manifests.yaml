@@ -1,0 +1,26 @@
+apiVersion: builtin
+kind: HelmChartInflationGenerator
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+name: kube-prometheus-stack
+repo: https://prometheus-community.github.io/helm-charts
+version: 61.3.2
+releaseName: prometheus-stack
+namespace: monitoring
+includeCRDs: true
+valuesInline:
+  fullnameOverride: prometheus-stack
+  defaultRules:
+    create: true
+    rules:
+      etcd: false
+      kubeScheduler: false
+  kubeControllerManager:
+    enabled: false
+  kubeEtcd:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+  nodeExporter:
+    enabled: true
