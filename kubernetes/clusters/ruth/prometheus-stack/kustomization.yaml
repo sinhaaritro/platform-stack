@@ -30,6 +30,8 @@ helmCharts:
         service:
           port: 9101
           targetPort: 9101
+        extraArgs:
+          - --web.listen-address=:9101
       grafana:
         enabled: true
         adminPassword: "prom-operator"
