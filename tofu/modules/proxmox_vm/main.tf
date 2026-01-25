@@ -38,6 +38,19 @@ resource "proxmox_virtual_environment_vm" "module_vm" {
     ssd          = var.disk_ssd
   }
 
+  # Additional Disks
+  dynamic "disk" {
+    for_each = var.additional_disks
+    content {
+      interface    = disk.value.interface
+      datastore_id = disk.value.datastore_id
+      size         = disk.value.size
+      cache        = "writeback"
+      discard      = "on"
+      ssd          = disk.value.ssd
+    }
+  }
+
   # CPU Configuration
   cpu {
     cores   = var.cpu_cores

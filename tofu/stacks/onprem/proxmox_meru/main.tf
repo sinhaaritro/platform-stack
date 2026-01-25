@@ -257,6 +257,15 @@ locals {
       vlan_id     = coalesce(item.node_override.vm_config.vlan_id, item.app_group.vm_config.vlan_id)
       os_version  = coalesce(item.node_override.vm_config.os_version, item.app_group.vm_config.os_version)
 
+      # Additional Disks
+      additional_disks = (
+        (item.node_override.vm_config != null && item.node_override.vm_config.additional_disks != null) ?
+        item.node_override.vm_config.additional_disks :
+        (item.app_group.vm_config != null && item.app_group.vm_config.additional_disks != null) ?
+        item.app_group.vm_config.additional_disks :
+        []
+      )
+
       # Cloud-Init
       ipv4_address = item.node_override.vm_config.ipv4_address
       ipv4_gateway = coalesce(item.node_override.vm_config.ipv4_gateway, item.app_group.vm_config.ipv4_gateway, "192.168.0.1")
@@ -401,6 +410,9 @@ module "proxmox_vms" {
   user_account_username = each.value.user_account_username
   user_account_password = each.value.user_account_password
   user_account_keys     = each.value.user_account_keys
+
+  # Aditional Disks
+  additional_disks = each.value.additional_disks
 }
 
 # -----------------------------------------------------------------------------

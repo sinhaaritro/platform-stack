@@ -129,3 +129,14 @@ variable "ansible_groups" {
   type        = map(map(string))
   default     = {}
 }
+
+variable "additional_disks" {
+  description = "A list of additional disks to attach to the VM."
+  type = list(object({
+    interface    = string # e.g., "scsi1", "scsi2"
+    datastore_id = string
+    size         = number
+    ssd          = bool
+  }))
+  default = []
+}

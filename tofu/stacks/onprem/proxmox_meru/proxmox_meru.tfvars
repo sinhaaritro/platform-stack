@@ -70,43 +70,61 @@ resources = {
 
     vm_config = {
       cpu_cores         = 2
-      memory_size       = 2048
+      memory_size       = 4096
       disk_datastore_id = "local-thin"
       os_version        = "24.04"
-      disk_size         = "16"
+      disk_size         = 12
     }
 
     nodes = {
       "ruth-01" = {
-        vm_id           = 801
+        vm_id           = 1020
         tags            = ["k_control"]
         cloud_init_user = "dev"
         vm_config = {
-          cpu_cores         = 4
-          memory_size       = 8192
-          disk_datastore_id = "data-storage"
-          disk_size         = "16"
-          ipv4_address      = "192.168.0.81/24"
+          cpu_cores    = 4
+          memory_size  = 6144
+          ipv4_address = "192.168.0.20/24"
+          additional_disks = [
+            {
+              interface    = "scsi1"
+              datastore_id = "data-storage"
+              size         = 20
+              ssd          = true
+            }
+          ]
         }
       },
       "ruth-02" = {
-        vm_id           = 802
+        vm_id           = 1021
         tags            = ["k_worker"]
         cloud_init_user = "dev"
         vm_config = {
-          memory_size       = 4096
-          disk_datastore_id = "data-storage"
-          disk_size         = "16"
-          ipv4_address      = "192.168.0.82/24"
+          ipv4_address = "192.168.0.21/24"
+          additional_disks = [
+            {
+              interface    = "scsi1"
+              datastore_id = "data-storage"
+              size         = 40
+              ssd          = true
+            }
+          ]
         }
       },
       "ruth-03" = {
-        vm_id           = 803
+        vm_id           = 1022
         tags            = ["k_worker"]
         cloud_init_user = "dev"
         vm_config = {
-          disk_datastore_id = "data-storage"
-          ipv4_address      = "192.168.0.83/24"
+          ipv4_address = "192.168.0.22/24"
+          additional_disks = [
+            {
+              interface    = "scsi1"
+              datastore_id = "data-storage"
+              size         = 20
+              ssd          = true
+            }
+          ]
         }
       }
     }
@@ -129,40 +147,60 @@ resources = {
 
     vm_config = {
       cpu_cores         = 2
-      memory_size       = 2048
+      memory_size       = 4096
       disk_datastore_id = "local-thin"
       os_version        = "24.04"
-      disk_size         = "16"
+      disk_size         = 12
     }
 
     nodes = {
       "arr-01" = {
-        vm_id           = 901
+        vm_id           = 1025
         tags            = ["k_control"]
         cloud_init_user = "dev"
         vm_config = {
-          memory_size       = 4096
-          disk_datastore_id = "data-storage"
-          disk_size         = "16"
-          ipv4_address      = "192.168.0.91/24"
+          memory_size  = 2048
+          ipv4_address = "192.168.0.25/24"
+          additional_disks = [
+            {
+              interface    = "scsi1"
+              datastore_id = "data-storage"
+              size         = 10
+              ssd          = true
+            }
+          ]
         }
       },
       "arr-02" = {
-        vm_id           = 902
+        vm_id           = 1026
         tags            = ["k_worker"]
         cloud_init_user = "dev"
         vm_config = {
-          disk_datastore_id = "data-storage"
-          ipv4_address      = "192.168.0.92/24"
+          ipv4_address = "192.168.0.26/24"
+          additional_disks = [
+            {
+              interface    = "scsi1"
+              datastore_id = "data-storage"
+              size         = 20
+              ssd          = true
+            }
+          ]
         }
       },
       "arr-03" = {
-        vm_id           = 903
+        vm_id           = 1027
         tags            = ["k_worker"]
         cloud_init_user = "dev"
         vm_config = {
-          disk_datastore_id = "data-storage"
-          ipv4_address      = "192.168.0.93/24"
+          ipv4_address = "192.168.0.27/24"
+          additional_disks = [
+            {
+              interface    = "scsi1"
+              datastore_id = "data-storage"
+              size         = 20
+              ssd          = true
+            }
+          ]
         }
       }
     }

@@ -114,6 +114,12 @@ variable "resources" {
       vlan_id           = optional(number, 0)
       ipv4_gateway      = optional(string)
       os_version        = optional(string)
+      additional_disks = optional(list(object({
+        interface    = string
+        datastore_id = string
+        size         = number
+        ssd          = bool
+      })), [])
     }))
 
     # Discriminating Union: LXC Configuration
@@ -162,6 +168,12 @@ variable "resources" {
         ipv4_address      = optional(string, "dhcp")
         ipv4_gateway      = optional(string)
         os_version        = optional(string)
+        additional_disks = optional(list(object({
+          interface    = string
+          datastore_id = string
+          size         = number
+          ssd          = bool
+        })))
       }))
 
       lxc_config = optional(object({
