@@ -159,7 +159,6 @@ resources = {
         tags            = ["k_control"]
         cloud_init_user = "dev"
         vm_config = {
-          memory_size  = 2048
           ipv4_address = "192.168.0.25/24"
           additional_disks = [
             {

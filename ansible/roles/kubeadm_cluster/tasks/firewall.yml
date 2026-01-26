@@ -24,4 +24,5 @@
     - { port: "4789", proto: "udp", name: "VXLAN" }
     - { port: "7946", proto: "tcp", name: "MetalLB Memberlist TCP" }
     - { port: "7946", proto: "udp", name: "MetalLB Memberlist UDP" }
+    - { port: "7472", proto: "tcp", name: "MetalLB Metrics/Liveness" }
   tags: [k8s, firewall]

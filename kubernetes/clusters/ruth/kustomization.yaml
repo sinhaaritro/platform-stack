@@ -9,3 +9,4 @@ resources:
   - traefik/kustomization.yaml
   # - longhorn/kustomization.yaml
   - kyverno/kustomization.yaml
+  - system-patches/kustomization.yaml
