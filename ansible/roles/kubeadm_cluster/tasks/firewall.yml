@@ -1,30 +1,27 @@
-# tasks/firewall.yml
 ---
-- name: Allow Kubernetes API (Masters)
+- name: Allow Kubernetes Pod Network (CNI/Overlay)
   community.general.ufw:
     rule: allow
-    port: "6443"
-    proto: tcp
-    src: "192.168.0.0/24" # Trust the LAN
-  when: "'k_control' in group_names"
+    src: "10.244.0.0/16"
+  tags: [k8s, firewall]
 
-- name: Allow Kubelet API (All Nodes)
+- name: Allow Kubernetes Service Network
   community.general.ufw:
     rule: allow
-    port: "10250"
-    proto: tcp
-  when: "'k_control' in group_names"
+    src: "10.96.0.0/12"
+  tags: [k8s, firewall]
 
-- name: Allow Calico BGP (Internal Networking)
+- name: Allow Kubernetes & MetalLB Ports
   community.general.ufw:
     rule: allow
-    port: "179"
-    proto: tcp
-    src: "192.168.0.0/24"
-
-- name: Allow Calico VXLAN (Internal Networking)
-  community.general.ufw:
-    rule: allow
-    port: "4789"
-    proto: udp
-    src: "192.168.0.0/24"
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+    comment: "{{ item.name }}"
+  loop:
+    - { port: "6443", proto: "tcp", name: "K8s API" }
+    - { port: "10250", proto: "tcp", name: "Kubelet" }
+    - { port: "179", proto: "tcp", name: "BGP (Calico/MetalLB)" }
+    - { port: "4789", proto: "udp", name: "VXLAN" }
+    - { port: "7946", proto: "tcp", name: "MetalLB Memberlist TCP" }
+    - { port: "7946", proto: "udp", name: "MetalLB Memberlist UDP" }
+  tags: [k8s, firewall]
