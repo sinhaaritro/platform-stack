@@ -64,35 +64,46 @@
     # Keep CA as Base64. Do NOT decode. The target secret needs it as Base64.
     remote_ca_b64: "{{ (remote_secret_json.stdout | from_json).data['ca.crt'] }}"
 
-# 3. Ensure TLS Certificate SANs (The Fix)
+# 3. Ensure TLS Certificate SANs
 - name: "Check API Server Cert SANs: {{ remote_master }}"
-  ansible.builtin.shell: |
-    openssl x509 -in /etc/kubernetes/pki/apiserver.crt -noout -text | grep "{{ target_cluster_group }}-api.example.com"
+  ansible.builtin.command: openssl x509 -in /etc/kubernetes/pki/apiserver.crt -noout -text
   delegate_to: "{{ remote_master }}"
   become: true
-  register: cert_sans_check
-  failed_when: false
+  register: cert_text
   changed_when: false
+  failed_when: false
 
 - name: "Update API Server Cert with SANs: {{ remote_master }}"
   ansible.builtin.shell: |
-    # Clean up old certs key to force regeneration (optional but safer for kubeadm phases)
     rm /etc/kubernetes/pki/apiserver.crt /etc/kubernetes/pki/apiserver.key
-
-    # Kubeadm init phase to regenerate apiserver cert
     kubeadm init phase certs apiserver --apiserver-cert-extra-sans "{{ target_cluster_group }}-api.example.com"
   delegate_to: "{{ remote_master }}"
   become: true
-  when: cert_sans_check.rc != 0
+  when:
+    - cert_text.rc == 0
+    - target_cluster_group ~ '-api.example.com' not in cert_text.stdout
+  changed_when: true
 
-- name: "Restart API Server (Force Reload): {{ remote_master }}"
-  ansible.builtin.shell: |
-    crictl ps --name kube-apiserver -q | xargs -r crictl stop
-    # Alternative: kubectl delete pod -n kube-system -l component=kube-apiserver --force
-    # But crictl is more direct if kubectl is flaky during restart
+- name: "Get API Server Container ID: {{ remote_master }}"
+  ansible.builtin.command: crictl ps --name kube-apiserver -q
   delegate_to: "{{ remote_master }}"
   become: true
-  when: cert_sans_check.rc != 0
+  register: apiserver_id
+  changed_when: false
+  when:
+    - cert_text.rc == 0
+    - target_cluster_group ~ '-api.example.com' not in cert_text.stdout
+
+- name: "Restart API Server (Force Reload): {{ remote_master }}"
+  ansible.builtin.command: "crictl stop {{ item }}"
+  loop: "{{ apiserver_id.stdout_lines }}"
+  delegate_to: "{{ remote_master }}"
+  become: true
+  when:
+    - cert_text.rc == 0
+    - target_cluster_group ~ '-api.example.com' not in cert_text.stdout
+    - apiserver_id.stdout_lines | length > 0
+  changed_when: true
 
 # 3. Execute on Local Management Cluster (Register)
 - name: "Ensure DNS Resolution for Cluster: {{ target_cluster_group }}"

@@ -1,0 +1,3 @@
+storage_mounts:
+  - { device: "/dev/sdb", path: "/data/storage", fstype: "ext4" }
+  - { device: "/dev/sdc", path: "/data/backups", fstype: "xfs" }

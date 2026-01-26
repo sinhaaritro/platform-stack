@@ -17,6 +17,7 @@
     - role: security      # SSH Hardening, UFW, Fail2Ban
     - role: monitoring    # Node Exporter, QEMU Agent
     - role: users         # User creation, Git config, SSH Keys
+    - role: storage_setup # Mount additional disks (e.g., /dev/sdb -> /data/storage)
 
 # ==============================================================================
 # PLAY 2: DEV/TEST KUBERNETES (KIND)
@@ -76,7 +77,6 @@
   become: true
   roles:
     - role: argocd
-      tags: [argocd]
 
 # # ==============================================================================
 # # PLAY 5: WEB LAYER

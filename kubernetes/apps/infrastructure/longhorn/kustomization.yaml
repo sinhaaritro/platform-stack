@@ -11,7 +11,7 @@ helmCharts:
     valuesInline:
       defaultSettings:
         createDefaultDiskLabeledNodes: false
-        defaultDataPath: /var/lib/longhorn
+        defaultDataPath: /data/storage
         storageReservedPercentageForDefaultDisk: 15
       persistence:
         defaultClass: true

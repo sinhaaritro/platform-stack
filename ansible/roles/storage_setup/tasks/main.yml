@@ -1,0 +1,6 @@
+---
+- name: Iterate over storage mounts
+  ansible.builtin.include_tasks: mount_disk.yml
+  loop: "{{ storage_mounts }}"
+  loop_control:
+    loop_var: mount_item

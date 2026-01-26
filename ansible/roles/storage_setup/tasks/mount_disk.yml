@@ -1,0 +1,26 @@
+---
+- name: Check disk device existence
+  ansible.builtin.stat:
+    path: "{{ mount_item.device }}"
+  register: device_stat
+
+- name: Create filesystem on device
+  community.general.filesystem:
+    fstype: "{{ mount_item.fstype | default('ext4') }}"
+    dev: "{{ mount_item.device }}"
+  when: device_stat.stat.exists
+
+- name: Create mount point directory
+  ansible.builtin.file:
+    path: "{{ mount_item.path }}"
+    state: directory
+    mode: "0755"
+  when: device_stat.stat.exists
+
+- name: Mount device to path
+  ansible.posix.mount:
+    path: "{{ mount_item.path }}"
+    src: "{{ mount_item.device }}"
+    fstype: "{{ mount_item.fstype | default('ext4') }}"
+    state: mounted
+  when: device_stat.stat.exists
