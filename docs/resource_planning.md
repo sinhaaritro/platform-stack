@@ -40,7 +40,7 @@ To prevent data usage from crashing your Operating Systems, every Kubernetes nod
 
 ### Pool B: `data-storage` (220 GB)
 **Role**: **Persistent Data (Longhorn)**
-- Secondary disk mounted at `/var/lib/longhorn`.
+- Secondary disk mounted at `/data/storage`.
 - **Total Provisioned**: 130 GB (Initial Active Nodes).
 - **Free**: 90 GB (Room for growth).
 
