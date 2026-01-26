@@ -14,7 +14,7 @@ patches:
         path: /stringData/promtail.yaml
         value: |
           server:
-            log_level: info
+            log_level: debug
             http_listen_port: 3101
             enable_runtime_reload: true
           
@@ -55,3 +55,14 @@ patches:
                   separator: /
                   source_labels: [__meta_kubernetes_pod_uid, __meta_kubernetes_pod_container_name]
                   target_label: __path__
+
+  - target:
+      kind: DaemonSet
+      name: promtail
+    patch: |-
+      - op: add
+        path: /spec/template/spec/securityContext/runAsUser
+        value: 0
+      - op: add
+        path: /spec/template/spec/securityContext/runAsGroup
+        value: 0
