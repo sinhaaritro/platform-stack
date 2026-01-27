@@ -14,6 +14,6 @@ argocd_node_port_https: 30443      # Fixed port for Web UI (HTTPS)
 # GitOps Bootstrap Configuration
 # CHANGE THIS to your repository URL
 argocd_git_repo_url: "https://github.com/sinhaaritro/platform-stack.git"
-argocd_git_repo_path: "kubernetes/bootstrap/appsets"
+argocd_git_repo_path: "kubernetes/bootstrap/ruth"
 argocd_git_repo_revision: "HEAD"
 argocd_root_app_name: "platform-root"

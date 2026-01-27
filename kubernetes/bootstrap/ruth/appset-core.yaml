@@ -1,0 +1,74 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: core-infrastructure
+  namespace: argocd
+spec:
+  generators:
+    - matrix:
+        generators:
+          - clusters: {}
+          - list:
+              elements:
+                - app: cert-manager
+                  namespace: networking
+                  serverSideApply: "true"
+                  replace: "false"
+                - app: kyverno
+                  namespace: security
+                  serverSideApply: "true"
+                  replace: "false"
+                - app: sealed-secrets
+                  namespace: security
+                  serverSideApply: "true"
+                  replace: "false"
+                - app: longhorn
+                  namespace: storage
+                  serverSideApply: "true"
+                  replace: "false"
+                - app: metallb-system
+                  namespace: networking
+                  serverSideApply: "true"
+                  replace: "false"
+                - app: traefik
+                  namespace: networking
+                  serverSideApply: "true"
+                  replace: "false"
+                - app: system-patches
+                  namespace: kube-system
+                  serverSideApply: "true"
+                  replace: "false"
+                - app: promtail
+                  namespace: logging
+                  serverSideApply: "true"
+                  replace: "false"
+                - app: prometheus-stack
+                  namespace: monitoring
+                  serverSideApply: "true"
+                  replace: "false"
+  template:
+    metadata:
+      name: "{{name}}-{{app}}"
+    spec:
+      ignoreDifferences:
+        - group: ""
+          kind: Secret
+          name: "sealed-secrets-key*"
+          jsonPointers:
+            - /data
+      project: default
+      source:
+        repoURL: https://github.com/sinhaaritro/platform-stack.git
+        targetRevision: HEAD
+        path: "kubernetes/clusters/{{name}}/{{app}}"
+      destination:
+        server: "{{server}}"
+        namespace: "{{namespace}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply={{serverSideApply}}
+          - Replace={{replace}}

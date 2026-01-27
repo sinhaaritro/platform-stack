@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: ruth-apps
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/sinhaaritro/platform-stack.git
+        revision: HEAD
+        directories:
+          - path: kubernetes/clusters/ruth/*
+          - path: kubernetes/clusters/ruth/cert-manager
+            exclude: true
+          - path: kubernetes/clusters/ruth/kyverno
+            exclude: true
+          - path: kubernetes/clusters/ruth/sealed-secrets
+            exclude: true
+          - path: kubernetes/clusters/ruth/longhorn
+            exclude: true
+          - path: kubernetes/clusters/ruth/metallb-system
+            exclude: true
+          - path: kubernetes/clusters/ruth/traefik
+            exclude: true
+          - path: kubernetes/clusters/ruth/system-patches
+            exclude: true
+          - path: kubernetes/clusters/ruth/promtail
+            exclude: true
+          - path: kubernetes/clusters/ruth/prometheus-stack
+            exclude: true
+  template:
+    metadata:
+      name: "ruth-{{path.basename}}"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/sinhaaritro/platform-stack.git
+        targetRevision: HEAD
+        path: "{{path}}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{path.basename}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - Replace=true
