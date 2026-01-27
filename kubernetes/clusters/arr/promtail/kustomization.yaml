@@ -61,8 +61,7 @@ patches:
       name: promtail
     patch: |-
       - op: add
-        path: /spec/template/spec/securityContext/runAsUser
-        value: 0
-      - op: add
-        path: /spec/template/spec/securityContext/runAsGroup
-        value: 0
+        path: /spec/template/spec/securityContext
+        value:
+          runAsUser: 0
+          runAsGroup: 0
