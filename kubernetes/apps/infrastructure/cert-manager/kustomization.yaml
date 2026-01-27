@@ -6,7 +6,7 @@ helmCharts:
     repo: https://charts.jetstack.io
     version: 1.19.2
     releaseName: cert-manager
-    namespace: cert-manager
+    namespace: networking
     includeCRDs: true
     valuesInline:
       installCRDs: true
