@@ -70,3 +70,6 @@ patches:
         value:
           runAsUser: 0
           runAsGroup: 0
+      - op: replace
+        path: /spec/template/spec/containers/0/readinessProbe/httpGet/path
+        value: /metrics
