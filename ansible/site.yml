@@ -11,6 +11,7 @@
 # ==============================================================================
 - name: Apply Base and Security Configuration
   hosts: vm
+  tags: vm
   become: true
   roles:
     - role: base          # System basics (Timezone, Locales, Packages)
@@ -26,6 +27,7 @@
 # ==============================================================================
 - name: Configure Dev Kubernetes (Kind)
   hosts: kind
+  tags: kind
   become: true
   roles:
     - role: docker        # Runtime Dependency (Must run first)
@@ -42,6 +44,7 @@
 # ==============================================================================
 - name: Bootstrap Control Plane (Init & CNI)
   hosts: k_control
+  tags: k_control
   become: true
   serial: 1
   roles:
@@ -59,6 +62,7 @@
 # ==============================================================================
 - name: Join Worker Nodes
   hosts: k_worker
+  tags: k_worker
   become: true
   # Parallel is fine here - all workers can join at once
   roles:
@@ -74,6 +78,7 @@
 # ==============================================================================
 - name: Configure Management Layer (ArgoCD)
   hosts: k_management:&k_control
+  tags: argocd
   become: true
   roles:
     - role: argocd
@@ -84,6 +89,7 @@
 # # ==============================================================================
 # - name: Configure Web Server
 #   hosts: server
+#   tags: server
 #   become: true
 #   roles:
 #     - role: nginx
@@ -94,6 +100,7 @@
 # # ==============================================================================
 # - name: Configure Postgres Database
 #   hosts: postgres
+#   tags: postgres
 #   become: true
 #   roles:
 #     - role: postgres

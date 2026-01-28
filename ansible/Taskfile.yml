@@ -49,17 +49,45 @@ tasks:
     cmds:
       - ansible all -m ping -i {{.INVENTORY_FILE}}
 
-  apply:
-    desc: "Runs the main site playbook to apply configurations."
-    dir: "{{.USER_WORKING_DIR}}/ansible"
-    cmds:
-      - ansible-playbook -i {{.INVENTORY_FILE}} {{.PLAYBOOK_FILE}} {{.CLI_ARGS}}
-
   check:
     desc: "Runs the main site playbook in 'check' (dry-run) mode."
     dir: "{{.USER_WORKING_DIR}}/ansible"
     cmds:
       - ansible-playbook -i {{.INVENTORY_FILE}} {{.PLAYBOOK_FILE}} --check --diff {{.CLI_ARGS}}
+
+  apply:all:
+    desc: "Runs the main site playbook to apply configurations."
+    dir: "{{.USER_WORKING_DIR}}/ansible"
+    cmds:
+      - ansible-playbook -i {{.INVENTORY_FILE}} {{.PLAYBOOK_FILE}} {{.CLI_ARGS}}
+
+  apply:hostgroup:
+    desc: "Runs the main site playbook limited to a specific host group."
+    summary: |
+      Usage: task apply:hostgroup group=<target_group>
+      Example: task apply:hostgroup group=k_management
+    dir: "{{.USER_WORKING_DIR}}/ansible"
+    vars:
+      GROUP: "{{.group}}"
+    cmds:
+      - ansible-playbook -i {{.INVENTORY_FILE}} {{.PLAYBOOK_FILE}} -l {{.GROUP}} {{.CLI_ARGS}}
+    preconditions:
+      - sh: 'test -n "{{.GROUP}}"'
+        msg: "You must provide a group name. Usage: task apply:hostgroup group=<target_group>"
+
+  apply:tag:
+    desc: "Runs the main site playbook limited to specific tags."
+    summary: |
+      Usage: task apply:tag tag=<target_tag>
+      Example: task apply:tag tag=argocd
+    dir: "{{.USER_WORKING_DIR}}/ansible"
+    vars:
+      TAG: "{{.tag}}"
+    cmds:
+      - ansible-playbook -i {{.INVENTORY_FILE}} {{.PLAYBOOK_FILE}} -t {{.TAG}} {{.CLI_ARGS}}
+    preconditions:
+      - sh: 'test -n "{{.TAG}}"'
+        msg: "You must provide a tag name. Usage: task apply:tag tag=<target_tag>"
 
   lint:
     desc: "Runs ansible-lint to check for best practices and errors."
