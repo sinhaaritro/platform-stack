@@ -21,3 +21,12 @@ patches:
           limits:
             cpu: 500m
             memory: 256Mi
+  - target:
+      group: traefik.io
+      version: v1alpha1
+      kind: IngressRoute
+      name: traefik-dashboard
+    patch: |-
+      - op: replace
+        path: /spec/routes/0/match
+        value: Host(`traefik.arr.example.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))

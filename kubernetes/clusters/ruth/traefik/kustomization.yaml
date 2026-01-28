@@ -3,3 +3,14 @@ kind: Kustomization
 
 resources:
   - ../../../apps/infrastructure/traefik
+
+patches:
+  - target:
+      group: traefik.io
+      version: v1alpha1
+      kind: IngressRoute
+      name: traefik-dashboard
+    patch: |-
+      - op: replace
+        path: /spec/routes/0/match
+        value: Host(`traefik.ruth.example.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
