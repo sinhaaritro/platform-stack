@@ -1,46 +1,141 @@
-# Storage Architecture Discussion: Generic Disk Mounting
+# VM Storage Architecture & Allocation Breakdown
 
-This document outlines the reasoning behind the storage configuration strategy and addresses concerns regarding path specificity and variable placement.
+This document provides a detailed breakdown of every active virtual machine in the ecosystem, defining its function and partitioning its data across the three storage tiers: **Boot Pool** (`local-thin`), **Data Pool** (`data-storage`), and **Network Storage** (`NFS`).
 
-## 1. Variable Placement: Why avoid `group_vars/vm.yml`?
+## Storage Tiers & Usage Theory
 
-You suggested moving the configuration to `ansible/roles/storage_setup/defaults/main.yml`. Here is the trade-off:
+1.  **Boot Pool (`local-thin`)**:
+    *   **Role**: Operating System, Kubernetes Binaries, System Logs, Container Runtimes.
+    *   **Risk**: If this fills up, the Node crashes or Evicts pods (as seen with `ruth-02`).
+    *   **Content**: `/`, `/var/log`, `/var/lib/kubelet` (Ephemeral Pod Data), `/var/lib/containerd` (Images).
 
-*   **Role Defaults (`defaults/main.yml`)**: These are the lowest priority variables in Ansible. They act as "safe fallbacks." If the role is used without any other configuration, these values are used.
-*   **The Problem with Role Defaults for Paths**: If we put `/var/lib/longhorn` in the role's `defaults/main.yml`, then **every VM** that runs this role will attempt to use that path. This makes the "generic" role inherently "Longhorn-aware," which defeats the purpose of modularity.
+2.  **Data Pool (`data-storage`)**:
+    *   **Role**: Persistent Application Data (Longhorn).
+    *   **Mount**: `/data/storage` (Used by Longhorn for PVCs).
+    *   **Content**: Databases (Postgres, Redis), App Configs, Prometheus Metrics, Loki Chunks.
 
-**Recommendation**: The role's `defaults/main.yml` should only define an empty list (`storage_mounts: []`). This ensures that if the role is accidentally run on a VM without configuration, it does nothing (safe state).
+3.  **NFS Share (`truenas-01`)**:
+    *   **Role**: Bulk Media and Backup Archival.
+    *   **Mount**: Mounted into Pods via PVC (ReadWriteMany) or HostPath.
+    *   **Content**: Photos (Immich), Movies/TV (Arr), Backups (Velero/Restic).
 
-## 2. The "Longhorn Path" Problem
+---
 
-You are correct: **A generic storage role should not know about Longhorn.**
+## 1. Cluster `ruth` (Management & Heavy Apps)
 
-If a VM is running a database, mounting the second disk to `/var/lib/longhorn` is misleading and architecturally "leaky."
+### **ruth-01** (Master / Monitoring)
+*   **Function**: Kubernetes Control Plane, Monitoring Brain, GitOps Controller.
+*   **Key Applications & Pods**:
+    *   **`argocd`**: `argocd-server`, `argocd-repo-server`, `argocd-application-controller` (Redis/Repo data).
+    *   **`prometheus-stack`**: `prometheus-server` (TSDB), `grafana`, `alertmanager`.
+    *   **`traefik`**: Ingress Controller pods.
+    *   **`metallb-system`**: Speaker/Controller pods.
+*   **Storage Breakdown**:
+    *   **`local-thin` (16 GB)**:
+        *   **OS & Binaries**: ~6 GB
+        *   **Images**: `quay.io/argoproj/argocd`, `quay.io/prometheus/prometheus` (~4 GB)
+        *   **Headroom**: ~4 GB
+    *   **`data-storage` (20 GB)**:
+        *   **Longhorn PVCs**: `prometheus-db` (~10 GB), `grafana-storage` (<1 GB).
+    *   **`NFS`**:
+        *   **Backups**: Cluster state snapshots.
 
-### Proposed Solutions for Path Selection:
+### **ruth-02** (Immich AI / Database)
+*   **Function**: AI Processing (Machine Learning), Shared Databases.
+*   **Key Applications & Pods**:
+    *   **`immich`**: `immich-server`, `immich-microservices`, `immich-machine-learning` (Heavy ML models).
+    *   **`databases`**: `postgresql` (Vector DB), `redis`.
+*   **Storage Breakdown**:
+    *   **`local-thin` (16 GB - Critical)**:
+        *   **OS & Binaries**: ~6 GB
+        *   **Images**: `ghcr.io/immich-app/immich-machine-learning` (Huge layers), `postgres:14-alpine` (~5 GB).
+        *   **Pod Ephemeral**: `/tmp` processing for ML uploads (~2 GB).
+        *   **Headroom**: ~3 GB
+    *   **`data-storage` (40 GB)**:
+        *   **Longhorn PVCs**: `immich-postgres` (~20 GB), `immich-redis` (~1 GB).
+        *   **ML Cache**: Cached model weights (~5 GB).
+    *   **`NFS`**:
+        *   **Immich Library**: `/mnt/media/photos` (~1 TB+).
 
-1.  **Generic Mounting**: Mount the 2nd disk to a standard, non-app-specific path like `/mnt/data/disk1` or `/data/storage`.
-    *   *Pros*: Consistent across all VMs.
-    *   *Cons*: Kubernetes/Longhorn still needs to be told to look there.
-2.  **Symlink Strategy**: Mount to a generic path (e.g., `/data/storage`) and have a separate app-specific task (in the `kubeadm_cluster` role) create a symlink: `/var/lib/longhorn` -> `/data/storage`.
-    *   *Pros*: Keeps the storage role pure; keeps Longhorn happy.
-3.  **Variable-Driven Mapping (Inventory)**: Define the path at the Inventory level (e.g., `group_vars/k8s_nodes.yml`).
-    *   *Note*: You mentioned deleting `group_vars/vm.yml`. If we use `group_vars/k8s_nodes.yml` instead, only the Kubernetes nodes get the Longhorn path. Other VMs (like a standalone Postgres VM) can have their own `group_vars/db_nodes.yml` mapping `/dev/sdb` to `/var/lib/postgresql`.
+### **ruth-03** (Logs / Obsidian)
+*   **Function**: Log Aggregation, Document Sync.
+*   **Key Applications & Pods**:
+    *   **`loki`**: `loki-write`, `loki-read`, `loki-backend` (Log ingestion).
+    *   **`obsidian-livesync`**: `couchdb` pod.
+    *   **`promtail`**: Log collector agent.
+*   **Storage Breakdown**:
+    *   **`local-thin` (16 GB)**:
+        *   **OS & Binaries**: ~6 GB
+        *   **Images**: `grafana/loki`, `couchdb` (~3 GB).
+        *   **Logs**: System journals (~4 GB).
+    *   **`data-storage` (20 GB)**:
+        *   **Longhorn PVCs**: `loki-chunks` (~15 GB), `couchdb-data` (~2 GB).
 
-## 3. Handling Multiple Disks
+---
 
-As requested, the role logic supports multiple disks. By using a list in the variables, we can handle any number of disks:
+## 2. Cluster `arr` (Media Stack)
 
-```yaml
-# Example in a host-specific file or group-specific file
-storage_mounts:
-  - { device: "/dev/sdb", path: "/var/lib/longhorn", fstype: "ext4" }
-  - { device: "/dev/sdc", path: "/data/backups", fstype: "xfs" }
-```
+### **arr-01** (Master / Controller)
+*   **Function**: Kubernetes Control Plane for Media.
+*   **Key Applications & Pods**:
+    *   **`traefik`**: Ingress for media apps.
+    *   **`cert-manager`**: `cert-manager`, `cainjector`, `webhook` (TLS mgmt).
+    *   **`longhorn-manager`**: Storage orchestration.
+*   **Storage Breakdown**:
+    *   **`local-thin` (12 GB)**:
+        *   **OS & Binaries**: ~5 GB
+        *   **Images**: `traefik`, `quay.io/jetstack/cert-manager-controller` (~2 GB).
+    *   **`data-storage` (10 GB)**:
+        *   **Etcd**: K8s state (~2 GB).
+    *   **`NFS`**: None.
 
-## Conclusion
+### **arr-02** (Media Worker 1 - Downloads)
+*   **Function**: Bulk Downloading & Management.
+*   **Key Applications & Pods**:
+    *   **`sonarr`**: Series management pod.
+    *   **`radarr`**: Movie management pod.
+    *   **`sabnzbd` / `qbittorrent`**: Downloader pods.
+    *   **`prowlarr`**: Indexer manager.
+*   **Storage Breakdown**:
+    *   **`local-thin` (12 GB)**:
+        *   **OS & Binaries**: ~5 GB
+        *   **Images**: `lscr.io/linuxserver/sonarr`, `radarr` (Checking for updates frequently) (~3 GB).
+    *   **`data-storage` (20 GB)**:
+        *   **Longhorn PVCs**: `sonarr-config` (SQLite DBs), `radarr-config` (~5 GB).
+    *   **`NFS`**:
+        *   **Downloads**: `/mnt/media/downloads` (~500 GB).
+        *   **Library**: `/mnt/media/tv`, `/mnt/media/movies`.
 
-To keep the system clean:
-1.  **Role Tasks**: Remain strictly generic (Logic: "If device X exists, mount to path Y").
-2.  **Role Defaults**: Set `storage_mounts: []` (Do nothing by default).
-3.  **Specific Config**: Put the mapping (`/dev/sdb` -> `/var/lib/longhorn`) in **Group-Specific** variables (e.g., `k8s_nodes`) rather than Global/VM-wide variables. This avoids the "Database VM has a Longhorn folder" problem.
+### **arr-03** (Media Worker 2 - Streaming)
+*   **Function**: Transcoding & Requests.
+*   **Key Applications & Pods**:
+    *   **`plex` / `jellyfin`**: Media server pods.
+    *   **`overseerr`**: Request UI pod.
+    *   **`tautulli`**: Plex monitoring.
+*   **Storage Breakdown**:
+    *   **`local-thin` (12 GB)**:
+        *   **OS & Binaries**: ~5 GB
+        *   **Images**: `plexinc/pms-docker` (Very large) (~2 GB).
+        *   **Transcode Buffer**: **CRITICAL** - `/tmp` or `EmptyDir`. If transcoding 4K, this can eat 10GB+ rapidly. **MUST MAP TO NFS OR LARGE PVC**.
+    *   **`data-storage` (20 GB)**:
+        *   **Longhorn PVCs**: `plex-config` (Metadata/Posters/BIFs) (~15 GB).
+    *   **`NFS`**:
+        *   **Library**: Read-only access to `/mnt/media`.
+
+---
+
+## 3. Static & Support VMs
+
+### **hiking-bear (1010)**
+*   **Function**: Workstation.
+*   **Apps**: VSCode Remote, Docker, Kubectl, Ansible.
+*   **`local-thin`**: 20 GB.
+
+### **sandbox-01 (1099)**
+*   **Function**: Testing using Kind.
+*   **Apps**: `kind-control-plane` container.
+*   **`local-thin`**: 20 GB.
+
+### **cf-tunnel (2050)** & **adguard (2051)**
+*   **Apps**: `cloudflared`, `adguardhome`.
+*   **Storage**: Minimal logging.
