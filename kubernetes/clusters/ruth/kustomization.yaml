@@ -7,6 +7,8 @@ resources:
   - cert-manager/kustomization.yaml
   - metallb-system/kustomization.yaml
   - traefik/kustomization.yaml
+  - prometheus-stack/kustomization.yaml
+  - loki/kustomization.yaml
   # - longhorn/kustomization.yaml
   - kyverno/kustomization.yaml
   - system-patches/kustomization.yaml

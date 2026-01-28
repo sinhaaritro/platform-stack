@@ -1,0 +1,22 @@
+grafana:
+  enabled: true
+  adminPassword: "admin"
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      url: http://loki.logging.svc.cluster.local:3100
+      access: proxy
+      isDefault: false
+
+prometheus:
+  enabled: true
+  prometheusSpec:
+    retention: 10d
+    retentionSize: "10GB"
+
+alertmanager:
+  enabled: true
