@@ -49,7 +49,7 @@ spec:
                   replace: "false"
   template:
     metadata:
-      name: '{{if eq name "in-cluster"}}ruth{{else}}{{name}}{{end}}-{{app}}'
+      name: '{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}-{{.app}}'
     spec:
       ignoreDifferences:
         - group: ""
@@ -61,15 +61,15 @@ spec:
       source:
         repoURL: https://github.com/sinhaaritro/platform-stack.git
         targetRevision: HEAD
-        path: 'kubernetes/clusters/{{if eq name "in-cluster"}}ruth{{else}}{{name}}{{end}}/{{app}}'
+        path: 'kubernetes/clusters/{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}/{{.app}}'
       destination:
-        server: "{{server}}"
-        namespace: "{{namespace}}"
+        server: "{{.server}}"
+        namespace: "{{.namespace}}"
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
-          - ServerSideApply={{serverSideApply}}
-          - Replace={{replace}}
+          - ServerSideApply={{.serverSideApply}}
+          - Replace={{.replace}}
