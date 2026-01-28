@@ -48,7 +48,7 @@ spec:
                   replace: "false"
   template:
     metadata:
-      name: "{{name}}-{{app}}"
+      name: '{{if eq name "in-cluster"}}ruth{{else}}{{name}}{{end}}-{{app}}'
     spec:
       ignoreDifferences:
         - group: ""
