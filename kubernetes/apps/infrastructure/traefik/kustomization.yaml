@@ -8,3 +8,4 @@ helmCharts:
     releaseName: traefik
     namespace: networking
     includeCRDs: true
+    valuesFile: values.yaml

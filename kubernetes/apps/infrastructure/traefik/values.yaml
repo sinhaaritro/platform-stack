@@ -1,0 +1,10 @@
+ingressRoute:
+  dashboard:
+    enabled: true
+    annotations: {}
+    labels: {}
+    matchRule: Host(`traefik.example.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
+    entryPoints: ["web", "websecure"]
+    middlewares: []
+    tls:
+      secretName: traefik-dashboard-cert
