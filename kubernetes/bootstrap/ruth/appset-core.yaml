@@ -60,7 +60,7 @@ spec:
       source:
         repoURL: https://github.com/sinhaaritro/platform-stack.git
         targetRevision: HEAD
-        path: "kubernetes/clusters/{{name}}/{{app}}"
+        path: 'kubernetes/clusters/{{if eq name "in-cluster"}}ruth{{else}}{{name}}{{end}}/{{app}}'
       destination:
         server: "{{server}}"
         namespace: "{{namespace}}"
