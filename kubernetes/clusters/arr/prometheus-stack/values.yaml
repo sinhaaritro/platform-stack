@@ -1,0 +1,11 @@
+grafana:
+  enabled: false
+alertmanager:
+  enabled: false
+defaultRules:
+  create: true
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}
+    serviceMonitorNamespaceSelector: {}
