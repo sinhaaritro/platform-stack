@@ -41,12 +41,15 @@ spec:
                   replace: "false"
                 - app: promtail
                   namespace: logging
-                  serverSideApply: "true"
                   replace: "false"
-                - app: loki
+          - list:
+              elements:
+                - name: in-cluster
+                  app: loki
                   namespace: logging
                   serverSideApply: "true"
                   replace: "true"
+                  server: https://kubernetes.default.svc
                 - app: prometheus-stack
                   namespace: monitoring
                   serverSideApply: "true"

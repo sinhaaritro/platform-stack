@@ -4,8 +4,13 @@ metadata:
   name: loki-gateway
   namespace: logging
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    cert-manager.io/cluster-issuer: selfsigned-issuer
 spec:
+  tls:
+    - hosts:
+        - loki.ruth.example.com
+      secretName: loki-gateway-cert
   rules:
     - host: loki.ruth.example.com
       http:

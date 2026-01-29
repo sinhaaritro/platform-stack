@@ -3,3 +3,9 @@ kind: Kustomization
 
 resources:
   - ../../../apps/infrastructure/promtail/overlays/minimal
+
+patches:
+  - path: config-patch.yaml
+    target:
+      kind: HelmRelease
+      name: promtail
