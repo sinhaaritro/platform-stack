@@ -3,3 +3,9 @@ kind: Kustomization
 
 resources:
   - ../../../apps/infrastructure/metallb/overlays/minimal
+
+patches:
+  - path: pool-patch.yaml
+    target:
+      kind: IPAddressPool
+      name: default-pool
