@@ -26,6 +26,8 @@ spec:
             exclude: true
           - path: kubernetes/clusters/ruth/promtail
             exclude: true
+          - path: kubernetes/clusters/ruth/loki
+            exclude: true
           - path: kubernetes/clusters/ruth/prometheus-stack
             exclude: true
   template:

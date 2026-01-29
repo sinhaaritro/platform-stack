@@ -43,6 +43,10 @@ spec:
                   namespace: logging
                   serverSideApply: "true"
                   replace: "false"
+                - app: loki
+                  namespace: logging
+                  serverSideApply: "true"
+                  replace: "true"
                 - app: prometheus-stack
                   namespace: monitoring
                   serverSideApply: "true"
