@@ -31,4 +31,3 @@ helmCharts:
 
 resources:
   - namespace.yaml
-  - ingress.yaml
