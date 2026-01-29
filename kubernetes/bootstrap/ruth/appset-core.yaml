@@ -18,7 +18,7 @@ spec:
                 - app: kyverno
                   namespace: security
                   serverSideApply: "true"
-                  replace: "false"
+                  replace: "true"
                 - app: sealed-secrets
                   namespace: security
                   serverSideApply: "true"
