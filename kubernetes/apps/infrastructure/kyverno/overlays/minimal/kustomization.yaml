@@ -69,3 +69,10 @@ patches:
           limits:
             cpu: 100m
             memory: 128Mi
+  - target:
+      kind: PodDisruptionBudget
+      name: kyverno-admission-controller
+    patch: |-
+      - op: replace
+        path: /spec/minAvailable
+        value: 0
