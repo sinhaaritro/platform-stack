@@ -1,4 +1,3 @@
-resources:
 helmCharts:
   - name: promtail
     repo: https://grafana.github.io/helm-charts
