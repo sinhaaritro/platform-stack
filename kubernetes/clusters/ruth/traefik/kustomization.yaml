@@ -14,3 +14,21 @@ patches:
       - op: replace
         path: /spec/routes/0/match
         value: Host(`traefik.ruth.example.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
+  - target:
+      kind: Certificate
+      name: traefik-dashboard-cert
+    patch: |-
+      - op: replace
+        path: /spec/dnsNames/0
+        value: traefik.ruth.example.com
+      - op: replace
+        path: /spec/commonName
+        value: traefik.ruth.example.com
+  - target:
+      kind: IngressRoute
+      name: traefik-dashboard
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          link.argocd.argoproj.io/external-link: https://traefik.ruth.example.com/dashboard/

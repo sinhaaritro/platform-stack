@@ -10,3 +10,6 @@ helmCharts:
     includeCRDs: true
     valuesInline:
       installCRDs: true
+
+resources:
+  - cluster-issuer.yaml

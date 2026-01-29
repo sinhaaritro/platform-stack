@@ -9,3 +9,6 @@ helmCharts:
     namespace: networking
     includeCRDs: true
     valuesFile: values.yaml
+
+resources:
+  - certificate.yaml

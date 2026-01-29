@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: traefik-dashboard-cert
+  namespace: networking
+spec:
+  # TODO: Switch to Cloudflare Origin Issuer when user provides API keys
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
+  secretName: traefik-dashboard-cert
+  dnsNames:
+    - traefik.example.com
+  commonName: traefik.example.com
