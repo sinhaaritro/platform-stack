@@ -9,6 +9,9 @@ helmCharts:
     namespace: security
     includeCRDs: true
     valuesInline:
+      crds:
+        migration:
+          enabled: false
       admissionController:
         replicas: 2
       backgroundController:
