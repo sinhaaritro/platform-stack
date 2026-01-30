@@ -23,6 +23,10 @@ spec:
                   namespace: security
                   serverSideApply: "true"
                   replace: "false"
+                - app: seaweedfs
+                  namespace: storage
+                  serverSideApply: "true"
+                  replace: "false"
                 - app: metallb-system
                   namespace: networking
                   serverSideApply: "true"
