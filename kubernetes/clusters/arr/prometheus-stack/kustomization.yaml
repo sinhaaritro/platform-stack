@@ -1,15 +1,3 @@
 resources:
   - ../../../apps/infrastructure/prometheus-stack/overlays/minimal
-
-patches:
-  - target:
-      kind: HelmRelease
-      name: prometheus-stack
-    patch: |-
-      - op: add
-        path: /spec/values
-        value:
-          grafana:
-            enabled: false
-          alertmanager:
-            enabled: false
+  - ingress.yaml
