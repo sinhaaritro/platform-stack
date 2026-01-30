@@ -1,3 +1,7 @@
+auth:
+  rootUser: "admin"
+  rootPassword: "change-me-in-overlay"
+
 persistence:
   enabled: true
   storageClass: "longhorn"
@@ -11,10 +15,10 @@ defaultBuckets: "loki-chunks, loki-ruler"
 
 service:
   type: ClusterIP
-  port: 9000
-  consolePort: 9090
+  ports:
+    api: 9000
+    console: 9090
 
-# Performance and security tweaks for local environment
 resources:
   requests:
     cpu: 100m
