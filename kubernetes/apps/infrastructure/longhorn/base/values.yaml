@@ -2,6 +2,7 @@ defaultSettings:
   createDefaultDiskLabeledNodes: false
   defaultDataPath: /data/storage
   storageReservedPercentageForDefaultDisk: 15
+  taintToleration: "node-role.kubernetes.io/control-plane:NoSchedule"
 persistence:
   defaultClass: true
   defaultClassReplicaCount: 2 # Good balance for stability vs resource usage
