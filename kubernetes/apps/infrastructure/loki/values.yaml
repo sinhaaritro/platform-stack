@@ -1,39 +1,68 @@
-deploymentMode: SingleBinary
+deploymentMode: SimpleScalable
 
 loki:
+  auth_enabled: false
   commonConfig:
     replication_factor: 1
+
   storage:
-    type: filesystem
+    type: s3
+    s3:
+      endpoint: minio.storage.svc:9000
+      region: us-east-1
+      accessKeyId: admin
+      secretAccessKey: admin123
+      s3ForcePathStyle: true
+      insecure: true
+      bucketNames:
+        chunks: loki-chunks
+        ruler: loki-ruler
+
   schemaConfig:
     configs:
       - from: "2024-04-01"
         store: tsdb
-        object_store: filesystem
+        object_store: s3
         schema: v13
         index:
-          prefix: index_
+          prefix: loki_index_
           period: 24h
-  # For persistence, we need a PVC. In SingleBinary, it uses a StatefulSet 'loki'.
 
-singleBinary:
+  # Retention configuration
+  limits_config:
+    retention_period: 30d
+
+# Disable components we don't need for a simple setup
+results_cache:
+  enabled: false
+# gateway is enabled by default in SimpleScalable to route requests
+gateway:
+  enabled: true
+
+# Monitoring integration
+monitoring:
+  serviceMonitor:
+    enabled: true
+
+# Enable persistence for write nodes for WAL if needed,
+# although S3 is the primary store.
+write:
   replicas: 1
   persistence:
     enabled: true
+    storageClass: "longhorn"
     size: 10Gi
-    storageClass: longhorn
 
-# Disable unnecessary components for resource saving
-monitoring:
-  dashboards:
-    enabled: false
-  rules:
-    enabled: false
-  serviceMonitor:
-    enabled: false
-  selfMonitoring:
-    enabled: false
-    lokiCanary:
-      enabled: false
-test:
-  enabled: false
+read:
+  replicas: 1
+  persistence:
+    enabled: true
+    storageClass: "longhorn"
+    size: 10Gi
+
+backend:
+  replicas: 1
+  persistence:
+    enabled: true
+    storageClass: "longhorn"
+    size: 10Gi

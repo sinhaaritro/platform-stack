@@ -19,6 +19,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: loki
+                name: loki-gateway
                 port:
-                  number: 3100
+                  number: 80

@@ -1,9 +1,8 @@
 resources:
-  - namespace.yaml
-  - manifests.yaml
+  - helmrelease.yaml
 
-patches:
-  - path: service-patch.yaml
-    target:
-      kind: Service
-      name: loki-memberlist
+configMapGenerator:
+  - name: loki-values
+    namespace: logging
+    files:
+      - values.yaml

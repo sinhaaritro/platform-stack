@@ -8,4 +8,4 @@ helmCharts:
     valuesInline:
       config:
         clients:
-          - url: http://loki-gateway.networking.svc.cluster.local/loki/api/v1/push
+          - url: http://loki-gateway.logging.svc.cluster.local/loki/api/v1/push
