@@ -8,10 +8,10 @@ loki:
   storage:
     type: s3
     s3:
-      endpoint: minio.storage.svc:9000
+      endpoint: http://seaweedfs-s3.storage.svc:8333
       region: us-east-1
-      accessKeyId: admin
-      secretAccessKey: admin123
+      accessKeyId: "" # No auth enabled in SeaweedFS internal
+      secretAccessKey: ""
       s3ForcePathStyle: true
       insecure: true
       bucketNames:

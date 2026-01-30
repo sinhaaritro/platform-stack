@@ -1,0 +1,73 @@
+global:
+  imageName: chrislusf/seaweedfs
+
+  # Enable Security if needed, but for internal cluster use we keep it simple for now
+  enableSecurity: false
+
+master:
+  enabled: true
+  replicas: 1
+  # Use Longhorn PVC instead of hostPath
+  data:
+    type: "persistentVolumeClaim"
+    size: "1Gi"
+    storageClass: "longhorn"
+  logs:
+    type: "persistentVolumeClaim"
+    size: "1Gi"
+    storageClass: "longhorn"
+
+filer:
+  enabled: true
+  replicas: 1
+  # Disable PVC for filer METADATA if using LevelDB, but standard deployment usually suggests it.
+  # SeaweedFS Filer stores metadata.
+  data:
+    type: "persistentVolumeClaim"
+    size: "5Gi"
+    storageClass: "longhorn"
+  logs:
+    type: "persistentVolumeClaim"
+    size: "1Gi"
+    storageClass: "longhorn"
+
+  # Enable S3 gateway on Filer (optional, but standalone S3 is often better)
+  s3:
+    enabled: false
+
+volume:
+  enabled: true
+  replicas: 1
+  minFreeSpacePercent: 1
+
+  # DATA DISKS
+  dataDirs:
+    - name: data
+      type: "persistentVolumeClaim"
+      size: "20Gi"
+      storageClass: "longhorn"
+      maxVolumes: 0
+
+  idx:
+    type: "persistentVolumeClaim"
+    size: "1Gi"
+    storageClass: "longhorn"
+  logs:
+    type: "persistentVolumeClaim"
+    size: "1Gi"
+    storageClass: "longhorn"
+
+s3:
+  enabled: true
+  replicas: 1
+  logs:
+    type: "persistentVolumeClaim"
+    size: "1Gi"
+    storageClass: "longhorn"
+
+  # Allow anonymous access or configure secret
+  enableAuth: false
+
+# Disable components we might not need immediately
+csi:
+  enabled: false
