@@ -8,8 +8,7 @@ helmCharts:
     releaseName: cert-manager
     namespace: networking
     includeCRDs: true
-    valuesInline:
-      installCRDs: true
+    valuesFile: values.yaml
 
 resources:
   - cluster-issuer.yaml

@@ -8,26 +8,7 @@ helmCharts:
     releaseName: longhorn
     namespace: storage
     includeCRDs: true
-    valuesInline:
-      defaultSettings:
-        createDefaultDiskLabeledNodes: false
-        defaultDataPath: /data/storage
-        storageReservedPercentageForDefaultDisk: 15
-      persistence:
-        defaultClass: true
-        defaultClassReplicaCount: 2 # Good balance for stability vs resource usage
-      preUpgradeChecker:
-        jobEnabled: false
-      longhornManager:
-        tolerations:
-          - key: "node-role.kubernetes.io/control-plane"
-            operator: "Exists"
-            effect: "NoSchedule"
-      longhornDriver:
-        tolerations:
-          - key: "node-role.kubernetes.io/control-plane"
-            operator: "Exists"
-            effect: "NoSchedule"
+    valuesFile: values.yaml
 
 resources:
   - namespace.yaml

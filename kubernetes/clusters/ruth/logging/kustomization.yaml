@@ -3,5 +3,5 @@ kind: Kustomization
 namespace: logging
 
 resources:
-  - ../../../apps/infrastructure/loki
+  - ../../../apps/infrastructure/loki/base
   - ingress.yaml

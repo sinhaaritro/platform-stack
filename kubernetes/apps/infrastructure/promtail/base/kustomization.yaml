@@ -5,7 +5,4 @@ helmCharts:
     releaseName: promtail
     namespace: logging
     includeCRDs: true
-    valuesInline:
-      config:
-        clients:
-          - url: http://loki-gateway.logging.svc.cluster.local/loki/api/v1/push
+    valuesFile: values.yaml
