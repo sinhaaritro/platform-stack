@@ -1,7 +1,3 @@
-auth:
-  rootUser: "admin"
-  rootPassword: "admin123"
-
 persistence:
   enabled: true
   storageClass: "longhorn"

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio
+  namespace: storage
+stringData:
+  # Patching standard keys for cloudpirates/minio
+  rootUser: "admin"
+  rootPassword: "admin"
+  # Fallback keys for older versions/variants
+  accesskey: "admin"
+  secretkey: "admin"

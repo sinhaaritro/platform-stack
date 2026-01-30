@@ -1,8 +1,11 @@
-resources:
-  - helmrelease.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
-configMapGenerator:
-  - name: loki-values
+helmCharts:
+  - name: loki
+    repo: https://grafana.github.io/helm-charts
+    version: 6.6.2
+    releaseName: loki
     namespace: logging
-    files:
-      - values.yaml
+    includeCRDs: true
+    valuesFile: values.yaml

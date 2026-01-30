@@ -3,3 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../../apps/infrastructure/minio/base
+  - ingress.yaml
+
+patches:
+  - path: auth-patch.yaml
