@@ -41,6 +41,8 @@ volume:
   minFreeSpacePercent: 1
 
   # DATA DISKS
+  dir: "/data"
+  dir_idx: "/idx"
   data:
     type: "persistentVolumeClaim"
     size: "20Gi"
