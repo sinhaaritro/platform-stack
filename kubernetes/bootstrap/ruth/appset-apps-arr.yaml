@@ -14,9 +14,9 @@ spec:
             exclude: true
           - path: kubernetes/clusters/arr/kyverno
             exclude: true
-          - path: kubernetes/clusters/arr/sealed-secrets
-            exclude: true
           - path: kubernetes/clusters/arr/longhorn
+            exclude: true
+          - path: kubernetes/clusters/arr/seaweedfs
             exclude: true
           - path: kubernetes/clusters/arr/metallb-system
             exclude: true
