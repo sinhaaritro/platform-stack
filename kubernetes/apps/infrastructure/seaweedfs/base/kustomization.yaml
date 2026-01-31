@@ -9,3 +9,14 @@ helmCharts:
     namespace: storage
     includeCRDs: true
     valuesFile: values.yaml
+
+patches:
+  - path: admin-sidecar-patch.yaml
+    target:
+      group: apps
+      version: v1
+      kind: StatefulSet
+      name: seaweedfs-master
+
+resources:
+  - namespace.yaml
