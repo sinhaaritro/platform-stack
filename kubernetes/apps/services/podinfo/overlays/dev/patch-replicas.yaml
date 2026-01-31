@@ -3,11 +3,8 @@ kind: Patch
 metadata:
   name: patch-replicas
 spec:
-  replicas: 1
+  replicas: 2
   template:
     spec:
       containers:
         - name: podinfo
-          env:
-            - name: PODINFO_UI_COLOR
-              value: "#34577c" # Blue for Dev
