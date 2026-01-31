@@ -1,0 +1,30 @@
+replicaCount: 1
+
+image:
+  repository: stefanprodan/podinfo
+  # Letting chart determine tag, or could pin to 6.4.0 to be safe.
+  # User requested chart version 6.9.4.
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 9898
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  hosts:
+    - host: podinfo.arr.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 10m
+    memory: 32Mi

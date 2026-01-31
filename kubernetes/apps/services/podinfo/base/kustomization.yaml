@@ -1,4 +1,13 @@
-resources:
-  - deployment.yaml
-  - service.yaml
-  - ingress.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+helmCharts:
+  - name: podinfo
+    repo: https://stefanprodan.github.io/podinfo
+    version: 6.9.4
+    releaseName: podinfo
+    namespace: default
+    includeCRDs: true
+    valuesFile: values.yaml
+
+resources: []
