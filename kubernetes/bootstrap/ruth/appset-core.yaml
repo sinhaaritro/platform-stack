@@ -61,6 +61,15 @@ spec:
           name: "sealed-secrets-key*"
           jsonPointers:
             - /data
+        - group: apps
+          kind: StatefulSet
+          jsonPointers:
+            - /spec/volumeClaimTemplates/0/status
+            - /spec/volumeClaimTemplates/0/spec/volumeMode
+            - /spec/volumeClaimTemplates/1/status
+            - /spec/volumeClaimTemplates/1/spec/volumeMode
+            - /spec/volumeClaimTemplates/2/status
+            - /spec/volumeClaimTemplates/2/spec/volumeMode
       project: default
       source:
         repoURL: https://github.com/sinhaaritro/platform-stack.git
