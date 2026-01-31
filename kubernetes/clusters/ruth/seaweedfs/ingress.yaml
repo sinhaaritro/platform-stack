@@ -44,3 +44,13 @@ spec:
                 name: seaweedfs-master
                 port:
                   number: 9333
+    - host: admin.seaweedfs.ruth.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-admin
+                port:
+                  number: 23646
