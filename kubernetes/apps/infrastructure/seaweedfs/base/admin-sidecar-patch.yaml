@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedfs-master
+spec:
+  template:
+    spec:
+      containers:
+        - name: seaweedfs-admin
+          image: chrislusf/seaweedfs:3.59
+          command: ["/bin/sh", "-c"]
+          args: ["weed admin -masters=localhost:9333 -port=23646 -ip=$(POD_IP)"]
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          ports:
+            - containerPort: 23646
+              name: admin-http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: seaweedfs-master
+spec:
+  ports:
+    - name: admin-http
+      port: 23646
+      targetPort: 23646
