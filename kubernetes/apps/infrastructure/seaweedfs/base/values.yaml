@@ -15,7 +15,7 @@ master:
   logs:
     type: "persistentVolumeClaim"
     size: "1Gi"
-    storageClass: "longhorn"
+    storageClass: "longhorn-logs"
 
 filer:
   enabled: true
@@ -29,7 +29,7 @@ filer:
   logs:
     type: "persistentVolumeClaim"
     size: "1Gi"
-    storageClass: "longhorn"
+    storageClass: "longhorn-logs"
 
   # Enable S3 gateway on Filer (optional, but standalone S3 is often better)
   s3:
@@ -55,7 +55,7 @@ volume:
   logs:
     type: "persistentVolumeClaim"
     size: "1Gi"
-    storageClass: "longhorn"
+    storageClass: "longhorn-logs"
 
 s3:
   enabled: true
@@ -63,7 +63,7 @@ s3:
   logs:
     type: "persistentVolumeClaim"
     size: "1Gi"
-    storageClass: "longhorn"
+    storageClass: "longhorn-logs"
 
   # Allow anonymous access or configure secret
   enableAuth: false
