@@ -5,3 +5,10 @@ metadata:
   namespace: podinfo
 spec:
   replicas: 2
+  template:
+    spec:
+      containers:
+        - name: podinfo
+          envFrom:
+            - configMapRef:
+                name: podinfo-dev-debug

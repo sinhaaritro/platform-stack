@@ -3,7 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../base
-  # - extra-debug-config.yaml # Adding a new resource at this level
+  - extra-debug-config.yaml
 
 patches:
   - path: patch-replicas.yaml
