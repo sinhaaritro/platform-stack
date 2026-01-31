@@ -1,7 +1,7 @@
-service:
-  enabled: true
-  type: ClusterIP
-  port: 9898
+# service:
+#   enabled: true
+#   type: ClusterIP
+#   port: 9898
 
 ingress:
   enabled: true

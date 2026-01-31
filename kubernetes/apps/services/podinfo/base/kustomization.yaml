@@ -6,8 +6,8 @@ helmCharts:
     repo: https://stefanprodan.github.io/podinfo
     version: 6.9.4
     releaseName: podinfo
-    namespace: default
+    namespace: podinfo
     includeCRDs: true
-    valuesFile: values.yaml
+    # valuesFile: values.yaml
 
 resources: []

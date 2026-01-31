@@ -3,16 +3,15 @@ kind: Kustomization
 
 resources:
   - ../../../apps/services/podinfo/base
-  - allow-ui-netpol.yaml # Adding a cluster-specific resource
+  # - allow-ui-netpol.yaml # Adding a cluster-specific resource
+# namespace: podinfo
 
-namespace: podinfo
+# secretGenerator:
+#   - name: podinfo-auth
+#     literals:
+#       - username=admin
+#       - password=secure-tenant-a-password
 
-secretGenerator:
-  - name: podinfo-auth
-    literals:
-      - username=admin
-      - password=secure-tenant-a-password
-
-patches:
-  - path: patch-ingress.yaml
-  - path: patch-secrets.yaml
+# patches:
+#   - path: patch-ingress.yaml
+#   - path: patch-secrets.yaml
