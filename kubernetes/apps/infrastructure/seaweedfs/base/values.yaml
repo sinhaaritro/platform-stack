@@ -41,12 +41,10 @@ volume:
   minFreeSpacePercent: 1
 
   # DATA DISKS
-  dataDirs:
-    - name: data
-      type: "persistentVolumeClaim"
-      size: "20Gi"
-      storageClass: "longhorn"
-      maxVolumes: 0
+  data:
+    type: "persistentVolumeClaim"
+    size: "20Gi"
+    storageClass: "longhorn"
 
   idx:
     type: "persistentVolumeClaim"
