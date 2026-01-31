@@ -4,6 +4,4 @@ metadata:
   name: podinfo-dev-debug
   namespace: podinfo
 data:
-  PODINFO_UI_MESSAGE: "Debug Mode Enabled"
   PODINFO_LEVEL: "debug"
-  PODINFO_LOG_LEVEL: "debug"
