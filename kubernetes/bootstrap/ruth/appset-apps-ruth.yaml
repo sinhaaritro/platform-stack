@@ -18,6 +18,8 @@ spec:
             exclude: true
           - path: kubernetes/clusters/ruth/longhorn
             exclude: true
+          - path: kubernetes/clusters/ruth/seaweedfs
+            exclude: true
           - path: kubernetes/clusters/ruth/metallb-system
             exclude: true
           - path: kubernetes/clusters/ruth/traefik
