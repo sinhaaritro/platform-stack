@@ -9,6 +9,8 @@ spec:
     spec:
       containers:
         - name: podinfo
+          args:
+            - --level=$(PODINFO_LEVEL)
           envFrom:
             - configMapRef:
                 name: podinfo-dev-debug
