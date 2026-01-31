@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: podinfo
-  template:
-    spec:
-      containers:
-        - name: podinfo
+  # template:
+  #   spec:
+  #     containers:
+  #       - name: podinfo
