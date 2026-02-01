@@ -4,6 +4,7 @@ metadata:
   name: podinfo
   namespace: podinfo
 spec:
+  # Level 1: The "Mini-Me" (Strategic Merge Patch)
   replicas: 2
   selector:
     matchLabels:
@@ -12,3 +13,11 @@ spec:
     spec:
       containers:
         - name: podinfo
+          # Level 3: Deep Nested Fields (Resources)
+          resources:
+            limits:
+              cpu: "50m" # Only this changes; memory limit stays 64Mi
+          # Level 2: Merging Lists (Env Vars)
+          env: # WIll not work but easy way to add a non config patch
+            - name: MY_CLUSTER_NAME
+              value: "production-cluster"

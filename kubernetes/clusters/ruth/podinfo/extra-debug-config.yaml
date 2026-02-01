@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: podinfo-dev-debug
-  namespace: podinfo
-data:
-  PODINFO_LEVEL: "debug"

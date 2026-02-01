@@ -1,0 +1,4 @@
+# Level 4: The "Surgical" Patch (JSON Patch)
+- op: replace
+  path: /spec/template/spec/containers/0/command/6
+  value: "--level=debug"
