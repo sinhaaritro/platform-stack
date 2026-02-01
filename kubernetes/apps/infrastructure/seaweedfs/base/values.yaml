@@ -4,9 +4,15 @@ global:
   # Enable Security if needed, but for internal cluster use we keep it simple for now
   enableSecurity: false
 
+  # Replication: 001 = 1 backup copy on different server (Total 2 copies)
+  replicationPlacement: "001"
+
 master:
   enabled: true
-  replicas: 1
+  replicas: 3
+  # Default replication setting for new buckets/volumes
+  defaultReplication: "001"
+
   # Use Longhorn PVC instead of hostPath
   data:
     type: "persistentVolumeClaim"
@@ -19,8 +25,8 @@ master:
 
 filer:
   enabled: true
-  replicas: 1
-  # Disable PVC for filer METADATA if using LevelDB, but standard deployment usually suggests it.
+  replicas: 1 # Standard is 1 unless using External DB
+
   # SeaweedFS Filer stores metadata.
   data:
     type: "persistentVolumeClaim"
@@ -31,13 +37,14 @@ filer:
     size: "1Gi"
     storageClass: "longhorn-logs"
 
-  # Enable S3 gateway on Filer (optional, but standalone S3 is often better)
+  # S3 is enabled as a separate service below, but Filer S3 gateway can be used too.
+  # We will use the standalone S3 component.
   s3:
     enabled: false
 
 volume:
   enabled: true
-  replicas: 1
+  replicas: 2 # 2 Volume Servers to satisfy 001 replication
   minFreeSpacePercent: 1
 
   # DATA DISKS
@@ -52,6 +59,7 @@ volume:
     type: "persistentVolumeClaim"
     size: "1Gi"
     storageClass: "longhorn"
+
   logs:
     type: "persistentVolumeClaim"
     size: "1Gi"
@@ -67,6 +75,44 @@ s3:
 
   # Allow anonymous access or configure secret
   enableAuth: false
+
+# Level 1 Requirements: Admin (Dashboard) and Workers (Maintenance)
+admin:
+  enabled: true
+  secret:
+    adminUser: admin
+    adminPassword: admin
+
+  # Storage configuration
+  data:
+    type: "persistentVolumeClaim"
+    size: "5Gi"
+    storageClass: "longhorn"
+
+  logs:
+    type: "persistentVolumeClaim"
+    size: "5Gi"
+    storageClass: "longhorn-logs"
+
+worker:
+  enabled: true
+  capabilities: "vacuum,balance,erasure_coding"
+
+  # Storage configuration
+  data:
+    type: "persistentVolumeClaim"
+    size: "5Gi"
+    storageClass: "longhorn"
+
+  logs:
+    type: "persistentVolumeClaim"
+    size: "5Gi"
+    storageClass: "longhorn-logs"
+
+# Level 1 Requirements: SFTP Access (Random user/pass default)
+sftp:
+  enabled: true
+  port: 2022
 
 # Disable components we might not need immediately
 csi:
