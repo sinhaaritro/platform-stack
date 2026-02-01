@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: longhorn-ui
+  namespace: storage
+spec:
+  replicas: 0
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: longhorn-driver-deployer
+  namespace: storage
+spec:
+  replicas: 0
+---
+# DaemonSets cannot be scaled to 0 directly.
+# We add a nodeSelector that matches nothing to evict them.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: longhorn-manager
+  namespace: storage
+spec:
+  template:
+    spec:
+      nodeSelector:
+        maintenance-mode: "active-evict-all"
