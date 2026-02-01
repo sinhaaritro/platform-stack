@@ -12,6 +12,6 @@ namespace: podinfo
 #       - username=admin
 #       - password=secure-tenant-a-password
 
-# patches:
-#   - path: patch-ingress.yaml
+patches:
+  - path: patch-ingress.yaml
 #   - path: patch-secrets.yaml
