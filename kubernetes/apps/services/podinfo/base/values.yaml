@@ -14,10 +14,15 @@ ingress:
         - path: /
           pathType: ImplementationSpecific
 
+serviceMonitor:
+  enabled: true
+  interval: 15s
+
+tls:
+  enabled: true
+  certPath: /data/cert
+
 resources:
   limits:
     cpu: 50m
     memory: 64Mi
-  requests:
-    cpu: 10m
-    memory: 32Mi

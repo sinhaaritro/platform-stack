@@ -1,0 +1,11 @@
+# Step 1: Remove the hardcoded 'value' from the first env var (index 0)
+- op: remove
+  path: /spec/template/spec/containers/0/env/0/value
+
+# Step 2: Add the 'valueFrom' to the first env var (index 0)
+- op: add
+  path: /spec/template/spec/containers/0/env/0/valueFrom
+  value:
+    configMapKeyRef:
+      name: podinfo-dev-debug
+      key: PODINFO_UI_COLOR
