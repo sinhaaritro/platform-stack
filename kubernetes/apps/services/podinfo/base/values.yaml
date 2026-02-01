@@ -18,9 +18,9 @@ serviceMonitor:
   enabled: true
   interval: 15s
 
-tls:
-  enabled: true
-  certPath: /data/cert
+# tls:
+#   enabled: true
+#   certPath: /data/cert
 
 resources:
   limits:
