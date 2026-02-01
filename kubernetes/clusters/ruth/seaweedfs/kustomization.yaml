@@ -2,8 +2,11 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - ../../../apps/infrastructure/seaweedfs/overlays/maintenance
+  - ../../../apps/infrastructure/seaweedfs/overlay/dev
+  # - ../../../apps/infrastructure/seaweedfs/overlays/maintenance
   # - ../../../apps/infrastructure/seaweedfs/base
+  # - ingress.yaml
+  # - secret-admin.yaml
   # - ../../../apps/infrastructure/seaweedfs/overlay/dev
   # - ingress.yaml
   # - secret-admin.yaml
