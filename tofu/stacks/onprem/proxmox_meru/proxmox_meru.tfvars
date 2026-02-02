@@ -36,6 +36,7 @@ resources = {
       memory_size       = 2048
       disk_datastore_id = "local-thin"
       os_version        = "24.04"
+      disk_size         = 16
     }
 
     nodes = {

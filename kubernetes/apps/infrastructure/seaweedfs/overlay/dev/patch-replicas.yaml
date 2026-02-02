@@ -5,3 +5,22 @@ metadata:
   namespace: storage
 spec:
   replicas: 2
+  template:
+    spec:
+      containers:
+        - name: seaweedfs
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              exec /usr/bin/weed \
+              -logtostderr=true \
+              -v=1 \
+              master \
+              -port=9333 \
+              -mdir=/data \
+              -ip.bind=0.0.0.0 \
+              -defaultReplication=001 \
+              -volumeSizeLimitMB=1000 \
+              -ip=${POD_NAME}.${SEAWEEDFS_FULLNAME}-master.storage \
+              -peers=${SEAWEEDFS_FULLNAME}-master-0.${SEAWEEDFS_FULLNAME}-master.storage:9333,${SEAWEEDFS_FULLNAME}-master-1.${SEAWEEDFS_FULLNAME}-master.storage:9333

@@ -11,8 +11,8 @@ spec:
           - clusters: {}
           - list:
               elements:
-                - app: cert-manager
-                  namespace: networking
+                - app: system-patches
+                  namespace: kube-system
                   serverSideApply: "true"
                   replace: "false"
                 - app: kyverno
@@ -23,12 +23,8 @@ spec:
                   namespace: security
                   serverSideApply: "true"
                   replace: "false"
-                - app: longhorn
-                  namespace: storage
-                  serverSideApply: "true"
-                  replace: "false"
-                - app: seaweedfs
-                  namespace: storage
+                - app: cert-manager
+                  namespace: networking
                   serverSideApply: "true"
                   replace: "false"
                 - app: metallb-system
@@ -39,18 +35,22 @@ spec:
                   namespace: networking
                   serverSideApply: "true"
                   replace: "false"
-                - app: system-patches
-                  namespace: kube-system
+                - app: longhorn
+                  namespace: storage
                   serverSideApply: "true"
                   replace: "false"
-                - app: promtail
-                  namespace: logging
-                  serverSideApply: "true"
-                  replace: "false"
-                - app: prometheus-stack
-                  namespace: monitoring
-                  serverSideApply: "true"
-                  replace: "false"
+                # - app: seaweedfs
+                #   namespace: storage
+                #   serverSideApply: "true"
+                #   replace: "false"
+                # - app: promtail
+                #   namespace: logging
+                #   serverSideApply: "true"
+                #   replace: "false"
+                # - app: prometheus-stack
+                #   namespace: monitoring
+                #   serverSideApply: "true"
+                #   replace: "false"
   template:
     metadata:
       name: '{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}-{{.app}}'

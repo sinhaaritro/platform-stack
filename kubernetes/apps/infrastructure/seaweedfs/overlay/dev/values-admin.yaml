@@ -2,18 +2,6 @@ global:
   imageName: chrislusf/seaweedfs
   enableSecurity: false
 
-# Disable all components except Admin
-master:
-  enabled: false
-volume:
-  enabled: false
-filer:
-  enabled: false
-s3:
-  enabled: false
-csi:
-  enabled: false
-
 # Enable Admin
 admin:
   enabled: true
