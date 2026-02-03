@@ -10,3 +10,7 @@ patches:
     target:
       kind: HelmRelease
       name: prometheus-stack
+  - path: ../../../apps/maintenance/patch-scale-zero.yaml
+    target:
+      kind: Deployment|StatefulSet
+      name: .*

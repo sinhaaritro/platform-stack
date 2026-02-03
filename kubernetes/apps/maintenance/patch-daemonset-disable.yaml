@@ -1,0 +1,9 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: .*
+spec:
+  template:
+    spec:
+      nodeSelector:
+        non-existent-label: "true"

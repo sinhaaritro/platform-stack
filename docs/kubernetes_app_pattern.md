@@ -458,3 +458,44 @@ spec:
             limits:
               memory: "1Gi"
 ```
+
+---
+
+## 12. Maintenance Mode & Scaling
+
+For operational tasks like storage upgrades, we need a standard way to scale applications to 0 without destroying their configuration (replicas, env vars) defined in `overlays/prod`.
+
+**Pattern:** "Cluster Object Patch" using Shared Resources.
+We maintain shared patches in `kubernetes/apps/maintenance/`.
+
+### A. The "Scale to Zero" Patch
+**File:** `kubernetes/apps/maintenance/patch-scale-zero.yaml`
+Sets `replicas: 0` for Deployments and StatefulSets.
+
+### B. Usage (How to enable Maintenance)
+Edit the **Level 3 (Cluster)** Kustomization file: `kubernetes/clusters/[CLUSTER]/[APP]/kustomization.yaml`.
+
+```yaml
+resources:
+  - ../../../apps/services/podinfo/overlays/prod
+
+patches:
+  # UNCOMMENT TO ENABLE MAINTENANCE MODE
+  - path: ../../../apps/maintenance/patch-scale-zero.yaml
+    target:
+      kind: Deployment|StatefulSet
+      name: .* # Target ALL resources in this app
+```
+
+### C. DaemonSets
+DaemonSets cannot be scaled to 0. We disable them by adding a non-existent `nodeSelector`.
+**File:** `kubernetes/apps/maintenance/patch-daemonset-disable.yaml`
+
+```yaml
+patches:
+  - path: ../../../apps/maintenance/patch-daemonset-disable.yaml
+    target:
+      kind: DaemonSet
+      name: .*
+```
+

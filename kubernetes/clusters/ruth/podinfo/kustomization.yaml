@@ -14,3 +14,7 @@ patches:
       version: v1
       kind: Deployment
       name: podinfo
+  - path: ../../../apps/maintenance/patch-scale-zero.yaml
+    target:
+      kind: Deployment
+      name: .*

@@ -3,3 +3,9 @@ kind: Kustomization
 
 resources:
   - ../../../apps/infrastructure/promtail/overlays/minimal
+
+patches:
+  - path: ../../../apps/maintenance/patch-daemonset-disable.yaml
+    target:
+      kind: DaemonSet
+      name: .*

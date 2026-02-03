@@ -10,3 +10,9 @@ resources:
   # - ../../../apps/infrastructure/seaweedfs/overlay/dev
   # - ingress.yaml
   # - secret-admin.yaml
+
+patches:
+  - path: ../../../apps/maintenance/patch-scale-zero.yaml
+    target:
+      kind: Deployment|StatefulSet
+      name: .*
