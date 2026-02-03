@@ -1,5 +1,5 @@
 defaultSettings:
-  createDefaultDiskLabeledNodes: false
+  createDefaultDiskLabeledNodes: true
   defaultDataPath: /data/storage
   storageReservedPercentageForDefaultDisk: 15
   taintToleration: "node-role.kubernetes.io/control-plane:NoSchedule"
