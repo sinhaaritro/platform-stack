@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: longhorn-ui
-  namespace: storage
+  namespace: longhorn-system
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
     cert-manager.io/cluster-issuer: selfsigned-issuer
