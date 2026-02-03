@@ -21,4 +21,4 @@ longhornDriver:
       effect: "NoSchedule"
 metrics:
   serviceMonitor:
-    enabled: true
+    enabled: false
