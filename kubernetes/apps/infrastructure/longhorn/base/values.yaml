@@ -1,4 +1,5 @@
 defaultSettings:
+  # This tells Longhorn not to register any nodes unless they have a specific secret label.
   createDefaultDiskLabeledNodes: true
   defaultDataPath: /data/storage
   storageReservedPercentageForDefaultDisk: 15
