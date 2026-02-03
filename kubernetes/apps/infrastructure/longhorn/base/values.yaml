@@ -3,6 +3,7 @@ defaultSettings:
   defaultDataPath: /data/storage
   storageReservedPercentageForDefaultDisk: 15
   taintToleration: "node-role.kubernetes.io/control-plane:NoSchedule"
+namespaceOverride: "longhorn-system"
 persistence:
   defaultClass: true
   defaultClassReplicaCount: 2 # Good balance for stability vs resource usage
@@ -18,3 +19,6 @@ longhornDriver:
     - key: "node-role.kubernetes.io/control-plane"
       operator: "Exists"
       effect: "NoSchedule"
+metrics:
+  serviceMonitor:
+    enabled: true

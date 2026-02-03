@@ -4,12 +4,12 @@ kind: Kustomization
 helmCharts:
   - name: longhorn
     repo: https://charts.longhorn.io
-    version: 1.7.2
+    version: 1.11.0
     releaseName: longhorn
-    namespace: storage
+    namespace: longhorn-system
     includeCRDs: true
     valuesFile: values.yaml
 
 resources:
   - namespace.yaml
-  - sc-longhorn-logs.yaml
+  - sc-longhorn-replication0.yaml

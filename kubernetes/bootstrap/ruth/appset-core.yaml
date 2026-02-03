@@ -36,7 +36,7 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                 - app: longhorn
-                  namespace: storage
+                  namespace: longhorn-system
                   serverSideApply: "true"
                   replace: "false"
                 # - app: seaweedfs
