@@ -329,7 +329,7 @@ spec:
       app.kubernetes.io/name: seaweedfs
   template:
     metadata:
-      annotations: null
+      annotations: {}
       labels:
         app.kubernetes.io/component: s3
         app.kubernetes.io/instance: seaweedfs
@@ -398,11 +398,11 @@ spec:
             periodSeconds: 15
             successThreshold: 1
             timeoutSeconds: 10
-          volumeMounts: null
+          volumeMounts: []
       enableServiceLinks: false
       restartPolicy: Always
       terminationGracePeriodSeconds: 10
-      volumes: null
+      volumes: []
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -424,7 +424,7 @@ spec:
       app.kubernetes.io/name: seaweedfs
   template:
     metadata:
-      annotations: null
+      annotations: {}
       labels:
         app.kubernetes.io/component: worker
         app.kubernetes.io/instance: seaweedfs
@@ -509,11 +509,11 @@ spec:
             requests:
               cpu: 500m
               memory: 512Mi
-          volumeMounts: null
+          volumeMounts: []
       enableServiceLinks: false
       restartPolicy: Always
       terminationGracePeriodSeconds: 60
-      volumes: null
+      volumes: []
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -537,7 +537,7 @@ spec:
   serviceName: seaweedfs-admin
   template:
     metadata:
-      annotations: null
+      annotations: {}
       labels:
         app.kubernetes.io/component: admin
         app.kubernetes.io/instance: seaweedfs
@@ -637,7 +637,7 @@ spec:
       enableServiceLinks: false
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
-      volumes: null
+      volumes: []
   volumeClaimTemplates:
     - metadata:
         name: admin-data
@@ -862,7 +862,7 @@ spec:
   serviceName: seaweedfs-master
   template:
     metadata:
-      annotations: null
+      annotations: {}
       labels:
         app.kubernetes.io/component: master
         app.kubernetes.io/instance: seaweedfs
@@ -1018,7 +1018,7 @@ spec:
   serviceName: seaweedfs-volume
   template:
     metadata:
-      annotations: null
+      annotations: {}
       labels:
         app.kubernetes.io/component: volume
         app.kubernetes.io/instance: seaweedfs
