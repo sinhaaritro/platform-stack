@@ -1028,12 +1028,14 @@ spec:
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchLabels:
-                  app.kubernetes.io/component: volume
-                  app.kubernetes.io/instance: seaweedfs
-                  app.kubernetes.io/name: seaweedfs
-              topologyKey: kubernetes.io/hostname
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/component: volume
+                    app.kubernetes.io/instance: seaweedfs
+                    app.kubernetes.io/name: seaweedfs
+                topologyKey: kubernetes.io/hostname
       containers:
         - command:
             - /bin/sh
