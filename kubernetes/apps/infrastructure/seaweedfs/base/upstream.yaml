@@ -1117,7 +1117,7 @@ spec:
       enableServiceLinks: false
       initContainers:
         - args:
-            - "if ls /data1/*.idx  >/dev/null 2>&1; then mv /data1/*.idx /idx/ ; fi; "
+            - "weed fix /data1; if ls /data1/*.idx  >/dev/null 2>&1; then mv /data1/*.idx /idx/ ; fi; "
           command:
             - /bin/sh
             - -c
