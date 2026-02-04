@@ -116,6 +116,7 @@ metadata:
   name: seaweedfs-admin
   namespace: storage
 spec:
+  clusterIP: None
   ports:
     - name: http
       port: 23646
@@ -129,7 +130,6 @@ spec:
     app.kubernetes.io/component: admin
     app.kubernetes.io/instance: seaweedfs
     app.kubernetes.io/name: seaweedfs
-  type: ClusterIP
 ---
 apiVersion: v1
 kind: Service
