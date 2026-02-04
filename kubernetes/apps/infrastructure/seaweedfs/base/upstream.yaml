@@ -569,7 +569,7 @@ spec:
               -dataDir=/data \
               -adminUser="${SEAWEEDFS_ADMIN_USER}" \
               -adminPassword="${SEAWEEDFS_ADMIN_PASSWORD}" \
-              -masters=${SEAWEEDFS_FULLNAME}-master-0.${SEAWEEDFS_FULLNAME}-master.storage:9333,${SEAWEEDFS_FULLNAME}-master-1.${SEAWEEDFS_FULLNAME}-master.storage:9333,${SEAWEEDFS_FULLNAME}-master-2.${SEAWEEDFS_FULLNAME}-master.storage:9333
+              -masters=${SEAWEEDFS_FULLNAME}-master-0.${SEAWEEDFS_FULLNAME}-master.storage:9333
           env:
             - name: SEAWEEDFS_ADMIN_USER
               valueFrom:
@@ -716,7 +716,7 @@ spec:
               -ip.bind=0.0.0.0 \
               -s3 \
               -s3.port=8333 \
-              -master=${SEAWEEDFS_FULLNAME}-master-0.${SEAWEEDFS_FULLNAME}-master.storage:9333,${SEAWEEDFS_FULLNAME}-master-1.${SEAWEEDFS_FULLNAME}-master.storage:9333,${SEAWEEDFS_FULLNAME}-master-2.${SEAWEEDFS_FULLNAME}-master.storage:9333 \
+              -master=${SEAWEEDFS_FULLNAME}-master-0.${SEAWEEDFS_FULLNAME}-master.storage:9333 \
           env:
             - name: POD_IP
               valueFrom:
@@ -853,7 +853,7 @@ metadata:
   namespace: storage
 spec:
   podManagementPolicy: Parallel
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/component: master
@@ -898,7 +898,7 @@ spec:
               -electionTimeout=10s \
               -heartbeatInterval=300ms \
               -ip=${POD_NAME}.${SEAWEEDFS_FULLNAME}-master.storage \
-              -peers=${SEAWEEDFS_FULLNAME}-master-0.${SEAWEEDFS_FULLNAME}-master.storage:9333,${SEAWEEDFS_FULLNAME}-master-1.${SEAWEEDFS_FULLNAME}-master.storage:9333,${SEAWEEDFS_FULLNAME}-master-2.${SEAWEEDFS_FULLNAME}-master.storage:9333 \
+              -peers=${SEAWEEDFS_FULLNAME}-master-0.${SEAWEEDFS_FULLNAME}-master.storage:9333 \
           env:
             - name: POD_IP
               valueFrom:
@@ -1055,7 +1055,7 @@ spec:
                 -minFreeSpacePercent=1 \
                 -ip=${POD_NAME}.${SEAWEEDFS_FULLNAME}-volume.storage \
                 -compactionMBps=50 \
-                -master=${SEAWEEDFS_FULLNAME}-master-0.${SEAWEEDFS_FULLNAME}-master.storage:9333,${SEAWEEDFS_FULLNAME}-master-1.${SEAWEEDFS_FULLNAME}-master.storage:9333,${SEAWEEDFS_FULLNAME}-master-2.${SEAWEEDFS_FULLNAME}-master.storage:9333 \
+                -master=${SEAWEEDFS_FULLNAME}-master-0.${SEAWEEDFS_FULLNAME}-master.storage:9333 \
           env:
             - name: POD_NAME
               valueFrom:
