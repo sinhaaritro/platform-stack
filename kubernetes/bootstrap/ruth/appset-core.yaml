@@ -39,10 +39,10 @@ spec:
                   namespace: longhorn-system
                   serverSideApply: "true"
                   replace: "false"
-                # - app: seaweedfs
-                #   namespace: storage
-                #   serverSideApply: "true"
-                #   replace: "false"
+                - app: seaweedfs
+                  namespace: storage
+                  serverSideApply: "true"
+                  replace: "false"
                 # - app: promtail
                 #   namespace: logging
                 #   serverSideApply: "true"

@@ -3,16 +3,18 @@ kind: Kustomization
 
 resources:
   - ../../../apps/infrastructure/seaweedfs/base
-  # - ../../../apps/infrastructure/seaweedfs/overlay/dev
   # - ../../../apps/infrastructure/seaweedfs/overlays/maintenance
-  # - ingress.yaml
-  # - secret-admin.yaml
-  # - ../../../apps/infrastructure/seaweedfs/overlay/dev
-  # - ingress.yaml
-  # - secret-admin.yaml
 
-patches:
-  - path: ../../../apps/maintenance/patch-scale-zero.yaml
-    target:
-      kind: Deployment|StatefulSet
-      name: .*
+patches: []
+  # Maintenance Mode (Scale to Zero)
+  # Uncomment to completely shut down SeaweedFS data nodes
+  # - path: ../../../apps/maintenance/patch-scale-zero.yaml
+  #   target:
+  #     kind: Deployment|StatefulSet
+  #     name: .*
+
+  # Ingress Host Configuration (Example, customize as needed)
+  # - path: patch-ingress-hosts.yaml
+  #   target:
+  #     kind: Ingress
+  #     name: .*

@@ -6,10 +6,13 @@ global:
   replicationPlacement: "001"
 
 master:
-  enabled: false
+  enabled: true
   replicas: 3
   # Default replication setting for new buckets/volumes
   defaultReplication: "001"
+
+  # Set specific port if needed, otherwise default 9333 is used
+  # port: 9333
 
   # Use Longhorn PVC instead of hostPath
   data:
@@ -19,11 +22,12 @@ master:
   logs:
     type: "persistentVolumeClaim"
     size: "1Gi"
-    storageClass: "longhorn-logs"
+    storageClass: "longhorn0rep"
 
 filer:
-  enabled: false
+  enabled: true
   replicas: 1 # Standard is 1 unless using External DB
+  # port: 8888
 
   # SeaweedFS Filer stores metadata.
   data:
@@ -33,17 +37,27 @@ filer:
   logs:
     type: "persistentVolumeClaim"
     size: "1Gi"
-    storageClass: "longhorn-logs"
+    storageClass: "longhorn0rep"
 
-  # S3 is enabled as a separate service below, but Filer S3 gateway can be used too.
-  # We will use the standalone S3 component.
+  # S3 is enabled as a separate service below
   s3:
-    enabled: false
+    enabled: true
+    # port: 8333
+
+  # WebDAV is often a separate component in newer charts or part of filer
+  webdav:
+    enabled: true
+    # port: 7333
 
 volume:
-  enabled: false
+  enabled: true
   replicas: 2 # 2 Volume Servers to satisfy 001 replication
   minFreeSpacePercent: 1
+  # port: 8080
+  # grpcPort: 18080
+  # Note: User mentioned 9340 for Volume Server.
+  # If that is the API port, we might need to map it or it's a specific config.
+  # For now keeping defaults and exposing via Ingress.
 
   # DATA DISKS
   dir: "/data"
@@ -61,15 +75,16 @@ volume:
   logs:
     type: "persistentVolumeClaim"
     size: "1Gi"
-    storageClass: "longhorn-logs"
+    storageClass: "longhorn0rep"
 
 s3:
-  enabled: false
+  enabled: true
   replicas: 1
+  port: 8333
   logs:
     type: "persistentVolumeClaim"
     size: "1Gi"
-    storageClass: "longhorn-logs"
+    storageClass: "longhorn0rep"
 
   # Allow anonymous access or configure secret
   enableAuth: false
@@ -77,6 +92,10 @@ s3:
 # Level 1 Requirements: Admin (Dashboard) and Workers (Maintenance)
 admin:
   enabled: true
+  # User mentioned Admin Dashboard at 23646
+  # This might be 'weed shell' or dashboard component.
+  # If chart doesn't support 'admin' key, this might be custom or ignored by helm.
+  # We'll leave it as per previous file but verify if it persists.
   secret:
     adminUser: admin
     adminPassword: admin
@@ -90,7 +109,7 @@ admin:
   logs:
     type: "persistentVolumeClaim"
     size: "5Gi"
-    storageClass: "longhorn-logs"
+    storageClass: "longhorn0rep"
 
 worker:
   enabled: true
@@ -105,13 +124,13 @@ worker:
   logs:
     type: "persistentVolumeClaim"
     size: "5Gi"
-    storageClass: "longhorn-logs"
+    storageClass: "longhorn0rep"
 
-# Level 1 Requirements: SFTP Access (Random user/pass default)
+# Legacy or specific components
 sftp:
   enabled: false
   port: 2022
 
-# Disable components we might not need immediately
+# CSI not needed if using Longhorn for backing storage and just S3 front
 csi:
   enabled: false

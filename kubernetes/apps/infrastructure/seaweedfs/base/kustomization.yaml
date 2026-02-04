@@ -4,8 +4,11 @@ kind: Kustomization
 helmCharts:
   - name: seaweedfs
     repo: https://seaweedfs.github.io/seaweedfs/helm
-    version: 3.59.0
+    version: 4.0.407
     releaseName: seaweedfs
     namespace: storage
     includeCRDs: true
     valuesFile: values.yaml
+
+resources:
+  - ingress.yaml
