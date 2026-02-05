@@ -10,9 +10,7 @@ resources:
 patches:
   # Ingress Host Configuration
   - path: patch-ingress-hosts.yaml
+
   # Maintenance Mode (Scale to Zero)
   # Uncomment to completely shut down SeaweedFS data nodes
-  # - path: ../../../apps/maintenance/patch-scale-zero.yaml
-  #   target:
-  #     kind: Deployment|StatefulSet
-  #     name: .*
+  # - path: maintenance-mode.yaml

@@ -20,5 +20,3 @@ patches:
     target:
       kind: StatefulSet
       name: seaweedfs-admin
-  # Uncomment to enable Maintenance Mode (Scale Down to 0)
-  # - path: patches/maintenance-mode.yaml
