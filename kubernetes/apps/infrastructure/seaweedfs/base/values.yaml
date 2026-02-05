@@ -17,8 +17,7 @@ master:
 
   # Matching upstream resource requests
   resources:
-    requests:
-      storage: 1Gi
+    requests: {}
   ingress:
     enabled: true
     className: ""
@@ -70,7 +69,7 @@ volume:
   dataDirs:
     - name: data1
       type: "hostPath"
-      hostPathPrefix: "/ssd/object_store/"
+      hostPathPrefix: "/ssd/object_store"
       maxVolumes: 0
 
   # Upstream IDX and Logs on Longhorn
