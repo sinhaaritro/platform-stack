@@ -14,3 +14,21 @@ helmCharts:
     namespace: storage
     version: 4.0.407
     valuesFile: values.yaml # Uncomment when ready to use values
+
+patches:
+  - target:
+      kind: StatefulSet
+      name: seaweedfs-admin
+    patch: |-
+      - op: add
+        path: /spec/volumeClaimTemplates/0/apiVersion
+        value: v1
+      - op: add
+        path: /spec/volumeClaimTemplates/0/kind
+        value: PersistentVolumeClaim
+      - op: add
+        path: /spec/volumeClaimTemplates/1/apiVersion
+        value: v1
+      - op: add
+        path: /spec/volumeClaimTemplates/1/kind
+        value: PersistentVolumeClaim
