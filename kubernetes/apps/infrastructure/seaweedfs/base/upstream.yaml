@@ -1178,10 +1178,10 @@ metadata:
   namespace: storage
 spec:
   ports:
-  - name: swfs-webdav
-    port: 7333
-    protocol: TCP
-    targetPort: 7333
+    - name: swfs-webdav
+      port: 7333
+      protocol: TCP
+      targetPort: 7333
   selector:
     app.kubernetes.io/component: webdav
     app.kubernetes.io/instance: seaweedfs
@@ -1215,56 +1215,52 @@ spec:
         helm.sh/chart: seaweedfs-4.0.407
     spec:
       containers:
-      - command:
-        - /bin/sh
-        - -ec
-        - |
-          exec /usr/bin/weed \
-          -logtostderr=true \
-          -v=1 \
-          webdav \
-          -ip.bind=0.0.0.0 \
-          -port=7333 \
-          -filer=seaweedfs-filer-client.storage:8888
-        env:
-        - name: POD_IP
-          valueFrom:
-            fieldRef:
-              fieldPath: status.podIP
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        - name: NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        image: chrislusf/seaweedfs:4.07
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          failureThreshold: 20
-          httpGet:
-            path: /
-            port: 7333
-            scheme: HTTP
-          initialDelaySeconds: 20
-          periodSeconds: 60
-          successThreshold: 1
-          timeoutSeconds: 10
-        name: seaweedfs
-        ports:
-        - containerPort: 7333
-          name: swfs-webdav
-        readinessProbe:
-          failureThreshold: 100
-          httpGet:
-            path: /
-            port: 7333
-            scheme: HTTP
-          initialDelaySeconds: 15
-          periodSeconds: 15
-          successThreshold: 1
-          timeoutSeconds: 10
-        resources: {}
+        - command:
+            - /bin/sh
+            - -ec
+            - |
+              exec /usr/bin/weed \
+              -logtostderr=true \
+              -v=1 \
+              webdav \
+              -ip.bind=0.0.0.0 \
+              -port=7333 \
+              -filer=seaweedfs-filer-client.storage:8888
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          image: chrislusf/seaweedfs:4.07
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 20
+            tcpSocket:
+              port: 7333
+            initialDelaySeconds: 20
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 10
+          name: seaweedfs
+          ports:
+            - containerPort: 7333
+              name: swfs-webdav
+          readinessProbe:
+            failureThreshold: 100
+            tcpSocket:
+              port: 7333
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 10
+          resources: {}
       enableServiceLinks: false
       restartPolicy: Always
