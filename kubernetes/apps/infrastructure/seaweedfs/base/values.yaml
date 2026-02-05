@@ -64,8 +64,7 @@ volume:
   # Matching upstream arguments
   # PublicURL is critical. Using string interpolation format that shell will evaluate.
   extraArgs:
-    - "-max=0"
-    - "-publicUrl=$(POD_NAME).$(SEAWEEDFS_FULLNAME)-volume.seaweedfs.ruth.example.com:80"
+    - "-publicUrl=${POD_NAME}.${SEAWEEDFS_FULLNAME}-volume.seaweedfs.ruth.example.com:80"
 
   # Upstream HostPath for data
   dataDirs:
@@ -87,7 +86,7 @@ volume:
 
   # Upstream Init Container for fixing/moving indexes
   initContainers: |
-    - name: seaweedfs-vol-move-idx
+    - name: seaweedfs-vol-fix-idx
       image: chrislusf/seaweedfs:4.07
       imagePullPolicy: IfNotPresent
       command: ["/bin/sh", "-c"]
