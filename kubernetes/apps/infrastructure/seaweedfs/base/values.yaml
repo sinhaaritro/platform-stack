@@ -11,14 +11,14 @@ global:
   serviceAccountName: "seaweedfs"
   automountServiceAccountToken: true
   monitoring:
-    enabled: true 
+    enabled: false
     gatewayHost: null
     gatewayPort: null
   enableReplication: false
   extraEnvironmentVars:
     WEED_CLUSTER_DEFAULT: "sw"
-    WEED_CLUSTER_SW_MASTER: "{{ include \"seaweedfs.cluster.masterAddress\" . }}"
-    WEED_CLUSTER_SW_FILER: "{{ include \"seaweedfs.cluster.filerAddress\" . }}"
+    WEED_CLUSTER_SW_MASTER: '{{ include "seaweedfs.cluster.masterAddress" . }}'
+    WEED_CLUSTER_SW_FILER: '{{ include "seaweedfs.cluster.filerAddress" . }}'
 
 image:
   registry: ""
@@ -40,9 +40,9 @@ master:
   resumeState: false
   electionTimeout: "10s"
   heartbeatInterval: "300ms"
-  
+
   # Matching upstream resource requests
-  resources: 
+  resources:
     requests:
       storage: 1Gi
   ingress:
@@ -64,7 +64,7 @@ master:
     type: "persistentVolumeClaim"
     size: "1Gi"
     storageClass: "longhorn0rep"
-  
+
   # Upstream has preferred AntiAffinity
   affinity: |
     podAntiAffinity:
@@ -88,10 +88,10 @@ volume:
   minFreeSpacePercent: 1
   compactionMBps: "50"
   readMode: proxy
-  
+
   # Matching upstream arguments
   # PublicURL is critical. Using string interpolation format that shell will evaluate.
-  extraArgs: 
+  extraArgs:
     - "-max=0"
     - "-publicUrl=$(POD_NAME).$(SEAWEEDFS_FULLNAME)-volume.seaweedfs.ruth.example.com:80"
 
@@ -150,7 +150,7 @@ filer:
   dirListLimit: 100000
   disableHttp: false
   redirectOnRead: false
-  
+
   # Enable S3 on Filer as per upstream
   extraArgs:
     - "-s3"
@@ -208,12 +208,12 @@ s3:
   # Upstream S3 has no specific storage, just EmptyDir/None usually, or logs.
   logs:
     type: "hostPath"
-    hostPathPrefix: /storage # Placeholder, upstream s3 deployment doesn't show logs volumeMounts explicitly in the snippet I saw? 
+    hostPathPrefix: /storage # Placeholder, upstream s3 deployment doesn't show logs volumeMounts explicitly in the snippet I saw?
     # Re-checking upstream: s3 deployment (lines 312+) has no volumeMounts.
     # So we should probably set this to emptyDir or disable if possible to match.
-    # Chart defaults logs to hostPath/emptyDir. 
+    # Chart defaults logs to hostPath/emptyDir.
     # Let's use emptyDir for now.
-    type: "emptyDir"
+    # type: "emptyDir"
 
 worker:
   enabled: true
@@ -222,7 +222,7 @@ worker:
   capabilities: "vacuum,balance,erasure_coding"
   maxConcurrent: 3
   workingDir: "/tmp/seaweedfs-worker"
-  
+
   # Upstream resources
   resources:
     requests:
@@ -250,7 +250,7 @@ admin:
   replicas: 1
   port: 23646
   grpcPort: 33646
-  
+
   adminUser: "admin"
   adminPassword: "admin" # Upstream secret decodes to 'admin'
 
