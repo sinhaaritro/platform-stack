@@ -58,6 +58,8 @@ volume:
   grpcPort: 18080
   metricsPort: 9327
   ipBind: "0.0.0.0"
+  replicas: 2
+  minFreeSpacePercent: 1
 
   # Matching upstream arguments
   # PublicURL is critical. Using string interpolation format that shell will evaluate.
