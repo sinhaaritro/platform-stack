@@ -9,7 +9,7 @@ master:
   volumePreallocate: false
   volumeSizeLimitMB: 1000
   # Upstream uses 001 (Rack awareness), chart default 000. Matching upstream.
-  defaultReplication: "001"
+  defaultReplication: "000"
   disableHttp: false
   resumeState: false
   electionTimeout: "10s"
@@ -57,7 +57,7 @@ volume:
   grpcPort: 18080
   metricsPort: 9327
   ipBind: "0.0.0.0"
-  replicas: 2
+  replicas: 1
   minFreeSpacePercent: 1
 
   # Matching upstream arguments
