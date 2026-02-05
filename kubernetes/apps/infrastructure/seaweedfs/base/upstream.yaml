@@ -1058,7 +1058,7 @@ spec:
                 -readMode=proxy \
                 -minFreeSpacePercent=1 \
                 -ip=${POD_NAME}.${SEAWEEDFS_FULLNAME}-volume.storage \
-                -publicUrl=${POD_NAME}.${SEAWEEDFS_FULLNAME}-volume.seaweedfs.ruth.example.com:80 \
+                # -publicUrl=${POD_NAME}.${SEAWEEDFS_FULLNAME}-volume.seaweedfs.ruth.example.com:80 \
                 -compactionMBps=50 \
                 -master=${SEAWEEDFS_FULLNAME}-master-0.${SEAWEEDFS_FULLNAME}-master.storage:9333 \
           env:
