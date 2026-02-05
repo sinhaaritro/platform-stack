@@ -1,6 +1,16 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-resources:
-  - upstream.yaml
-  - ingress.yaml
+# resources:
+#   - webdav.yaml
+#   - volume-ingress.yaml
+# - upstream.yaml
+# - ingress.yaml
+
+helmCharts:
+  - name: seaweedfs
+    repo: https://seaweedfs.github.io/seaweedfs/helm
+    releaseName: seaweedfs
+    namespace: storage
+    version: 4.0.407
+    valuesFile: values.yaml # Uncomment when ready to use values

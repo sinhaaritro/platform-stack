@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedfs-volume
+  namespace: storage
+  labels:
+    app.kubernetes.io/component: volume
+    app.kubernetes.io/instance: seaweedfs
+    app.kubernetes.io/name: seaweedfs
+    helm.sh/chart: seaweedfs-4.0.407
+spec:
+  rules:
+    - host: volume.seaweedfs.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-volume
+                port:
+                  number: 8080
