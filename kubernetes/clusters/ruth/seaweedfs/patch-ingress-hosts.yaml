@@ -87,6 +87,16 @@ spec:
                 name: seaweedfs-volume
                 port:
                   number: 8080
+    - host: "*.seaweedfs-volume.seaweedfs.ruth.example.com"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-volume
+                port:
+                  number: 8080
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
