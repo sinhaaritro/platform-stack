@@ -639,7 +639,9 @@ spec:
       terminationGracePeriodSeconds: 30
       volumes: []
   volumeClaimTemplates:
-    - metadata:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
         name: admin-data
       spec:
         accessModes:
@@ -648,7 +650,9 @@ spec:
           requests:
             storage: 5Gi
         storageClassName: longhorn
-    - metadata:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
         name: admin-logs
       spec:
         accessModes:
