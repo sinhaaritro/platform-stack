@@ -1,23 +1,4 @@
 # Populated values.yaml matching current upstream.yaml configuration
-
-global:
-  createClusterRole: true
-  imagePullPolicy: IfNotPresent
-  restartPolicy: Always
-  loggingLevel: 1
-  enableSecurity: false
-  serviceAccountName: "seaweedfs"
-  automountServiceAccountToken: true
-  monitoring:
-    enabled: false
-    gatewayHost: null
-    gatewayPort: null
-  enableReplication: false
-  extraEnvironmentVars:
-    WEED_CLUSTER_DEFAULT: "sw"
-    WEED_CLUSTER_SW_MASTER: '{{ include "seaweedfs.cluster.masterAddress" . }}'
-    WEED_CLUSTER_SW_FILER: '{{ include "seaweedfs.cluster.filerAddress" . }}'
-
 master:
   enabled: true
   replicas: 1
@@ -77,10 +58,6 @@ volume:
   grpcPort: 18080
   metricsPort: 9327
   ipBind: "0.0.0.0"
-  replicas: 2
-  minFreeSpacePercent: 1
-  compactionMBps: "50"
-  readMode: proxy
 
   # Matching upstream arguments
   # PublicURL is critical. Using string interpolation format that shell will evaluate.
