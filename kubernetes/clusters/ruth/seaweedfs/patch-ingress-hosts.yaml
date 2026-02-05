@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-master
+  name: ingress-seaweedfs-master
   namespace: storage
 spec:
   rules:
@@ -19,7 +19,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-filer
+  name: ingress-seaweedfs-filer
   namespace: storage
 spec:
   rules:
@@ -37,7 +37,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-s3
+  name: ingress-seaweedfs-s3
   namespace: storage
 spec:
   rules:
@@ -55,53 +55,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-webdav
-  namespace: storage
-spec:
-  rules:
-    - host: webdav.seaweedfs.ruth.example.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: seaweedfs-webdav
-                port:
-                  number: 7333
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: seaweedfs-volume
-  namespace: storage
-spec:
-  rules:
-    - host: volume.seaweedfs.ruth.example.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: seaweedfs-volume
-                port:
-                  number: 8080
-    - host: "*.seaweedfs-volume.seaweedfs.ruth.example.com"
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: seaweedfs-volume
-                port:
-                  number: 8080
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: seaweedfs-admin
+  name: ingress-seaweedfs-admin
   namespace: storage
 spec:
   rules:
