@@ -2,8 +2,8 @@
 
 global:
   createClusterRole: true
-  repository: chrislusf/seaweedfs
-  imageName: chrislusf/seaweedfs
+  # repository: chrislusf
+  # imageName: seaweedfs
   imagePullPolicy: IfNotPresent
   restartPolicy: Always
   loggingLevel: 1
