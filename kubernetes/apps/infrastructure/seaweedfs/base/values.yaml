@@ -20,7 +20,7 @@ master:
     requests: {}
   ingress:
     enabled: true
-    className: ""
+    className: null
     # host: false for "*" hostname, or an array for multiple hostnames
     host: "master.seaweedfs.local"
     path: "/sw-master/?(.*)"
@@ -127,7 +127,7 @@ filer:
     - "-s3.port=8333"
   ingress:
     enabled: true
-    className: ""
+    className: null
     # host: false for "*" hostname
     host: "seaweedfs.cluster.local"
     path: "/"
@@ -167,7 +167,7 @@ s3:
   domainName: ""
   ingress:
     enabled: true
-    className: ""
+    className: null
     # host: false for "*" hostname, or an array for multiple hostnames
     host: "s3.seaweedfs.local"
     path: "/"
@@ -236,7 +236,7 @@ admin:
 
   ingress:
     enabled: true
-    className: ""
+    className: null
     host: "admin.seaweedfs.local"
     path: "/"
     pathType: Prefix
