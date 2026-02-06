@@ -70,11 +70,11 @@ resources = {
     }
 
     vm_config = {
-      cpu_cores         = 2
+      cpu_cores         = 3
       memory_size       = 4096
       disk_datastore_id = "local-thin"
       os_version        = "24.04"
-      disk_size         = 16
+      disk_size         = 24
     }
 
     nodes = {
@@ -90,7 +90,7 @@ resources = {
             {
               interface    = "scsi1"
               datastore_id = "data-storage"
-              size         = 20
+              size         = 32
               ssd          = true
             }
           ]
@@ -106,7 +106,7 @@ resources = {
             {
               interface    = "scsi1"
               datastore_id = "data-storage"
-              size         = 40
+              size         = 32
               ssd          = true
             }
           ]
@@ -122,7 +122,7 @@ resources = {
             {
               interface    = "scsi1"
               datastore_id = "data-storage"
-              size         = 20
+              size         = 32
               ssd          = true
             }
           ]
@@ -131,7 +131,7 @@ resources = {
     }
   },
   "arr" = {
-    enabled     = true
+    enabled     = false
     type        = "vm"
     node_name   = "moo-moo"
     description = "Kubernets servers. Ubuntu 24.04."
