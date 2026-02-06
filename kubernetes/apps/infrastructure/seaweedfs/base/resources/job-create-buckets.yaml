@@ -14,8 +14,20 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
-              echo "Creating loki-data bucket..."
-              curl -f -v -X POST "http://seaweedfs-filer.storage.svc:8888/buckets/loki-data/"
-              echo "Creating loki-data-ruler bucket..."
-              curl -f -v -X POST "http://seaweedfs-filer.storage.svc:8888/buckets/loki-data-ruler/"
+              # Function to create bucket if not exists
+              create_bucket() {
+                BUCKET=$1
+                echo "Checking if bucket $BUCKET exists..."
+                HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://seaweedfs-filer.storage.svc:8888/buckets/$BUCKET/")
+                
+                if [ "$HTTP_CODE" -eq 200 ]; then
+                  echo "Bucket $BUCKET already exists. Skipping."
+                else
+                  echo "Creating bucket $BUCKET..."
+                  curl -f -v -X POST "http://seaweedfs-filer.storage.svc:8888/buckets/$BUCKET/"
+                fi
+              }
+
+              create_bucket "loki-data"
+              create_bucket "loki-data-ruler"
       restartPolicy: OnFailure
