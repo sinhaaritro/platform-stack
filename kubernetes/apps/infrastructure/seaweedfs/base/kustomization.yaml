@@ -1,11 +1,12 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# resources:
-#   - webdav.yaml
-#   - volume-ingress.yaml
-# - upstream.yaml
-# - ingress.yaml
+resources:
+  # - webdav.yaml
+  # - volume-ingress.yaml
+  # - upstream.yaml
+  # - ingress.yaml
+  - resources/job-create-buckets.yaml
 
 helmCharts:
   - name: seaweedfs
