@@ -15,7 +15,7 @@ spec:
           args:
             - |
               echo "Creating loki-data bucket..."
-              curl -f -v -X POST -F "name=loki-data" "http://seaweedfs-filer.storage.svc:8888/buckets/loki-data"
+              curl -f -v -X POST "http://seaweedfs-filer.storage.svc:8888/buckets/loki-data/"
               echo "Creating loki-data-ruler bucket..."
-              curl -f -v -X POST -F "name=loki-data-ruler" "http://seaweedfs-filer.storage.svc:8888/buckets/loki-data-ruler"
+              curl -f -v -X POST "http://seaweedfs-filer.storage.svc:8888/buckets/loki-data-ruler/"
       restartPolicy: OnFailure
