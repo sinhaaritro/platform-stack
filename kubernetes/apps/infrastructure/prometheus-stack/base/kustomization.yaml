@@ -10,5 +10,5 @@ helmCharts:
     version: 81.5.0
     releaseName: prometheus-stack
     namespace: monitoring
-    valuesFile: values.yaml
+    # valuesFile: values.yaml
     includeCRDs: true

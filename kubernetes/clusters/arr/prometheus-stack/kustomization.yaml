@@ -1,23 +1,22 @@
 resources:
   - ../../../apps/infrastructure/prometheus-stack/overlays/minimal
-  - ingress.yaml
-
-patches:
-  - target:
-      kind: Deployment
-      name: prometheus-stack-grafana
-    patch: |-
-      $patch: delete
-      apiVersion: apps/v1
-      kind: Deployment
-      metadata:
-        name: prometheus-stack-grafana
-  - target:
-      kind: StatefulSet
-      name: alertmanager-prometheus-stack-kube-prom-alertmanager
-    patch: |-
-      $patch: delete
-      apiVersion: apps/v1
-      kind: StatefulSet
-      metadata:
-        name: alertmanager-prometheus-stack-kube-prom-alertmanager
+  # - ingress.yaml
+# patches:
+#   - target:
+#       kind: Deployment
+#       name: prometheus-stack-grafana
+#     patch: |-
+#       $patch: delete
+#       apiVersion: apps/v1
+#       kind: Deployment
+#       metadata:
+#         name: prometheus-stack-grafana
+#   - target:
+#       kind: StatefulSet
+#       name: alertmanager-prometheus-stack-kube-prom-alertmanager
+#     patch: |-
+#       $patch: delete
+#       apiVersion: apps/v1
+#       kind: StatefulSet
+#       metadata:
+#         name: alertmanager-prometheus-stack-kube-prom-alertmanager
