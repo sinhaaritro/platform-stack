@@ -3,4 +3,8 @@ kind: Kustomization
 
 resources:
   - ../../../apps/infrastructure/seaweedfs/base
-  - ingress.yaml
+  - ingress-extras.yaml
+  # - ../../../apps/infrastructure/seaweedfs/overlays/maintenance
+
+patches:
+  - path: patch-ingress-hosts.yaml
