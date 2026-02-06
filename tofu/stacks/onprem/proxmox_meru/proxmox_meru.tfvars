@@ -64,9 +64,9 @@ resources = {
       "kubeadm" = {
         "kubeadm_bootstrap_node" : "ruth-01"
       },
-      "k_management" = {
-        "argocd_managed_fleets" : "arr"
-      }
+      # "k_management" = {
+      #   "argocd_managed_fleets" : "arr"
+      # }
     }
 
     vm_config = {
