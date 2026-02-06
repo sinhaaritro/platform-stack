@@ -25,10 +25,10 @@ grafana:
     size: 2Gi
 
 prometheus:
-  enabled: false # Phase 1: Logs only
+  enabled: true
   prometheusSpec:
     retention: 10d
     retentionSize: "10GB"
 
 alertmanager:
-  enabled: false # Phase 1: Logs only
+  enabled: true
