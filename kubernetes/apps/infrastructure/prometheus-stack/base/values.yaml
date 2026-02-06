@@ -11,12 +11,24 @@ grafana:
       url: http://loki-gateway.logging.svc.cluster.local
       access: proxy
       isDefault: false
+      jsonData:
+        derivedFields:
+          - datasourceUid: tempo
+            matcherRegex: "traceID=(\\w+)"
+            name: TraceID
+            url: "$${__value.raw}"
+
+  persistence:
+    enabled: true
+    type: statefulset
+    storageClassName: "longhorn"
+    size: 2Gi
 
 prometheus:
-  enabled: true
+  enabled: false # Phase 1: Logs only
   prometheusSpec:
     retention: 10d
     retentionSize: "10GB"
 
 alertmanager:
-  enabled: true
+  enabled: false # Phase 1: Logs only

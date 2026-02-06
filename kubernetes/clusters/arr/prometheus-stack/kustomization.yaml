@@ -1,3 +1,24 @@
 resources:
   - ../../../apps/infrastructure/prometheus-stack/overlays/minimal
   - ingress.yaml
+
+patches:
+  - patch: |-
+      apiVersion: helm.toolkit.fluxcd.io/v2beta1
+      kind: HelmRelease
+      metadata:
+        name: prometheus-stack
+        namespace: monitoring
+      spec:
+        valuesFrom:
+          - kind: ConfigMap
+            name: prometheus-stack-values
+            valuesKey: values.yaml
+    target:
+      kind: HelmRelease
+      name: prometheus-stack
+
+configMapGenerator:
+  - name: prometheus-stack-values
+    files:
+      - values.yaml

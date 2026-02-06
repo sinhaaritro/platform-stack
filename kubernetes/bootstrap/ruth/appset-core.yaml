@@ -43,14 +43,13 @@ spec:
                   namespace: storage
                   serverSideApply: "true"
                   replace: "false"
-                # - app: promtail
                 #   namespace: logging
                 #   serverSideApply: "true"
                 #   replace: "false"
-                # - app: prometheus-stack
-                #   namespace: monitoring
-                #   serverSideApply: "true"
-                #   replace: "false"
+                - app: prometheus-stack
+                  namespace: monitoring
+                  serverSideApply: "true"
+                  replace: "false"
   template:
     metadata:
       name: '{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}-{{.app}}'
