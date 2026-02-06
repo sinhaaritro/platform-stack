@@ -4,13 +4,3 @@ kind: Kustomization
 resources:
   - ../../../apps/infrastructure/prometheus-stack/overlays/minimal
   - ingress.yaml
-
-patches:
-  - path: datasources-patch.yaml
-    target:
-      kind: HelmRelease
-      name: prometheus-stack
-  - path: ../../../apps/maintenance/patch-scale-zero.yaml
-    target:
-      kind: Deployment|StatefulSet
-      name: .*

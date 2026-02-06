@@ -1,8 +1,0 @@
-- op: add
-  path: /spec/values/grafana/additionalDataSources/-
-  value:
-    name: Prometheus-Arr
-    type: prometheus
-    url: https://prometheus.arr.example.com
-    access: proxy
-    isDefault: false
