@@ -71,7 +71,7 @@ resources = {
 
     vm_config = {
       cpu_cores         = 3
-      memory_size       = 4096
+      memory_size       = 6144
       disk_datastore_id = "local-thin"
       os_version        = "24.04"
       disk_size         = 24
