@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - ../../../apps/infrastructure/longhorn/overlays/minimal
   - ingress.yaml
+  # - ../../../apps/infrastructure/longhorn/overlays/maintenance
