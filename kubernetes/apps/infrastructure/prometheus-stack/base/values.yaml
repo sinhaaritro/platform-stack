@@ -41,13 +41,6 @@ prometheus:
 alertmanager:
   enabled: true
 
-nodeExporter:
-  enabled: true
-  hostNetwork: false
-  service:
-    port: 9100
-    targetPort: 9100
-
 prometheus-node-exporter:
   hostNetwork: false
   service:
