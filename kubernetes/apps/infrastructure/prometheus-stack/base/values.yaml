@@ -43,8 +43,7 @@ alertmanager:
 
 nodeExporter:
   enabled: true
+  hostNetwork: false
   service:
-    port: 9101
-    targetPort: 9101
-  extraArgs:
-    - --web.listen-address=:9101
+    port: 9100
+    targetPort: 9100
