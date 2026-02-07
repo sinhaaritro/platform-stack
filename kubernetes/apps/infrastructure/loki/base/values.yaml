@@ -13,8 +13,8 @@ loki:
     s3:
       endpoint: http://seaweedfs-s3.storage.svc:8333
       region: us-east-1
-      accessKeyId: "fake" # No auth enabled in SeaweedFS internal, but client needs non-empty string
-      secretAccessKey: "fake"
+      accessKeyId: "loki"
+      secretAccessKey: "loki"
       s3ForcePathStyle: true
       insecure: true
 
