@@ -28,7 +28,7 @@ prometheus:
   enabled: true
   prometheusSpec:
     retention: 10d
-    retentionSize: "10GB"
+    retentionSize: "4GB"
     storageSpec:
       volumeClaimTemplate:
         spec:
@@ -36,7 +36,7 @@ prometheus:
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 10Gi
+              storage: 5Gi
 
 alertmanager:
   enabled: true
