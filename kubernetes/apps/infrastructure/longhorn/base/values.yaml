@@ -7,7 +7,7 @@ defaultSettings:
 # namespaceOverride: "longhorn-system"
 persistence:
   defaultClass: true
-  defaultClassReplicaCount: 1 # 2 is good balance for stability vs resource usage
+  defaultClassReplicaCount: 1 # Set to 1 for Lab/Home environment to save space
 preUpgradeChecker:
   jobEnabled: false
 longhornManager:
