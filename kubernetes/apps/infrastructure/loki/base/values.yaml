@@ -6,6 +6,9 @@ loki:
     replication_factor: 1
 
   storage:
+    bucketNames:
+      chunks: loki-chunks
+      ruler: loki-ruler
     type: s3
     s3:
       endpoint: http://seaweedfs-s3.storage.svc:8333
@@ -14,9 +17,6 @@ loki:
       secretAccessKey: ""
       s3ForcePathStyle: true
       insecure: true
-      bucketNames:
-        chunks: loki-chunks
-        ruler: loki-ruler
 
   schemaConfig:
     configs:
