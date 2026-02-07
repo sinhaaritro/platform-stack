@@ -3,4 +3,4 @@ kind: Kustomization
 
 resources:
   - ../../../apps/infrastructure/prometheus-stack/overlays/minimal
-  # - ingress.yaml
+  - ingress.yaml
