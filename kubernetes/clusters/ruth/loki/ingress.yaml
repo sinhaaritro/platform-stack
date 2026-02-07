@@ -4,15 +4,18 @@ metadata:
   name: loki-gateway
   namespace: logging
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    cert-manager.io/cluster-issuer: selfsigned-issuer
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
 spec:
+  ingressClassName: nginx
   tls:
     - hosts:
-        - loki.ruth.example.com
-      secretName: loki-gateway-cert
+        - loki.ruth.k8s.sh
+      secretName: loki-gateway-tls
   rules:
-    - host: loki.ruth.example.com
+    - host: loki.ruth.k8s.sh
       http:
         paths:
           - path: /
