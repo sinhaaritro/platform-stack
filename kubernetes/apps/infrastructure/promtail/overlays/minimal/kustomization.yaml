@@ -18,3 +18,11 @@ patches:
           limits:
             cpu: 200m
             memory: 256Mi
+  - target:
+      kind: DaemonSet
+      name: promtail
+    patch: |-
+      - op: add
+        path: /spec/template/spec/nodeSelector
+        value:
+          kubernetes.io/hostname: ruth-01
