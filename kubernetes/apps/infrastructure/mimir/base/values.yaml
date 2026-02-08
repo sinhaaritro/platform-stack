@@ -43,12 +43,6 @@ compactor:
     size: 2Gi
     storageClass: longhorn
 
-distributor:
-
-querier:
-
-query_frontend:
-
 ruler:
   enabled: true
 
@@ -58,8 +52,6 @@ alertmanager:
   persistentVolume:
     size: 2Gi
     storageClass: longhorn
-
-overrides_exporter:
 
 # Gateway (Nginx)
 nginx:
