@@ -1,33 +1,39 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: create-loki-buckets
+  name: create-system-buckets
   namespace: storage
   annotations:
     argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
 spec:
   template:
     spec:
       containers:
         - name: create-buckets
-          image: curlimages/curl
+          image: chrislusf/seaweedfs:4.07
           command: ["/bin/sh", "-c"]
           args:
             - |
-              # Function to create bucket if not exists
-              create_bucket() {
-                BUCKET=$1
-                echo "Checking if bucket $BUCKET exists..."
-                HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://seaweedfs-filer.storage.svc:8888/buckets/$BUCKET/")
-                
-                if [ "$HTTP_CODE" -eq 200 ]; then
-                  echo "Bucket $BUCKET already exists. Skipping."
-                else
-                  echo "Creating bucket $BUCKET..."
-                  curl -f -v -X POST "http://seaweedfs-filer.storage.svc:8888/buckets/$BUCKET/"
-                fi
-              }
+              echo "Waiting for SeaweedFS Master..."
+              # Use specific pod DNS for stability
+              MASTER="seaweedfs-master-0.seaweedfs-master.storage:9333"
+              FILER="seaweedfs-filer-0.seaweedfs-filer.storage:8888"
 
-              create_bucket "loki-data"
-              create_bucket "loki-data-ruler"
+              until echo "s3.bucket.list" | weed shell -master=$MASTER; do
+                echo "Waiting for master at $MASTER..."
+                sleep 2
+              done
+
+              echo "Creating Buckets and Users..."
+              weed shell -master=$MASTER <<EOF
+              s3.bucket.create -name=mimir-tsdb
+              s3.bucket.create -name=mimir-ruler
+              s3.bucket.create -name=mimir-alertmanager
+              s3.bucket.create -name=loki-chunks
+              s3.bucket.create -name=loki-ruler
+              s3.bucket.create -name=loki-admin
+              s3.configure -user=mimir -access_key=mimir -secret_key=mimir -actions=Read,Write,List,Tagging,Admin
+              s3.configure -user=loki -access_key=loki -secret_key=loki -actions=Read,Write,List,Tagging,Admin
+              EOF
       restartPolicy: OnFailure
