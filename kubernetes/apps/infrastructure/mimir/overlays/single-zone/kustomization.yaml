@@ -6,7 +6,10 @@ resources:
 
 patches:
   - path: patch-replicas.yaml
-  - path: patch-no-ha-args.yaml
     target:
       kind: Deployment|StatefulSet
       name: .*
+  - path: patch-no-ha-args.yaml
+    target:
+      kind: Deployment|StatefulSet
+      name: mimir-(ingester|store-gateway|alertmanager|compactor|distributor|querier|query-frontend|query-scheduler|ruler|overrides-exporter).*
