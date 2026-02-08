@@ -23,39 +23,91 @@ mimir:
       s3:
         bucket_name: mimir-ruler
 
+  mimir:
+    structuredConfig:
+      limits:
+        # Disable zone-awareness for single-zone deployment
+        ingestion_rate: 100000
+        ingestion_burst_size: 200000
+        max_global_series_per_user: 1000000
+
+      # Single Zone Configuration
+      ingester:
+        ring:
+          replication_factor: 1
+          zone_awareness_enabled: false
+
+      store_gateway:
+        sharding_ring:
+          replication_factor: 1
+          zone_awareness_enabled: false
+
+      alertmanager:
+        sharding_ring:
+          replication_factor: 1
+          zone_awareness_enabled: false
+
+      ruler:
+        ring:
+          replication_factor: 1
+          zone_awareness_enabled: false
+
+      distributor:
+        ring:
+          kvstore:
+            store: memberlist
+
 # Disable MinIO as we use SeaweedFS
 minio:
   enabled: false
 
-# Replicas (minimal for now)
+# Replicas (Single Zone = 1)
 ingester:
+  replicas: 1
   persistentVolume:
     size: 2Gi
     storageClass: longhorn
 
 store_gateway:
+  replicas: 1
   persistentVolume:
     size: 2Gi
     storageClass: longhorn
 
 compactor:
+  replicas: 1
   persistentVolume:
     size: 2Gi
     storageClass: longhorn
 
 ruler:
   enabled: true
+  replicas: 1
 
 alertmanager:
   enabled: true
+  replicas: 1
 
   persistentVolume:
     size: 2Gi
     storageClass: longhorn
 
+distributor:
+  replicas: 1
+
+querier:
+  replicas: 1
+
+query_frontend:
+  replicas: 1
+
+query_scheduler:
+  replicas: 1
+
 # Gateway (Nginx)
 nginx:
   enabled: true
+  replicas: 1
 
 meta_monitoring:
   serviceMonitor:
