@@ -1,5 +1,9 @@
 mimir:
   structuredConfig:
+    limits:
+      ingestion_rate: 100000
+      ingestion_burst_size: 200000
+      max_global_series_per_user: 1000000
     common:
       storage:
         backend: s3
@@ -22,40 +26,6 @@ mimir:
     ruler_storage:
       s3:
         bucket_name: mimir-ruler
-
-  mimir:
-    structuredConfig:
-      limits:
-        # Disable zone-awareness for single-zone deployment
-        ingestion_rate: 100000
-        ingestion_burst_size: 200000
-        max_global_series_per_user: 1000000
-
-      # Single Zone Configuration
-      ingester:
-        ring:
-          replication_factor: 1
-          zone_awareness_enabled: false
-
-      store_gateway:
-        sharding_ring:
-          replication_factor: 1
-          zone_awareness_enabled: false
-
-      alertmanager:
-        sharding_ring:
-          replication_factor: 1
-          zone_awareness_enabled: false
-
-      ruler:
-        ring:
-          replication_factor: 1
-          zone_awareness_enabled: false
-
-      distributor:
-        ring:
-          kvstore:
-            store: memberlist
 
 # Disable MinIO as we use SeaweedFS
 minio:
