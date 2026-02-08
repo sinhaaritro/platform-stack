@@ -12,10 +12,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - mimir.ruth.k8s.sh
+        - mimir.ruth.example.com
       secretName: mimir-gateway-tls
   rules:
-    - host: mimir.ruth.k8s.sh
+    - host: mimir.ruth.example.com
       http:
         paths:
           - path: /

@@ -29,50 +29,41 @@ minio:
 
 # Replicas (minimal for now)
 ingester:
-  replicas: 1
   persistentVolume:
     size: 2Gi
     storageClass: longhorn
 
 store_gateway:
-  replicas: 1
   persistentVolume:
     size: 2Gi
     storageClass: longhorn
 
 compactor:
-  replicas: 1
   persistentVolume:
     size: 2Gi
     storageClass: longhorn
 
 distributor:
-  replicas: 1
 
 querier:
-  replicas: 1
 
 query_frontend:
-  replicas: 1
 
 ruler:
   enabled: true
-  replicas: 1
 
 alertmanager:
   enabled: true
-  replicas: 1
+
   persistentVolume:
     size: 2Gi
     storageClass: longhorn
 
 overrides_exporter:
-  replicas: 1
 
 # Gateway (Nginx)
 nginx:
   enabled: true
-  replicas: 1
 
 meta_monitoring:
   serviceMonitor:

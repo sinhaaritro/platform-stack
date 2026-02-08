@@ -1,0 +1,27 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: mimir
+  namespace: monitoring
+spec:
+  values:
+    ingester:
+      replicas: 1
+    store_gateway:
+      replicas: 1
+    compactor:
+      replicas: 1
+    distributor:
+      replicas: 1
+    querier:
+      replicas: 1
+    query_frontend:
+      replicas: 1
+    ruler:
+      replicas: 1
+    alertmanager:
+      replicas: 1
+    overrides_exporter:
+      replicas: 1
+    nginx:
+      replicas: 1

@@ -3,5 +3,5 @@ kind: Kustomization
 namespace: monitoring
 
 resources:
-  - ../../../apps/infrastructure/mimir/base
+  - ../../../apps/infrastructure/mimir/overlays/minimal
   - ingress.yaml
