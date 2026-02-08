@@ -6,3 +6,10 @@ resources:
 
 patches:
   - path: replicas.yaml
+    target:
+      kind: Deployment
+      labelSelector: app.kubernetes.io/instance=mimir
+  - path: replicas.yaml
+    target:
+      kind: StatefulSet
+      labelSelector: app.kubernetes.io/instance=mimir
