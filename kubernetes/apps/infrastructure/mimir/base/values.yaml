@@ -4,7 +4,7 @@ mimir:
       storage:
         backend: s3
         s3:
-          endpoint: http://seaweedfs-s3.storage.svc:8333
+          endpoint: seaweedfs-s3.storage.svc:8333
           region: us-east-1
           access_key_id: mimir
           secret_access_key: mimir
