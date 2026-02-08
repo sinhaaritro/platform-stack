@@ -1,0 +1,87 @@
+mimir:
+  structuredConfig:
+    common:
+      storage:
+        backend: s3
+        s3:
+          endpoint: http://seaweedfs-s3.storage.svc:8333
+          region: us-east-1
+          access_key_id: mimir
+          secret_access_key: mimir
+          insecure: true
+          signature_version: v4
+
+    blocks_storage:
+      s3:
+        bucket_name: mimir-tsdb
+
+    alertmanager_storage:
+      s3:
+        bucket_name: mimir-alertmanager
+
+    ruler_storage:
+      s3:
+        bucket_name: mimir-ruler
+
+# Disable MinIO as we use SeaweedFS
+minio:
+  enabled: false
+
+# Replicas (minimal for now)
+ingester:
+  replicas: 1
+  persistentVolume:
+    size: 10Gi
+    storageClass: longhorn
+
+store_gateway:
+  replicas: 1
+  persistentVolume:
+    size: 10Gi
+    storageClass: longhorn
+
+compactor:
+  replicas: 1
+  persistentVolume:
+    size: 10Gi
+    storageClass: longhorn
+
+distributor:
+  replicas: 1
+
+querier:
+  replicas: 1
+
+query_frontend:
+  replicas: 1
+
+ruler:
+  enabled: true
+  replicas: 1
+
+alertmanager:
+  enabled: true
+  replicas: 1
+  persistentVolume:
+    size: 2Gi
+    storageClass: longhorn
+
+overrides_exporter:
+  replicas: 1
+
+# Gateway (Nginx)
+nginx:
+  enabled: true
+  replicas: 1
+
+meta_monitoring:
+  serviceMonitor:
+    enabled: true
+    labels:
+      release: prometheus-stack
+  prometheusRule:
+    enabled: true
+    labels:
+      release: prometheus-stack
+      prometheus: k8s
+      role: alert-rules
