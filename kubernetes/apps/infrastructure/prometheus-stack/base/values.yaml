@@ -17,6 +17,13 @@ grafana:
             matcherRegex: "traceID=(\\w+)"
             name: TraceID
             url: "$${__value.raw}"
+    - name: Mimir
+      type: prometheus
+      url: http://mimir-nginx.monitoring.svc:80/prometheus
+      access: proxy
+      isDefault: false
+      jsonData:
+        timeInterval: "15s"
 
   persistence:
     enabled: true
