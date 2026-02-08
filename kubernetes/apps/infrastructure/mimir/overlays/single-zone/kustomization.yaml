@@ -9,7 +9,23 @@ patches:
     target:
       kind: Deployment|StatefulSet
       name: .*
-  - path: patch-no-ha-args.yaml
+  - path: patch-args-ingester.yaml
     target:
-      kind: Deployment|StatefulSet
-      name: mimir-(ingester|store-gateway|alertmanager|compactor|distributor|querier|query-frontend|query-scheduler|ruler|overrides-exporter).*
+      kind: StatefulSet
+      name: mimir-ingester.*
+  - path: patch-args-distributor.yaml
+    target:
+      kind: Deployment
+      name: mimir-distributor.*
+  - path: patch-args-store-gateway.yaml
+    target:
+      kind: StatefulSet
+      name: mimir-store-gateway.*
+  - path: patch-args-ruler.yaml
+    target:
+      kind: Deployment
+      name: mimir-ruler.*
+  - path: patch-args-alertmanager.yaml
+    target:
+      kind: StatefulSet
+      name: mimir-alertmanager.*

@@ -1,0 +1,6 @@
+- op: add
+  path: /spec/template/spec/containers/0/args/-
+  value: "-store-gateway.sharding-ring.replication-factor=1"
+- op: add
+  path: /spec/template/spec/containers/0/args/-
+  value: "-store-gateway.sharding-ring.zone-awareness-enabled=false"
