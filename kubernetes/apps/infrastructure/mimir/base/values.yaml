@@ -31,19 +31,19 @@ minio:
 ingester:
   replicas: 1
   persistentVolume:
-    size: 10Gi
+    size: 2Gi
     storageClass: longhorn
 
 store_gateway:
   replicas: 1
   persistentVolume:
-    size: 10Gi
+    size: 2Gi
     storageClass: longhorn
 
 compactor:
   replicas: 1
   persistentVolume:
-    size: 10Gi
+    size: 2Gi
     storageClass: longhorn
 
 distributor:
