@@ -13,7 +13,7 @@ helmCharts:
     repo: https://seaweedfs.github.io/seaweedfs/helm
     releaseName: seaweedfs
     namespace: storage
-    version: 4.0.407
+    version: 4.0.409
     valuesFile: values.yaml # Uncomment when ready to use values
 
 patches:

@@ -4,8 +4,6 @@ namespace: storage
 
 resources:
   - ../../../apps/infrastructure/seaweedfs/base
-  - ingress-extras.yaml
-  # - ../../../apps/infrastructure/seaweedfs/overlays/maintenance
 
 patches:
   # Ingress Host Configuration
