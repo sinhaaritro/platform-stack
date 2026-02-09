@@ -24,7 +24,7 @@ We utilize a strict 3-layer inheritance model. Specificity increases as we go do
     *   **Role:** Binds the App Profile to a specific Cluster. Defines Ingress domains, injects Secrets, NetworkPolicies.
     *   **Constraint:** The final build target.
 
-> **Advisory:** We do **not** use Flux `HelmRelease` resources. Running two GitOps engines (ArgoCD + Flux) is unnecessary complexity. We stick to standard Kubernetes resources and Kustomize.
+> **Critical Note:** We do **not** use Flux `HelmRelease` resources. Running two GitOps engines (ArgoCD + Flux) is unnecessary complexity. We stick to standard Kubernetes resources and Kustomize.
 
 #### Why this pattern?
 1.  **Vendor Upstream:** We reference official Helm charts directly.
@@ -404,6 +404,9 @@ Before generating code or executing commands, verify:
 4.  [ ] **Secret Check:** Did I use `secretGenerator` instead of hardcoding secrets?
 5.  [ ] **Patch Logic:** Did I use JSON Patch for ordered lists (`args`) and Merge Patch for maps (`env`)?
 6.  [ ] **Host Check:** Did I check `ansible/inventory.yml` before constructing a remote command?
+7.  [ ] **Maintenance Check (CRITICAL):**
+    *   Am I deleting an Application from `AppSet`? -> **STOP**.
+    *   Does this app have PVCs? -> **STOP**. Use [Maintenance Overlay](#12-maintenance-mode--scaling).
 
 ---
 
@@ -461,41 +464,35 @@ spec:
 
 ---
 
-## 12. Maintenance Mode & Scaling
+## 12. Maintenance Mode & Scaling (The "Safe Shutdown" Protocol)
 
-For operational tasks like storage upgrades, we need a standard way to scale applications to 0 without destroying their configuration (replicas, env vars) defined in `overlays/prod`.
+### A. The Golden Rule: Persistence First
+**NEVER** remove an application from the `AppSet` (ArgoCD) to shut it down.
+*   **Risk:** ArgoCD may cascade-delete the `StatefulSet` AND its `PVCs`, causing **PERMANENT DATA LOSS**.
+*   **Correct Method:** Scale the application to 0 replicas while keeping definitions active.
 
-**Pattern:** "Cluster Object Patch" using Shared Resources.
-We maintain shared patches in `kubernetes/apps/maintenance/`.
+### B. The "Maintenance Overlay" Pattern (GitOps Native)
+For complex stateful apps (SeaweedFS, Mimir, Loki), we use a dedicated Kustomize overlay to ensure a clean shutdown.
 
-### A. The "Scale to Zero" Patch
-**File:** `kubernetes/apps/maintenance/patch-scale-zero.yaml`
-Sets `replicas: 0` for Deployments and StatefulSets.
+1.  **Target:** `kubernetes/maintenance/shutdown`
+2.  **Mechanism:** Patches `replicas: 0` for all components (StatefulSet & Deployment).
+3.  **Usage (To Shutdown):**
+    *   Modify `kubernetes/clusters/[CLUSTER]/[APP]/kustomization.yaml`.
+    *   **Swap Base:** Change `resources` from `../../apps/services/[app]/overlays/prod` to `../../maintenance/shutdown`.
+    *   **Commit & Push:** ArgoCD syncs -> App scales to 0 -> PVCs remain Bound.
 
-### B. Usage (How to enable Maintenance)
-Edit the **Level 3 (Cluster)** Kustomization file: `kubernetes/clusters/[CLUSTER]/[APP]/kustomization.yaml`.
+### C. Decision Criteria: When to use "Safe Shutdown"?
+| Trigger | Action | Reason |
+| :--- | :--- | :--- |
+| **Upgrade Longhorn** | **MUST Shutdown** | Storage engine restart will hang writes. |
+| **Reboot Node** | **SHOULD Shutdown** | Prevents "Volume Locked" errors on reschedule. |
+| **Move Storage** | **MUST Shutdown** | Clean detach required for nice re-attach. |
+| **Upgrade Traefik** | **Safe Delete** | Stateless. Traffic drops only. |
 
-```yaml
-resources:
-  - ../../../apps/services/podinfo/overlays/prod
+### D. Manual Emergency Recovery
+If a volume gets "stuck" (device busy) despite safe shutdown:
+1.  **Cordon Node:** `kubectl cordon [node]`.
+2.  **Restart Longhorn:** `kubectl delete pod -n longhorn-system -l app=longhorn-manager --field-selector spec.nodeName=[node]`.
+3.  **Wait:** Allow CSI driver to re-register.
 
-patches:
-  # UNCOMMENT TO ENABLE MAINTENANCE MODE
-  - path: ../../../apps/maintenance/patch-scale-zero.yaml
-    target:
-      kind: Deployment|StatefulSet
-      name: .* # Target ALL resources in this app
-```
-
-### C. DaemonSets
-DaemonSets cannot be scaled to 0. We disable them by adding a non-existent `nodeSelector`.
-**File:** `kubernetes/apps/maintenance/patch-daemonset-disable.yaml`
-
-```yaml
-patches:
-  - path: ../../../apps/maintenance/patch-daemonset-disable.yaml
-    target:
-      kind: DaemonSet
-      name: .*
-```
 

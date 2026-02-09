@@ -1,57 +1,57 @@
-apiVersion: argoproj.io/v1alpha1
-kind: ApplicationSet
-metadata:
-  name: arr-apps
-  namespace: argocd
-spec:
-  generators:
-    - git:
-        repoURL: https://github.com/sinhaaritro/platform-stack.git
-        revision: HEAD
-        directories:
-          - path: kubernetes/clusters/arr/*
-          - path: kubernetes/clusters/arr/cert-manager
-            exclude: true
-          - path: kubernetes/clusters/arr/kyverno
-            exclude: true
-          - path: kubernetes/clusters/arr/sealed-secrets
-            exclude: true
-          - path: kubernetes/clusters/arr/longhorn
-            exclude: true
-          - path: kubernetes/clusters/arr/seaweedfs
-            exclude: true
-          - path: kubernetes/clusters/arr/metallb-system
-            exclude: true
-          - path: kubernetes/clusters/arr/traefik
-            exclude: true
-          - path: kubernetes/clusters/arr/system-patches
-            exclude: true
-          - path: kubernetes/clusters/arr/promtail
-            exclude: true
-          - path: kubernetes/clusters/arr/prometheus-stack
-            exclude: true
-  template:
-    metadata:
-      name: "arr-{{path.basename}}"
-    spec:
-      project: default
-      source:
-        repoURL: https://github.com/sinhaaritro/platform-stack.git
-        targetRevision: HEAD
-        path: "{{path}}"
-      destination:
-        server: https://arr-api.example.com:6443
-        namespace: "{{path.basename}}"
-      syncPolicy:
-        automated:
-          prune: true
-          selfHeal: true
-        syncOptions:
-          - CreateNamespace=true
-          - Replace=true
-        retry:
-          limit: 10
-          backoff:
-            duration: "5s"
-            factor: 2
-            maxDuration: "3m"
+# apiVersion: argoproj.io/v1alpha1
+# kind: ApplicationSet
+# metadata:
+#   name: arr-apps
+#   namespace: argocd
+# spec:
+#   generators:
+#     - git:
+#         repoURL: https://github.com/sinhaaritro/platform-stack.git
+#         revision: HEAD
+#         directories:
+#           - path: kubernetes/clusters/arr/*
+#           - path: kubernetes/clusters/arr/cert-manager
+#             exclude: true
+#           - path: kubernetes/clusters/arr/kyverno
+#             exclude: true
+#           - path: kubernetes/clusters/arr/sealed-secrets
+#             exclude: true
+#           - path: kubernetes/clusters/arr/longhorn
+#             exclude: true
+#           - path: kubernetes/clusters/arr/seaweedfs
+#             exclude: true
+#           - path: kubernetes/clusters/arr/metallb-system
+#             exclude: true
+#           - path: kubernetes/clusters/arr/traefik
+#             exclude: true
+#           - path: kubernetes/clusters/arr/system-patches
+#             exclude: true
+#           - path: kubernetes/clusters/arr/promtail
+#             exclude: true
+#           - path: kubernetes/clusters/arr/prometheus-stack
+#             exclude: true
+#   template:
+#     metadata:
+#       name: "arr-{{path.basename}}"
+#     spec:
+#       project: default
+#       source:
+#         repoURL: https://github.com/sinhaaritro/platform-stack.git
+#         targetRevision: HEAD
+#         path: "{{path}}"
+#       destination:
+#         server: https://arr-api.example.com:6443
+#         namespace: "{{path.basename}}"
+#       syncPolicy:
+#         automated:
+#           prune: true
+#           selfHeal: true
+#         syncOptions:
+#           - CreateNamespace=true
+#           - Replace=true
+#         retry:
+#           limit: 10
+#           backoff:
+#             duration: "5s"
+#             factor: 2
+#             maxDuration: "3m"
