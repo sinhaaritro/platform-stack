@@ -1,5 +1,5 @@
-# Authoritative Kubernetes Architecture Guide for AI Agent 
-**Version:** 4.0 (Complete)
+# Authoritative Kubernetes Architecture Guide for AI Agent
+**Version:** 5.1 (Restored & Refined)
 
 **Author:** Aritro Sinha
 
@@ -7,42 +7,34 @@
 
 ---
 
-## 1. Architectural Philosophy & Mental Models
+## 1. Architectural Philosophy: "The Lego Model"
 
-### A. The "Russian Doll" Configuration Pattern
-We utilize a strict 3-layer inheritance model. Specificity increases as we go down the layers.
-*   **Level 1: Base (The Package)**
-    *   **Technology:** `Helm` (via Kustomize `helmCharts` and `valuesFile`).
-    *   **Role:** Inflates the upstream chart into raw YAML. Sets "Safe Defaults".
-    *   **Constraint:** NEVER contains environment-specific logic.
-*   **Level 2: Overlay (The App Profile)**
-    *   **Technology:** `Kustomize` (Patches & Resources).
-    *   **Role:** Defines logical application profiles (e.g., `dev`, `prod`, `minimal`). Modifies replicas, feature flags, UI colors.
-    *   **Constraint:** NEVER contains infrastructure-specific data (Ingress hosts, specific secrets).
-*   **Level 3: Cluster (The Tenant/Infra)**
-    *   **Technology:** `Kustomize` (Patches & Resources).
-    *   **Role:** Binds the App Profile to a specific Cluster. Defines Ingress domains, injects Secrets, NetworkPolicies.
-    *   **Constraint:** The final build target.
+We utilize a flexible **Composition Pattern** (Base + Patches + Overlays). Instead of deep linear inheritance, we prefer composing functionality from atomic pieces.
 
-> **Critical Note:** We do **not** use Flux `HelmRelease` resources. Running two GitOps engines (ArgoCD + Flux) is unnecessary complexity. We stick to standard Kubernetes resources and Kustomize.
+### The 4 Structural Components
 
-#### Why this pattern?
-1.  **Vendor Upstream:** We reference official Helm charts directly.
-2.  **Clean Overrides:** We avoid copy-pasting monolithic `values.yaml` files. We only maintain the *delta*.
-3.  **Last Mile Patching:** Kustomize allows us to path the resulting YAML (e.g., adding annotations to Secrets) even if the Helm chart doesn't expose a variable for it.
+1.  **Base (The Foundation)**
+    *   **Location:** `apps/[category]/[app]/base/`
+    *   **Role:** The raw Helm Chart + Default `values.yaml`.
+    *   **Constraint:** Pure installation. No environment specifics.
 
-### B. The "Hub-and-Spoke" GitOps Topology
-*   **Hub (Management Cluster):** The cluster running ArgoCD (e.g., `CLS1`). It manages itself and other clusters.
-*   **Spoke (Target Cluster):** A cluster registered to the Hub. It does not run its own ArgoCD control plane.
-*   **ApplicationSets:** Used to automate deployment.
-    *   `appset-core`: Deploys common apps to **ALL** clusters (Matrix Generator).
-    *   `appset-apps-[CLUSTER]`: Deploys unique apps to **ONE** specific cluster (Git Directory Generator).
+2.  **Patches (The Features)**
+    *   **Location:** `apps/[category]/[app]/patches/`
+    *   **Role:** Atomic, reusable units of change.
+    *   **Examples:** `scale-to-zero.yaml` (Maintenance), `high-availability.yaml` (3 replicas), `ingress-internal.yaml`.
+    *   **Constraint:** Must be self-contained Kustomize patches.
 
-### C. The "Remote Operator" Execution Model
-The environment where this code is generated is **NOT** the cluster.
-*   **Local Scope:** File generation, `kustomize build` (dry-run), Git operations.
-*   **Remote Scope:** `kubectl` commands, logs, debugging.
-*   **Bridge:** All remote interaction **MUST** be tunneled through **Ansible** using the `Taskfile`.
+3.  **Overlays (The Profiles)**
+    *   **Location:** `apps/[category]/[app]/overlays/`
+    *   **Role:** Pre-packaged compositions for standard scenarios.
+    *   **Logic:** `Base` + `Select Patches`.
+    *   **Examples:** `dev` (Base), `prod` (Base + HA), `maintenance` (Base + Zero Replicas).
+
+4.  **Cluster Implementation (The Deployment)**
+    *   **Location:** `clusters/[cluster]/[app]/`
+    *   **Role:** The final binding to a specific cluster.
+    *   **Logic:** Can consume **Process A** (Direct Base) or **Process B** (Overlay).
+    *   **Flexibility:** Can apply *additional* cluster-specific patches on top.
 
 ---
 
@@ -65,28 +57,44 @@ This is organized by **Target**. It contains the specific implementations.
 ```text
 root/
 ├── ansible/                                 # REMOTE EXECUTION CONTEXT
-│   ├── inventory.yml                        # Host list (Look here to find IPs)
-│   ├── Taskfile.yml                         # Wrappers commands for remote execution
-│   └── ansible.cfg                          # Connection config
+│   ├── inventory.yml                        # Host list
+│   ├── Taskfile.yml                         # Remote execution wrappers
+│   └── ansible.cfg
 ├── kubernetes/
-│   ├── Taskfile.yml                         # Common K8s helper commands
-│   ├── apps/                                # APP DEFINITIONS
+│   ├── apps/                                # REUSABLE DEFINITIONS
 │   │   ├── infrastructure/
-│   │   │   └── cert-manager/ ...
-│   │   └── services/
+│   │   │   └── [APP_NAME]/
+│   │   │       ├── base/                    # 1. BASE
+│   │   │       │   ├── kustomization.yaml   # HelmRelease / Core Resources
+│   │   │       │   └── values.yaml
+│   │   │       ├── patches/                 # 2. PATCHES (Atomic Features)
+│   │   │       │   ├── scale-to-zero.yaml
+│   │   │       │   ├── high-availability.yaml
+│   │   │       │   └── ingress-traefik.yaml
+│   │   │       └── overlays/                # 3. OVERLAYS (Profiles)
+│   │   │           ├── dev/                 # (Base + Simple)
+│   │   │           ├── prod/                # (Base + HA Patch)
+│   │   │           └── maintenance/         # (Base + Zero Replicas)
+│   │   ├── services/
+│   │   │   └── [APP_NAME]/
+│   │   │       ├── base/                    # 1. BASE
+│   │   │       │   ├── kustomization.yaml   # HelmRelease / Core Resources
+│   │   │       │   └── values.yaml
+│   │   │       ├── patches/                 # 2. PATCHES (Atomic Features)
+│   │   │       │   ├── scale-to-zero.yaml
+│   │   │       │   ├── high-availability.yaml
+│   │   │       │   └── ingress-traefik.yaml
+│   │   │       └── overlays/                # 3. OVERLAYS (Profiles)
+│   │   │           ├── dev/                 # (Base + Simple)
+│   │   │           ├── prod/                # (Base + HA Patch)
+│   │   │           └── maintenance/         # (Base + Scale-Zero Patch)
+│   │                       
+│   ├── clusters/                            # 4. CLUSTER IMPLEMENTATIONS
+│   │   └── [CLUSTER_NAME]/
 │   │       └── [APP_NAME]/
-│   │           ├── base/                    # LEVEL 1 (Helm Inflation)
-│   │           │   ├── kustomization.yaml
-│   │           │   └── values.yaml
-│   │           └── overlays/                # LEVEL 2 (App Profiles)
-│   │               └── [PROFILE_NAME]/      # e.g., dev, prod
-│   │                   ├── kustomization.yaml
-│   │                   └── patch-[logic].yaml
-│   ├── clusters/                            # CLUSTER INSTANCES (LEVEL 3)
-│   │   └── [CLUSTER_NAME]/                  # e.g., CLS1, CLS2
-│   │       └── [APP_NAME]/                  # e.g., podinfo
 │   │           ├── kustomization.yaml
-│   │           └── patch-[infra].yaml
+│   │           └── patch-[local].yaml       # Cluster-specific overrides
+│   │
 │   └── bootstrap/                           # MANAGEMENT LAYER (ArgoCD)
 │       └── [MGMT_CLUSTER]/                  # e.g., CLS1 (The Hub)
 │           ├── appset-core.yaml             # Apps installed everywhere
@@ -95,7 +103,7 @@ root/
 │           └── appset-apps-CLS3.yaml        # Apps specific to CLS3 (Spoke)
 ```
 
-Future
+Future when we will multiple tenants in 1 cluster
 ```text
 │
 └── clusters/ruth/              # [THE INVENTORY]
@@ -108,391 +116,141 @@ Future
 
 ## 3. Operational Protocols: Bootstrapping & Cluster Management
 
-For multi-cluster management, we use **ArgoCD ApplicationSets** located in the `bootstrap` folder.
+### A. The "Hub-and-Spoke" Topology
+*   **Hub (Management Cluster):** The cluster running ArgoCD (e.g., `CLS1`). It manages itself and other clusters.
+*   **Spoke (Target Cluster):** A cluster registered to the Hub. It does not run its own ArgoCD control plane.
+*   **Bootstrapping:** All ApplicationSets live in `kubernetes/bootstrap/[HUB]/`. Target clusters do *not* have their own bootstrap folder.
 
-### A. The "Hub-and-Spoke" Definition
-The `bootstrap` folder is organized by **Management Cluster**.
-*   If `CLS1` is the Hub, all ApplicationSets live in `kubernetes/bootstrap/CLS1/`.
-*   Target clusters (`CLS2`, `CLS3`) **do not** have their own folder in `bootstrap`. They have a definition file inside the Hub's folder.
-
-#### The Matrix Generator Pattern
-To manage core infrastructure (like `cert-manager`, `monitoring`, `system-patches`) across **ALL** clusters efficiently, we use the **Matrix Generator**.
+### B. The Matrix Generator Pattern (Core Apps)
+To manage core infrastructure (like `cert-manager`, `monitoring`) across **ALL** clusters efficiently, we use the **Matrix Generator**.
 
 1.  **Generator 1 (Clusters):** Automatically discovers all clusters registered in ArgoCD.
-2.  **Generator 2 (List):** Defines the list of applications to deploy (name, namespace, sync options).
+2.  **Generator 2 (List):** Defines the list of core applications to deploy.
 
-The Matrix generator acts as a multiplication table: `(Clusters) x (Apps) = Deployments`.
-This ensures that if we add a new cluster, it automatically gets the standard baseline configuration without copying paste YAML.
+**Rule:** If adding an app to *all* clusters, add it to `appset-core.yaml`. Explicitly exclude it from individual cluster ApplicationSets if needed.
 
-**Example: `appset-core.yaml`**
-```yaml
-spec:
-  generators:
-    - matrix:
-        generators:
-          - clusters: {} # Dynamic discovery
-          - list:
-              elements:
-                - app: cert-manager
-                  namespace: networking
-                  serverSideApply: "true"
-                  replace: "false"
-                - app: longhorn
-                  namespace: storage
-                  serverSideApply: "true"
-                  replace: "false"
-                # ...
-```
+### C. Tenant Apps (Cluster Specific)
+Tenant-specific apps are managed by a **Git Generator** in `appset-apps-[CLUSTER].yaml`. This generator looks for directories inside `kubernetes/clusters/[CLUSTER]/*`.
 
-> Note: If we want to add a app to all cluster then we have to add it to `appset-core.yaml`. And we have to manually excluse the app from the cluster specific files like `kubernetes/bootstrap/CLS1/appset-apps-CLS1.yaml`, `kubernetes/bootstrap/CLS1/appset-apps-CLS2.yaml`, `kubernetes/bootstrap/CLS1/appset-apps-CLS3.yaml`
-
-#### Tenant Apps
-Tenant-specific apps are usually managed by a simpler **Git Generator**, which looks for directories separately in each cluster's folder (e.g., `kubernetes/bootstrap/CLS1/appset-apps-CLS1.yaml`), allowing for per-cluster customization.
-
-### B. Protocol: Adding a New Cluster (e.g., CLS3)
-To bring a new cluster under management:
-1.  **Register:** Connect `CLS3` to the ArgoCD on `CLS1` (CLI: `argocd cluster add ...` via Ansible).
-2.  **Define:** Create a new file `kubernetes/bootstrap/CLS1/appset-apps-CLS3.yaml`.
-3.  **Content:** Copy the pattern from `CLS2`, changing the `destination.name` and the `git.directories.path`.
-
-```yaml
-# kubernetes/bootstrap/CLS1/appset-apps-CLS3.yaml
-apiVersion: argoproj.io/v1alpha1
-kind: ApplicationSet
-metadata:
-  name: apps-cls3
-spec:
-  generators:
-    - git:
-        repoURL: https://github.com/my-org/gitops.git
-        revision: HEAD
-        directories:
-          - path: kubernetes/clusters/CLS3/* # Target the specific cluster folder
-  template:
-    metadata:
-      name: 'CLS3-{{path.basename}}'
-    spec:
-      project: default
-      source:
-        repoURL: https://github.com/my-org/gitops.git
-        targetRevision: HEAD
-        path: '{{path}}'
-      destination:
-        name: CLS3 # Matches the registered cluster name
-        namespace: '{{path.basename}}'
-```
-
-### C. Protocol: Adding a New App
-1.  **Global App:** Add to `appset-core.yaml`. It automatically rolls out to CLS1, CLS2, CLS3...
-2.  **Cluster Specific App:**
-    *   Create folder `kubernetes/clusters/CLS3/my-new-app`.
-    *   **Result:** `appset-apps-CLS3.yaml` automatically finds this folder and deploys it only to CLS3.
+**To Add a New App to CLS1:**
+1.  Create folder `kubernetes/clusters/CLS1/my-new-app`.
+2.  Add `kustomization.yaml` (consuming Base or Overlay).
+3.  ArgoCD automatically detects and deploys it.
 
 ---
 
 ## 4. Operational Protocols: Execution & Debugging
 
-**Rule:** Never assume `kubectl` works locally against the target cluster. Use Ansible tunneling from `ansible/Taskfile.yml`..
+**Rule:** Never assume `kubectl` works locally against the target cluster. Use Ansible tunneling.
 
-### Example Scenario: "Investigate why Podinfo is failing on CLS1"
+### Debugging Workflow
+**Scenario:** "Investigate why Podinfo is failing on CLS1"
 
-**Agent Thought Process:**
-1.  **Goal:** Debug Podinfo on CLS1.
-2.  **Constraint:** Cannot run kubectl locally.
-3.  **Action 1 (Locate Host):** Read `ansible/inventory.yml`.
-    *   *Found:* `CLS1` group has host `cls1-control-plane-01`.
-4.  **Action 2 (Check Status):** Construct Ansible command via Taskfile.
-    *   *Command:* `task -d ansible k8s:cmd HOST=cls1-control-plane-01 CMD="kubectl get pods -n podinfo"`
-    *   *Output:* `podinfo-dep-xyz CrashLoopBackOff`
-5.  **Action 3 (Deep Dive):** Check logs/describe.
-    *   *Command:* `task -d ansible k8s:cmd HOST=cls1-control-plane-01 CMD="kubectl logs -l app=podinfo -n podinfo --tail=20"`
-    *   *Output:* `Error: Memory limit exceeded`
-6.  **Action 4 (Fix):** Modify Code (Local).
-    *   Edit `kubernetes/clusters/CLS1/podinfo/patch-resources.yaml` (Level 3 patch).
-    *   Increase Memory limit.
-7.  **Action 5 (Deploy):** Commit & Push. ArgoCD handles the rest.
+1.  **Locate Host:** Check `ansible/inventory.yml` to find the control plane IP for `CLS1`.
+2.  **Check Status:**
+    *   `task -d ansible k8s:cmd HOST=cls1-cp CMD="kubectl get pods -n podinfo"`
+3.  **Deep Dive:**
+    *   `task -d ansible k8s:cmd HOST=cls1-cp CMD="kubectl logs -l app=podinfo -n podinfo"`
+4.  **Decide Fix Scope (Critical Step):**
+    *   **Is this a Global Issue?** (e.g., Wrong Docker image tag, buggy config).
+        *   -> Fix in `apps/services/podinfo/base` or `patches`.
+    *   **Is this a Local Issue?** (e.g., Ingress host mismatch, specialized resource limit).
+        *   -> Fix in `clusters/CLS1/podinfo/kustomization.yaml` or `patch-local.yaml`.
+5.  **Apply Fix (Local or Global):**
+    *   Update the specific file determined in Step 4.
+6.  **Deploy:** Commit & Push. ArgoCD handles the sync.
+
+### Local Debugging: Chart Inflation (The "X-Ray")
+To determine *exactly* what path to patch, you can inflate the Helm chart locally.
+
+1.  **Command:** `kustomize build --enable-helm . > debug_full.yaml`
+    *   Run this inside `base/` or `overlays/dev/`.
+2.  **Inspect:** Open `debug_full.yaml`. Find the resource (e.g., `Deployment`) and copy the exact path structure.
+3.  **Cleanup (CRITICAL):**
+    *   **NEVER** commit `debug_full.yaml`.
+    *   **NEVER** commit the `charts/` directory (created by Kustomize).
+    *   (Tip: Add headers to `.gitignore` to prevent accidents).
 
 ---
 
-## 5. Configuration & Coding Guidelines
+## 5. Configuration Guidelines
 
-### Level 1: Base (Helm Inflation)
-**File:** `kubernetes/apps/services/[APP]/base/kustomization.yaml`
+### A. The Base
+**File:** `apps/services/[app]/base/kustomization.yaml`
+*   Use `helmCharts` with `valuesFile`.
+*   Enable Ingress/Resources with dummy values so objects are generated for later patching.
 
-**Rule:** Use `helmCharts` with `valuesFile`. Enable Ingress/Resources with dummy values so objects are generated for later patching.
+### B. The Patches (Atomic Units)
+**File:** `apps/services/[app]/patches/[feature].yaml`
+*   **Functional:** Changes *one* aspect (e.g., `replicas: 0`, `resources: limits`).
+*   **Self-Contained:** Must be a valid Kustomize patch.
 
-### Level 2: Overlay (App Profile)
-**File:** `kubernetes/apps/services/[APP]/overlays/[PROFILE]/kustomization.yaml`
+### C. The Overlays (Profiles)
+**File:** `apps/services/[app]/overlays/[profile]/kustomization.yaml`
+*   **Composition:** `resources: [ ../../base ]` + `patches: [ ../../patches/feature.yaml ]`.
+*   **Rule:** Do *not* redefine Helm charts here. Only patch.
 
-**Rule:** Inherit Base. Use **Strategic Merge Patches** for simple updates.
-
-### Level 3: Cluster (Infra Binding)
-**File:** `kubernetes/clusters/[CLUSTER]/[APP]/kustomization.yaml`
-
-**Rule:** Inherit Overlay. Use **JSON Patches** for lists. Use **SecretGenerator** for credentials.
+### D. The Cluster Implementation
+**File:** `clusters/[cluster]/[app]/kustomization.yaml`
+*   **Consumption:** `resources: [ ../../../apps/services/[app]/overlays/prod ]` (or `base`).
+*   **Local Patching:** Add `patches: [ patch-local-ingress.yaml ]` for specific overrides like domains or secrets.
+*   **Shared Patching:** Can also pull in shared patches manually: `patches: [ ../../../apps/services/[app]/patches/extra-feature.yaml ]`.
 
 ---
 
 ## 6. Naming Conventions
-- **File Naming**:
-    * Kustomization file: kustomization.yaml (Lowercase).
-    * Patches: patch-[functional-area].yaml (e.g., patch-ingress.yaml, patch-limits.yaml).
-    * New Resources: resource-[kind]-[name].yaml (e.g., resource-cm-dashboard.yaml).
-- **Resource Naming**:
-    * All Kubernetes objects must use kebab-case.
-    * SecretGenerators should use a functional suffix (e.g., podinfo-auth).
-- **Patch Naming (Metadata)**:
-    * Patches usually do not need a filename inside the file content, but the name and namespace in the YAML MUST match the target object exactly.
+
+*   **Patches Folder:** `/patches/` (Plural).
+*   **Patch Files (Shared):** Descriptive names (e.g., `scale-to-zero.yaml`, `high-availability.yaml`).
+*   **Patch Files (Local):** `patch-[logic].yaml` (e.g., `patch-ingress.yaml`).
+*   **Resources:** `resource-[kind]-[name].yaml` (e.g., `resource-cm-dashboard.yaml`).
+*   **SecretGenerators:** Suffix with purpose (e.g., `podinfo-auth`).
 
 ---
 
 ## 7. Patching Strategy & Decision Tree
 
-**INPUT:** User wants to modify property `X` on resource `Y`.
+**INPUT:** Modify property `X` on resource `Y`.
 
-1.  **Is this a new object?** (e.g., Dashboard ConfigMap, NetworkPolicy)
-    *   **YES:** Create `resource-[kind]-[name].yaml`. Add to `resources` list.
-    *   **NO:** Proceed to 2.
+1.  **Is it a shared feature?** (e.g., "HA Mode", "Maintenance Mode")
+    *   **Action:** Create a shared patch in `apps/.../patches/`.
+    *   **Usage:** Reference it in `overlays/`.
 
-2.  **Is `X` a standard field?** (e.g., `replicas`, `image`, `service.type`, `tolerations`)
+2.  **Is it cluster-specific?** (e.g., "Ingress Host", "DB Password")
+    *   **Action:** Create a local patch `patch-ingress.yaml` in `clusters/.../`.
+
+3.  **Is `X` a Standard Field?** (Replicas, Image)
     *   **Action:** Use **Strategic Merge Patch**.
-    *   **File:** `patch-[feature].yaml`.
-    *   **Style:** Copy original structure, include only changed fields.
 
-3.  **Is `X` a Key-Value List?** (e.g., `env`, `volumeMounts`, `labels`)
-    *   **Action:** Use **Strategic Merge Patch**.
-    *   **Logic:** Kubernetes merges these by the "name" key. New names are appended; existing names are updated.
-
-4.  **Is `X` an Ordered List?** (e.g., `command`, `args`, `ingress.rules`)
+4.  **Is `X` an Ordered List?** (Command, Args)
     *   **Action:** Use **JSON Patch 6902**.
-    *   **Why:** Merge patches often overwrite the whole list or append incorrectly.
-    *   **Style:**
-        ```yaml
-        - target:
-            kind: Deployment
-            name: my-app
-          patch: |-
-            - op: replace
-              path: /spec/template/spec/containers/0/command/2
-              value: "--new-flag"
-        ```
+    *   (Merge patches append to lists, often breaking commands).
 
-5.  **Is the goal to DELETE an object?**
-    *   **Action:** Use `$patch: delete` directive in the Kustomization file or patch.
+5.  **Is `X` a Key-Value Map?** (Env, Labels)
+    *   **Action:** Use **Strategic Merge Patch**.
 
 ---
 
-## 8. Syntax Guide & Code Snippets
-
-### A. Level 1: Base (Helm Inflation)
-**File:** `apps/services/podinfo/base/kustomization.yaml`
-
-**Rule:** `valuesFile` is preferred over `valuesInline` for readability.
-
-```yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-helmCharts:
-  - name: podinfo
-    repo: https://stefanprodan.github.io/podinfo
-    version: 6.9.4
-    releaseName: my-podinfo
-    namespace: podinfo
-    includeCRDs: true
-    valuesFile: values.yaml # Must exist in same folder
-```
-
-### B. Level 2: Overlay (Strategic Merge Patch)
-**File:** `apps/services/podinfo/overlays/dev/patch-replicas.yaml`
-
-**Rule:** Only include fields that change.
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: my-podinfo # STRICT MATCH
-  namespace: podinfo # STRICT MATCH
-spec:
-  replicas: 1
-  template:
-    spec:
-      containers:
-        - name: podinfo # STRICT MATCH
-          env:
-            - name: LOG_LEVEL # Updating existing env
-              value: "debug"
-            - name: NEW_FEATURE # Adding new env
-              value: "enabled"
-```
-
-### C. Level 3: Cluster (JSON Patch 6902)
-**File:** `cluster/tenant-a/podinfo/kustomization.yaml`
-
-**Rule:** Used for precise surgical changes to arrays or complex paths.
-
-```yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-namespace: podinfo
-
-resources:
-  - ../../../apps/services/podinfo/overlays/dev
-
-patches:
-  - target:
-      kind: Ingress
-      name: my-podinfo
-    patch: |-
-      - op: replace
-        path: /spec/rules/0/host
-        value: "tenant-a.example.com"
-```
-
-### D. Secret Generation (Level 3 Only)
-**Rule:** Never commit base64 secrets. Use `secretGenerator`.
-
-```yaml
-secretGenerator:
-  - name: db-creds
-    literals:
-      - username=admin
-      - password=complex-password
-    # OR file based
-    # files:
-    #   - secrets/db.properties
-```
-
----
-
-## 9. Common Pitfalls & Anti-Patterns (The "Don't Do This" List)
+## 8. Common Pitfalls & Anti-Patterns
 
 1.  **The "Values in Overlay" Fallacy:**
-    *   *Bad:* Defining `helmCharts` again in `overlays/dev/kustomization.yaml` to pass a different `values.yaml`.
-    *   *Why:* This creates two different Helm releases.
-    *   *Correct:* Inherit the Base (which has the Helm Chart) and use **Patches** to modify the output.
+    *   *Bad:* Defining `helmCharts` again in Overlay to pass different values.
+    *   *Correct:* Inflate Helm in Base to default YAML. Patch the YAML in Overlay/Cluster.
 
 2.  **The "Path Blindness":**
     *   *Bad:* `resources: [ ../base ]` (Relative paths are tricky).
-    *   *Correct:* Always calculate the relative path based on the depth.
-        *   Overlay -> Base: `../../base`
-        *   Cluster -> Overlay: `../../../apps/services/[app]/overlays/[profile]`
+    *   *Correct:* Calculate depth. Cluster -> Overlay = `../../../`.
 
 3.  **Imperative Secret Injection:**
-    *   *Bad:* Hardcoding `value: my-password` in a `Deployment` patch.
-    *   *Correct:* Create a `Secret` (via generator) and use `valueFrom: secretKeyRef` in the `Deployment` patch.
-
-4.  **Overwriting Lists with Strategic Merge:**
-    *   *Bad:* Trying to change the 3rd argument in `command: [...]` by copying the whole list in a merge patch.
-    *   *Why:* This often appends rather than replaces, or replaces the whole list destroying other settings.
-    *   *Correct:* Use JSON Patch 6902 for ordered lists (`command`, `args`).
+    *   *Bad:* Hardcoding `value: password`.
+    *   *Correct:* Use `secretGenerator` + `valueFrom`.
 
 ---
 
+## 9. AI Agent Verification Checklist
 
-## 10. AI Agent Verification Checklist
-
-Before generating code or executing commands, verify:
-
-1.  [ ] **Context Check:** Am I writing code (Local) or debugging (Remote/Ansible)?
-2.  [ ] **Pathing:** Am I using `clusters` (plural) for level 3?
-3.  [ ] **Bootstrap Check:**
-    *   Is this a new Cluster? (Update `bootstrap/[HUB]/appset-apps-[NEW_CLUSTER].yaml`).
-    *   Is this a Core app? (Update `appset-core.yaml` & check excludes).
-4.  [ ] **Secret Check:** Did I use `secretGenerator` instead of hardcoding secrets?
-5.  [ ] **Patch Logic:** Did I use JSON Patch for ordered lists (`args`) and Merge Patch for maps (`env`)?
-6.  [ ] **Host Check:** Did I check `ansible/inventory.yml` before constructing a remote command?
-7.  [ ] **Maintenance Check (CRITICAL):**
-    *   Am I deleting an Application from `AppSet`? -> **STOP**.
-    *   Does this app have PVCs? -> **STOP**. Use [Maintenance Overlay](#12-maintenance-mode--scaling).
-
----
-
-## 11. Complete Example: "The Podinfo Standard"
-
-**Input Request:** "Deploy Podinfo to 'tenant-b' cluster using 'prod' profile. Change Host to 'b.com' and Memory limit to '1Gi'."
-
-**AI Generated Plan:**
-
-1.  **Apps Layer:** `apps/services/podinfo/overlays/prod` exists.
-2.  **Cluster Layer:** Create `cluster/tenant-b/podinfo`.
-
-**File:** `cluster/tenant-b/podinfo/kustomization.yaml`
-```yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-namespace: podinfo
-
-resources:
-  - ../../../apps/services/podinfo/overlays/prod
-
-patches:
-  - path: patch-ingress-host.yaml
-  - path: patch-memory-limit.yaml
-```
-
-**File:** `cluster/tenant-b/podinfo/patch-ingress-host.yaml`
-```yaml
-- target:
-    kind: Ingress
-    name: my-podinfo
-  patch: |-
-    - op: replace
-      path: /spec/rules/0/host
-      value: "b.com"
-```
-
-**File:** `cluster/tenant-b/podinfo/patch-memory-limit.yaml`
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: my-podinfo
-  namespace: podinfo
-spec:
-  template:
-    spec:
-      containers:
-        - name: podinfo
-          resources:
-            limits:
-              memory: "1Gi"
-```
-
----
-
-## 12. Maintenance Mode & Scaling (The "Safe Shutdown" Protocol)
-
-### A. The Golden Rule: Persistence First
-**NEVER** remove an application from the `AppSet` (ArgoCD) to shut it down.
-*   **Risk:** ArgoCD may cascade-delete the `StatefulSet` AND its `PVCs`, causing **PERMANENT DATA LOSS**.
-*   **Correct Method:** Scale the application to 0 replicas while keeping definitions active.
-
-### B. The "Maintenance Overlay" Pattern (GitOps Native)
-For complex stateful apps (SeaweedFS, Mimir, Loki), we use a dedicated Kustomize overlay to ensure a clean shutdown.
-
-1.  **Target:** `kubernetes/maintenance/shutdown`
-2.  **Mechanism:** Patches `replicas: 0` for all components (StatefulSet & Deployment).
-3.  **Usage (To Shutdown):**
-    *   Modify `kubernetes/clusters/[CLUSTER]/[APP]/kustomization.yaml`.
-    *   **Swap Base:** Change `resources` from `../../apps/services/[app]/overlays/prod` to `../../maintenance/shutdown`.
-    *   **Commit & Push:** ArgoCD syncs -> App scales to 0 -> PVCs remain Bound.
-
-### C. Decision Criteria: When to use "Safe Shutdown"?
-| Trigger | Action | Reason |
-| :--- | :--- | :--- |
-| **Upgrade Longhorn** | **MUST Shutdown** | Storage engine restart will hang writes. |
-| **Reboot Node** | **SHOULD Shutdown** | Prevents "Volume Locked" errors on reschedule. |
-| **Move Storage** | **MUST Shutdown** | Clean detach required for nice re-attach. |
-| **Upgrade Traefik** | **Safe Delete** | Stateless. Traffic drops only. |
-
-### D. Manual Emergency Recovery
-If a volume gets "stuck" (device busy) despite safe shutdown:
-1.  **Cordon Node:** `kubectl cordon [node]`.
-2.  **Restart Longhorn:** `kubectl delete pod -n longhorn-system -l app=longhorn-manager --field-selector spec.nodeName=[node]`.
-3.  **Wait:** Allow CSI driver to re-register.
-
-
+1.  [ ] **Context:** Am I editing *Shared* (`apps/`) or *Specific* (`clusters/`) logic?
+2.  [ ] **Composition:** Did I use the `patches/` folder for reusable logic?
+3.  [ ] **Pathing:** Are relative paths correct? (`../../../`)
+4.  [ ] **Secrets:** Used `secretGenerator`?
+5.  [ ] **Maintenance:** If deleting, check if PVCs are at risk. Use `patches/scale-to-zero.yaml` instead?
