@@ -9,7 +9,7 @@
 The Antigravity Kit in this repository is highly specialized for **Cloud-Native Infrastructure, GitOps, and Platform Engineering**. It has been trimmed of generic web/mobile bloat to ensure high performance and context accuracy.
 
 - **7 Specialist Agents** - Role-based AI personas
-- **10 Skills** - Domain-specific knowledge modules
+- **12 Skills** - Domain-specific knowledge modules
 - **10 Workflows** - Slash command procedures
 - **4 Master Scripts** - Validation and session management
 
@@ -36,7 +36,7 @@ Specialist AI personas for technical infrastructure and automation.
 | Agent                  | Focus                      | Key Skills Used                                     |
 | ---------------------- | -------------------------- | --------------------------------------------------- |
 | `orchestrator`         | Multi-agent coordination   | parallel-agents, intelligent-routing                |
-| `project-planner`      | Discovery, task planning   | brainstorming, plan-writing, codebase-mapping       |
+| `project-planner`      | Discovery, task planning   | brainstorming, plan-writing, decision-making        |
 | `devops-engineer`      | CI/CD, IaC, Automation     | server-management, lint-and-validate                |
 | `security-auditor`     | Security compliance        | vulnerability-scanner, code-review-checklist        |
 | `debugger`             | Root cause analysis        | systematic-debugging, clean-code                    |
@@ -45,7 +45,7 @@ Specialist AI personas for technical infrastructure and automation.
 
 ---
 
-## 🧩 Skills (10)
+## 🧩 Skills (12)
 
 Modular knowledge domains loaded on-demand.
 
@@ -53,6 +53,7 @@ Modular knowledge domains loaded on-demand.
 | :--- | :--- | :--- |
 | **Strategy** | `brainstorming` | Socratic discovery and problem mapping |
 | | `plan-writing` | Structured task breakdown and dependencies |
+| | `decision-making` | Manage Architecture Decision Records (ADRs) |
 | **Logic** | `clean-code` | Universal coding standards |
 | | `intelligent-routing` | Context-aware agent selection |
 | **Technical** | `server-management` | Infrastructure and process management |
@@ -61,6 +62,7 @@ Modular knowledge domains loaded on-demand.
 | | `code-review-checklist` | Security and quality standards |
 | **Automation** | `parallel-agents` | Multi-agent coordination patterns |
 | | `documentation-templates`| Standardized technical documentation |
+| | `skill-creator` | Create and standardize new agent skills |
 
 ---
 
