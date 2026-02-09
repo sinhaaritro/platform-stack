@@ -44,55 +44,24 @@ platform-stack/
 
 ## One-Time Environment Setup
 
-Before working with any of the layers, every developer **must** perform this one-time setup after cloning the repository. This ensures that the development environment is consistent and that critical safety checks are active.
+> **[GO TO: GETTING STARTED GUIDE](./docs/GETTING_STARTED.md)**
 
-1.  **Clone the Repository**
-    ```sh
-    git clone <your-repository-url>
-    cd platform-stack/
-    ```
-
-2.  **Install Project Hooks (CRITICAL)**
-    This project uses Git hooks to enforce security policies, such as preventing unencrypted secrets from being committed. The `Makefile` at the root of the project automates the installation of these hooks.
-
-    **Prerequisite:** Ensure you have `make` installed.
-
-    Run the following command from the root of the repository:
-    ```sh
-    make install-hooks
-    ```
-    This command sets up a pre-commit hook that will now run automatically before every commit, safeguarding the repository.
-
-3.  **Continue with the Full Setup**
-    For the complete developer setup, workflow, and tool installation, please follow the **[GETTING_STARTED.md](./docs/GETTING_STARTED.md)** guide.
+All developers **must** follow the **[Getting Started](./docs/GETTING_STARTED.md)** guide to:
+1.  Clone the repository.
+2.  **Install Git Hooks** (Critical for security).
+3.  Configure Ansible Vault secrets.
+4.  Install required tools (OpenTofu, Ansible, Task).
 
 ---
 
 ## The Five Layers of the Platform
 
-Each directory below contains its own `README.md` file with detailed instructions for that specific layer.
+> **[GO TO: CODEBASE MAP](./CODEBASE.md)**
 
-### Layer 0: Project Management & Decisions
-*   **Purpose:** To track the long-term roadmap, manage the backlog of ideas/bugs, and document architectural decisions.
-*   **Location:** `planning/` and `docs/adr/`
-*   **Documentation:** AI agents are required to check these before and after every task.
+For a detailed breakdown of the repository structure and the purpose of each directory, please refer to **[CODEBASE.md](./CODEBASE.md)**.
 
-### Layer 1: Infrastructure Provisioning with OpenTofu
-*   **Purpose:** To create the raw infrastructure (VMs, LXCs, networks) declaratively.
-*   **Location:** `tofu/`
-*   **Documentation:** For detailed usage, see the **[Tofu README](./tofu/README.md)**.
-
-### Layer 2: Server Configuration with Ansible
-*   **Purpose:** To take the raw servers from OpenTofu and configure them into a consistent, ready-to-use state.
-*   **Location:** `ansible/`
-*   **Documentation:** For detailed usage, see the **[Ansible README](./ansible/README.md)**.
-
-### Layer 3: Production Orchestration with Kubernetes
-*   **Purpose:** To deploy, manage, and scale our containerized applications in a resilient, production-grade environment.
-*   **Location:** `k8s/`
-*   **Documentation:** For detailed usage, see the **[Kubernetes README](./k8s/README.md)**.
-
-### Layer 4: Local Development & Testing with Compose
-*   **Purpose:** To provide developers with a fast, isolated, and easy-to-use environment on their local machine that mirrors the production architecture.
-*   **Location:** `compose/`
-*   **Documentation:** For detailed usage, see the **[Compose README](./compose/README.md)**.
+*   **Layer 0:** Project Management (`planning/`)
+*   **Layer 1:** Infrastructure Provisioning (`tofu/`)
+*   **Layer 2:** Server Configuration (`ansible/`)
+*   **Layer 3:** Production Orchestration (`k8s/` & `kubernetes/`)
+*   **Layer 4:** Local Development (`compose/`)

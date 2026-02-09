@@ -577,4 +577,5 @@ The entire platform is managed through a layered automation workflow that direct
 1.  **`tofu/` (Layer 1 - Provisioning):** OpenTofu code defines the desired state of all VMs and LXCs on Proxmox and in the cloud. Running `tofu apply` creates, updates, or destroys the base infrastructure.
 2.  **`ansible/` (Layer 2 - Configuration):** Ansible playbooks target the raw infrastructure provisioned by Tofu. They perform tasks like OS hardening, installing dependencies (e.g., container runtimes), setting up the Kubernetes cluster, and deploying configurations from `/lxc-configs`.
 3.  **`k8s/` (Layer 3 - Orchestration):** This directory contains Kubernetes manifests (YAML files, Helm charts) that define the applications. The in-cluster GitOps controller automatically applies any changes committed to this directory, ensuring the running applications always match the code in Git.
-4.  **Secrets Management:** All secrets (passwords, API keys, IP addresses) are encrypted using **Ansible Vault**. The public repository contains only the encrypted files; the decryption key is managed securely and separately.
+4.  **Secrets Management:** All secrets are managed via Ansible Vault.
+    > **See [SECRETS.md](./SECRETS.md) for the full security policy and workflow.**

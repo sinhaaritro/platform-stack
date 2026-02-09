@@ -1,4 +1,4 @@
-# Secrets Management Policy
+list# Secrets Management Policy
 
 This document is the single source of truth for the policy and procedures related to managing all sensitive information within this project. Adherence to this policy is mandatory.
 
@@ -61,8 +61,8 @@ This convention is not a suggestion; it is a **mandatory rule enforced by our pr
 The Ansible Vault is encrypted with a master password.
 
 1.  **Obtaining the Password:** The vault password must be obtained from a project administrator through a secure, out-of-band channel (e.g., a password manager share).
-
-2.  **Configuring Your Environment:** The vault password **must** be made available to your local environment via the `ANSIBLE_VAULT_PASSWORD` environment variable. For detailed instructions on how to set this up, refer to the **[GETTING_STARTED.md](./GETTING_STARTED.md)** guide.
+2.  **Configuring Your Environment:** You must set the `ANSIBLE_VAULT_PASSWORD` environment variable.
+    > **See [GETTING_STARTED.md](./GETTING_STARTED.md#3-configure-secrets) for the official setup instructions.**
 
 ---
 

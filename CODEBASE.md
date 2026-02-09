@@ -20,38 +20,39 @@ This repository is in transition. You must understand the difference between the
 
 ---
 
-## Repository Structure
+## Repository Structure (The Stack)
 
-### 1. Infrastructure (Constraint-based)
-*   **`tofu/`**: Infrastructure as Code (OpenTofu).
-    *   Defines *physical* and *virtual* resources (VMs, LXCs, DNS records).
-    *   **Rule:** Output variables often feed into Ansible.
+This repository is organized into **Five Logical Layers**, plus automation and documentation.
 
-*   **`ansible/`**: Configuration Management.
-    *   Configures the operating systems provisioned by Tofu.
-    *   **Rule:** Idempotent playbooks. Secrets managed via Ansible Vault.
+### Layer 0: Project Management (`planning/` & `docs/adr/`)
+*   **The Brain:** Where all work begins.
+*   **`planning/ROADMAP.md`**: Strategic goals.
+*   **`planning/BACKLOG.md`**: The tactical inbox for ideas, technical debt, and issues found mid-task. **AI Agents:** Always check here before declaring a task "done" to ensure no related cleanup was missed.
+*   **`docs/adr/`**: Architecture Decision Records (The "Why").
 
-### 2. Orchestration (Application Layer)
-*   **`kubernetes/`**: (See "The Kubernetes Split" above).
-    *   **`clusters/`**: Cluster-specific overlays.
-    *   **`apps/`**: Base manifests for applications.
-    *   **`bootstrap/`**: Initial cluster setup components.
+### Layer 1: Infrastructure (`tofu/`)
+*   **The Hardware:** Defines "Constraint-based" infrastructure (VMs, LXC containers, networking, DNS).
+*   **Tool:** OpenTofu.
+*   **Rule:** Output variables often feed into Ansible.
 
-### 3. Project Management (The "Brain")
-*   **`planning/`**: The source of truth for work-in-progress and future plans.
-    *   **`ROADMAP.md`**: High-level milestones.
-    *   **`BACKLOG.md`**: The "Dump" for ideas, technical debt, and issues found mid-task. **AI Agents:** Always check here before declaring a task "done" to ensure no related cleanup was missed.
-    *   **`active/`**: Detailed specs for currently active feature work.
-    *   **`done/`**: Archived tasks.
+### Layer 2: Configuration (`ansible/`)
+*   **The OS:** Configures the servers provisioned by Layer 1.
+*   **Tool:** Ansible.
+*   **Rule:** Idempotent playbooks. Secrets managed via Ansible Vault.
 
-*   **`docs/adr/`**: Architecture Decision Records.
-    *   **Rule:** When making a significant design choice (e.g., "Switching from Traefik to Nginx"), you MUST generate an ADR explaining *why*.
+### Layer 3: Orchestration (`k8s/` & `kubernetes/`)
+*   **The Platform:** Manages containerized workloads.
+*   **`k8s/`**: Legacy Kustomize manifests (Current Active).
+*   **`kubernetes/`**: Modern GitOps structure (`apps/`, `clusters/`, `bootstrap/`).
 
-### 4. Agent & Automation
-*   **`.agent/`**: AI Behaviors.
-    *   **`GEMINI.md`**: The core ruleset.
-    *   **`agents/`**: Persona definitions.
-    *   **`skills/`**: Reusable capability toolboxes.
+### Layer 4: Development (`compose/`)
+*   **The Lab:** Local emulation of the stack.
+*   **Tool:** Podman Compose.
+*   **Rule:** Rapid feedback loop for developers. Mirrors production architecture but runs on a single machine.
+
+### Automation & Intelligence (`.agent/`)
+*   **The Team:** AI Agent definitions, skills, and behavior rules.
+*   **`GEMINI.md`**: The master ruleset.
 
 ---
 

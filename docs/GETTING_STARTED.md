@@ -32,6 +32,8 @@ Before you begin, you must install the following tools on your local machine. Pl
 #### Local Development Tools
 -   **[Podman](https://podman.io/getting-started/installation) & [Podman Compose](https://github.com/containers/podman-compose#installation):** For running local development environments (Layer 4). (Docker and Docker Compose are also compatible).
 
+> **Ubuntu Users:** For a complete list of apt-get commands to install these tools, see **[System Setup](./System%20Setup.md)**.
+
 ---
 
 ## 2. Step 1: Initial Repository Setup
