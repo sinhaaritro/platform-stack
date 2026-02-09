@@ -125,13 +125,19 @@ All changes to the infrastructure and applications must be made through Git.
     git checkout -b feat/my-new-feature
     ```
 
-2.  **Make Your Changes:** The directory you work in depends on what you are changing:
+2.  **Check the Roadmap & Backlog:** Before starting, check `planning/ROADMAP.md` and `planning/BACKLOG.md` to see if your task is listed or if there are related bugs/notes to consider.
+
+3.  **Make Your Changes:** The directory you work in depends on what you are changing:
     -   **To provision a new VM or change its resources:** Edit files in `/tofu/`.
     -   **To install software on a VM or change its configuration:** Edit files in `/ansible/`.
-    -   **To deploy or update a Kubernetes application:** Edit files in `/k8s/`.
+    -   **To deploy or update a Kubernetes application:** Edit files in `/k8s/` or `/kubernetes/`.
     -   **To work on a local development environment:** Edit files in `/compose/`.
 
-3.  **Commit and Push:** Commit your changes with a descriptive message that follows the [Conventional Commits](https://www.conventionalcommits.org/) standard.
+4.  **Log Off-Topic Discoveries:** If you find a bug or think of an improvement that is *out of scope* for your current task, do not fix it immediately. Add it to `planning/BACKLOG.md` for later.
+
+5.  **Document Decisions:** If your changes involve a significant architectural choice, create an ADR in `docs/adr/` using the template provided.
+
+6.  **Commit and Push:** Commit your changes with a descriptive message that follows the [Conventional Commits](https://www.conventionalcommits.org/) standard.
     ```sh
     git add .
     git commit -m "feat: add new monitoring dashboard for proxmox"

@@ -30,6 +30,8 @@ The repository is organized into distinct layers, each managed by a specific too
 platform-stack/
 ├── Makefile           # Automates common project setup and operational tasks.
 ├── docs/              # High-level project documentation (architecture, conventions, etc.).
+│   └── adr/           # Architecture Decision Records (The "Why").
+├── planning/          # Layer 0: High-level roadmap and backlog (The "What").
 ├── scripts/           # Contains helper scripts for safety, automation, and CI/CD.
 ├── lxc-configs/       # Application-specific configuration files for standalone LXC containers.
 ├── tofu/              # Layer 1: Provisions the core infrastructure (VMs, networks, LXCs).
@@ -66,9 +68,14 @@ Before working with any of the layers, every developer **must** perform this one
 
 ---
 
-## The Four Layers of the Platform
+## The Five Layers of the Platform
 
 Each directory below contains its own `README.md` file with detailed instructions for that specific layer.
+
+### Layer 0: Project Management & Decisions
+*   **Purpose:** To track the long-term roadmap, manage the backlog of ideas/bugs, and document architectural decisions.
+*   **Location:** `planning/` and `docs/adr/`
+*   **Documentation:** AI agents are required to check these before and after every task.
 
 ### Layer 1: Infrastructure Provisioning with OpenTofu
 *   **Purpose:** To create the raw infrastructure (VMs, LXCs, networks) declaratively.
