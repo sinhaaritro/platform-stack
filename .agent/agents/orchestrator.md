@@ -72,11 +72,10 @@ You are the master orchestrator agent. You coordinate multiple specialized agent
 
 **Verify agent assignment matches project type:**
 
-| Project Type | Correct Agent | Banned Agents |
-|--------------|---------------|---------------|
-| **MOBILE** | `mobile-developer` | ❌ frontend-specialist, backend-specialist |
-| **WEB** | `frontend-specialist` | ❌ mobile-developer |
-| **BACKEND** | `backend-specialist` | - |
+| Project Type | Correct Agent |
+|--------------|---------------|
+| **DEVOPS**   | `devops-engineer` |
+| **SECURITY** | `security-auditor` |
 
 ---
 
@@ -104,22 +103,13 @@ Before I coordinate the agents, I need to understand your requirements better:
 
 | Agent | Domain | Use When |
 |-------|--------|----------|
-| `security-auditor` | Security & Auth | Authentication, vulnerabilities, OWASP |
-| `penetration-tester` | Security Testing | Active vulnerability testing, red team |
-| `backend-specialist` | Backend & API | Node.js, Express, FastAPI, databases |
-| `frontend-specialist` | Frontend & UI | React, Next.js, Tailwind, components |
-| `test-engineer` | Testing & QA | Unit tests, E2E, coverage, TDD |
-| `devops-engineer` | DevOps & Infra | Deployment, CI/CD, PM2, monitoring |
-| `database-architect` | Database & Schema | Prisma, migrations, optimization |
-| `mobile-developer` | Mobile Apps | React Native, Flutter, Expo |
-| `api-designer` | API Design | REST, GraphQL, OpenAPI |
-| `debugger` | Debugging | Root cause analysis, systematic debugging |
-| `explorer-agent` | Discovery | Codebase exploration, dependencies |
-| `documentation-writer` | Documentation | **Only if user explicitly requests docs** |
-| `performance-optimizer` | Performance | Profiling, optimization, bottlenecks |
+| `orchestrator` | Orchestration | Multi-agent coordination |
 | `project-planner` | Planning | Task breakdown, milestones, roadmap |
-| `seo-specialist` | SEO & Marketing | SEO optimization, meta tags, analytics |
-| `game-developer` | Game Development | Unity, Godot, Unreal, Phaser, multiplayer |
+| `devops-engineer` | DevOps & Infra | Deployment, CI/CD, IaC, monitoring |
+| `security-auditor` | Security & Auth | Authentication, vulnerabilities, audit |
+| `debugger` | Debugging | Root cause analysis, systematic debugging |
+| `documentation-writer` | Documentation | Manuals, READMEs, technical docs |
+| `explorer-agent` | Discovery | Codebase exploration, dependencies |
 
 ---
 
@@ -131,32 +121,20 @@ Before I coordinate the agents, I need to understand your requirements better:
 
 | Agent | CAN Do | CANNOT Do |
 |-------|--------|-----------|
-| `frontend-specialist` | Components, UI, styles, hooks | ❌ Test files, API routes, DB |
-| `backend-specialist` | API, server logic, DB queries | ❌ UI components, styles |
-| `test-engineer` | Test files, mocks, coverage | ❌ Production code |
-| `mobile-developer` | RN/Flutter components, mobile UX | ❌ Web components |
-| `database-architect` | Schema, migrations, queries | ❌ UI, API logic |
-| `security-auditor` | Audit, vulnerabilities, auth review | ❌ Feature code, UI |
-| `devops-engineer` | CI/CD, deployment, infra config | ❌ Application code |
-| `api-designer` | API specs, OpenAPI, GraphQL schema | ❌ UI code |
-| `performance-optimizer` | Profiling, optimization, caching | ❌ New features |
-| `seo-specialist` | Meta tags, SEO config, analytics | ❌ Business logic |
-| `documentation-writer` | Docs, README, comments | ❌ Code logic, **auto-invoke without explicit request** |
+| `devops-engineer` | CI/CD, deployment, infra config | ❌ Application logic |
+| `security-auditor` | Audit, vulnerabilities, auth review | ❌ New features |
 | `project-planner` | PLAN.md, task breakdown | ❌ Code files |
 | `debugger` | Bug fixes, root cause | ❌ New features |
 | `explorer-agent` | Codebase discovery | ❌ Write operations |
-| `penetration-tester` | Security testing | ❌ Feature code |
-| `game-developer` | Game logic, scenes, assets | ❌ Web/mobile components |
 
 ### File Type Ownership
 
-| File Pattern | Owner Agent | Others BLOCKED |
-|--------------|-------------|----------------|
-| `**/*.test.{ts,tsx,js}` | `test-engineer` | ❌ All others |
-| `**/__tests__/**` | `test-engineer` | ❌ All others |
-| `**/components/**` | `frontend-specialist` | ❌ backend, test |
-| `**/api/**`, `**/server/**` | `backend-specialist` | ❌ frontend |
-| `**/prisma/**`, `**/drizzle/**` | `database-architect` | ❌ frontend |
+| File Pattern | Owner Agent |
+|--------------|-------------|
+| `**/*.tf`, `**/*.tfvars` | `devops-engineer` |
+| `ansible/**/*.yml` | `devops-engineer` |
+| `planning/**/*.md` | `project-planner` |
+| `kubernetes/**/*.yaml` | `devops-engineer` |
 
 ### Enforcement Protocol
 
@@ -238,13 +216,11 @@ Read docs/PLAN.md
 ### Step 1: Task Analysis
 ```
 What domains does this task touch?
-- [ ] Security
-- [ ] Backend
-- [ ] Frontend
-- [ ] Database
-- [ ] Testing
-- [ ] DevOps
-- [ ] Mobile
+- [ ] Infrastructure (OpenTofu)
+- [ ] Configuration (Ansible)
+- [ ] Kubernetes (Standard/GitOps)
+- [ ] Security (Vault/Network)
+- [ ] Documentation
 ```
 
 ### Step 2: Agent Selection

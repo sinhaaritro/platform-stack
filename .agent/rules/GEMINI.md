@@ -151,10 +151,7 @@ When user's prompt is NOT in English:
 
 | Project Type                              | Primary Agent         | Skills                               |
 | ----------------------------------------- | --------------------- | ------------------------------------ |
-| **MOBILE** (iOS, Android, RN, Flutter)    | `mobile-developer`    | mobile-design                        |
-| **WEB** (Next.js, React web)              | `frontend-specialist` | frontend-design                      |
-| **BACKEND** (API, server, DB)             | `backend-specialist`  | api-patterns, database-design        |
-| **DEVOPS** (API, server, Insfrastructure) | `devops-engineer`     | deployment-procedures, docker-expert |
+| **DEVOPS** (API, server, Infrastructure) | `devops-engineer`     | deployment-procedures, docker-expert |
 
 > 🔴 **Mobile + frontend-specialist = WRONG.** Mobile = mobile-developer ONLY.
 
@@ -257,18 +254,41 @@ When user's prompt is NOT in English:
 
 ---
 
+## TIER 2: PROJECT MANAGEMENT PROTOCOL
+
+> **Rules for using the `planning/` directory and `docs/adr/`**
+
+### 1. The "Memory" System
+- **`planning/ROADMAP.md`**: The Strategic View. Read this to understand the "Big Picture".
+- **`planning/BACKLOG.md`**: The Tactical Inbox.
+    - **Before starting:** Check if your task is already listed or if related tasks exist.
+    - **During work:** If you find a bug/refactor/idea that is OUT OF SCOPE for the current task, **DO NOT FIX IT**. Add it to the "Inbox" section of `BACKLOG.md`.
+- **`docs/adr/`**: The "Why".
+    - **Requirement:** If you make a significant architectural choice (e.g., changing a library, pattern, or infrastructure component), you **MUST** create a new ADR using the template.
+
+### 2. Context Awareness
+When starting a new session or task, you must be aware of the "Kubernetes Split" (documented in `CODEBASE.md`).
+
+---
+
 ## 📁 QUICK REFERENCE
 
 ### Agents & Skills
 
-- **Masters**: `orchestrator`, `project-planner`, `security-auditor` (Cyber/Audit), `backend-specialist` (API/DB), `frontend-specialist` (UI/UX), `mobile-developer`, `debugger`, `game-developer`
-- **Key Skills**: `clean-code`, `brainstorming`, `app-builder`, `frontend-design`, `mobile-design`, `plan-writing`, `behavioral-modes`
+- **Masters**: `orchestrator`, `project-planner`, `devops-engineer`, `security-auditor`, `explorer-agent`, `debugger`, `documentation-writer`
+- **Key Skills**: `clean-code`, `brainstorming`, `intelligent-routing`, `parallel-agents`, `plan-writing`, `server-management`, `systematic-debugging`.
 
 ### Key Scripts
 
 - **Verify**: `.agent/scripts/verify_all.py`, `.agent/scripts/checklist.py`
-- **Scanners**: `security_scan.py`, `dependency_analyzer.py`
-- **Audits**: `ux_audit.py`, `mobile_audit.py`, `lighthouse_audit.py`, `seo_checker.py`
-- **Test**: `playwright_runner.py`, `test_runner.py`
+- **Management**: `session_manager.py`, `auto_preview.py`
 
 ---
+
+| Need     | Agent                 | Skills                                |
+| -------- | --------------------- | ------------------------------------- |
+| DevOps   | `devops-engineer`     | server-management, lint-and-validate  |
+| Security | `security-auditor`    | vulnerability-scanner                 |
+| Debug    | `debugger`            | systematic-debugging                  |
+| Plan     | `project-planner`     | brainstorming, plan-writing           |
+| Discovery| `explorer-agent`      | (Native tools)                        |

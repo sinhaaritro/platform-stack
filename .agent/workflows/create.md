@@ -26,10 +26,9 @@ This command starts a new application creation process.
 
 3. **Application Building (After Approval)**
    - Orchestrate with `app-builder` skill
-   - Coordinate expert agents:
-     - `database-architect` → Schema
-     - `backend-specialist` → API
-     - `frontend-specialist` → UI
+    - Coordinate expert agents:
+      - `devops-engineer` → Infrastructure & Config
+      - `security-auditor` → Hardening & Vault
 
 4. **Preview**
    - Start with `auto_preview.py` when complete
@@ -40,11 +39,11 @@ This command starts a new application creation process.
 ## Usage Examples
 
 ```
-/create blog site
-/create e-commerce app with product listing and cart
-/create todo app
-/create Instagram clone
-/create crm system with customer management
+/create homelab-site
+/create kubernetes-cluster with monitoring
+/create proxmox-vm for db
+/create cloudflare-tunnel
+/create monitoring-stack with prometheus
 ```
 
 ---

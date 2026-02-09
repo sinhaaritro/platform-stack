@@ -66,10 +66,10 @@ Show current project and agent status.
 
 === Agent Status ===
 
-✅ database-architect → Completed
-✅ backend-specialist → Completed
-🔄 frontend-specialist → Dashboard components (60%)
-⏳ test-engineer → Waiting
+✅ devops-engineer → Completed
+✅ security-auditor → Completed
+🔄 explorer-agent → Node mapping (60%)
+⏳ debugger → Waiting
 
 === Preview ===
 

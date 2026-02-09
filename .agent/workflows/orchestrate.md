@@ -13,26 +13,24 @@ $ARGUMENTS
 
 ## 🔴 CRITICAL: Minimum Agent Requirement
 
-> ⚠️ **ORCHESTRATION = MINIMUM 3 DIFFERENT AGENTS**
+> ⚠️ **ORCHESTRATION = MINIMUM 2 DIFFERENT AGENTS**
 > 
-> If you use fewer than 3 agents, you are NOT orchestrating - you're just delegating.
+> If you use fewer than 2 agents, you are NOT orchestrating - you're just delegating.
 > 
 > **Validation before completion:**
 > - Count invoked agents
-> - If `agent_count < 3` → STOP and invoke more agents
+> - If `agent_count < 2` → STOP and invoke more agents
 > - Single agent = FAILURE of orchestration
 
 ### Agent Selection Matrix
 
 | Task Type | REQUIRED Agents (minimum) |
 |-----------|---------------------------|
-| **Web App** | frontend-specialist, backend-specialist, test-engineer |
-| **API** | backend-specialist, security-auditor, test-engineer |
-| **UI/Design** | frontend-specialist, seo-specialist, performance-optimizer |
-| **Database** | database-architect, backend-specialist, security-auditor |
-| **Full Stack** | project-planner, frontend-specialist, backend-specialist, devops-engineer |
-| **Debug** | debugger, explorer-agent, test-engineer |
-| **Security** | security-auditor, penetration-tester, devops-engineer |
+| **IaC** | devops-engineer, security-auditor |
+| **Config** | devops-engineer, security-auditor |
+| **GitOps** | devops-engineer, security-auditor, explorer-agent |
+| **Debug** | debugger, explorer-agent, devops-engineer |
+| **Security** | security-auditor, devops-engineer |
 
 ---
 
@@ -76,9 +74,8 @@ Do you approve? (Y/N)
 
 | Parallel Group | Agents |
 |----------------|--------|
-| Foundation | `database-architect`, `security-auditor` |
-| Core | `backend-specialist`, `frontend-specialist` |
-| Polish | `test-engineer`, `devops-engineer` |
+| Foundation | `devops-engineer`, `security-auditor` |
+| Coordination | `orchestrator`, `project-planner` |
 
 > ✅ After user approval, invoke multiple agents in PARALLEL.
 
@@ -86,21 +83,12 @@ Do you approve? (Y/N)
 
 | Agent | Domain | Use When |
 |-------|--------|----------|
-| `project-planner` | Planning | Task breakdown, PLAN.md |
+| `project-planner` | Planning | Task breakdown, milestones |
 | `explorer-agent` | Discovery | Codebase mapping |
-| `frontend-specialist` | UI/UX | React, Vue, CSS, HTML |
-| `backend-specialist` | Server | API, Node.js, Python |
-| `database-architect` | Data | SQL, NoSQL, Schema |
-| `security-auditor` | Security | Vulnerabilities, Auth |
-| `penetration-tester` | Security | Active testing |
-| `test-engineer` | Testing | Unit, E2E, Coverage |
-| `devops-engineer` | Ops | CI/CD, Docker, Deploy |
-| `mobile-developer` | Mobile | React Native, Flutter |
-| `performance-optimizer` | Speed | Lighthouse, Profiling |
-| `seo-specialist` | SEO | Meta, Schema, Rankings |
-| `documentation-writer` | Docs | README, API docs |
-| `debugger` | Debug | Error analysis |
-| `game-developer` | Games | Unity, Godot |
+| `devops-engineer` | Ops | IaC, Config, K8s, Deploy |
+| `security-auditor` | Security | Hardening, Vault, Audit |
+| `debugger` | Debug | Root cause analysis |
+| `documentation-writer` | Docs | README, Manuals |
 | `orchestrator` | Meta | Coordination |
 
 ---
@@ -110,16 +98,12 @@ Do you approve? (Y/N)
 ### Step 1: Analyze Task Domains
 Identify ALL domains this task touches:
 ```
-□ Security     → security-auditor, penetration-tester
-□ Backend/API  → backend-specialist
-□ Frontend/UI  → frontend-specialist
-□ Database     → database-architect
-□ Testing      → test-engineer
-□ DevOps       → devops-engineer
-□ Mobile       → mobile-developer
-□ Performance  → performance-optimizer
-□ SEO          → seo-specialist
-□ Planning     → project-planner
+□ Infrastructure (IaC) → devops-engineer
+□ Configuration (Ansible) → devops-engineer
+□ Kubernetes (K8s) → devops-engineer
+□ Security/Auth  → security-auditor
+□ Planning/Roadmap → project-planner
+□ Discovery/Analysis → explorer-agent
 ```
 
 ### Step 2: Phase Detection
@@ -141,9 +125,8 @@ Use the project-planner agent to create PLAN.md
 **PHASE 2 (Implementation - after approval):**
 ```
 Invoke agents in PARALLEL:
-Use the frontend-specialist agent to [task]
-Use the backend-specialist agent to [task]
-Use the test-engineer agent to [task]
+Use the devops-engineer agent to [task]
+Use the security-auditor agent to [task]
 ```
 
 **🔴 CRITICAL: Context Passing (MANDATORY)**
@@ -198,8 +181,8 @@ Combine all agent outputs into unified report.
 | # | Agent | Focus Area | Status |
 |---|-------|------------|--------|
 | 1 | project-planner | Task breakdown | ✅ |
-| 2 | frontend-specialist | UI implementation | ✅ |
-| 3 | test-engineer | Verification scripts | ✅ |
+| 2 | devops-engineer | IaC implementation | ✅ |
+| 3 | security-auditor | Security hardening | ✅ |
 
 ### Verification Scripts Executed
 - [x] security_scan.py → Pass/Fail
@@ -226,7 +209,7 @@ Combine all agent outputs into unified report.
 
 Before completing orchestration, verify:
 
-1. ✅ **Agent Count:** `invoked_agents >= 3`
+1. ✅ **Agent Count:** `invoked_agents >= 2`
 2. ✅ **Scripts Executed:** At least `security_scan.py` ran
 3. ✅ **Report Generated:** Orchestration Report with all agents listed
 

@@ -13,8 +13,9 @@ You are a project planning expert. You analyze user requests, break them into ta
 ## 🛑 PHASE 0: CONTEXT CHECK (QUICK)
 
 **Check for existing context before starting:**
-1.  **Read** `CODEBASE.md` → Check **OS** field (Windows/macOS/Linux)
-2.  **Read** any existing plan files in project root
+1.  **Read** `CODEBASE.md` → Check **OS** field and **Kubernetes Split** context.
+2.  **Read** `planning/ROADMAP.md` and `planning/BACKLOG.md` → Check for related tasks.
+3.  **Read** any existing plan files in project root
 3.  **Check** if request is clear enough to proceed
 4.  **If unclear:** Ask 1-2 quick questions, then proceed
 
@@ -140,10 +141,10 @@ File:         ./dashboard-analytics.md (project root)
 
 | Priority | Phase | Agents | When to Use |
 |----------|-------|--------|-------------|
-| **P0** | Foundation | `database-architect` → `security-auditor` | If project needs DB |
-| **P1** | Core | `backend-specialist` | If project has backend |
-| **P2** | UI/UX | `frontend-specialist` OR `mobile-developer` | Web OR Mobile (not both!) |
-| **P3** | Polish | `test-engineer`, `performance-optimizer`, `seo-specialist` | Based on needs |
+| **P0** | Foundation | `devops-engineer` → `security-auditor` | Infrastructure provisioning |
+| **P1** | Core | `devops-engineer` | Ansible configuration & K8s setup |
+| **P2** | Quality | `security-auditor` | Security hardening & Audit |
+| **P3** | Polish | `documentation-writer` | Final documentation |
 
 > 🔴 **Agent Selection Rule:**
 > - Web app → `frontend-specialist` (NO `mobile-developer`)
@@ -188,28 +189,24 @@ Parse the request to understand:
 
 Before assigning agents, determine project type:
 
-| Trigger | Project Type | Primary Agent | DO NOT USE |
-|---------|--------------|---------------|------------|
-| "mobile app", "iOS", "Android", "React Native", "Flutter", "Expo" | **MOBILE** | `mobile-developer` | ❌ frontend-specialist, backend-specialist |
-| "website", "web app", "Next.js", "React" (web) | **WEB** | `frontend-specialist` | ❌ mobile-developer |
-| "API", "backend", "server", "database" (standalone) | **BACKEND** | `backend-specialist | - |
-
-> 🔴 **CRITICAL:** Mobile project + frontend-specialist = WRONG. Mobile project = mobile-developer ONLY.
+| Trigger | Project Type | Primary Agent |
+|---------|--------------|---------------|
+| "tofu", "vm", "proxmox", "infrastructure" | **IaC** | `devops-engineer` |
+| "ansible", "configure", "setup" | **Config** | `devops-engineer` |
+| "k8s", "kubernetes", "manifest", "gitops" | **K8s** | `devops-engineer` |
+| "security", "audit", "vault" | **Security** | `security-auditor` |
 
 ---
 
 **Components by Project Type:**
 
-| Component | WEB Agent | MOBILE Agent |
-|-----------|-----------|---------------|
-| Database/Schema | `database-architect` | `mobile-developer` |
-| API/Backend | `backend-specialist` | `mobile-developer` |
-| Auth | `security-auditor` | `mobile-developer` |
-| UI/Styling | `frontend-specialist` | `mobile-developer` |
-| Tests | `test-engineer` | `mobile-developer` |
-| Deploy | `devops-engineer` | `mobile-developer` |
-
-> `mobile-developer` is full-stack for mobile projects.
+| Component | DEVOPS Agent |
+|-----------|--------------|
+| Infrastructure | `devops-engineer` |
+| Configuration | `devops-engineer` |
+| Kubernetes | `devops-engineer` |
+| Security | `security-auditor` |
+| Docs | `documentation-writer` |
 
 ---
 
