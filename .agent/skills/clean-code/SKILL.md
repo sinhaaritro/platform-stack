@@ -21,6 +21,26 @@ priority: CRITICAL
 | **KISS** | Keep It Simple - simplest solution that works |
 | **YAGNI** | You Aren't Gonna Need It - don't build unused features |
 | **Boy Scout** | Leave code cleaner than you found it |
+| **Modular** | Make code and fuctionaly work like plug and play |
+
+---
+
+## The Twelve Factors
+
+| Factor | Description |
+|--------|-------------|
+| **1. Codebase** | One codebase tracked in revision control, many deploys |
+| **2. Dependencies** | Explicitly declare and isolate dependencies |
+| **3. Config** | Store config in environment |
+| **4. Backing Services** | Treat as attached resources |
+| **5. Build, Release, Run** | Separate build and run stages |
+| **6. Processes** | Execute as one or more stateless processes |
+| **7. Port Binding** | Export services via port binding |
+| **8. Concurrency** | Scale out via the process model |
+| **9. Disposability** | Maximize robustness with fast startup/shutdown |
+| **10. Dev/Prod Parity** | Keep dev, staging, and prod as similar as possible |
+| **11. Logs** | Treat logs as event streams |
+| **12. Admin Processes** | Run admin/management tasks as one-off processes |
 
 ---
 
