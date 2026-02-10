@@ -54,6 +54,14 @@ metadata:
 spec:
   volumeClaimTemplates:
     - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 50Gi # Starting small, easy to expand
+        storageClassName: longhorn0rep
+    - metadata:
         name: idx
       spec:
         accessModes: ["ReadWriteOnce"]
