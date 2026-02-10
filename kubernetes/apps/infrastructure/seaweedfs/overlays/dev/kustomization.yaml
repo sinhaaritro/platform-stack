@@ -6,4 +6,6 @@ resources:
 
 components:
   - ../../components/common
+
+patches:
   - path: patch-replicas.yaml
