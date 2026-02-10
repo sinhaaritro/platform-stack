@@ -3,11 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../base
-  - ../../patches/resource-ingress-extras.yaml
 
-patches:
-  - path: ../../patches/fix-admin-pvc.yaml
-    target:
-      kind: StatefulSet
-      name: seaweedfs-admin
+components:
+  - ../../components/common
   - path: patch-replicas.yaml
