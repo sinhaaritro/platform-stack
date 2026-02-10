@@ -35,16 +35,26 @@ spec:
               s3.configure -user=admin -access_key=admin -secret_key=admin -actions=Read,Write,List,Tagging,Admin -apply
               EOF
 
-              # 2. Create Buckets (Check if exists logic handled by weed shell usually, but we can be explicit or ignore error)
-              # Note: seaweedfs s3.bucket.create errors if exists. We will try creating and ignore error or check list.
-              # A simple way in shell script:
+              # 2. Create Buckets with Strict Ownership
+              # Now that users exist, we create buckets assigning them as owners.
 
-              for BUCKET in mimir-tsdb mimir-ruler mimir-alertmanager loki-chunks loki-ruler loki-admin; do
+              # Mimir Buckets
+              for BUCKET in mimir-tsdb mimir-ruler mimir-alertmanager; do
                  echo "Checking bucket $BUCKET..."
-                 # Check if bucket exists
                  if ! echo "s3.bucket.list" | weed shell -master=$MASTER | grep -q "$BUCKET"; then
-                    echo "Creating bucket $BUCKET..."
-                    echo "s3.bucket.create -name=$BUCKET" | weed shell -master=$MASTER
+                    echo "Creating bucket $BUCKET for user mimir..."
+                    echo "s3.bucket.create -name=$BUCKET -owner=mimir" | weed shell -master=$MASTER
+                 else
+                    echo "Bucket $BUCKET already exists."
+                 fi
+              done
+
+              # Loki Buckets
+              for BUCKET in loki-chunks loki-ruler loki-admin; do
+                 echo "Checking bucket $BUCKET..."
+                 if ! echo "s3.bucket.list" | weed shell -master=$MASTER | grep -q "$BUCKET"; then
+                    echo "Creating bucket $BUCKET for user loki..."
+                    echo "s3.bucket.create -name=$BUCKET -owner=loki" | weed shell -master=$MASTER
                  else
                     echo "Bucket $BUCKET already exists."
                  fi
