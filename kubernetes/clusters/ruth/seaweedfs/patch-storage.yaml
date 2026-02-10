@@ -8,6 +8,8 @@ spec:
     - metadata:
         name: data
       spec:
+        accessModes:
+          - ReadWriteOnce
         resources:
           requests:
             storage: 1Gi
@@ -15,6 +17,8 @@ spec:
     - metadata:
         name: logs
       spec:
+        accessModes:
+          - ReadWriteOnce
         resources:
           requests:
             storage: 1Gi
@@ -30,6 +34,8 @@ spec:
     - metadata:
         name: data
       spec:
+        accessModes:
+          - ReadWriteOnce
         resources:
           requests:
             storage: 5Gi
@@ -37,6 +43,8 @@ spec:
     - metadata:
         name: logs
       spec:
+        accessModes:
+          - ReadWriteOnce
         resources:
           requests:
             storage: 1Gi
@@ -52,6 +60,8 @@ spec:
     - metadata:
         name: data
       spec:
+        accessModes:
+          - ReadWriteOnce
         resources:
           requests:
             storage: 5Gi
@@ -59,6 +69,8 @@ spec:
     - metadata:
         name: logs
       spec:
+        accessModes:
+          - ReadWriteOnce
         resources:
           requests:
             storage: 5Gi
@@ -74,6 +86,8 @@ spec:
     - metadata:
         name: idx
       spec:
+        accessModes:
+          - ReadWriteOnce
         resources:
           requests:
             storage: 1Gi
@@ -81,6 +95,8 @@ spec:
     - metadata:
         name: logs
       spec:
+        accessModes:
+          - ReadWriteOnce
         resources:
           requests:
             storage: 1Gi
