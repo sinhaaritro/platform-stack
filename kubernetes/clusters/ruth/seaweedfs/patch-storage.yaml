@@ -6,7 +6,9 @@ metadata:
 spec:
   volumeClaimTemplates:
     - metadata:
-        name: data
+        name: list # The chart seems to change names based on value? Let's assume 'data-storage' based on error.
+        # Check error: "Not found: "data-storage""
+        name: data-storage # Replaced 'data'
       spec:
         accessModes:
           - ReadWriteOnce
@@ -15,7 +17,7 @@ spec:
             storage: 1Gi
         storageClassName: longhorn
     - metadata:
-        name: logs
+        name: seaweedfs-master-log-volume # Replaced 'logs'
       spec:
         accessModes:
           - ReadWriteOnce
@@ -32,7 +34,7 @@ metadata:
 spec:
   volumeClaimTemplates:
     - metadata:
-        name: data
+        name: data-filer # Replaced 'data'
       spec:
         accessModes:
           - ReadWriteOnce
@@ -41,7 +43,7 @@ spec:
             storage: 5Gi
         storageClassName: longhorn
     - metadata:
-        name: logs
+        name: seaweedfs-filer-log-volume # Replaced 'logs'
       spec:
         accessModes:
           - ReadWriteOnce
@@ -58,7 +60,7 @@ metadata:
 spec:
   volumeClaimTemplates:
     - metadata:
-        name: data
+        name: admin-data # Replaced 'data'
       spec:
         accessModes:
           - ReadWriteOnce
@@ -67,7 +69,7 @@ spec:
             storage: 5Gi
         storageClassName: longhorn
     - metadata:
-        name: logs
+        name: admin-logs # Replaced 'logs'
       spec:
         accessModes:
           - ReadWriteOnce

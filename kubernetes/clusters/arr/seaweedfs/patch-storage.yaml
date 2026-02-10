@@ -6,7 +6,7 @@ metadata:
 spec:
   volumeClaimTemplates:
     - metadata:
-        name: data
+        name: data-storage
       spec:
         accessModes:
           - ReadWriteOnce
@@ -15,7 +15,7 @@ spec:
             storage: 1Gi
         storageClassName: longhorn
     - metadata:
-        name: logs
+        name: seaweedfs-master-log-volume
       spec:
         accessModes:
           - ReadWriteOnce
@@ -32,7 +32,7 @@ metadata:
 spec:
   volumeClaimTemplates:
     - metadata:
-        name: data
+        name: data-filer
       spec:
         accessModes:
           - ReadWriteOnce
@@ -41,7 +41,7 @@ spec:
             storage: 5Gi
         storageClassName: longhorn
     - metadata:
-        name: logs
+        name: seaweedfs-filer-log-volume
       spec:
         accessModes:
           - ReadWriteOnce
@@ -58,7 +58,7 @@ metadata:
 spec:
   volumeClaimTemplates:
     - metadata:
-        name: data
+        name: admin-data
       spec:
         accessModes:
           - ReadWriteOnce
@@ -67,7 +67,7 @@ spec:
             storage: 5Gi
         storageClassName: longhorn
     - metadata:
-        name: logs
+        name: admin-logs
       spec:
         accessModes:
           - ReadWriteOnce
