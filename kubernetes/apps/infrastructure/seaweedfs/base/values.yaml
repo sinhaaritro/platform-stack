@@ -112,9 +112,7 @@ filer:
   disableHttp: false
   redirectOnRead: false
 
-  extraArgs:
-    - "-s3"
-    - "-s3.port=8333"
+  extraArgs: []
   ingress:
     enabled: true
     className: null
