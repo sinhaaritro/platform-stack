@@ -3,9 +3,16 @@ kind: Ingress
 metadata:
   name: ingress-seaweedfs-master
   namespace: storage
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    cert-manager.io/cluster-issuer: selfsigned-issuer
 spec:
+  tls:
+    - hosts:
+        - seaweedfs.ruth.example.com
+      secretName: seaweedfs-cert
   rules:
-    - host: master.seaweedfs.ruth.example.com
+    - host: seaweedfs.ruth.example.com
       http:
         paths:
           - path: /
@@ -21,9 +28,16 @@ kind: Ingress
 metadata:
   name: ingress-seaweedfs-filer
   namespace: storage
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    cert-manager.io/cluster-issuer: selfsigned-issuer
 spec:
+  tls:
+    - hosts:
+        - filerseaweed.ruth.example.com
+      secretName: seaweedfs-cert
   rules:
-    - host: filer.seaweedfs.ruth.example.com
+    - host: filerseaweed.ruth.example.com
       http:
         paths:
           - path: /
@@ -39,9 +53,16 @@ kind: Ingress
 metadata:
   name: ingress-seaweedfs-s3
   namespace: storage
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    cert-manager.io/cluster-issuer: selfsigned-issuer
 spec:
+  tls:
+    - hosts:
+        - s3.ruth.example.com
+      secretName: seaweedfs-cert
   rules:
-    - host: s3.seaweedfs.ruth.example.com
+    - host: s3.ruth.example.com
       http:
         paths:
           - path: /
@@ -57,7 +78,14 @@ kind: Ingress
 metadata:
   name: ingress-seaweedfs-admin
   namespace: storage
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    cert-manager.io/cluster-issuer: selfsigned-issuer
 spec:
+  tls:
+    - hosts:
+        - admin.seaweedfs.ruth.example.com
+      secretName: seaweedfs-cert
   rules:
     - host: admin.seaweedfs.ruth.example.com
       http:
@@ -75,7 +103,14 @@ kind: Ingress
 metadata:
   name: seaweedfs-webdav
   namespace: storage
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    cert-manager.io/cluster-issuer: selfsigned-issuer
 spec:
+  tls:
+    - hosts:
+        - webdav.seaweedfs.ruth.example.com
+      secretName: seaweedfs-cert
   rules:
     - host: webdav.seaweedfs.ruth.example.com
       http:
@@ -93,7 +128,14 @@ kind: Ingress
 metadata:
   name: seaweedfs-volume
   namespace: storage
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    cert-manager.io/cluster-issuer: selfsigned-issuer
 spec:
+  tls:
+    - hosts:
+        - volume.seaweedfs.ruth.example.com
+      secretName: seaweedfs-cert
   rules:
     - host: volume.seaweedfs.ruth.example.com
       http:

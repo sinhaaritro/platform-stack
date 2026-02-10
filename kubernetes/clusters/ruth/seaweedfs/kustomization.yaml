@@ -7,4 +7,5 @@ resources:
   - ../../../apps/infrastructure/seaweedfs/resources/job-create-buckets.yaml
 
 patches:
-  - path: patch-ingress-hosts.yaml
+  - path: patch-ingress.yaml
+  - path: patch-storage.yaml

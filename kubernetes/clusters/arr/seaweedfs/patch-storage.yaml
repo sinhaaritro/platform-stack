@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedfs-master
+  namespace: storage
+spec:
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: longhorn
+    - metadata:
+        name: logs
+      spec:
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: longhorn0rep
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedfs-filer
+  namespace: storage
+spec:
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: longhorn
+    - metadata:
+        name: logs
+      spec:
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: longhorn0rep
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedfs-admin
+  namespace: storage
+spec:
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: longhorn
+    - metadata:
+        name: logs
+      spec:
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: longhorn0rep
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedfs-volume
+  namespace: storage
+spec:
+  volumeClaimTemplates:
+    - metadata:
+        name: idx
+      spec:
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: longhorn
+    - metadata:
+        name: logs
+      spec:
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: longhorn0rep
