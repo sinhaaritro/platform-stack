@@ -4,15 +4,7 @@ metadata:
   name: seaweedfs-master
   namespace: storage
 spec:
-  replicas: 0
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: seaweedfs-volume
-  namespace: storage
-spec:
-  replicas: 0
+  replicas: 1
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -20,15 +12,15 @@ metadata:
   name: seaweedfs-filer
   namespace: storage
 spec:
-  replicas: 0
+  replicas: 1
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: seaweedfs-admin
+  name: seaweedfs-volume
   namespace: storage
 spec:
-  replicas: 0
+  replicas: 1
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -36,12 +28,12 @@ metadata:
   name: seaweedfs-s3
   namespace: storage
 spec:
-  replicas: 0
+  replicas: 1
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: seaweedfs-worker
+  name: seaweedfs-admin
   namespace: storage
 spec:
-  replicas: 0
+  replicas: 1

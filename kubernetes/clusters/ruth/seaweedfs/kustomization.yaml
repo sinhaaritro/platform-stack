@@ -6,7 +6,9 @@ resources:
   - ../../../apps/infrastructure/seaweedfs/overlays/prod
 
 components:
-  - ../../../apps/infrastructure/seaweedfs/components/bucket-job
+  - ../../../apps/infrastructure/seaweedfs/components/s3-config
+  - ../../../apps/infrastructure/seaweedfs/components/replicas-1
+  # - ../../../apps/infrastructure/seaweedfs/components/maintenance # Uncomment to scale down statefulsets
 
 patches:
   - path: patch-ingress.yaml
