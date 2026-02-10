@@ -39,3 +39,4 @@ secrets.decrypted
 
 # Kubernetes SealedSecretes
 master.key
+**/charts/
