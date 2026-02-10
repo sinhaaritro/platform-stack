@@ -148,7 +148,7 @@ s3:
   replicas: 1
   port: 8333
   metricsPort: 9327
-  enableAuth: false
+  enableAuth: true
   bindAddress: "0.0.0.0"
   domainName: ""
   ingress:
