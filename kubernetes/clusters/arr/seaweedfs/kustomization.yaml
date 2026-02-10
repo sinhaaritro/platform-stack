@@ -3,7 +3,9 @@ kind: Kustomization
 
 resources:
   - ../../../apps/infrastructure/seaweedfs/overlays/prod
-  - ../../../apps/infrastructure/seaweedfs/resources/job-create-buckets.yaml
+
+components:
+  - ../../../apps/infrastructure/seaweedfs/components/bucket-job
   # - ../../../apps/infrastructure/seaweedfs/overlays/maintenance
 
 patches:
