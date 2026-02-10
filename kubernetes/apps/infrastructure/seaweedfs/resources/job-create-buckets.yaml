@@ -35,5 +35,6 @@ spec:
               s3.bucket.create -name=loki-admin
               s3.configure -user=mimir -access_key=mimir -secret_key=mimir -actions=Read,Write,List,Tagging,Admin
               s3.configure -user=loki -access_key=loki -secret_key=loki -actions=Read,Write,List,Tagging,Admin
+              s3.configure -user=admin -access_key=admin -secret_key=admin -actions=Read,Write,List,Tagging,Admin
               EOF
       restartPolicy: OnFailure
