@@ -10,4 +10,3 @@ components:
 
 patches:
   - path: patch-ingress-hosts.yaml
-  - path: patch-storage.yaml
