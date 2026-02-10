@@ -6,9 +6,7 @@ metadata:
 spec:
   volumeClaimTemplates:
     - metadata:
-        name: list # The chart seems to change names based on value? Let's assume 'data-storage' based on error.
-        # Check error: "Not found: "data-storage""
-        name: data-storage # Replaced 'data'
+        name: data-storage
       spec:
         accessModes:
           - ReadWriteOnce
@@ -34,7 +32,7 @@ metadata:
 spec:
   volumeClaimTemplates:
     - metadata:
-        name: data-filer # Replaced 'data'
+        name: data-filer
       spec:
         accessModes:
           - ReadWriteOnce
@@ -60,7 +58,7 @@ metadata:
 spec:
   volumeClaimTemplates:
     - metadata:
-        name: admin-data # Replaced 'data'
+        name: admin-data
       spec:
         accessModes:
           - ReadWriteOnce
