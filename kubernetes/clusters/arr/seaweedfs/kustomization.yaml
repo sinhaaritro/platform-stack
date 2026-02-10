@@ -7,6 +7,7 @@ resources:
 components:
   - ../../../apps/infrastructure/seaweedfs/components/s3-config
   - ../../../apps/infrastructure/seaweedfs/components/replicas-1
+  - ../../../apps/infrastructure/seaweedfs/components/storage-longhorn
   # - ../../../apps/infrastructure/seaweedfs/components/maintenance
 
 patches:

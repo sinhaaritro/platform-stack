@@ -25,13 +25,9 @@ master:
     tls: []
   data:
     type: "persistentVolumeClaim"
-    size: "1Gi"
-    storageClass: "longhorn"
 
   logs:
     type: "persistentVolumeClaim"
-    size: "1Gi"
-    storageClass: "longhorn0rep"
 
   affinity: |
     podAntiAffinity:
@@ -65,13 +61,9 @@ volume:
 
   idx:
     type: "persistentVolumeClaim"
-    size: "1Gi"
-    storageClass: "longhorn"
 
   logs:
     type: "persistentVolumeClaim"
-    size: "1Gi"
-    storageClass: "longhorn0rep"
 
   initContainers: |
     - name: seaweedfs-vol-fix-idx
@@ -120,13 +112,9 @@ filer:
     tls: []
   data:
     type: "persistentVolumeClaim"
-    size: "5Gi"
-    storageClass: "longhorn"
 
   logs:
     type: "persistentVolumeClaim"
-    size: "1Gi"
-    storageClass: "longhorn0rep"
 
   affinity: |
     podAntiAffinity:
@@ -201,13 +189,9 @@ admin:
 
   data:
     type: "persistentVolumeClaim"
-    size: "5Gi"
-    storageClass: "longhorn"
 
   logs:
     type: "persistentVolumeClaim"
-    size: "5Gi"
-    storageClass: "longhorn0rep"
 
   ingress:
     enabled: true
