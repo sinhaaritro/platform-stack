@@ -1,4 +1,3 @@
-# Populated values.yaml matching current upstream.yaml configuration
 master:
   enabled: true
   replicas: 1
@@ -15,19 +14,16 @@ master:
   electionTimeout: "10s"
   heartbeatInterval: "300ms"
 
-  # Matching upstream resource requests
   resources:
     requests: {}
   ingress:
     enabled: true
     className: null
-    # host: false for "*" hostname, or an array for multiple hostnames
     host: "master.seaweedfs.local"
     path: "/sw-master/?(.*)"
     pathType: ImplementationSpecific
     annotations: {}
     tls: []
-  # Upstream storage: 1Gi Longhorn for data, 1Gi Longhorn0rep for logs
   data:
     type: "persistentVolumeClaim"
     size: "1Gi"
@@ -38,7 +34,6 @@ master:
     size: "1Gi"
     storageClass: "longhorn0rep"
 
-  # Upstream has preferred AntiAffinity
   affinity: |
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
@@ -60,19 +55,16 @@ volume:
   replicas: 1
   minFreeSpacePercent: 1
 
-  # Matching upstream arguments
   # PublicURL is critical. Using string interpolation format that shell will evaluate.
   extraArgs:
     - "-publicUrl=${POD_NAME}.${SEAWEEDFS_FULLNAME}-volume.seaweedfs.ruth.example.com:80"
 
-  # Upstream HostPath for data
   dataDirs:
     - name: data1
       type: "hostPath"
       hostPathPrefix: "/ssd/object_store"
       maxVolumes: 0
 
-  # Upstream IDX and Logs on Longhorn
   idx:
     type: "persistentVolumeClaim"
     size: "1Gi"
@@ -83,7 +75,6 @@ volume:
     size: "1Gi"
     storageClass: "longhorn0rep"
 
-  # Upstream Init Container for fixing/moving indexes
   initContainers: |
     - name: seaweedfs-vol-fix-idx
       image: chrislusf/seaweedfs:4.07
@@ -121,20 +112,17 @@ filer:
   disableHttp: false
   redirectOnRead: false
 
-  # Enable S3 on Filer as per upstream
   extraArgs:
     - "-s3"
     - "-s3.port=8333"
   ingress:
     enabled: true
     className: null
-    # host: false for "*" hostname
     host: "seaweedfs.cluster.local"
     path: "/"
     pathType: Prefix
     annotations: {}
     tls: []
-  # Upstream storage: 5Gi Longhorn for data, 1Gi Longhorn0rep for logs
   data:
     type: "persistentVolumeClaim"
     size: "5Gi"
@@ -168,14 +156,11 @@ s3:
   ingress:
     enabled: true
     className: null
-    # host: false for "*" hostname, or an array for multiple hostnames
     host: "s3.seaweedfs.local"
     path: "/"
     pathType: Prefix
-    # additional ingress annotations for the s3 endpoint
     annotations: {}
     tls: []
-  # Upstream S3 has no specific storage, just EmptyDir/None usually, or logs.
   logs:
     type: "hostPath"
     hostPathPrefix: /storage # Placeholder, upstream s3 deployment doesn't show logs volumeMounts explicitly in the snippet I saw?
@@ -193,7 +178,6 @@ worker:
   maxConcurrent: 3
   workingDir: "/tmp/seaweedfs-worker"
 
-  # Upstream resources
   resources:
     requests:
       cpu: "500m"
@@ -214,7 +198,6 @@ worker:
                 app.kubernetes.io/name: {{ template "seaweedfs.name" . }}
             topologyKey: kubernetes.io/hostname
 
-# Attempting to enable Admin via chart values
 admin:
   enabled: true
   replicas: 1
@@ -231,7 +214,7 @@ admin:
 
   logs:
     type: "persistentVolumeClaim"
-    size: "5Gi" # Upstream says 5Gi for logs too
+    size: "5Gi"
     storageClass: "longhorn0rep"
 
   ingress:
@@ -255,4 +238,4 @@ admin:
                 app.kubernetes.io/name: {{ template "seaweedfs.name" . }}
             topologyKey: kubernetes.io/hostname
 
-# Missing: WebDAV (not in chart), Ingresses (will need to patch or add manually)
+# Missing: WebDAV (not in chart) add in future

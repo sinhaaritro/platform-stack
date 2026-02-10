@@ -5,4 +5,8 @@ resources:
   - ../../base
 
 patches:
+  - path: ../../patches/fix-admin-pvc.yaml
+    target:
+      kind: StatefulSet
+      name: seaweedfs-admin
   - path: patch-scale-zero.yaml

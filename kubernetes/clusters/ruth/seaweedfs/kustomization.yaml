@@ -3,8 +3,8 @@ kind: Kustomization
 namespace: storage
 
 resources:
-  - ../../../apps/infrastructure/seaweedfs/base
+  - ../../../apps/infrastructure/seaweedfs/overlays/prod
+  - ../../../apps/infrastructure/seaweedfs/resources/job-create-buckets.yaml
 
 patches:
-  # Ingress Host Configuration
   - path: patch-ingress-hosts.yaml

@@ -1,23 +1,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-resources:
-  # - webdav.yaml
-  # - volume-ingress.yaml
-  # - upstream.yaml
-  # - ingress.yaml
-  - resources/job-create-buckets.yaml
-
 helmCharts:
   - name: seaweedfs
     repo: https://seaweedfs.github.io/seaweedfs/helm
     releaseName: seaweedfs
     namespace: storage
     version: 4.0.409
-    valuesFile: values.yaml # Uncomment when ready to use values
-
-patches:
-  - path: patches/fix-admin-pvc.yaml
-    target:
-      kind: StatefulSet
-      name: seaweedfs-admin
+    valuesFile: values.yaml

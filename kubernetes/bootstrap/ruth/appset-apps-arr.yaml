@@ -20,6 +20,8 @@
 #             exclude: true
 #           - path: kubernetes/clusters/arr/seaweedfs
 #             exclude: true
+# - path: kubernetes/clusters/ruth/mimir
+#   exclude: true
 #           - path: kubernetes/clusters/arr/metallb-system
 #             exclude: true
 #           - path: kubernetes/clusters/arr/traefik

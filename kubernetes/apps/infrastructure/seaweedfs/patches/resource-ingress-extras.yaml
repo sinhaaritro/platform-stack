@@ -5,7 +5,7 @@ metadata:
   namespace: storage
 spec:
   rules:
-    - host: webdav.seaweedfs.arr.example.com
+    - host: webdav.seaweedfs.local # To be patched
       http:
         paths:
           - path: /
@@ -23,7 +23,7 @@ metadata:
   namespace: storage
 spec:
   rules:
-    - host: volume.seaweedfs.arr.example.com
+    - host: volume.seaweedfs.local # To be patched
       http:
         paths:
           - path: /
@@ -33,7 +33,7 @@ spec:
                 name: seaweedfs-volume
                 port:
                   number: 8080
-    - host: "*.seaweedfs-volume.seaweedfs.arr.example.com"
+    - host: "*.volume.seaweedfs.local" # To be patched
       http:
         paths:
           - path: /

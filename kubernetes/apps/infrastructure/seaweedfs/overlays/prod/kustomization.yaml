@@ -10,4 +10,3 @@ patches:
     target:
       kind: StatefulSet
       name: seaweedfs-admin
-  - path: patch-replicas.yaml
