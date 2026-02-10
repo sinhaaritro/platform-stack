@@ -66,19 +66,19 @@ write:
   replicas: 1
   persistence:
     enabled: true
-    storageClass: "longhorn"
+    storageClass: "longhorn0rep"
     size: 10Gi
 
 read:
   replicas: 1
   persistence:
     enabled: true
-    storageClass: "longhorn"
+    storageClass: "longhorn0rep"
     size: 10Gi
 
 backend:
   replicas: 1
   persistence:
     enabled: true
-    storageClass: "longhorn"
+    storageClass: "longhorn0rep"
     size: 10Gi

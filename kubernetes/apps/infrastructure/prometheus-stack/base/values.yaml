@@ -28,8 +28,8 @@ grafana:
   persistence:
     enabled: true
     type: statefulset
-    storageClassName: "longhorn"
-    size: 2Gi
+    storageClassName: "longhorn0rep"
+    size: 10Gi
 
 prometheus:
   enabled: true
@@ -39,11 +39,11 @@ prometheus:
     storageSpec:
       volumeClaimTemplate:
         spec:
-          storageClassName: "longhorn"
+          storageClassName: "longhorn0rep"
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 5Gi
+              storage: 10Gi
     remoteWrite:
       - url: http://mimir-distributor.monitoring.svc:8080/api/v1/push
         headers:
