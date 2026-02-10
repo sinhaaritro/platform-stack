@@ -29,7 +29,18 @@ Tenant-specific apps are managed by a **Git Generator** in `appset-apps-[CLUSTER
 2.  **Result:** Work is done in `clusters/[CLUSTER]/[APP]`.
 3.  **Deploy:** ArgoCD Git Generator automatically detects the new folder and deploys it.
 
-## 4. Operational Troubleshooting
+3.  **Deploy:** ArgoCD Git Generator automatically detects the new folder and deploys it.
+
+## 4. Feature Extraction Protocol (Components)
+
+**Rule:** If a feature requires extra resources (Jobs, ConfigMaps) or complex patching, do **not** bury it in an Overlay.
+
+1.  **Extract:** Create `apps/services/[app]/components/[feature]`.
+2.  **Encapsulate:** Put all resources and patches in that folder.
+3.  **Import:** Reference it in the Overlay or Cluster `kustomization.yaml`.
+4.  **Why:** Keeps the Base clean and the Overlay simple.
+
+## 5. Operational Troubleshooting
 
 **Rule:** Never assume `kubectl` works locally against the target cluster. Use Ansible tunneling via `task -d ansible k8s:cmd`.
 

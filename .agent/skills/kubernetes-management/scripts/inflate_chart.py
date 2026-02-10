@@ -22,7 +22,8 @@ def inflate(path):
     
     try:
         # Run kustomize build
-        cmd = ["kustomize", "build", "--enable-helm", "."]
+        # Use kubectl kustomize --enable-helm which is standard in this stack
+        cmd = ["kubectl", "kustomize", "--enable-helm", "."]
         result = subprocess.run(cmd, cwd=target_dir, capture_output=True, text=True)
         
         if result.returncode != 0:

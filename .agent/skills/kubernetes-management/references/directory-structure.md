@@ -22,6 +22,7 @@ root/
 │   │   ├── services/                        # (User: immich, plex)
 │   │   │   └── [APP_NAME]/
 │   │   │       ├── base/
+│   │   │       ├── components/              # 1.5 COMPONENTS (Reusable Modules)
 │   │   │       ├── patches/
 │   │   │       └── overlays/
 │   │                       
@@ -45,6 +46,10 @@ There is a deliberate structural difference between the **Apps Catalog** (`kuber
 This is organized by **Category**. It contains the reusable definitions.
 *   `infrastructure/` (System level: cert-manager, ingress, monitoring, etc.)
 *   `services/` (User level: immich, plex, etc.)
+
+### C. The Components (`components/`)
+*   **Location:** Inside `apps/[category]/[app]/components/`.
+*   **Role:** Reusable modules (e.g., jobs, configurations) that can be imported by Overlays or Clusters.
 
 ### B. The Cluster Inventory (`kubernetes/clusters/`)
 This is organized by **Target**. It contains the specific implementations.
