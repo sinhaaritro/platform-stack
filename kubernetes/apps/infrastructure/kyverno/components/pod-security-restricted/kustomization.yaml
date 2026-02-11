@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: Namespace
+      name: security
+    patch: |-
+      - op: replace
+        path: /metadata/labels/pod-security.kubernetes.io~1enforce
+        value: restricted

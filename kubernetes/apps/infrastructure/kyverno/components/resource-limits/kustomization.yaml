@@ -1,17 +1,11 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-  - ../../base
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
 
 patches:
   - target:
       kind: Deployment
       name: kyverno-admission-controller
     patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
       - op: add
         path: /spec/template/spec/containers/0/resources
         value:
@@ -25,9 +19,6 @@ patches:
       kind: Deployment
       name: kyverno-background-controller
     patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
       - op: add
         path: /spec/template/spec/containers/0/resources
         value:
@@ -41,9 +32,6 @@ patches:
       kind: Deployment
       name: kyverno-reports-controller
     patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
       - op: add
         path: /spec/template/spec/containers/0/resources
         value:
@@ -57,9 +45,6 @@ patches:
       kind: Deployment
       name: kyverno-cleanup-controller
     patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
       - op: add
         path: /spec/template/spec/containers/0/resources
         value:
@@ -69,10 +54,3 @@ patches:
           limits:
             cpu: 100m
             memory: 128Mi
-  - target:
-      kind: PodDisruptionBudget
-      name: kyverno-admission-controller
-    patch: |-
-      - op: replace
-        path: /spec/minAvailable
-        value: 0
