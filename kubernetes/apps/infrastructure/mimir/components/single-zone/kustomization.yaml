@@ -26,3 +26,19 @@ patches:
     target:
       kind: StatefulSet
       name: mimir-alertmanager.*
+  - patch: |
+      - op: add
+        path: /spec/volumeClaimTemplates/0/kind
+        value: PersistentVolumeClaim
+      - op: add
+        path: /spec/volumeClaimTemplates/0/apiVersion
+        value: v1
+      - op: add
+        path: /spec/volumeClaimTemplates/0/metadata/creationTimestamp
+        value: null
+      - op: add
+        path: /spec/volumeClaimTemplates/0/spec/volumeMode
+        value: Filesystem
+    target:
+      kind: StatefulSet
+      name: mimir-(ingester|store-gateway|compactor|alertmanager)
