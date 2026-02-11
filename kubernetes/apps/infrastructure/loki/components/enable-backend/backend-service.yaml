@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/instance: loki
     app.kubernetes.io/version: "3.6.4"
     app.kubernetes.io/component: backend
-  annotations:
+
 spec:
   type: ClusterIP
   ports:
