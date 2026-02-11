@@ -43,10 +43,6 @@ spec:
                   namespace: storage
                   serverSideApply: "true"
                   replace: "false"
-                - app: loki
-                  namespace: logging
-                  serverSideApply: "true"
-                  replace: "false"
                 - app: promtail
                   namespace: logging
                   serverSideApply: "true"
