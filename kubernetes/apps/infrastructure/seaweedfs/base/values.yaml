@@ -70,7 +70,7 @@ volume:
 
   initContainers: |
     - name: seaweedfs-vol-fix-idx
-      image: {{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
+      image: chrislusf/seaweedfs:4.07
       imagePullPolicy: IfNotPresent
       command: ["/bin/sh", "-c"]
       args: ["weed fix /data; if ls /data/*.idx  >/dev/null 2>&1; then mv /data/*.idx /idx/ ; fi; "]
