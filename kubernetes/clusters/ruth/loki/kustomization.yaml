@@ -7,10 +7,10 @@ resources:
   - ingress.yaml
 
 components:
+  - ../../../apps/infrastructure/loki/components/enable-backend
   - ../../../apps/infrastructure/loki/components/minimal-replicas
   - ../../../apps/infrastructure/loki/components/resource-limits
   - ../../../apps/infrastructure/loki/components/storage-s3
   - ../../../apps/infrastructure/loki/components/storage-retention
   - ../../../apps/infrastructure/loki/components/storage-pvc
-  - ../../../apps/infrastructure/loki/components/enable-backend
   # - ../../../apps/infrastructure/loki/components/maintenance
