@@ -9,6 +9,3 @@ helmCharts:
     namespace: networking
     includeCRDs: true
     valuesFile: values.yaml
-
-resources:
-  - cluster-issuer.yaml
