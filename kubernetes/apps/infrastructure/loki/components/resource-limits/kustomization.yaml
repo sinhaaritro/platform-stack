@@ -5,64 +5,99 @@ patches:
   - target:
       kind: StatefulSet
       name: loki-read
-    patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/resources
-        value:
-          requests:
-            cpu: 100m
-            memory: 256Mi
-          limits:
-            cpu: 1000m
-            memory: 1Gi
+    patch: |
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: loki-read
+      spec:
+        template:
+          spec:
+            containers:
+              - name: loki
+                resources:
+                  requests:
+                    cpu: 100m
+                    memory: 256Mi
+                  limits:
+                    cpu: 1000m
+                    memory: 1Gi
   - target:
       kind: StatefulSet
       name: loki-write
-    patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/resources
-        value:
-          requests:
-            cpu: 100m
-            memory: 256Mi
-          limits:
-            cpu: 1000m
-            memory: 1Gi
+    patch: |
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: loki-write
+      spec:
+        template:
+          spec:
+            containers:
+              - name: loki
+                resources:
+                  requests:
+                    cpu: 100m
+                    memory: 256Mi
+                  limits:
+                    cpu: 1000m
+                    memory: 1Gi
   - target:
       kind: StatefulSet
       name: loki-backend
-    patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/resources
-        value:
-          requests:
-            cpu: 50m
-            memory: 128Mi
-          limits:
-            cpu: 500m
-            memory: 512Mi
+    patch: |
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: loki-backend
+      spec:
+        template:
+          spec:
+            containers:
+              - name: loki
+                resources:
+                  requests:
+                    cpu: 50m
+                    memory: 128Mi
+                  limits:
+                    cpu: 500m
+                    memory: 512Mi
   - target:
       kind: Deployment
       name: loki-gateway
-    patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/resources
-        value:
-          requests:
-            cpu: 50m
-            memory: 64Mi
-          limits:
-            cpu: 500m
-            memory: 256Mi
+    patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: loki-gateway
+      spec:
+        template:
+          spec:
+            containers:
+              - name: nginx
+                resources:
+                  requests:
+                    cpu: 50m
+                    memory: 64Mi
+                  limits:
+                    cpu: 500m
+                    memory: 256Mi
   - target:
       kind: StatefulSet
       name: loki-chunks-cache
-    patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/resources
-        value:
-          requests:
-            cpu: 100m
-            memory: 256Mi
-          limits:
-            memory: 512Mi
+    patch: |
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: loki-chunks-cache
+      spec:
+        template:
+          spec:
+            containers:
+              - name: memcached
+                resources:
+                  requests:
+                    cpu: 100m
+                    memory: 256Mi
+                  limits:
+                    memory: 512Mi

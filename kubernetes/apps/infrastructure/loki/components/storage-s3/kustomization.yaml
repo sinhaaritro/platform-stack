@@ -3,20 +3,114 @@ kind: Component
 
 patches:
   - target:
-      kind: ConfigMap
-      name: loki
-    patch: |-
-      - op: add
-        path: /data/loki.yaml
-        # parsing the yaml inside the string to patch it
-        value: |
-          storage:
-            bucketNames:
-              chunks: loki-chunks
-              ruler: loki-ruler
-              admin: loki-admin
-            s3:
-              endpoint: http://seaweedfs-s3.storage.svc:8333
-              region: us-east-1
-              accessKeyId: "loki"
-              secretAccessKey: "loki"
+      kind: StatefulSet
+      name: loki-read
+    patch: |
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: loki-read
+      spec:
+        template:
+          spec:
+            containers:
+              - name: loki
+                env:
+                  - name: S3_ENDPOINT
+                    value: "http://seaweedfs-s3.storage.svc:8333"
+                  - name: S3_REGION
+                    value: "us-east-1"
+                  - name: S3_BUCKET_CHUNKS
+                    value: "loki-chunks"
+                  - name: S3_BUCKET_RULER
+                    value: "loki-ruler"
+                  - name: S3_BUCKET_ADMIN
+                    value: "loki-admin"
+                  - name: S3_ACCESS_KEY
+                    value: "loki"
+                  - name: S3_SECRET_KEY
+                    value: "loki"
+  - target:
+      kind: StatefulSet
+      name: loki-write
+    patch: |
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: loki-write
+      spec:
+        template:
+          spec:
+            containers:
+              - name: loki
+                env:
+                  - name: S3_ENDPOINT
+                    value: "http://seaweedfs-s3.storage.svc:8333"
+                  - name: S3_REGION
+                    value: "us-east-1"
+                  - name: S3_BUCKET_CHUNKS
+                    value: "loki-chunks"
+                  - name: S3_BUCKET_RULER
+                    value: "loki-ruler"
+                  - name: S3_BUCKET_ADMIN
+                    value: "loki-admin"
+                  - name: S3_ACCESS_KEY
+                    value: "loki"
+                  - name: S3_SECRET_KEY
+                    value: "loki"
+  - target:
+      kind: StatefulSet
+      name: loki-backend
+    patch: |
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: loki-backend
+      spec:
+        template:
+          spec:
+            containers:
+              - name: loki
+                env:
+                  - name: S3_ENDPOINT
+                    value: "http://seaweedfs-s3.storage.svc:8333"
+                  - name: S3_REGION
+                    value: "us-east-1"
+                  - name: S3_BUCKET_CHUNKS
+                    value: "loki-chunks"
+                  - name: S3_BUCKET_RULER
+                    value: "loki-ruler"
+                  - name: S3_BUCKET_ADMIN
+                    value: "loki-admin"
+                  - name: S3_ACCESS_KEY
+                    value: "loki"
+                  - name: S3_SECRET_KEY
+                    value: "loki"
+  - target:
+      kind: Deployment
+      name: loki-canary
+    patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: loki-canary
+      spec:
+        template:
+          spec:
+            containers:
+              - name: loki
+                env:
+                  - name: S3_ENDPOINT
+                    value: "http://seaweedfs-s3.storage.svc:8333"
+                  - name: S3_REGION
+                    value: "us-east-1"
+                  - name: S3_BUCKET_CHUNKS
+                    value: "loki-chunks"
+                  - name: S3_BUCKET_RULER
+                    value: "loki-ruler"
+                  - name: S3_BUCKET_ADMIN
+                    value: "loki-admin"
+                  - name: S3_ACCESS_KEY
+                    value: "loki"
+                  - name: S3_SECRET_KEY
+                    value: "loki"

@@ -4,36 +4,51 @@ kind: Component
 patches:
   - target:
       kind: StatefulSet
-      name: loki-backend
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
+      name: loki-read
+    patch: |
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: loki-read
+      spec:
+        replicas: 1
   - target:
       kind: StatefulSet
       name: loki-write
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
+    patch: |
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: loki-write
+      spec:
+        replicas: 1
   - target:
       kind: StatefulSet
-      name: loki-read
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
+      name: loki-backend
+    patch: |
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: loki-backend
+      spec:
+        replicas: 1
   - target:
       kind: Deployment
       name: loki-gateway
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
+    patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: loki-gateway
+      spec:
+        replicas: 1
   - target:
-      kind: StatefulSet
+      kind: Deployment
       name: loki-canary
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
+    patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: loki-canary
+      spec:
+        replicas: 1

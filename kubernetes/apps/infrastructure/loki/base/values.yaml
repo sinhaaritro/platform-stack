@@ -9,10 +9,14 @@ loki:
   storage:
     type: s3
     bucketNames:
-      chunks: placeholder
-      ruler: placeholder
-      admin: placeholder
+      chunks: ${S3_BUCKET_CHUNKS}
+      ruler: ${S3_BUCKET_RULER}
+      admin: ${S3_BUCKET_ADMIN}
     s3:
+      endpoint: ${S3_ENDPOINT}
+      region: ${S3_REGION}
+      accessKeyId: ${S3_ACCESS_KEY}
+      secretAccessKey: ${S3_SECRET_KEY}
       s3ForcePathStyle: true
       insecure: true
 
@@ -26,12 +30,13 @@ loki:
           prefix: loki_index_
           period: 24h
 
+serviceAccount:
+  create: true
+  name: loki
+
 chunksCache:
   enabled: true
-  # No index gateway in SimpleScalable with TSDB
-  index_gateway:
-    enabled: false
-  allocatedMemory: 256
+  allocatedMemory: 512
 
 results_cache:
   enabled: false
@@ -40,16 +45,34 @@ gateway:
   enabled: true
 
 write:
+  replicas: 3
+  legacyWriteTarget: true # Force StatefulSet
+  extraArgs:
+    - -config.expand-env=true
   persistence:
     enabled: true
+    size: 10Gi
+    storageClass: longhorn
 
 read:
+  replicas: 3
+  legacyReadTarget: true # Force StatefulSet
+  extraArgs:
+    - -config.expand-env=true
   persistence:
     enabled: true
+    size: 10Gi
+    storageClass: longhorn
 
 backend:
+  replicas: 3
+  legacyBackendTarget: true # Force StatefulSet
+  extraArgs:
+    - -config.expand-env=true
   persistence:
     enabled: true
+    size: 10Gi
+    storageClass: longhorn
 
 monitoring:
   serviceMonitor:
