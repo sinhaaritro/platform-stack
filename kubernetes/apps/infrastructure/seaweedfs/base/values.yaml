@@ -52,15 +52,10 @@ volume:
   # PublicURL is critical. Using string interpolation format that shell will evaluate.
   extraArgs:
     - "-publicUrl=${POD_NAME}.${SEAWEEDFS_FULLNAME}-volume.seaweedfs.ruth.example.com:80"
-    - "-dir=/data"
-    - "-max=0"
 
-  extraVolumeMounts:
+  dataDirs:
     - name: data
-      mountPath: /data
-      readOnly: false
-
-  dataDirs: []
+      type: "persistentVolumeClaim"
 
   data:
     type: "persistentVolumeClaim"
