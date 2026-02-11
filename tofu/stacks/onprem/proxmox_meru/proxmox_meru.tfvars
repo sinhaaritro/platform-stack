@@ -90,7 +90,7 @@ resources = {
             {
               interface    = "scsi1"
               datastore_id = "data-storage"
-              size         = 32
+              size         = 64
               ssd          = true
             }
           ]
@@ -106,7 +106,7 @@ resources = {
             {
               interface    = "scsi1"
               datastore_id = "data-storage"
-              size         = 32
+              size         = 64
               ssd          = true
             }
           ]
@@ -122,7 +122,7 @@ resources = {
             {
               interface    = "scsi1"
               datastore_id = "data-storage"
-              size         = 32
+              size         = 64
               ssd          = true
             }
           ]
