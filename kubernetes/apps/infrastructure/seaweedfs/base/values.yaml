@@ -7,7 +7,7 @@ master:
   metricsPort: 9327
   ipBind: "0.0.0.0"
   volumePreallocate: false
-  volumeSizeLimitMB: 1000
+  volumeSizeLimitMB: 2000
   # Upstream uses 001 (Rack awareness), chart default 000. Matching upstream.
   defaultReplication: "000"
   disableHttp: false
@@ -54,6 +54,7 @@ volume:
   # PublicURL is critical. Using string interpolation format that shell will evaluate.
   extraArgs:
     - "-publicUrl=${POD_NAME}.${SEAWEEDFS_FULLNAME}-volume.seaweedfs.ruth.example.com:80"
+    - "-max=15"
 
   dataDirs:
     - name: data
