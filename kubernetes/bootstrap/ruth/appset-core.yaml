@@ -47,10 +47,10 @@ spec:
                   namespace: logging
                   serverSideApply: "true"
                   replace: "false"
-                # - app: mimir
-                #   namespace: monitoring
-                #   serverSideApply: "true"
-                #   replace: "false"
+                - app: mimir
+                  namespace: monitoring
+                  serverSideApply: "true"
+                  replace: "false"
                 - app: prometheus-stack
                   namespace: monitoring
                   serverSideApply: "true"
