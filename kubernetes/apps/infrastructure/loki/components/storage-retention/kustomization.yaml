@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: ConfigMap
+      name: loki
+    patch: |-
+      - op: add
+        path: /data/loki.yaml
+        value: |
+          limits_config:
+            retention_period: 30d
+            max_cache_freshness_per_query: 10m
+            split_queries_by_interval: 15m

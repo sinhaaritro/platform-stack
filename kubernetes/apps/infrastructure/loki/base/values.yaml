@@ -1,20 +1,18 @@
 deploymentMode: SimpleScalable
 
 loki:
-  auth_enabled: false
+  auth_enabled: true
   commonConfig:
     replication_factor: 1
+    path_prefix: /var/loki
 
   storage:
-    bucketNames:
-      chunks: loki-chunks
-      ruler: loki-ruler
     type: s3
+    bucketNames:
+      chunks: placeholder
+      ruler: placeholder
+      admin: placeholder
     s3:
-      endpoint: http://seaweedfs-s3.storage.svc:8333
-      region: us-east-1
-      accessKeyId: "loki"
-      secretAccessKey: "loki"
       s3ForcePathStyle: true
       insecure: true
 
@@ -28,57 +26,33 @@ loki:
           prefix: loki_index_
           period: 24h
 
-  # Retention configuration
-  limits_config:
-    retention_period: 30d
-
-# Disable results cache, not needed for simple setup
-results_cache:
-  enabled: false
-
-# Enable chunks cache but with minimal resources (1 replica)
 chunksCache:
   enabled: true
-  replicas: 1
-  resources:
-    limits:
-      memory: 512Mi
-    requests:
-      cpu: 100m
-      memory: 256Mi
-  # No index gateway in SimpleScalable
+  # No index gateway in SimpleScalable with TSDB
   index_gateway:
     enabled: false
   allocatedMemory: 256
 
-# gateway is enabled by default in SimpleScalable to route requests
+results_cache:
+  enabled: false
+
 gateway:
   enabled: true
 
-# Monitoring integration
+write:
+  persistence:
+    enabled: true
+
+read:
+  persistence:
+    enabled: true
+
+backend:
+  persistence:
+    enabled: true
+
 monitoring:
   serviceMonitor:
     enabled: true
-
-# Enable persistence for write nodes for WAL if needed,
-# although S3 is the primary store.
-write:
-  replicas: 1
-  persistence:
-    enabled: true
-    storageClass: "longhorn0rep"
-    size: 10Gi
-
-read:
-  replicas: 1
-  persistence:
-    enabled: true
-    storageClass: "longhorn0rep"
-    size: 10Gi
-
-backend:
-  replicas: 1
-  persistence:
-    enabled: true
-    storageClass: "longhorn0rep"
-    size: 10Gi
+    labels:
+      release: prometheus-stack

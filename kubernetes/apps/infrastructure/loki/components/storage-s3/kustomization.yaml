@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: ConfigMap
+      name: loki
+    patch: |-
+      - op: add
+        path: /data/loki.yaml
+        # parsing the yaml inside the string to patch it
+        value: |
+          storage:
+            bucketNames:
+              chunks: loki-chunks
+              ruler: loki-ruler
+              admin: loki-admin
+            s3:
+              endpoint: http://seaweedfs-s3.storage.svc:8333
+              region: us-east-1
+              accessKeyId: "loki"
+              secretAccessKey: "loki"
