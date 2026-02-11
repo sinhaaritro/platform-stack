@@ -7,6 +7,8 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: data-storage # From chart
+      apiVersion: v1
+      kind: PersistentVolumeClaim
       spec:
         accessModes: ["ReadWriteOnce"]
         resources:
@@ -15,6 +17,8 @@ spec:
         storageClassName: longhorn
     - metadata:
         name: seaweedfs-master-log-volume # From chart
+      apiVersion: v1
+      kind: PersistentVolumeClaim
       spec:
         accessModes: ["ReadWriteOnce"]
         resources:
@@ -31,6 +35,8 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: data-filer
+      apiVersion: v1
+      kind: PersistentVolumeClaim
       spec:
         accessModes: ["ReadWriteOnce"]
         resources:
@@ -39,6 +45,8 @@ spec:
         storageClassName: longhorn
     - metadata:
         name: seaweedfs-filer-log-volume
+      apiVersion: v1
+      kind: PersistentVolumeClaim
       spec:
         accessModes: ["ReadWriteOnce"]
         resources:
@@ -55,6 +63,8 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: data
+      apiVersion: v1
+      kind: PersistentVolumeClaim
       spec:
         accessModes: ["ReadWriteOnce"]
         resources:
@@ -63,6 +73,8 @@ spec:
         storageClassName: longhorn0rep
     - metadata:
         name: idx
+      apiVersion: v1
+      kind: PersistentVolumeClaim
       spec:
         accessModes: ["ReadWriteOnce"]
         resources:
@@ -71,6 +83,8 @@ spec:
         storageClassName: longhorn0rep
     - metadata:
         name: logs
+      apiVersion: v1
+      kind: PersistentVolumeClaim
       spec:
         accessModes: ["ReadWriteOnce"]
         resources:
@@ -87,6 +101,8 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: admin-data
+      apiVersion: v1
+      kind: PersistentVolumeClaim
       spec:
         accessModes: ["ReadWriteOnce"]
         resources:
@@ -95,6 +111,8 @@ spec:
         storageClassName: longhorn
     - metadata:
         name: admin-logs
+      apiVersion: v1
+      kind: PersistentVolumeClaim
       spec:
         accessModes: ["ReadWriteOnce"]
         resources:

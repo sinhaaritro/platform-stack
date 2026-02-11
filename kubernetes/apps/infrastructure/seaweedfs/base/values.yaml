@@ -73,12 +73,12 @@ volume:
       image: chrislusf/seaweedfs:4.07
       imagePullPolicy: IfNotPresent
       command: ["/bin/sh", "-c"]
-      args: ["weed fix /data1; if ls /data1/*.idx  >/dev/null 2>&1; then mv /data1/*.idx /idx/ ; fi; "]
+      args: ["weed fix /data; if ls /data/*.idx  >/dev/null 2>&1; then mv /data/*.idx /idx/ ; fi; "]
       volumeMounts:
         - mountPath: /idx
           name: idx
-        - mountPath: /data1
-          name: data1
+        - mountPath: /data
+          name: data
 
   affinity: |
     podAntiAffinity:
