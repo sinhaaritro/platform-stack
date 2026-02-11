@@ -8,3 +8,4 @@ components:
   - ../../../apps/infrastructure/cert-manager/components/issuers
   - ../../../apps/infrastructure/cert-manager/components/minimal-replicas
   - ../../../apps/infrastructure/cert-manager/components/resource-limits
+  # - ../../../apps/infrastructure/cert-manager/components/maintenance

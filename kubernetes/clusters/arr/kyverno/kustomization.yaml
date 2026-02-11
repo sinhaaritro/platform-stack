@@ -5,6 +5,6 @@ resources:
   - ../../../apps/infrastructure/kyverno/base
 
 components:
-  - ../../../apps/infrastructure/kyverno/components/minimal-replicas
   - ../../../apps/infrastructure/kyverno/components/resource-limits
   - ../../../apps/infrastructure/kyverno/components/pod-security-restricted
+  # - ../../../apps/infrastructure/kyverno/components/maintenance
