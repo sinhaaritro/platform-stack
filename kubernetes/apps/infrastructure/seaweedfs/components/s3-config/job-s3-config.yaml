@@ -11,7 +11,7 @@ spec:
       spec:
          containers:
             - name: create-buckets
-              image: chrislusf/seaweedfs:4.07
+              image: seaweedfs-placeholder
               command: ["/bin/sh", "-c"]
               args:
                  - |
@@ -32,6 +32,7 @@ spec:
                     weed shell -master=$MASTER <<EOF
                     s3.configure -user=mimir -access_key=mimir -secret_key=mimir -actions=Read,Write,List,Tagging,Admin -apply
                     s3.configure -user=loki -access_key=loki -secret_key=loki -actions=Read,Write,List,Tagging,Admin -apply
+                    s3.configure -user=alertmanager -access_key=alertmanager -secret_key=alertmanager -actions=Read,Write,List,Tagging,Admin -apply
                     s3.configure -user=admin -access_key=admin -secret_key=admin -actions=Read,Write,List,Tagging,Admin -apply
                     EOF
 
@@ -60,10 +61,22 @@ spec:
                        fi
                     done
 
+                    # Alertmanager Buckets
+                    for BUCKET in alertmanager; do
+                       echo "Checking bucket $BUCKET..."
+                       if ! echo "s3.bucket.list" | weed shell -master=$MASTER | grep -q "$BUCKET"; then
+                          echo "Creating bucket $BUCKET for user alertmanager..."
+                          echo "s3.bucket.create -name=$BUCKET -owner=alertmanager" | weed shell -master=$MASTER
+                       else
+                          echo "Bucket $BUCKET already exists."
+                       fi
+                    done
+
                     # 3. Assign Buckets to Users (Strict Ownership)
                     echo "Assigning Buckets to Users..."
                     weed shell -master=$MASTER <<EOF
                     s3.configure -user=mimir -buckets=mimir-tsdb,mimir-ruler,mimir-alertmanager -apply
                     s3.configure -user=loki -buckets=loki-chunks,loki-ruler,loki-admin -apply
+                    s3.configure -user=alertmanager -buckets=alertmanager -apply
                     EOF
          restartPolicy: OnFailure

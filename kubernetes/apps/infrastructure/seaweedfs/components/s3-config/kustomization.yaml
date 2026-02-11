@@ -3,3 +3,15 @@ kind: Component
 
 resources:
   - job-s3-config.yaml
+
+replacements:
+  - source:
+      kind: StatefulSet
+      name: seaweedfs-master
+      fieldPath: spec.template.spec.containers.0.image
+    targets:
+      - select:
+          kind: Job
+          name: s3-config-job
+        fieldPaths:
+          - spec.template.spec.containers.0.image
