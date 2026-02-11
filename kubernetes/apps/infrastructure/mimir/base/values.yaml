@@ -34,12 +34,16 @@ minio:
 # Replicas (Single Zone = 1)
 ingester:
   replicas: 1
+  zoneAwareReplication:
+    enabled: false
   persistentVolume:
     size: 2Gi
     storageClass: longhorn
 
 store_gateway:
   replicas: 1
+  zoneAwareReplication:
+    enabled: false
   persistentVolume:
     size: 2Gi
     storageClass: longhorn
@@ -57,6 +61,8 @@ ruler:
 alertmanager:
   enabled: true
   replicas: 1
+  zoneAwareReplication:
+    enabled: false
 
   persistentVolume:
     size: 2Gi
