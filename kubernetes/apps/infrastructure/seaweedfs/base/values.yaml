@@ -53,11 +53,9 @@ volume:
   extraArgs:
     - "-publicUrl=${POD_NAME}.${SEAWEEDFS_FULLNAME}-volume.seaweedfs.ruth.example.com:80"
 
-  dataDirs: []
-  #   - name: data1
-  #     type: "hostPath"
-  #     hostPathPrefix: "/ssd/object_store"
-  #     maxVolumes: 0
+  dataDirs:
+    - name: data
+      type: "persistentVolumeClaim"
 
   data:
     type: "persistentVolumeClaim"

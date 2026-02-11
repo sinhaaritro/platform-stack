@@ -69,7 +69,7 @@ spec:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: 20Gi # Reduced to fit 25Gi/node constraint
+            storage: 20Gi # Starting small, easy to expand
         storageClassName: longhorn0rep
     - metadata:
         name: idx
