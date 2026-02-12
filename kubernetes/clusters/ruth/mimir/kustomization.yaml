@@ -7,5 +7,5 @@ resources:
   - ingress.yaml
 
 components:
-  # - ../../../apps/infrastructure/mimir/components/maintenance
   - ../../../apps/infrastructure/mimir/components/single-zone
+  # - ../../../apps/infrastructure/mimir/components/maintenance
