@@ -3,27 +3,3 @@ kind: Kustomization
 
 resources:
   - ../../base
-
-    # It doesn't seem to patch values.yaml directly in overlay?
-    # Wait, SeaweedFS `overlays/prod` has NO values.yaml patching in `kustomization.yaml` shown in step 49.
-    # It just includes base and components.
-    #
-    # So for Grafana, I should follow suit: include base, maybe create components if needed.
-    # But for simple values override, I might need to use a strategic merge patch on the `HelmRelease` if using Flux, or just rely on base values for now if they are sufficient?
-    #
-    # Wait, Kustomize's `helmCharts` field creates the resources.
-    # If I want to override values in overlay, I should probably re-declare `helmCharts` with a different values file?
-    # Or just use `patches` on the resulting Deployment/StatefulSet?
-    #
-    # The skill says: "Step 3: Create Profiles (Overlays)... patches: [ ../../patches/feature.yaml ]".
-    #
-    # So let's stick to base + patches if needed. I will creating `values.yaml` in overlay but how to use it?
-    # If I re-declare `helmCharts` in overlay, it might conflict or duplicate.
-    #
-    # Let's check `apps/infrastructure/loki/overlays`? Step 9 showed `overlays` exists.
-    # Let's verify Loki or Mimir overlays if possible later.
-    #
-    # For now, I will create `overlays/prod/kustomization.yaml` referencing base, and if I need values, I'll figure it out.
-    # The user asked for "Same format as seaweeedfs".
-    # SeaweedFS `overlays/prod/kustomization.yaml` (step 49) ONLY includes base and components.
-    # So I will do the same.
