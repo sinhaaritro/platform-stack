@@ -3,7 +3,10 @@ kind: Kustomization
 namespace: monitoring
 
 resources:
-  - ../../../apps/infrastructure/grafana/overlays/prod
+  - ../../../apps/infrastructure/grafana/base
+
+components:
+  - ../../../apps/infrastructure/grafana/components/storage-longhorn
 
 patches:
   - path: patch-ingress.yaml
