@@ -1,0 +1,55 @@
+alloy:
+  configMap:
+    create: true
+    content: ""
+
+  clustering:
+    enabled: true
+    portName: http
+
+  stabilityLevel: "generally-available"
+  storagePath: /var/lib/alloy/data
+
+  enableHttpServerPort: true
+  listenAddr: 0.0.0.0
+  listenPort: 12345
+  listenScheme: HTTP
+
+  uiPathPrefix: /
+  enableReporting: true
+
+  securityContext:
+    privileged: true # Often needed for ebpf or host system access, can refine later
+
+  resources:
+    limits:
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+controller:
+  type: "statefulset" # Using StatefulSet for stable identity and clustering
+  replicas: 1
+  enableStatefulSetAutoDeletePVC: false
+
+service:
+  enabled: true
+  type: ClusterIP
+  internalTrafficPolicy: Cluster
+
+serviceMonitor:
+  enabled: false # Disabled until CRDs are stable/managed elsewhere
+
+ingress:
+  enabled: false
+
+rbac:
+  create: true
+
+serviceAccount:
+  create: true
+  automountServiceAccountToken: true
+
+configReloader:
+  enabled: true

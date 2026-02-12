@@ -63,6 +63,10 @@ spec:
                   namespace: monitoring
                   serverSideApply: "true"
                   replace: "false"
+                - app: alloy
+                  namespace: monitoring
+                  serverSideApply: "true"
+                  replace: "false"
   template:
     metadata:
       name: '{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}-{{.app}}'
