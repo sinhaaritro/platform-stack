@@ -74,6 +74,12 @@ distributor:
 
 querier:
   replicas: 1
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
 
 query_frontend:
   replicas: 1
