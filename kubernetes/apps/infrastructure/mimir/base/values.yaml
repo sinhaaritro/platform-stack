@@ -14,6 +14,7 @@ mimir:
           secret_access_key: mimir
           insecure: true
           signature_version: v4
+          s3_force_path_style: true
 
     blocks_storage:
       s3:
