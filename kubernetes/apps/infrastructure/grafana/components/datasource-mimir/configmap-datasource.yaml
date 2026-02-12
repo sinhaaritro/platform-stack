@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasource-mimir
+  labels:
+    grafana_datasource: "1"
+data:
+  mimir-datasource.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        uid: prometheus
+        access: proxy
+        url: http://mimir-nginx.monitoring.svc:80/prometheus
+        jsonData:
+          httpHeaderName1: "X-Scope-OrgID"
+          timeInterval: "15s"
+        secureJsonData:
+          httpHeaderValue1: "anonymous"
