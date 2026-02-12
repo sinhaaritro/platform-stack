@@ -1,0 +1,48 @@
+# Default values for prometheus-node-exporter.
+image:
+  registry: quay.io
+  repository: prometheus/node-exporter
+  tag: ""
+  pullPolicy: IfNotPresent
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 9100
+  targetPort: 9100
+  listenOnAllInterfaces: true
+  annotations:
+    prometheus.io/scrape: "true"
+
+prometheus:
+  monitor:
+    enabled: false
+
+rbac:
+  create: true
+
+serviceAccount:
+  create: true
+  name:
+  automountServiceAccountToken: false
+
+# Expose the service to the host network
+hostNetwork: true
+hostPID: true
+
+hostRootFsMount:
+  enabled: true
+  mountPropagation: HostToContainer
+
+securityContext:
+  fsGroup: 65534
+  runAsGroup: 65534
+  runAsNonRoot: true
+  runAsUser: 65534
+
+containerSecurityContext:
+  readOnlyRootFilesystem: true
+
+tolerations:
+  - effect: NoSchedule
+    operator: Exists
