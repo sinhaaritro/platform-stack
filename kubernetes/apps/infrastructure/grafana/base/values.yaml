@@ -1,0 +1,18 @@
+adminPassword: admin
+
+persistence:
+  enabled: true
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+
+serviceMonitor:
+  enabled: true
+
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  annotations: {}
+  hosts:
+    - grafana.local

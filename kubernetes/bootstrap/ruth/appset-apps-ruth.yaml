@@ -32,6 +32,8 @@ spec:
             exclude: true
           - path: kubernetes/clusters/ruth/prometheus-stack
             exclude: true
+          - path: kubernetes/clusters/ruth/grafana
+            exclude: true
   template:
     metadata:
       name: "ruth-{{path.basename}}"
