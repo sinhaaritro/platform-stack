@@ -1,7 +1,11 @@
 adminPassword: admin
 
 persistence:
-  enabled: false
+  enabled: true
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
 
 serviceMonitor:
   enabled: false
