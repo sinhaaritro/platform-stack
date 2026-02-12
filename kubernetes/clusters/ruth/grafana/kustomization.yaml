@@ -7,6 +7,7 @@ resources:
 
 components:
   - ../../../apps/infrastructure/grafana/components/storage-longhorn
+  # - ../../../apps/infrastructure/grafana/components/maintenance
 
 patches:
   - path: patch-ingress.yaml
