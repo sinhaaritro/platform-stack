@@ -1,7 +1,80 @@
 alloy:
   configMap:
     create: true
-    content: ""
+    content: |
+      // Logging: Discovery
+      discovery.kubernetes "pods" {
+        role = "pod"
+      }
+
+      discovery.relabel "pod_logs" {
+        targets = discovery.kubernetes.pods.targets
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          action = "keep"
+          regex = ".*"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_name"]
+          target_label = "pod"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          target_label = "namespace"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_container_name"]
+          target_label = "container"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_node_name"]
+          target_label = "node"
+        }
+      }
+
+      // Logging: Source
+      loki.source.kubernetes "pod_logs" {
+        targets    = discovery.relabel.pod_logs.output
+        forward_to = [loki.write.default.receiver]
+      }
+
+      // Logging: Write
+      loki.write "default" {
+        endpoint {
+          url = "http://loki-gateway.logging.svc.cluster.local:80/loki/api/v1/push"
+        }
+      }
+
+      // Metrics: Discovery (Node Exporter)
+      discovery.kubernetes "nodes" {
+        role = "service"
+      }
+
+      discovery.relabel "node_exporter" {
+        targets = discovery.kubernetes.nodes.targets
+        rule {
+          source_labels = ["__meta_kubernetes_service_name"]
+          regex = "node-exporter"
+          action = "keep"
+        }
+      }
+
+      // Metrics: Scrape
+      prometheus.scrape "node_exporter" {
+        targets    = discovery.relabel.node_exporter.output
+        forward_to = [prometheus.remote_write.mimir.receiver]
+        scrape_interval = "15s"
+      }
+
+      // Metrics: Write
+      prometheus.remote_write "mimir" {
+        endpoint {
+          url = "http://mimir-nginx.monitoring.svc.cluster.local:80/api/v1/push"
+          headers = {
+            "X-Scope-OrgID" = "anonymous",
+          }
+        }
+      }
 
   clustering:
     enabled: true
@@ -19,7 +92,7 @@ alloy:
   enableReporting: true
 
   securityContext:
-    privileged: true # Often needed for ebpf or host system access, can refine later
+    privileged: true
 
   resources:
     limits:
@@ -28,8 +101,12 @@ alloy:
       cpu: 100m
       memory: 128Mi
 
+  mounts:
+    varlog: true
+    dockercontainers: true
+
 controller:
-  type: "statefulset" # Using StatefulSet for stable identity and clustering
+  type: "daemonset"
   replicas: 1
   enableStatefulSetAutoDeletePVC: false
 
@@ -39,7 +116,7 @@ service:
   internalTrafficPolicy: Cluster
 
 serviceMonitor:
-  enabled: false # Disabled until CRDs are stable/managed elsewhere
+  enabled: false
 
 ingress:
   enabled: false
