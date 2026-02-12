@@ -6,20 +6,12 @@ metadata:
 spec:
   template:
     spec:
+      containers:
+        - name: grafana
+          volumeMounts:
+            - name: storage
+              mountPath: /var/lib/grafana
       volumes:
         - name: storage
           persistentVolumeClaim:
             claimName: grafana
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: grafana
-  namespace: monitoring
-spec:
-  storageClassName: longhorn
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi
