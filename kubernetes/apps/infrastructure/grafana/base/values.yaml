@@ -34,3 +34,7 @@ datasources:
         type: loki
         url: http://loki-gateway.logging.svc.cluster.local:80
         access: proxy
+        jsonData:
+          httpHeaderName1: "X-Scope-OrgID"
+        secureJsonData:
+          httpHeaderValue1: "1"
