@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasource-alertmanager
+  labels:
+    grafana_datasource: "1"
+data:
+  alertmanager-datasource.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Alertmanager
+        type: alertmanager
+        access: proxy
+        url: http://alertmanager.monitoring.svc:9093
+        jsonData:
+          implementation: prometheus
