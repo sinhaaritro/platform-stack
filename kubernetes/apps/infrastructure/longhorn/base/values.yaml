@@ -3,6 +3,7 @@ defaultSettings:
   createDefaultDiskLabeledNodes: false
   defaultDataPath: /data/storage
   storageReservedPercentageForDefaultDisk: 15
+  replicaAutoBalance: best-effort
   taintToleration: "node-role.kubernetes.io/control-plane:NoSchedule"
 # namespaceOverride: "longhorn-system"
 persistence:
