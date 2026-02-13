@@ -64,6 +64,7 @@ alloy:
 
       // Metrics: Scrape
       prometheus.scrape "node_exporter" {
+        job_name   = "node-exporter"
         targets    = discovery.relabel.node_exporter.output
         forward_to = [prometheus.remote_write.mimir.receiver]
         scrape_interval = "15s"
