@@ -28,8 +28,6 @@ spec:
             exclude: true
           - path: kubernetes/clusters/ruth/system-patches
             exclude: true
-          - path: kubernetes/clusters/ruth/promtail
-            exclude: true
           - path: kubernetes/clusters/ruth/prometheus-stack
             exclude: true
           - path: kubernetes/clusters/ruth/grafana
