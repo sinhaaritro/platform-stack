@@ -70,8 +70,8 @@ resources = {
     }
 
     vm_config = {
-      cpu_cores         = 3
-      memory_size       = 6144
+      cpu_cores         = 4
+      memory_size       = 8192
       disk_datastore_id = "local-thin"
       os_version        = "24.04"
       disk_size         = 24
@@ -83,8 +83,6 @@ resources = {
         tags            = ["k_control"]
         cloud_init_user = "dev"
         vm_config = {
-          cpu_cores    = 4
-          memory_size  = 6144
           ipv4_address = "192.168.0.20/24"
           additional_disks = [
             {
