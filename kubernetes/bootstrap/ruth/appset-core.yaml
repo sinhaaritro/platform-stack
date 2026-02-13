@@ -15,53 +15,67 @@ spec:
                   namespace: kube-system
                   serverSideApply: "true"
                   replace: "false"
+                  wave: "0"
                 - app: kyverno
                   namespace: security
                   serverSideApply: "true"
                   replace: "false"
+                  wave: "1"
                 - app: sealed-secrets
                   namespace: security
                   serverSideApply: "true"
                   replace: "false"
+                  wave: "2"
                 - app: cert-manager
                   namespace: networking
                   serverSideApply: "true"
                   replace: "false"
+                  wave: "2"
                 - app: metallb-system
                   namespace: networking
                   serverSideApply: "true"
                   replace: "false"
+                  wave: "3"
                 - app: traefik
                   namespace: networking
                   serverSideApply: "true"
                   replace: "false"
+                  wave: "3"
                 - app: longhorn
                   namespace: longhorn-system
                   serverSideApply: "true"
                   replace: "false"
+                  wave: "4"
                 - app: seaweedfs
                   namespace: storage
                   serverSideApply: "true"
                   replace: "false"
+                  wave: "5"
                 - app: mimir
                   namespace: monitoring
                   serverSideApply: "true"
                   replace: "false"
+                  wave: "6"
                 - app: grafana
                   namespace: monitoring
                   serverSideApply: "true"
                   replace: "false"
+                  wave: "6"
                 - app: node-exporter
                   namespace: monitoring
                   serverSideApply: "true"
                   replace: "false"
+                  wave: "6"
                 - app: alloy
                   namespace: monitoring
                   serverSideApply: "true"
                   replace: "false"
+                  wave: "6"
   template:
     metadata:
       name: '{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}-{{.app}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{.wave | default "0"}}'
     spec:
       ignoreDifferences:
         - group: ""
