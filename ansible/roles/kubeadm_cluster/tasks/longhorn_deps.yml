@@ -15,6 +15,16 @@
     enabled: true
     state: started
 
+- name: Load iSCSI TCP Module (Guardrail)
+  ansible.builtin.command: modprobe iscsi_tcp
+  changed_when: false
+
+- name: Verify iSCSI Daemon is Active (Guardrail)
+  ansible.builtin.command: systemctl is-active iscsid
+  register: iscsid_check
+  changed_when: false
+  failed_when: iscsid_check.rc != 0
+
 - name: Disable Multipathd (Conflicts with Longhorn)
   ansible.builtin.systemd:
     name: multipathd
