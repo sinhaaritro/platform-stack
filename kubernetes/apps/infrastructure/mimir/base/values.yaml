@@ -19,12 +19,6 @@ mimir:
     ingester:
       ring:
         replication_factor: 1
-    store_gateway:
-      sharding_ring:
-        replication_factor: 1
-    ruler:
-      ring:
-        replication_factor: 1
 
     blocks_storage:
       s3:
