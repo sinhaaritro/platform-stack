@@ -14,8 +14,6 @@ spec:
   template:
     metadata:
       name: "ruth-{{appName}}"
-      labels:
-        tier: "{{tier}}"
     spec:
       project: default
       source:
@@ -38,11 +36,3 @@ spec:
             duration: "5s"
             factor: 2
             maxDuration: "3m"
-
-  # Only include apps NOT marked as 'core' (or marked as 'apps')
-  selector:
-    matchExpressions:
-      - key: tier
-        operator: NotIn
-        values:
-          - core

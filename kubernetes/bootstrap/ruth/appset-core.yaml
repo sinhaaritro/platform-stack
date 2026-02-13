@@ -13,12 +13,10 @@ spec:
               repoURL: https://github.com/sinhaaritro/platform-stack.git
               revision: HEAD
               files:
-                - path: 'kubernetes/clusters/{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}/**/app.yaml'
+                - path: 'kubernetes/clusters/{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}/**/core.yaml'
   template:
     metadata:
       name: '{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}-{{appName}}'
-      labels:
-        tier: "{{tier}}"
     spec:
       ignoreDifferences:
         - group: ""
@@ -87,11 +85,3 @@ spec:
             duration: "5s"
             factor: 2
             maxDuration: "3m"
-
-  # Only include apps marked as 'core'
-  selector:
-    matchExpressions:
-      - key: tier
-        operator: In
-        values:
-          - core
