@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  namespace: monitoring
+spec:
+  template:
+    spec:
+      containers:
+        - name: node-exporter
+          args:
+            - --path.procfs=/host/proc
+            - --path.sysfs=/host/sys
+            - --path.rootfs=/host/root
+            - --path.udev.data=/host/root/run/udev/data
+            - --web.listen-address=0.0.0.0:9102

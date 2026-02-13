@@ -9,3 +9,9 @@ helmCharts:
     version: 4.51.1
     includeCRDs: true
     valuesFile: values.yaml
+
+patches:
+  - path: patch-args.yaml
+    target:
+      kind: DaemonSet
+      name: node-exporter
