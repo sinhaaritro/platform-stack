@@ -14,4 +14,4 @@ patches:
   - path: patch-args.yaml
     target:
       kind: DaemonSet
-      name: node-exporter
+      name: node-exporter-prometheus-node-exporter
