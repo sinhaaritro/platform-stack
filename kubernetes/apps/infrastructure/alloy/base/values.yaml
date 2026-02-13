@@ -58,14 +58,35 @@ alloy:
           regex = ".*node-exporter.*"
           action = "keep"
         }
-        // Force the port to 9101 (though service discovery should pick it up from the service definition)
-        // Just to be safe/explicit if discovery uses the pod IP directly.
+      }
+
+      // Metrics: Discovery (SeaweedFS)
+      discovery.relabel "seaweedfs" {
+        targets = discovery.kubernetes.nodes.targets
+        rule {
+          source_labels = ["__meta_kubernetes_service_name"]
+          regex = "seaweedfs-(master|volume|filer|s3)"
+          action = "keep"
+        }
+        rule {
+          target_label = "__address__"
+          replacement  = "${1}:9327"
+          source_labels = ["__address__"]
+          regex = "([^:]+)(?::\\d+)?"
+        }
       }
 
       // Metrics: Scrape
       prometheus.scrape "node_exporter" {
         job_name   = "node-exporter"
         targets    = discovery.relabel.node_exporter.output
+        forward_to = [prometheus.remote_write.mimir.receiver]
+        scrape_interval = "15s"
+      }
+
+      prometheus.scrape "seaweedfs" {
+        job_name   = "seaweedfs"
+        targets    = discovery.relabel.seaweedfs.output
         forward_to = [prometheus.remote_write.mimir.receiver]
         scrape_interval = "15s"
       }
