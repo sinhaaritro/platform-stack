@@ -54,14 +54,16 @@ For complex apps (like SeaweedFS) where features need to be toggled or configure
 
 ### Step 5: Register in ArgoCD (Marker File Pattern)
 1.  **Do NOT** edit `appset-core.yaml` or `appset-apps-[cluster].yaml`.
-2.  **Create:** `clusters/[cluster]/[app]/app.yaml`.
+2.  **Create Marker File:**
+    *   For Core/Infrastructure: `clusters/[cluster]/[app]/core.yaml`.
+    *   For Generic Apps: `clusters/[cluster]/[app]/app.yaml`.
 3.  **Content:**
     ```yaml
     appName: [app-name]   # e.g., loki
     namespace: [ns]       # e.g., logging
-    tier: [core|apps]     # core = managed by appset-core (infra), apps = managed by appset-apps-[cluster]
+    # tier field no longer strictly required but good for record
     ```
-4.  **Result:** The appropriate ApplicationSet will automatically discover and sync the app.
+4.  **Result:** `appset-core` picks up `core.yaml`, while `appset-apps-*` picks up `app.yaml`.
 
 ## 2. Safe Shutdown (Deletion)
 
