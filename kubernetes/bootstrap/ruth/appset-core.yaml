@@ -71,6 +71,11 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "6"
+                - app: alertmanager
+                  namespace: monitoring
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "6"
   template:
     metadata:
       name: '{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}-{{.app}}'

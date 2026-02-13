@@ -1,0 +1,26 @@
+replicaCount: 1
+
+image:
+  repository: quay.io/prometheus/alertmanager
+  tag: "v0.26.0" # Chart 1.33.0 defaults to v0.26.0
+
+service:
+  type: ClusterIP
+
+persistence:
+  enabled: true
+  storageClass: longhorn
+  accessModes:
+    - ReadWriteOnce
+  size: 1Gi
+
+ingress:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
