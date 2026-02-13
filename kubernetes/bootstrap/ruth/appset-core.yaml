@@ -67,7 +67,7 @@ spec:
       source:
         repoURL: https://github.com/sinhaaritro/platform-stack.git
         targetRevision: HEAD
-        path: "{{path.directory}}"
+        path: "{{.path.directory}}"
       destination:
         server: "{{.server}}"
         namespace: "{{.namespace}}"
