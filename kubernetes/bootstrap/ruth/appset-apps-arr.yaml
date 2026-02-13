@@ -4,6 +4,7 @@
 #   name: arr-apps
 #   namespace: argocd
 # spec:
+#   goTemplate: true
 #   generators:
 #     - git:
 #         repoURL: https://github.com/sinhaaritro/platform-stack.git
@@ -13,16 +14,18 @@
 #           - path: "kubernetes/clusters/arr/**/app.yaml"
 #   template:
 #     metadata:
-#       name: "arr-{{appName}}"
+#       name: "arr-{{.appName}}"
+#       labels:
+#         tier: "{{.tier}}"
 #     spec:
 #       project: default
 #       source:
 #         repoURL: https://github.com/sinhaaritro/platform-stack.git
 #         targetRevision: HEAD
-#         path: "{{path.directory}}"
+#         path: "{{.path.directory}}"
 #       destination:
 #         server: https://arr-api.example.com:6443
-#         namespace: "{{namespace}}"
+#         namespace: "{{.namespace}}"
 #       syncPolicy:
 #         automated:
 #           prune: true

@@ -4,6 +4,7 @@ metadata:
   name: ruth-apps
   namespace: argocd
 spec:
+  goTemplate: true
   generators:
     - git:
         repoURL: https://github.com/sinhaaritro/platform-stack.git
@@ -13,16 +14,16 @@ spec:
           - path: "kubernetes/clusters/ruth/**/app.yaml"
   template:
     metadata:
-      name: "ruth-{{appName}}"
+      name: "ruth-{{.appName}}"
     spec:
       project: default
       source:
         repoURL: https://github.com/sinhaaritro/platform-stack.git
         targetRevision: HEAD
-        path: "{{path.directory}}"
+        path: "{{.path.directory}}"
       destination:
         server: https://kubernetes.default.svc
-        namespace: "{{namespace}}"
+        namespace: "{{.namespace}}"
       syncPolicy:
         automated:
           prune: true

@@ -16,7 +16,7 @@ spec:
                 - path: 'kubernetes/clusters/{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}/**/core.yaml'
   template:
     metadata:
-      name: '{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}-{{appName}}'
+      name: '{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}-{{.appName}}'
     spec:
       ignoreDifferences:
         - group: ""
@@ -70,7 +70,7 @@ spec:
         path: "{{path.directory}}"
       destination:
         server: "{{.server}}"
-        namespace: "{{namespace}}"
+        namespace: "{{.namespace}}"
       syncPolicy:
         automated:
           prune: true
