@@ -57,6 +57,8 @@ alloy:
           regex = "node-exporter"
           action = "keep"
         }
+        // Force the port to 9101 (though service discovery should pick it up from the service definition)
+        // Just to be safe/explicit if discovery uses the pod IP directly.
       }
 
       // Metrics: Scrape
