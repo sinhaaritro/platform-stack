@@ -1,0 +1,3 @@
+appName: grafana
+namespace: monitoring
+tier: core

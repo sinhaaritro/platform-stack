@@ -1,0 +1,3 @@
+appName: cert-manager
+namespace: networking
+tier: core

@@ -8,42 +8,23 @@ spec:
     - git:
         repoURL: https://github.com/sinhaaritro/platform-stack.git
         revision: HEAD
-        directories:
-          - path: kubernetes/clusters/ruth/*
-          - path: kubernetes/clusters/ruth/cert-manager
-            exclude: true
-          - path: kubernetes/clusters/ruth/kyverno
-            exclude: true
-          - path: kubernetes/clusters/ruth/sealed-secrets
-            exclude: true
-          - path: kubernetes/clusters/ruth/longhorn
-            exclude: true
-          - path: kubernetes/clusters/ruth/seaweedfs
-            exclude: true
-          - path: kubernetes/clusters/ruth/mimir
-            exclude: true
-          - path: kubernetes/clusters/ruth/metallb-system
-            exclude: true
-          - path: kubernetes/clusters/ruth/traefik
-            exclude: true
-          - path: kubernetes/clusters/ruth/system-patches
-            exclude: true
-          - path: kubernetes/clusters/ruth/prometheus-stack
-            exclude: true
-          - path: kubernetes/clusters/ruth/grafana
-            exclude: true
+        # Find all app.yaml files in the cluster directory
+        files:
+          - path: "kubernetes/clusters/ruth/**/app.yaml"
   template:
     metadata:
-      name: "ruth-{{path.basename}}"
+      name: "ruth-{{appName}}"
+      labels:
+        tier: "{{tier}}"
     spec:
       project: default
       source:
         repoURL: https://github.com/sinhaaritro/platform-stack.git
         targetRevision: HEAD
-        path: "{{path}}"
+        path: "{{path.directory}}"
       destination:
         server: https://kubernetes.default.svc
-        namespace: "{{path.basename}}"
+        namespace: "{{namespace}}"
       syncPolicy:
         automated:
           prune: true
@@ -57,3 +38,11 @@ spec:
             duration: "5s"
             factor: 2
             maxDuration: "3m"
+
+  # Only include apps NOT marked as 'core' (or marked as 'apps')
+  selector:
+    matchExpressions:
+      - key: tier
+        operator: NotIn
+        values:
+          - core

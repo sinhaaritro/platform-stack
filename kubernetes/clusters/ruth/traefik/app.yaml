@@ -1,0 +1,3 @@
+appName: traefik
+namespace: networking
+tier: core

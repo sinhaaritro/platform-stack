@@ -9,63 +9,16 @@ spec:
     - matrix:
         generators:
           - clusters: {}
-          - list:
-              elements:
-                - app: system-patches
-                  namespace: kube-system
-                  serverSideApply: "true"
-                  replace: "false"
-                - app: kyverno
-                  namespace: security
-                  serverSideApply: "true"
-                  replace: "false"
-                - app: sealed-secrets
-                  namespace: security
-                  serverSideApply: "true"
-                  replace: "false"
-                - app: cert-manager
-                  namespace: networking
-                  serverSideApply: "true"
-                  replace: "false"
-                - app: metallb-system
-                  namespace: networking
-                  serverSideApply: "true"
-                  replace: "false"
-                - app: traefik
-                  namespace: networking
-                  serverSideApply: "true"
-                  replace: "false"
-                - app: longhorn
-                  namespace: longhorn-system
-                  serverSideApply: "true"
-                  replace: "false"
-                - app: seaweedfs
-                  namespace: storage
-                  serverSideApply: "true"
-                  replace: "false"
-                - app: mimir
-                  namespace: monitoring
-                  serverSideApply: "true"
-                  replace: "false"
-                # - app: prometheus-stack
-                #   namespace: monitoring
-                #   serverSideApply: "true"
-                #   replace: "false"
-                - app: grafana
-                  namespace: monitoring
-                  serverSideApply: "true"
-                  replace: "false"
-                - app: node-exporter
-                  namespace: monitoring
-                  serverSideApply: "true"
-                  replace: "false"
-                - app: alloy
-                  namespace: monitoring
-                  serverSideApply: "true"
-                  replace: "false"
+          - git:
+              repoURL: https://github.com/sinhaaritro/platform-stack.git
+              revision: HEAD
+              files:
+                - path: 'kubernetes/clusters/{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}/**/app.yaml'
   template:
     metadata:
-      name: '{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}-{{.app}}'
+      name: '{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}-{{appName}}'
+      labels:
+        tier: "{{tier}}"
     spec:
       ignoreDifferences:
         - group: ""
@@ -116,21 +69,29 @@ spec:
       source:
         repoURL: https://github.com/sinhaaritro/platform-stack.git
         targetRevision: HEAD
-        path: 'kubernetes/clusters/{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}/{{.app}}'
+        path: "{{path.directory}}"
       destination:
         server: "{{.server}}"
-        namespace: "{{.namespace}}"
+        namespace: "{{namespace}}"
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
-          - ServerSideApply={{.serverSideApply}}
-          - Replace={{.replace}}
+          - ServerSideApply=true
+          - Replace=false
         retry:
           limit: 10
           backoff:
             duration: "5s"
             factor: 2
             maxDuration: "3m"
+
+  # Only include apps marked as 'core'
+  selector:
+    matchExpressions:
+      - key: tier
+        operator: In
+        values:
+          - core

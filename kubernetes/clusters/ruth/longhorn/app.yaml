@@ -1,0 +1,3 @@
+appName: longhorn
+namespace: longhorn-system
+tier: core

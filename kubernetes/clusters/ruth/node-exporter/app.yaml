@@ -1,0 +1,3 @@
+appName: node-exporter
+namespace: monitoring
+tier: core

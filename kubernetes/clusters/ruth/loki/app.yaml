@@ -1,0 +1,3 @@
+appName: loki
+namespace: logging
+tier: core

@@ -52,9 +52,16 @@ For complex apps (like SeaweedFS) where features need to be toggled or configure
     *   Create `patch-ingress.yaml`.
     *   Add to `patches` list in `kustomization.yaml`.
 
-### Step 5: Register in ArgoCD
-1.  Add the app to `kubernetes/bootstrap/[HUB]/appset-apps-[CLUSTER].yaml` (if using Git Generator).
-2.  **Matrix Generator:** If adding to `appset-core.yaml` (for all clusters), ensure you **EXCLUDE** it from the individual `appset-apps-[CLUSTER].yaml` files to avoid conflicts.
+### Step 5: Register in ArgoCD (Marker File Pattern)
+1.  **Do NOT** edit `appset-core.yaml` or `appset-apps-[cluster].yaml`.
+2.  **Create:** `clusters/[cluster]/[app]/app.yaml`.
+3.  **Content:**
+    ```yaml
+    appName: [app-name]   # e.g., loki
+    namespace: [ns]       # e.g., logging
+    tier: [core|apps]     # core = managed by appset-core (infra), apps = managed by appset-apps-[cluster]
+    ```
+4.  **Result:** The appropriate ApplicationSet will automatically discover and sync the app.
 
 ## 2. Safe Shutdown (Deletion)
 
