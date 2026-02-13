@@ -14,8 +14,7 @@ service:
   annotations:
     prometheus.io/scrape: "true"
 
-extraArgs:
-  - --web.listen-address=0.0.0.0:9102
+extraArgs: []
 
 prometheus:
   monitor:
