@@ -13,4 +13,4 @@ spec:
             - --path.sysfs=/host/sys
             - --path.rootfs=/host/root
             - --path.udev.data=/host/root/run/udev/data
-            - --web.listen-address=0.0.0.0:9102
+            - --web.listen-address=0.0.0.0:9101
