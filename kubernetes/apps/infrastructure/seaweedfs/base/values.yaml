@@ -16,7 +16,14 @@ master:
   heartbeatInterval: "300ms"
 
   resources:
-    requests: {}
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  terminationGracePeriodSeconds: 60
+
   ingress:
     enabled: true
     className: null
@@ -50,6 +57,15 @@ volume:
   metricsPort: 9327
   ipBind: "0.0.0.0"
   minFreeSpacePercent: 1
+  terminationGracePeriodSeconds: 60
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
 
   # PublicURL is critical. Using string interpolation format that shell will evaluate.
   extraArgs:
@@ -104,6 +120,15 @@ filer:
   dirListLimit: 100000
   disableHttp: false
   redirectOnRead: false
+  terminationGracePeriodSeconds: 60
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
 
   extraArgs: []
   ingress:
@@ -139,6 +164,15 @@ s3:
   enableAuth: true
   bindAddress: "0.0.0.0"
   domainName: ""
+  terminationGracePeriodSeconds: 60
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
   ingress:
     enabled: true
     className: null
@@ -162,6 +196,7 @@ worker:
   capabilities: "vacuum,balance,erasure_coding"
   maxConcurrent: 3
   workingDir: "/tmp/seaweedfs-worker"
+  terminationGracePeriodSeconds: 60
 
   resources:
     requests:
@@ -187,6 +222,15 @@ admin:
   enabled: true
   port: 23646
   grpcPort: 33646
+  terminationGracePeriodSeconds: 60
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
 
   adminUser: "admin"
   adminPassword: "admin" # Upstream secret decodes to 'admin'
