@@ -1,40 +1,40 @@
-apiVersion: argoproj.io/v1alpha1
-kind: ApplicationSet
-metadata:
-  name: arr-apps
-  namespace: argocd
-spec:
-  goTemplate: true
-  generators:
-    - list:
-        elements:
-          - app: podinfo
-            namespace: podinfo
-            serverSideApply: "false"
-            replace: "false"
-  template:
-    metadata:
-      name: "arr-{{.app}}"
-    spec:
-      project: default
-      source:
-        repoURL: https://github.com/sinhaaritro/platform-stack.git
-        targetRevision: HEAD
-        path: "kubernetes/clusters/arr/{{.app}}"
-      destination:
-        server: https://arr-api.example.com:6443
-        namespace: "{{.namespace}}"
-      syncPolicy:
-        automated:
-          prune: true
-          selfHeal: true
-        syncOptions:
-          - CreateNamespace=true
-          - ServerSideApply={{.serverSideApply}}
-          - Replace={{.replace}}
-        retry:
-          limit: 10
-          backoff:
-            duration: "5s"
-            factor: 2
-            maxDuration: "3m"
+# apiVersion: argoproj.io/v1alpha1
+# kind: ApplicationSet
+# metadata:
+#   name: arr-apps
+#   namespace: argocd
+# spec:
+#   goTemplate: true
+#   generators:
+#     - list:
+#         elements:
+#           - app: podinfo
+#             namespace: podinfo
+#             serverSideApply: "false"
+#             replace: "false"
+#   template:
+#     metadata:
+#       name: "arr-{{.app}}"
+#     spec:
+#       project: default
+#       source:
+#         repoURL: https://github.com/sinhaaritro/platform-stack.git
+#         targetRevision: HEAD
+#         path: "kubernetes/clusters/arr/{{.app}}"
+#       destination:
+#         server: https://arr-api.example.com:6443
+#         namespace: "{{.namespace}}"
+#       syncPolicy:
+#         automated:
+#           prune: true
+#           selfHeal: true
+#         syncOptions:
+#           - CreateNamespace=true
+#           - ServerSideApply={{.serverSideApply}}
+#           - Replace={{.replace}}
+#         retry:
+#           limit: 10
+#           backoff:
+#             duration: "5s"
+#             factor: 2
+#             maxDuration: "3m"
