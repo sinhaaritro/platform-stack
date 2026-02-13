@@ -15,7 +15,7 @@ service:
     prometheus.io/scrape: "true"
 
 extraArgs:
-  - --web.listen-address=:9102
+  - --web.listen-address=0.0.0.0:9102
 
 prometheus:
   monitor:
