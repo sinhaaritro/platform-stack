@@ -11,7 +11,7 @@
     src: "10.96.0.0/12"
   tags: [k8s, firewall]
 
-- name: Allow Kubernetes & MetalLB Ports
+- name: Allow Kubernetes, MetalLB & Node Exporter Ports
   community.general.ufw:
     rule: allow
     port: "{{ item.port }}"
@@ -25,4 +25,5 @@
     - { port: "7946", proto: "tcp", name: "MetalLB Memberlist TCP" }
     - { port: "7946", proto: "udp", name: "MetalLB Memberlist UDP" }
     - { port: "7472", proto: "tcp", name: "MetalLB Metrics/Liveness" }
+    - { port: "9101", proto: "tcp", name: "Node Exporter (K8s) Port" }
   tags: [k8s, firewall]
