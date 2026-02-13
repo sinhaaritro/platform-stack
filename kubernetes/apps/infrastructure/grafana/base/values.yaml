@@ -20,3 +20,17 @@ sidecar:
   dashboards:
     enabled: true
     label: grafana_dashboard
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://mimir-nginx.monitoring.svc.cluster.local:80/prometheus
+        access: proxy
+        isDefault: true
+      - name: Loki
+        type: loki
+        url: http://loki-gateway.logging.svc.cluster.local:80
+        access: proxy
