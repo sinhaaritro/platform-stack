@@ -55,7 +55,7 @@ alloy:
         targets = discovery.kubernetes.nodes.targets
         rule {
           source_labels = ["__meta_kubernetes_service_name"]
-          regex = "node-exporter"
+          regex = ".*node-exporter.*"
           action = "keep"
         }
         // Force the port to 9101 (though service discovery should pick it up from the service definition)
