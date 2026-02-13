@@ -6,21 +6,25 @@ metadata:
 spec:
   goTemplate: true
   generators:
-    - git:
-        repoURL: https://github.com/sinhaaritro/platform-stack.git
-        revision: HEAD
-        # Find all app.yaml files in the cluster directory
-        files:
-          - path: "kubernetes/clusters/ruth/**/app.yaml"
+    - list:
+        elements:
+          - app: loki
+            namespace: logging
+            serverSideApply: "false"
+            replace: "false"
+          - app: podinfo
+            namespace: podinfo
+            serverSideApply: "false"
+            replace: "false"
   template:
     metadata:
-      name: "ruth-{{.appName}}"
+      name: "ruth-{{.app}}"
     spec:
       project: default
       source:
         repoURL: https://github.com/sinhaaritro/platform-stack.git
         targetRevision: HEAD
-        path: "{{.path.directory}}"
+        path: "kubernetes/clusters/ruth/{{.app}}"
       destination:
         server: https://kubernetes.default.svc
         namespace: "{{.namespace}}"
@@ -30,7 +34,8 @@ spec:
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
-          - Replace=true
+          - ServerSideApply={{.serverSideApply}}
+          - Replace={{.replace}}
         retry:
           limit: 10
           backoff:

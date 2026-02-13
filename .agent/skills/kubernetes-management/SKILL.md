@@ -52,18 +52,18 @@ For complex apps (like SeaweedFS) where features need to be toggled or configure
     *   Create `patch-ingress.yaml`.
     *   Add to `patches` list in `kustomization.yaml`.
 
-### Step 5: Register in ArgoCD (Marker File Pattern)
-1.  **Do NOT** edit `appset-core.yaml` or `appset-apps-[cluster].yaml`.
-2.  **Create Marker File:**
-    *   For Core/Infrastructure: `clusters/[cluster]/[app]/core.yaml`.
-    *   For Generic Apps: `clusters/[cluster]/[app]/app.yaml`.
-3.  **Content:**
+### Step 5: Register in ArgoCD (Explicit List Pattern)
+1.  **Edit:** `appset-core.yaml` (for infra) or `appset-apps-[cluster].yaml` (for workloads).
+2.  **Add to List:** Add your app to the `generators.list.elements` section:
     ```yaml
-    appName: [app-name]   # e.g., loki
-    namespace: [ns]       # e.g., logging
-    # tier field no longer strictly required but good for record
+    - app: [app-name]
+      namespace: [ns]
+      serverSideApply: "true"
+      replace: "false"
     ```
-4.  **Result:** `appset-core` picks up `core.yaml`, while `appset-apps-*` picks up `app.yaml`.
+3.  **Result:** ArgoCD will pick up the new item and deploy it.
+    *   **Core Apps:** Deployed to ALL clusters (Ruth, Arr, etc.).
+    *   **Workload Apps:** Deployed only to the specific cluster AppSet you edited.
 
 ## 2. Safe Shutdown (Deletion)
 
