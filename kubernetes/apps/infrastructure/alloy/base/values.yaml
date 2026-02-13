@@ -42,6 +42,7 @@ alloy:
       loki.write "default" {
         endpoint {
           url = "http://loki-gateway.logging.svc.cluster.local:80/loki/api/v1/push"
+          tenant_id = "1"
         }
       }
 
@@ -121,7 +122,10 @@ serviceMonitor:
   enabled: false
 
 ingress:
-  enabled: false
+  enabled: true
+  ingressClassName: traefik
+  hosts:
+    - alloy.local
 
 rbac:
   create: true

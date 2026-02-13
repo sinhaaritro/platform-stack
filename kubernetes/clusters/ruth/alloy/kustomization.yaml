@@ -4,5 +4,5 @@ namespace: monitoring
 
 resources:
   - ../../../apps/infrastructure/alloy/overlays/prod
-# patches:
-#   - path: patch-ingress.yaml
+patches:
+  - path: patch-ingress.yaml
