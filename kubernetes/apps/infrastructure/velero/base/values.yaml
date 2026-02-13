@@ -1,0 +1,42 @@
+# Default values for velero.
+image:
+  repository: velero/velero
+  tag: v1.13.2
+  pullPolicy: IfNotPresent
+
+initContainers:
+  - name: velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:v1.9.0
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+
+configuration:
+  backupStorageLocation:
+    - name: default
+      provider: aws
+      bucket: velero
+      config:
+        region: us-east-1
+        s3ForcePathStyle: "true"
+        s3Url: http://seaweedfs-s3.storage.svc:8333
+        # checksumAlgorithm: "" # Optional
+      default: true
+
+  volumeSnapshotLocation: []
+
+credentials:
+  useSecret: true
+  name: velero-aws-creds
+  secretContents: {}
+
+# Disable Node Agent/Restic per user request "do not activate any backup scheme"
+deployNodeAgent: false
+
+schedules: {}
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false
