@@ -153,7 +153,14 @@ spec:
       automountServiceAccountToken: true
       containers:
       - args:
+        - --log-level=info
+        - --log-format=text
+        - --interval=1m
+        - --source=service
+        - --source=ingress
+        - --policy=upsert-only
         - --registry=txt
+        - --provider=aws
         - --txt-owner-id=ruth-external-dns
         env:
         - name: AWS_SHARED_CREDENTIALS_FILE

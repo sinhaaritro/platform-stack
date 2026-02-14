@@ -15,8 +15,6 @@ extraVolumes:
     secret:
       secretName: external-dns-secret
 
-policy: upsert-only
-
 interval: 1m
 logLevel: info
 
