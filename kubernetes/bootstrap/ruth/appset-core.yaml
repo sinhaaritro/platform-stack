@@ -86,6 +86,11 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "8"
+                - app: external-dns
+                  namespace: external-dns
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "9"
 
   template:
     metadata:
