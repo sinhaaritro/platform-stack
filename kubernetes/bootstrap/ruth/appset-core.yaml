@@ -41,11 +41,11 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "3"
-                # - app: external-dns
-                #   namespace: external-dns
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "4"
+                - app: external-dns
+                  namespace: external-dns
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "4"
                 - app: longhorn
                   namespace: longhorn-system
                   serverSideApply: "true"
