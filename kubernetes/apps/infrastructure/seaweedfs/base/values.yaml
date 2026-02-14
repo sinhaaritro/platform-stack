@@ -231,10 +231,8 @@ admin:
       cpu: 200m
       memory: 128Mi
 
-  secret:
-    existingSecret: seaweedfs-admin-secret
-    userKey: adminUser
-    pwKey: adminPassword
+  adminUser: "admin"
+  adminPassword: "admin" # Upstream secret decodes to 'admin'
 
   data:
     type: "persistentVolumeClaim"
