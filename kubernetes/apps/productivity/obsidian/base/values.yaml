@@ -1,0 +1,29 @@
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  hosts:
+    - host: obsidian.ruth.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          port: 3000
+
+env:
+  puid: "1000"
+  pgid: "1000"
+  timezone: "Etc/UTC"
+
+persistence:
+  enabled: true
+  storageClass: "longhorn"
+  accessMode: ReadWriteOnce
+  size: 10Gi
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    memory: 2Gi

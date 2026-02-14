@@ -96,6 +96,11 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "10"
+                - app: obsidian
+                  namespace: obsidian
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "11"
 
   template:
     metadata:
