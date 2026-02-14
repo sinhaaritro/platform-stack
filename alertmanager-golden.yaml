@@ -1,0 +1,171 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/warn: privileged
+  name: monitoring
+---
+apiVersion: v1
+automountServiceAccountToken: true
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/instance: alertmanager
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/version: v0.31.0
+    helm.sh/chart: alertmanager-1.33.0
+  name: alertmanager
+  namespace: monitoring
+---
+apiVersion: v1
+data:
+  alertmanager.yml: |
+    global: {}
+    receivers:
+    - name: default-receiver
+    route:
+      group_interval: 5m
+      group_wait: 10s
+      receiver: default-receiver
+      repeat_interval: 3h
+    templates:
+    - /etc/alertmanager/*.tmpl
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/instance: alertmanager
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/version: v0.31.0
+    helm.sh/chart: alertmanager-1.33.0
+  name: alertmanager
+  namespace: monitoring
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/instance: alertmanager
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/version: v0.31.0
+    helm.sh/chart: alertmanager-1.33.0
+  name: alertmanager
+  namespace: monitoring
+spec:
+  ports:
+  - name: http
+    port: 9093
+    protocol: TCP
+    targetPort: http
+  selector:
+    app.kubernetes.io/instance: alertmanager
+    app.kubernetes.io/name: alertmanager
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/instance: alertmanager
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/version: v0.31.0
+    helm.sh/chart: alertmanager-1.33.0
+  name: alertmanager-headless
+  namespace: monitoring
+spec:
+  clusterIP: None
+  ports:
+  - name: http
+    port: 9093
+    protocol: TCP
+    targetPort: http
+  selector:
+    app.kubernetes.io/instance: alertmanager
+    app.kubernetes.io/name: alertmanager
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/instance: alertmanager
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/version: v0.31.0
+    helm.sh/chart: alertmanager-1.33.0
+  name: alertmanager
+  namespace: monitoring
+spec:
+  minReadySeconds: 0
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: alertmanager
+      app.kubernetes.io/name: alertmanager
+  serviceName: alertmanager-headless
+  template:
+    metadata:
+      annotations:
+        checksum/config: 8679ee8d58a7b2b0e6f947c09286a7f4137c616f02c9f79b38194aeba7dc4601
+      labels:
+        app.kubernetes.io/instance: alertmanager
+        app.kubernetes.io/name: alertmanager
+    spec:
+      automountServiceAccountToken: true
+      containers:
+      - args:
+        - --storage.path=/alertmanager
+        - --config.file=/etc/alertmanager/alertmanager.yml
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        image: quay.io/prometheus/alertmanager:v0.26.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+        name: alertmanager
+        ports:
+        - containerPort: 9093
+          name: http
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+        resources: {}
+        securityContext:
+          runAsGroup: 65534
+          runAsNonRoot: true
+          runAsUser: 65534
+        volumeMounts:
+        - mountPath: /etc/alertmanager
+          name: config
+        - mountPath: /alertmanager
+          name: storage
+      securityContext:
+        fsGroup: 65534
+      serviceAccountName: alertmanager
+      volumes:
+      - configMap:
+          name: alertmanager
+        name: config
+  volumeClaimTemplates:
+  - metadata:
+      name: storage
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: longhorn
