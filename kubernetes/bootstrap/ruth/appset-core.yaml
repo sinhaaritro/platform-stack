@@ -81,6 +81,11 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "7"
+                - app: immich
+                  namespace: immich
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "8"
 
   template:
     metadata:

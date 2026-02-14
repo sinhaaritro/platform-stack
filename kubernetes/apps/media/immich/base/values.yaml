@@ -1,0 +1,39 @@
+image:
+  tag: v1.114.0
+
+immich:
+  persistence:
+    library:
+      existingClaim: immich-library
+
+postgresql:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 15Gi
+    storageClass: longhorn
+  primary:
+    persistence:
+      enabled: true
+      size: 15Gi
+      storageClass: longhorn
+
+valkey:
+  enabled: true
+  persistence:
+    size: 1Gi
+    storageClass: longhorn
+
+server:
+  ingress:
+    main:
+      enabled: true
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      hosts:
+        - host: immich.ruth.example.com
+          paths:
+            - path: "/"
+              service:
+                identifier: main
+                port: http
