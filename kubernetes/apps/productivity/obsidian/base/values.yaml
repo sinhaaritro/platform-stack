@@ -3,12 +3,17 @@ ingress:
   annotations:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
   hosts:
     - host: obsidian.ruth.example.com
       paths:
         - path: /
           pathType: Prefix
           port: 3000
+  tls:
+    - hosts:
+        - obsidian.ruth.example.com
+      secretName: obsidian-tls
 
 env:
   puid: "1000"
