@@ -4,16 +4,12 @@ metadata:
   name: longhorn-ui
   namespace: longhorn-system
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
-    cert-manager.io/cluster-issuer: selfsigned-issuer
-    link.argocd.argoproj.io/external-link: https://longhorn.ruth.example.com/
+    cloudflare-tunnel-ingress-controller.strzibny.name/backend-protocol: "http"
+    cloudflare-tunnel-ingress-controller.strzibny.name/ssl-verify: "false"
 spec:
-  tls:
-    - hosts:
-        - longhorn.ruth.example.com
-      secretName: longhorn-ui-cert
+  ingressClassName: cloudflare-tunnel
   rules:
-    - host: longhorn.ruth.example.com
+    - host: "longhorn.ruth.example.com"
       http:
         paths:
           - path: /

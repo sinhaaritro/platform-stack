@@ -12,4 +12,3 @@ helmCharts:
 
 resources:
   - namespace.yaml
-  - sc-longhorn-replication0.yaml
