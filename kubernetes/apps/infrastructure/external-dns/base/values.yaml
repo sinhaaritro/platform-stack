@@ -16,8 +16,7 @@ extraVolumes:
       secretName: external-dns-secret
 
 policy: upsert-only
-registry: txt
-txtOwnerId: ruth-external-dns
+
 interval: 1m
 logLevel: info
 
