@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: copyparty
+
+helmCharts:
+  - name: copyparty
+    repo: oci://ghcr.io/ernail/charts
+    releaseName: copyparty
+    namespace: copyparty
+    version: 2.0.0
+    valuesFile: values.yaml
+
+resources:
+  - namespace.yaml

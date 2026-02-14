@@ -1,0 +1,40 @@
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+  hosts:
+    - host: copyparty.ruth.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          servicePortName: http
+  tls:
+    - hosts:
+        - copyparty.ruth.example.com
+      secretName: copyparty-tls
+
+volumeConfig:
+  userData:
+    persistence:
+      enabled: true
+      pvcName: "user-data"
+      accessModes:
+        - "ReadWriteOnce"
+      size: "20Gi"
+      storageClass: "longhorn"
+  appData:
+    persistence:
+      enabled: true
+      pvcName: "app-data"
+      accessModes:
+        - "ReadWriteOnce"
+      size: "1Gi"
+      storageClass: "longhorn"
+
+resources:
+  limits:
+    memory: "1Gi"
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
