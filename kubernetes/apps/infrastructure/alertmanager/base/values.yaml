@@ -9,10 +9,6 @@ service:
 
 persistence:
   enabled: true
-  storageClass: longhorn
-  accessModes:
-    - ReadWriteOnce
-  size: 1Gi
 
 ingress:
   enabled: false
