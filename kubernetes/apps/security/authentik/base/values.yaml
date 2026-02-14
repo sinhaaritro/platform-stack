@@ -1,0 +1,47 @@
+global:
+  env:
+    - name: AUTHENTIK_SECRET_KEY
+      value: "hPpoQAyXSJUWbiDBY/nJ2AySuLF2Sj5xO991P3GsTxw="
+
+authentik:
+  log_level: info
+  error_reporting:
+    enabled: false
+  postgresql:
+    host: "authentik-postgresql"
+    name: "authentik"
+    user: "authentik"
+    password: "authentik-password-change-me" # Ideally this should be a secret reference, but chart-managed implies simplicity here.
+
+server:
+  ingress:
+    enabled: true
+    hosts:
+      - authentik.ruth.example.com
+    paths:
+      - /
+
+postgresql:
+  enabled: true
+  auth:
+    username: authentik
+    password: authentik-password-change-me
+    database: authentik
+  persistence:
+    enabled: true
+    storageClass: longhorn
+    size: 10Gi
+
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: true
+      storageClass: longhorn
+      size: 1Gi
+
+geoip:
+  enabled: false

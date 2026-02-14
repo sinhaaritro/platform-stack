@@ -91,6 +91,11 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "9"
+                - app: authentik
+                  namespace: authentik
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "10"
 
   template:
     metadata:
