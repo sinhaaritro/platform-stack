@@ -2,6 +2,13 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - ../../../apps/infrastructure/longhorn/overlays/minimal
+  - ../../../apps/infrastructure/longhorn/base
   - ingress.yaml
-  # - ../../../apps/infrastructure/longhorn/overlays/maintenance
+
+components:
+  - ../../../apps/infrastructure/longhorn/components/settings
+  - ../../../apps/infrastructure/longhorn/components/persistence
+  - ../../../apps/infrastructure/longhorn/components/tolerations
+  - ../../../apps/infrastructure/longhorn/components/persistence-replication0
+  - ../../../apps/infrastructure/longhorn/components/metrics
+  - ../../../apps/infrastructure/longhorn/components/minimal
