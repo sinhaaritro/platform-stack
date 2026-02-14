@@ -97,10 +97,7 @@ metadata:
   name: external-dns-secret
   namespace: external-dns
 stringData:
-  credentials: |
-    [default]
-    aws_access_key_id = CHANGE_ME
-    aws_secret_access_key = CHANGE_ME
+  api-token: CHANGE_ME
 type: Opaque
 ---
 apiVersion: v1
@@ -161,10 +158,6 @@ spec:
         - --policy=upsert-only
         - --registry=txt
         - --provider=aws
-        - --txt-owner-id=ruth-external-dns
-        env:
-        - name: AWS_SHARED_CREDENTIALS_FILE
-          value: /etc/kubernetes/secrets/credentials
         image: registry.k8s.io/external-dns/external-dns:v0.20.0
         imagePullPolicy: IfNotPresent
         livenessProbe:
@@ -200,17 +193,9 @@ spec:
           runAsGroup: 65532
           runAsNonRoot: true
           runAsUser: 65532
-        volumeMounts:
-        - mountPath: /etc/kubernetes/secrets
-          name: credentials
-          readOnly: true
       securityContext:
         fsGroup: 65534
         runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
       serviceAccountName: external-dns
-      volumes:
-      - name: credentials
-        secret:
-          secretName: external-dns-secret

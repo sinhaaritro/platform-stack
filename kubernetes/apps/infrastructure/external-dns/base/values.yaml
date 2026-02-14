@@ -1,20 +1,7 @@
 provider:
-  name: aws
+  name: cloudflare
 
-env:
-  - name: AWS_SHARED_CREDENTIALS_FILE
-    value: /etc/kubernetes/secrets/credentials
-
-extraVolumeMounts:
-  - name: credentials
-    mountPath: /etc/kubernetes/secrets
-    readOnly: true
-
-extraVolumes:
-  - name: credentials
-    secret:
-      secretName: external-dns-secret
-
+policy: upsert-only
 interval: 1m
 logLevel: info
 

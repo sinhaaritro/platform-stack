@@ -5,3 +5,5 @@ resources:
 
 components:
   - ../../../apps/infrastructure/external-dns/components/registry-txt-ruth
+  - ../../../apps/infrastructure/external-dns/components/provider-cloudflare
+  - ../../../apps/infrastructure/external-dns/components/resources
