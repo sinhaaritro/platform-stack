@@ -41,6 +41,11 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "3"
+                # - app: external-dns
+                #   namespace: external-dns
+                #   serverSideApply: "true"
+                #   replace: "false"
+                #   wave: "4"
                 - app: longhorn
                   namespace: longhorn-system
                   serverSideApply: "true"
@@ -60,7 +65,7 @@ spec:
                   namespace: monitoring
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "6"
+                  wave: "7"
                 - app: node-exporter
                   namespace: monitoring
                   serverSideApply: "true"
@@ -76,36 +81,16 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "6"
-                - app: velero
-                  namespace: velero
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "7"
-                - app: immich
-                  namespace: immich
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "8"
-                - app: external-dns
-                  namespace: external-dns
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "9"
-                - app: authentik
-                  namespace: authentik
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "10"
-                - app: obsidian
-                  namespace: obsidian
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "11"
-                - app: copyparty
-                  namespace: copyparty
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "12"
+                # - app: velero
+                #   namespace: velero
+                #   serverSideApply: "true"
+                #   replace: "false"
+                #   wave: "6"
+                # - app: copyparty
+                #   namespace: copyparty
+                #   serverSideApply: "true"
+                #   replace: "false"
+                #   wave: "7"
 
   template:
     metadata:
