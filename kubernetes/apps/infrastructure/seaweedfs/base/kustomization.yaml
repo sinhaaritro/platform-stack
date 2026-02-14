@@ -9,5 +9,4 @@ helmCharts:
     version: 4.0.409
     valuesFile: values.yaml
 
-resources:
-  - service-filer-client.yaml
+resources: []
