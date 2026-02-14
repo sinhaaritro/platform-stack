@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: longhorn-servicemonitor
+  namespace: longhorn-system
+  labels:
+    release: mimir # Matches Prometheus/Mimir scrape config
+    app: longhorn-manager
+spec:
+  selector:
+    matchLabels:
+      app: longhorn-manager
+  namespaceSelector:
+    matchNames:
+      - longhorn-system
+  endpoints:
+    - port: manager
+      interval: 30s
+      scrapeTimeout: 10s
