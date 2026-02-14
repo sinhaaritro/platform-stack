@@ -130,8 +130,6 @@ filer:
       cpu: 1000m
       memory: 1Gi
 
-  extraArgs:
-    - "-filer=seaweedfs-filer-client.storage.svc:8888"
   ingress:
     enabled: true
     className: null
