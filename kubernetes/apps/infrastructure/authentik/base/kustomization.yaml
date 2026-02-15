@@ -10,5 +10,4 @@ helmCharts:
     version: 2025.12.4
     valuesFile: values.yaml
 
-resources:
-  - namespace.yaml
+resources: []
