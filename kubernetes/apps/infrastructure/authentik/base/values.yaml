@@ -14,7 +14,10 @@ postgresql:
     # Keeping minimal defaults that we override or satisfy via Secret.
     username: authentik
     database: authentik
-    # password is required? If we provide via secret, we might ignore this or set dummy.
+    # password  # Secret Key is now provided via envFrom (secrets component)
+  envFrom:
+    - secretRef:
+        name: authentik-secrets
 
 redis:
   enabled: true
