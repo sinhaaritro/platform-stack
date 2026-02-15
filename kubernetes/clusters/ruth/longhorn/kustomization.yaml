@@ -10,5 +10,5 @@ components:
   - ../../../apps/infrastructure/longhorn/components/persistence
   - ../../../apps/infrastructure/longhorn/components/tolerations
   - ../../../apps/infrastructure/longhorn/components/persistence-replication0
-  # - ../../../apps/infrastructure/longhorn/components/metrics # Requires ServiceMonitor CRD (Circular Dependency)
+  - ../../../apps/infrastructure/longhorn/components/metrics
   - ../../../apps/infrastructure/longhorn/components/minimal
