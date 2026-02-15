@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: longhorn-ui
+  name: longhorn-ingress-remote
   namespace: longhorn-system
   annotations:
     cloudflare-tunnel-ingress-controller.strzibny.name/backend-protocol: "http"

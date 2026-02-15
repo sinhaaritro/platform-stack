@@ -3,7 +3,8 @@ kind: Kustomization
 
 resources:
   - ../../../apps/infrastructure/longhorn/base
-  - ingress.yaml
+  - ingress-local.yaml
+  - ingress-remote.yaml
 
 components:
   - ../../../apps/infrastructure/longhorn/components/settings
