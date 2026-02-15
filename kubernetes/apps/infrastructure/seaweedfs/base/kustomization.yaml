@@ -9,4 +9,5 @@ helmCharts:
     version: 4.0.409
     valuesFile: values.yaml
 
-resources: []
+resources:
+  - namespace.yaml
