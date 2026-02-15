@@ -6,6 +6,15 @@ namespace: security
 resources:
   - ../../../apps/infrastructure/authentik/base
 
+helmCharts:
+  - name: authentik
+    repo: https://charts.goauthentik.io
+    releaseName: authentik
+    namespace: security
+    version: 2025.12.4
+    # Note: relative to this file
+    valuesFile: ../../../apps/infrastructure/authentik/base/values.yaml
+
 components:
   - ../../../apps/infrastructure/authentik/components/redis
   - ../../../apps/infrastructure/authentik/components/postgresql
