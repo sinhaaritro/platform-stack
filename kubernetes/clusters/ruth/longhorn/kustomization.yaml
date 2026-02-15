@@ -13,4 +13,4 @@ components:
   - ../../../apps/infrastructure/longhorn/components/persistence-replication0
   - ../../../apps/infrastructure/longhorn/components/metrics
   - ../../../apps/infrastructure/longhorn/components/minimal
-  - ../../../apps/infrastructure/longhorn/components/maintenance-scale-down
+  # - ../../../apps/infrastructure/longhorn/components/maintenance-scale-down

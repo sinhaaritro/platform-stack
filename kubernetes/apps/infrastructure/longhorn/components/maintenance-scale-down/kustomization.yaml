@@ -2,17 +2,17 @@ apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 
 patches:
-  - path: patch-scale-down.yaml
+  - path: patch-deployments.yaml
     target:
       kind: Deployment
       name: longhorn-ui
       namespace: longhorn-system
-  - path: patch-scale-down.yaml
+  - path: patch-deployments.yaml
     target:
       kind: Deployment
       name: longhorn-driver-deployer
       namespace: longhorn-system
-  - path: patch-scale-down.yaml
+  - path: patch-daemonset.yaml
     target:
       kind: DaemonSet
       name: longhorn-manager
