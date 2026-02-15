@@ -11,8 +11,10 @@ spec:
         - name: longhorn-ui
           resources:
             requests:
-              cpu: 20m
+              cpu: 50m
+
               memory: 64Mi
             limits:
-              cpu: 200m
+              cpu: 250m
+
               memory: 256Mi
