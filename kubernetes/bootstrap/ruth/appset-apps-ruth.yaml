@@ -13,26 +13,26 @@ spec:
             serverSideApply: "false"
             replace: "false"
             wave: "6"
-          # - app: podinfo
-          #   namespace: podinfo
-          #   serverSideApply: "false"
-          #   replace: "false"
-          #   wave: "6"
+          - app: authentik
+            namespace: authentik
+            serverSideApply: "true"
+            replace: "false"
+            wave: "6"
           # - app: immich
           #   namespace: immich
           #   serverSideApply: "true"
           #   replace: "false"
           #   wave: "7"
-          # - app: authentik
-          #   namespace: authentik
-          #   serverSideApply: "true"
-          #   replace: "false"
-          #   wave: "6"
           # - app: obsidian
           #   namespace: obsidian
           #   serverSideApply: "true"
           #   replace: "false"
           #   wave: "7"
+          # - app: podinfo
+          #   namespace: podinfo
+          #   serverSideApply: "false"
+          #   replace: "false"
+          #   wave: "6"
   template:
     metadata:
       name: "ruth-{{.app}}"
