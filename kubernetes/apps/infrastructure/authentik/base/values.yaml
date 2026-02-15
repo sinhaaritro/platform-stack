@@ -1,47 +1,29 @@
-global:
-  env:
-    - name: AUTHENTIK_SECRET_KEY
-      value: "hPpoQAyXSJUWbiDBY/nJ2AySuLF2Sj5xO991P3GsTxw="
-
 authentik:
   log_level: info
   error_reporting:
     enabled: false
-  postgresql:
-    host: "authentik-postgresql"
-    name: "authentik"
-    user: "authentik"
-    password: "authentik-password-change-me" # Ideally this should be a secret reference, but chart-managed implies simplicity here.
 
-server:
-  ingress:
-    enabled: true
-    hosts:
-      - authentik.ruth.example.com
-    paths:
-      - /
+  # Enable generic secret support (we patch the specific secret name in the component)
+  # But the chart needs to know to look for env vars if we don't provide them here.
+  # Actually, if we use envFrom, we don't need to change much here, just ensure no conflicting values.
 
 postgresql:
   enabled: true
   auth:
+    # We will provide credentials via Secret/Env, but chart might need placeholders?
+    # Keeping minimal defaults that we override or satisfy via Secret.
     username: authentik
-    password: authentik-password-change-me
     database: authentik
-  persistence:
-    enabled: true
-    storageClass: longhorn
-    size: 10Gi
+    # password is required? If we provide via secret, we might ignore this or set dummy.
 
 redis:
   enabled: true
   architecture: standalone
-  auth:
-    enabled: false
-  master:
-    persistence:
-      enabled: true
-      storageClass: longhorn
-      size: 1Gi
 
-geoip:
-  enabled: false
+server:
+  ingress:
+    enabled: true
+    # We will patch the hosts in the component
+    hosts: []
+    paths:
+      - /

@@ -14,7 +14,8 @@ spec:
             replace: "false"
             wave: "6"
           - app: authentik
-            namespace: authentik
+            namespace: security
+
             serverSideApply: "true"
             replace: "false"
             wave: "6"
