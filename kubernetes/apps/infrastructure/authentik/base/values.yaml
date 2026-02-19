@@ -3,7 +3,9 @@ authentik:
   error_reporting:
     enabled: true
   postgresql:
-    password: "ThisIsNotASecurePassword"
+    host: "authentik-postgresql"
+    user: "file:///postgres-creds/username"
+    password: "file:///postgres-creds/password"
 
   envFrom:
     - secretRef:
@@ -13,6 +15,19 @@ server:
   envFrom:
     - secretRef:
         name: authentik
+  volumes:
+    - name: postgres-creds
+      secret:
+        secretName: authentik-secrets
+        items:
+          - key: username
+            path: username
+          - key: password
+            path: password
+  volumeMounts:
+    - name: postgres-creds
+      mountPath: /postgres-creds
+      readOnly: true
   ingress:
     enabled: true
     hosts:
@@ -28,6 +43,19 @@ server:
     failureThreshold: 5
 
 worker:
+  volumes:
+    - name: postgres-creds
+      secret:
+        secretName: authentik-secrets
+        items:
+          - key: username
+            path: username
+          - key: password
+            path: password
+  volumeMounts:
+    - name: postgres-creds
+      mountPath: /postgres-creds
+      readOnly: true
   envFrom:
     - secretRef:
         name: authentik
