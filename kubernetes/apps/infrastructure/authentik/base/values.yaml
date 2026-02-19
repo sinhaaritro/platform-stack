@@ -18,6 +18,15 @@ server:
     hosts:
       - authentik.domain.tld
 
+  # Tune probes to avoid initial 502 errors during Gunicorn startup
+  startupProbe:
+    initialDelaySeconds: 10
+    failureThreshold: 30
+    periodSeconds: 10
+  livenessProbe:
+    initialDelaySeconds: 10
+    failureThreshold: 5
+
 worker:
   envFrom:
     - secretRef:
