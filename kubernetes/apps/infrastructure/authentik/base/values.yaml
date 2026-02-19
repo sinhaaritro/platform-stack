@@ -10,6 +10,9 @@ authentik:
   envFrom:
     - secretRef:
         name: authentik
+  # Point to standalone Redis
+  redis:
+    host: "authentik-redis-master"
 
 server:
   envFrom:
@@ -76,6 +79,3 @@ postgresql:
     secretKeys:
       userPasswordKey: password
       adminPasswordKey: password
-
-redis:
-  enabled: true

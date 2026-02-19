@@ -9,6 +9,8 @@ resources:
 components:
   - ../../../apps/infrastructure/authentik/components/security-context
   - ../../../apps/infrastructure/authentik/components/secrets
-  - ../../../apps/infrastructure/authentik/components/redis
+  - ../../../apps/infrastructure/authentik/components/secrets
+  # - ../../../apps/infrastructure/authentik/components/redis # Old component (volume patch) likely obsolete if chart is new
+  - ../../../apps/infrastructure/authentik/components/redis-standalone
   - ../../../apps/infrastructure/authentik/components/postgresql
   - ../../../apps/infrastructure/authentik/components/ingress
