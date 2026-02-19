@@ -32,6 +32,15 @@ worker:
     - secretRef:
         name: authentik
 
+  # Tune probes to wait for PID file creation in /dev/shm
+  startupProbe:
+    initialDelaySeconds: 10
+    failureThreshold: 30
+    periodSeconds: 10
+  livenessProbe:
+    initialDelaySeconds: 10
+    failureThreshold: 5
+
 postgresql:
   enabled: true
   auth:
