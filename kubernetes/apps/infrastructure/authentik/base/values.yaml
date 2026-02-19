@@ -1,5 +1,5 @@
 authentik:
-  secret_key: "PleaseGenerateA50CharKey"
+  secret_key: "K2w4Yjd2em0rOG5mZzVlMnc5Z3J5cTdxMmR1YTN4ZmI1aTZvOGwKbjk5YzEycjM0dDV5NnU3aThvOQ=="
   error_reporting:
     enabled: true
   postgresql:
