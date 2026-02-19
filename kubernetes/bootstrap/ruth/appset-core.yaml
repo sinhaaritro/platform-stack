@@ -27,7 +27,7 @@ spec:
                   replace: "false"
                   wave: "2"
                 - app: redis
-                  namespace: security
+                  namespace: storage
                   serverSideApply: "true"
                   replace: "false"
                   wave: "2"

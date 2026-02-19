@@ -10,9 +10,9 @@ authentik:
   envFrom:
     - secretRef:
         name: authentik
-  # Point to standalone Redis
+  # Point to standalone Redis (FQDN needed as it is in 'storage' ns)
   redis:
-    host: "redis-master"
+    host: "redis-master.storage.svc.cluster.local"
 
 server:
   envFrom:
