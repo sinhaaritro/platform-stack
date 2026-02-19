@@ -1,9 +1,9 @@
 architecture: standalone
 auth:
-  enabled: false
+  enabled: true
+  existingSecret: redis-secret
+  existingSecretPasswordKey: password
 
 primary:
   persistence:
-    enabled: true
-    storageClass: longhorn
-    size: 1Gi
+    enabled: false

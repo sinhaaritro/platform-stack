@@ -5,3 +5,7 @@ namespace: storage
 
 resources:
   - ../../../apps/infrastructure/redis/base
+
+components:
+  - ../../../apps/infrastructure/redis/components/storage
+  - ../../../apps/infrastructure/redis/components/secrets
