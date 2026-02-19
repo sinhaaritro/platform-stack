@@ -7,8 +7,8 @@ resources:
   - ../../../apps/infrastructure/authentik/base
 
 components:
+  - ../../../apps/infrastructure/authentik/components/secrets
   # - ../../../apps/infrastructure/authentik/components/redis
   # - ../../../apps/infrastructure/authentik/components/postgresql
   - ../../../apps/infrastructure/authentik/components/ingress
-  # - ../../../apps/infrastructure/authentik/components/secrets
   - ../../../apps/infrastructure/authentik/components/security-context
