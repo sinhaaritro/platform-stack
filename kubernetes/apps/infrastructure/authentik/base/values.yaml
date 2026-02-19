@@ -5,13 +5,11 @@ authentik:
   postgresql:
     password: "ThisIsNotASecurePassword"
 
-  # Link the chart-generated secret so the pod sees the AUTHENTIK_* env vars
   envFrom:
     - secretRef:
         name: authentik
 
 server:
-  # Link the chart-generated secret so the pod sees the AUTHENTIK_* env vars
   envFrom:
     - secretRef:
         name: authentik
@@ -20,44 +18,12 @@ server:
     hosts:
       - authentik.domain.tld
 
-  # Security Context (Required for restricted policy)
-  podSecurityContext:
-    runAsNonRoot: true
-    seccompProfile:
-      type: RuntimeDefault
-    fsGroup: 1001
-  containerSecurityContext:
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop: ["ALL"]
-    runAsNonRoot: true
-    seccompProfile:
-      type: RuntimeDefault
-
 worker:
-  # Link the chart-generated secret so the pod sees the AUTHENTIK_* env vars
   envFrom:
     - secretRef:
         name: authentik
-  # Security Context (Required for restricted policy)
-  podSecurityContext:
-    runAsNonRoot: true
-    seccompProfile:
-      type: RuntimeDefault
-    fsGroup: 1001
-  containerSecurityContext:
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop: ["ALL"]
-    runAsNonRoot: true
-    seccompProfile:
-      type: RuntimeDefault
 
 postgresql:
   enabled: true
   auth:
     password: "ThisIsNotASecurePassword"
-
-  # Ensure the subchart also complies (if it supports these keys)
-  # Standard Bitnami charts usually use `primary.podSecurityContext` etc.
-  # But for now, we focus on Authentik's own pods which were failing.
