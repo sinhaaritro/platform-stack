@@ -5,7 +5,7 @@ namespace: security
 helmCharts:
   - name: redis
     repo: oci://registry-1.docker.io/bitnamicharts
-    releaseName: authentik-redis
+    releaseName: redis
     namespace: security
     version: 19.6.4
     valuesFile: values.yaml

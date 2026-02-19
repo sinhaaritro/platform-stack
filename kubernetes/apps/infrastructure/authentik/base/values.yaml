@@ -12,7 +12,7 @@ authentik:
         name: authentik
   # Point to standalone Redis
   redis:
-    host: "authentik-redis-master"
+    host: "redis-master"
 
 server:
   envFrom:

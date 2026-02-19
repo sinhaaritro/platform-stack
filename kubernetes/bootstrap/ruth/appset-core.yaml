@@ -26,6 +26,11 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "2"
+                - app: redis
+                  namespace: security
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "2"
                 - app: cert-manager
                   namespace: networking
                   serverSideApply: "true"
