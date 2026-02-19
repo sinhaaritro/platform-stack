@@ -1,65 +1,53 @@
 authentik:
-  log_level: info
-  secret_key: "change-me-please-but-make-it-long-enough-to-be-secure"
+  secret_key: "PleaseGenerateA50CharKey"
   error_reporting:
-    enabled: false
-
+    enabled: true
   postgresql:
-    password: "4H2o00fSQ7"
-
-  # Link the chart-generated secret so the pod sees the AUTHENTIK_* env vars
-  envFrom:
-    - secretRef:
-        name: authentik
-
-  # Global defaults for security context if supported, otherwise explicit per component below.
+    password: "ThisIsNotASecurePassword"
 
 server:
-  # Pod-level security context
+  ingress:
+    enabled: true
+    hosts:
+      - authentik.domain.tld
+    paths:
+      - /
+
+  # Security Context (Required for restricted policy)
   podSecurityContext:
     runAsNonRoot: true
     seccompProfile:
       type: RuntimeDefault
     fsGroup: 1001
-
-  # Container-level security context
   containerSecurityContext:
     allowPrivilegeEscalation: false
     capabilities:
-      drop:
-        - ALL
+      drop: ["ALL"]
     runAsNonRoot: true
     seccompProfile:
       type: RuntimeDefault
 
 worker:
-  # Pod-level security context
+  # Security Context (Required for restricted policy)
   podSecurityContext:
     runAsNonRoot: true
     seccompProfile:
       type: RuntimeDefault
     fsGroup: 1001
-
-  # Container-level security context
   containerSecurityContext:
     allowPrivilegeEscalation: false
     capabilities:
-      drop:
-        - ALL
+      drop: ["ALL"]
     runAsNonRoot: true
     seccompProfile:
       type: RuntimeDefault
-
-  # Enable generic secret support (we patch the specific secret name in the component)
-  # But the chart needs to know to look for env vars if we don't provide them here.
-  # Actually, if we use envFrom, we don't need to change much here, just ensure no conflicting values.
 
 postgresql:
   enabled: true
   auth:
     username: authentik
     database: authentik
-    password: "4H2o00fSQ7"
+    password: "ThisIsNotASecurePassword"
 
 redis:
   enabled: true
