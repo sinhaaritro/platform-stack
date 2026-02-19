@@ -7,6 +7,11 @@ authentik:
   postgresql:
     password: "4H2o00fSQ7"
 
+  # Link the chart-generated secret so the pod sees the AUTHENTIK_* env vars
+  envFrom:
+    - secretRef:
+        name: authentik
+
   # Global defaults for security context if supported, otherwise explicit per component below.
 
 server:
