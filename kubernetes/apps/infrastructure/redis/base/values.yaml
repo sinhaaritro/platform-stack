@@ -1,7 +1,8 @@
 architecture: standalone
 auth:
   enabled: false
-master:
+
+primary:
   persistence:
     enabled: true
     storageClass: longhorn

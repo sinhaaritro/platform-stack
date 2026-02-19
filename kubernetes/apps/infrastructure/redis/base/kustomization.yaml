@@ -4,8 +4,8 @@ namespace: security
 
 helmCharts:
   - name: redis
-    repo: oci://registry-1.docker.io/bitnamicharts
+    repo: https://kubelauncher.github.io/charts
     releaseName: redis
     namespace: security
-    version: 19.6.4
+    version: 0.2.14
     valuesFile: values.yaml
