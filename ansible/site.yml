@@ -84,16 +84,16 @@
   roles:
     - role: argocd
 
-# # ==============================================================================
-# # PLAY 5: WEB LAYER
-# # Target: Web Server
-# # ==============================================================================
-# - name: Configure Web Server
-#   hosts: server
-#   tags: server
-#   become: true
-#   roles:
-#     - role: nginx
+# ==============================================================================
+# PLAY 5: WEB LAYER
+# Target: Web Server
+# ==============================================================================
+- name: Configure Web Server
+  hosts: web_server
+  tags: web_server
+  become: true
+  roles:
+    - role: nginx
 
 # # ==============================================================================
 # # PLAY 6: DATA LAYER

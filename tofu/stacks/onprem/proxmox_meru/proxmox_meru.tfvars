@@ -205,28 +205,31 @@ resources = {
   },
 
   "web_server" = {
-    enabled     = false
+    enabled     = true
     type        = "vm"
     node_name   = "moo-moo"
     description = "Web servers. Ubuntu 24.04."
     tags        = ["server", "ansible"]
     ansible_groups = {
       "timezone" = {
-        "user_timezone" = "GMT"
+        "user_timezone" = "Asia/Kolkata"
         "user_locale"   = "en_US.UTF-8"
       }
     }
 
     vm_config = {
+      cpu_cores         = 2
+      memory_size       = 2048
       disk_datastore_id = "local-thin"
       os_version        = "24.04"
+      disk_size         = 16
     }
 
     nodes = {
       "web-server-01" = {
         vm_id           = 700
         tags            = ["server", "ubuntu"]
-        cloud_init_user = "web_admins"
+        cloud_init_user = "dev"
         ansible_groups = {
           "timezone" = {
             "user_timezone" = "Asia/Kolkata"
@@ -235,10 +238,11 @@ resources = {
         }
         vm_config = {
           disk_datastore_id = "data-storage"
-          ipv4_address      = "192.168.0.96/24"
+          ipv4_address      = "192.168.0.70/24"
         }
       },
       "web-server-02" = {
+        enabled         = false
         vm_id           = 701
         tags            = ["server", "ubuntu"]
         cloud_init_user = "web_admins"
