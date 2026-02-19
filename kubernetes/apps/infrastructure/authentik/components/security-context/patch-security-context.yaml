@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: authentik-server
+  namespace: security
 spec:
   template:
     spec:
@@ -21,6 +22,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: authentik-worker
+  namespace: security
 spec:
   template:
     spec:

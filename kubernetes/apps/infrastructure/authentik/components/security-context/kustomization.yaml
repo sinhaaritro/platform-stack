@@ -3,10 +3,3 @@ kind: Component
 
 patches:
   - path: patch-security-context.yaml
-    target:
-      kind: Deployment
-      name: authentik-server
-  - path: patch-security-context.yaml
-    target:
-      kind: Deployment
-      name: authentik-worker
