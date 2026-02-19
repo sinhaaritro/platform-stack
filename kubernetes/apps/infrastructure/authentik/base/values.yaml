@@ -11,6 +11,10 @@ authentik:
         name: authentik
 
 server:
+  # Link the chart-generated secret so the pod sees the AUTHENTIK_* env vars
+  envFrom:
+    - secretRef:
+        name: authentik
   ingress:
     enabled: true
     hosts:
@@ -31,6 +35,10 @@ server:
       type: RuntimeDefault
 
 worker:
+  # Link the chart-generated secret so the pod sees the AUTHENTIK_* env vars
+  envFrom:
+    - secretRef:
+        name: authentik
   # Security Context (Required for restricted policy)
   podSecurityContext:
     runAsNonRoot: true
