@@ -72,4 +72,7 @@ worker:
 postgresql:
   enabled: true
   auth:
-    password: "ThisIsNotASecurePassword"
+    existingSecret: authentik-secrets
+    secretKeys:
+      userPasswordKey: password
+      adminPasswordKey: password
