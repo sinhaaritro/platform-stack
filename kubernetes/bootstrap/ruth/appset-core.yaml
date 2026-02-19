@@ -109,10 +109,19 @@ spec:
           jsonPointers:
             - /spec/volumeClaimTemplates/0/status
             - /spec/volumeClaimTemplates/0/spec/volumeMode
+            - /spec/volumeClaimTemplates/0/apiVersion
+            - /spec/volumeClaimTemplates/0/kind
+            - /spec/volumeClaimTemplates/0/metadata/creationTimestamp
             - /spec/volumeClaimTemplates/1/status
             - /spec/volumeClaimTemplates/1/spec/volumeMode
+            - /spec/volumeClaimTemplates/1/apiVersion
+            - /spec/volumeClaimTemplates/1/kind
+            - /spec/volumeClaimTemplates/1/metadata/creationTimestamp
             - /spec/volumeClaimTemplates/2/status
             - /spec/volumeClaimTemplates/2/spec/volumeMode
+            - /spec/volumeClaimTemplates/2/apiVersion
+            - /spec/volumeClaimTemplates/2/kind
+            - /spec/volumeClaimTemplates/2/metadata/creationTimestamp
         - group: apiextensions.k8s.io
           kind: CustomResourceDefinition
           name: bgpadvertisements.metallb.io
