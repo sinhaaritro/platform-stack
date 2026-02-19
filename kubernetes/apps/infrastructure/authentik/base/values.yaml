@@ -76,3 +76,6 @@ postgresql:
     secretKeys:
       userPasswordKey: password
       adminPasswordKey: password
+
+redis:
+  enabled: true
