@@ -1,7 +1,11 @@
 authentik:
   log_level: info
+  secret_key: "change-me-please-but-make-it-long-enough-to-be-secure"
   error_reporting:
     enabled: false
+
+  postgresql:
+    password: "4H2o00fSQ7"
 
   # Global defaults for security context if supported, otherwise explicit per component below.
 
@@ -48,14 +52,9 @@ worker:
 postgresql:
   enabled: true
   auth:
-    # We will provide credentials via Secret/Env, but chart might need placeholders?
-    # Keeping minimal defaults that we override or satisfy via Secret.
     username: authentik
     database: authentik
-    # password  # Secret Key is now provided via envFrom (secrets component)
-  envFrom:
-    - secretRef:
-        name: authentik-secrets
+    password: "4H2o00fSQ7"
 
 redis:
   enabled: true
