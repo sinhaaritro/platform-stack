@@ -11,5 +11,6 @@ components:
   - ../../../apps/infrastructure/authentik/components/secrets
   # - ../../../apps/infrastructure/authentik/components/redis # Old component (volume patch) likely obsolete if chart is new
   # - ../../../apps/infrastructure/authentik/components/redis-standalone # Moved to standalone app
-  - ../../../apps/infrastructure/authentik/components/postgresql
+  # - ../../../apps/infrastructure/authentik/components/postgresql
+
   - ../../../apps/infrastructure/authentik/components/ingress
