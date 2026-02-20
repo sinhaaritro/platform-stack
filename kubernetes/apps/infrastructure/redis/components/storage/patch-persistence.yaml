@@ -1,12 +1,17 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: redis-master
+  name: redis
   namespace: storage
 spec:
+  template:
+    spec:
+      volumes:
+        - name: redis-data
+          $patch: delete
   volumeClaimTemplates:
     - metadata:
-        name: data
+        name: redis-data
       spec:
         accessModes: ["ReadWriteOnce"]
         storageClassName: "longhorn"
