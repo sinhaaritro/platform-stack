@@ -20,6 +20,14 @@ authentik:
       existingSecret: "redis-secret"
       existingSecretPasswordKey: "password"
 
+  # Email Configuration (Password is loaded from authentik-secrets via envFrom)
+  email:
+    host: "smtp.example.com"
+    port: 587
+    username: "user@example.com"
+    use_tls: true
+    from: "authentik@example.com"
+
 server:
   envFrom:
     - secretRef:
