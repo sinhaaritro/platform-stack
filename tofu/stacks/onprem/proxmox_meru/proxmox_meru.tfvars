@@ -205,7 +205,7 @@ resources = {
   },
 
   "web_server" = {
-    enabled     = true
+    enabled     = false
     type        = "vm"
     node_name   = "moo-moo"
     description = "Web servers. Ubuntu 24.04."
