@@ -31,11 +31,6 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "2"
-                - app: authentik
-                  namespace: security
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "3"
                 - app: cert-manager
                   namespace: networking
                   serverSideApply: "true"
