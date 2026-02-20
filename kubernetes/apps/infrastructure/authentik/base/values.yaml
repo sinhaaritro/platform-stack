@@ -12,7 +12,13 @@ authentik:
         name: authentik
   # Point to standalone Redis (FQDN needed as it is in 'storage' ns)
   redis:
-    host: "redis-master.storage.svc.cluster.local"
+    host: "redis.storage.svc.cluster.local"
+    # User requested auth block (applies if subchart enabled, or for documentation)
+    auth:
+      enabled: true
+      password: ""
+      existingSecret: "redis-secret"
+      existingSecretPasswordKey: "password"
 
 server:
   envFrom:
