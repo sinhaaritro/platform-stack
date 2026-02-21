@@ -18,11 +18,16 @@ spec:
             serverSideApply: "true"
             replace: "false"
             wave: "6"
-          # - app: immich
-          #   namespace: immich
-          #   serverSideApply: "true"
-          #   replace: "false"
-          #   wave: "7"
+          - app: postgresql-14
+            namespace: infrastructure
+            serverSideApply: "true"
+            replace: "false"
+            wave: "6"
+          - app: immich
+            namespace: personal
+            serverSideApply: "true"
+            replace: "false"
+            wave: "7"
           # - app: obsidian
           #   namespace: obsidian
           #   serverSideApply: "true"

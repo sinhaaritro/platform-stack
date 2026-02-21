@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgresql-14
+spec:
+  serviceName: postgresql-14
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgresql-14
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: postgresql-14
+    spec:
+      containers:
+        - name: postgres
+          image: tensorchord/pgvecto-rs:pg14-v0.2.0@sha256:90724186f0a3517cf69142950db2e26ece9f237f374ea3b1184ffeb0981977de
+          env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: superadminpassword # In a real scenario, this should be a SealedSecret
+            - name: POSTGRES_INITDB_ARGS
+              value: "--data-checksums"
+          ports:
+            - containerPort: 5432
+              name: postgresql
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+              subPath: postgresql
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: "longhorn"
+        resources:
+          requests:
+            storage: 15Gi
