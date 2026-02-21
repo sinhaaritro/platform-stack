@@ -22,8 +22,7 @@ immich:
   # once configured via the Immich Admin UI.
   persistence:
     library:
-      size: 5Gi
-      storageClass: longhorn
+      existingClaim: immich-library
 
 # Disable built-in subcharts to use our standalone instances instead
 postgresql:
