@@ -52,9 +52,3 @@ server:
               service:
                 identifier: main
                 port: http
-
-machine-learning:
-  persistence:
-    enabled: true
-    size: 5Gi
-    storageClass: longhorn
