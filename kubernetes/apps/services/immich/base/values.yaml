@@ -24,20 +24,6 @@ immich:
     library:
       existingClaim: immich-library
 
-# Disable built-in subcharts to use our standalone instances instead
-postgresql:
-  enabled: false
-
-valkey:
-  enabled: false
-  auth:
-    username: "dummy"
-
-redis:
-  enabled: false
-  auth:
-    username: "dummy"
-
 server:
   ingress:
     main:
