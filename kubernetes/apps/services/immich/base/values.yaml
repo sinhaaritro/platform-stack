@@ -1,17 +1,21 @@
 image:
   tag: v1.114.0
 
-env:
-  # Database Configuration (Centralized PostgreSQL-14)
-  DB_HOSTNAME: "postgresql-14.infrastructure.svc.cluster.local"
-  DB_USERNAME: "postgres"
-  DB_PASSWORD: "superadminpassword"
-  DB_DATABASE_NAME: "immich"
+controllers:
+  main:
+    containers:
+      main:
+        env:
+          # Database Configuration (Centralized PostgreSQL-14)
+          DB_HOSTNAME: "postgresql-14.infrastructure.svc.cluster.local"
+          DB_USERNAME: "postgres"
+          DB_PASSWORD: "superadminpassword"
+          DB_DATABASE_NAME: "immich"
 
-  # Redis Configuration (Shared Storage Redis - Logical DB 1)
-  REDIS_HOSTNAME: "redis.storage.svc.cluster.local"
-  REDIS_PASSWORD: "change-me-please-redis-password"
-  REDIS_DB: "1"
+          # Redis Configuration (Shared Storage Redis - Logical DB 1)
+          REDIS_HOSTNAME: "redis.storage.svc.cluster.local"
+          REDIS_PASSWORD: "change-me-please-redis-password"
+          REDIS_DB: "1"
 
 immich:
   metrics:
