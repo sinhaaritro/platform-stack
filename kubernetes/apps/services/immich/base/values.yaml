@@ -31,9 +31,13 @@ postgresql:
 
 valkey:
   enabled: false
+  auth:
+    username: "dummy"
 
 redis:
   enabled: false
+  auth:
+    username: "dummy"
 
 server:
   ingress:
@@ -46,7 +50,7 @@ server:
           paths:
             - path: "/"
               service:
-                name: immich-server
+                identifier: main
                 port: http
 
 machine-learning:
