@@ -31,7 +31,7 @@ authentik:
 server:
   envFrom:
     - secretRef:
-        name: authentik
+        name: authentik-secrets
   volumes:
     - name: postgres-creds
       secret:
@@ -75,7 +75,7 @@ worker:
       readOnly: true
   envFrom:
     - secretRef:
-        name: authentik
+        name: authentik-secrets
 
   # Tune probes to wait for PID file creation in /dev/shm
   startupProbe:
