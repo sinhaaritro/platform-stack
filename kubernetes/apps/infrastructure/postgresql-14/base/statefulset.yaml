@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: tensorchord/pgvecto-rs:pg14-v0.2.0@sha256:90724186f0a3517cf69142950db2e26ece9f237f374ea3b1184ffeb0981977de
+          image: tensorchord/pgvecto-rs:pg14-v0.2.0
           env:
             - name: POSTGRES_USER
               value: postgres
