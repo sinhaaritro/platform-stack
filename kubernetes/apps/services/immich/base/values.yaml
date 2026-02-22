@@ -14,7 +14,7 @@ controllers:
 
           # Redis Configuration (Shared Storage Redis - Logical DB 1)
           REDIS_HOSTNAME: "redis.storage.svc.cluster.local"
-          REDIS_PASSWORD: "RtnObTwQ80"
+          REDIS_PASSWORD: "change-me-please-redis-password"
           REDIS_DB: "1"
     initContainers:
       init-storage:
