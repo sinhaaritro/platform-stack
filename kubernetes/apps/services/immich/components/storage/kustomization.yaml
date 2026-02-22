@@ -3,9 +3,3 @@ kind: Component
 
 resources:
   - pvc-library.yaml
-
-patches:
-  - path: patch-storage.yaml
-    target:
-      kind: PersistentVolumeClaim
-      name: immich-library
