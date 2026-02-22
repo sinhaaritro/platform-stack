@@ -3,3 +3,8 @@ kind: Kustomization
 
 resources:
   - ../../../apps/services/immich/base
+
+components:
+  - ../../../apps/services/immich/components/init-db
+  - ../../../apps/services/immich/components/ingress
+  - ../../../apps/services/immich/components/storage
