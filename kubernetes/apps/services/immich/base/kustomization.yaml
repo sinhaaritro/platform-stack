@@ -12,5 +12,8 @@ helmCharts:
 
 resources:
   - namespace.yaml
-  - pvc-library.yaml
-  - init-db-job.yaml
+
+components:
+  - ../components/storage
+  - ../components/init-db
+  - ../components/ingress
