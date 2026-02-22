@@ -16,20 +16,20 @@ controllers:
           REDIS_HOSTNAME: "redis.storage.svc.cluster.local"
           REDIS_PASSWORD: "RtnObTwQ80"
           REDIS_DB: "1"
-      initContainers:
-        init-storage:
-          image:
-            repository: busybox
-            tag: latest
-          command:
-            - sh
-            - -c
-            - |
-              mkdir -p /data/library /data/upload /data/profile /data/thumbs /data/encoded-video /data/backups
-              for dir in library upload profile thumbs encoded-video backups; do
-                touch "/data/$dir/.immich"
-              done
-              chown -R 1000:1000 /data
+    initContainers:
+      init-storage:
+        image:
+          repository: busybox
+          tag: latest
+        command:
+          - sh
+          - -c
+          - |
+            mkdir -p /data/library /data/upload /data/profile /data/thumbs /data/encoded-video /data/backups
+            for dir in library upload profile thumbs encoded-video backups; do
+              touch "/data/$dir/.immich"
+            done
+            chown -R 1000:1000 /data
 
 immich:
   metrics:
