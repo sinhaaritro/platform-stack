@@ -17,3 +17,4 @@ components:
   - ../components/storage
   - ../components/init-db
   - ../components/ingress
+  - ../components/secrets
