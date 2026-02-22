@@ -25,11 +25,17 @@ controllers:
           - sh
           - -c
           - |
-            mkdir -p /data/library /data/upload /data/profile /data/thumbs /data/encoded-video /data/backups
-            for dir in library upload profile thumbs encoded-video backups; do
-              touch "/data/$dir/.immich"
-            done
-            chown -R 1000:1000 /data
+            if [ -d /data ]; then
+              mkdir -p /data/library /data/upload /data/profile /data/thumbs /data/encoded-video /data/backups
+              for dir in library upload profile thumbs encoded-video backups; do
+                touch "/data/$dir/.immich"
+              done
+              chown -R 1000:1000 /data
+            else
+              echo "/data not found, skipping initialization"
+            fi
+        securityContext:
+          runAsUser: 0
 
 immich:
   metrics:
