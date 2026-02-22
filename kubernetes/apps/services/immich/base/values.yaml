@@ -41,9 +41,8 @@ immich:
   metrics:
     enabled: true
 
-  # Machine Learning and temporary upload processing requires local scratch space.
-  # The actual massive image data will be stored seamlessly in SeaweedFS S3
-  # once configured via the Immich Admin UI.
+  # All Immich data stored on Longhorn PVC (immich-library, 50Gi).
+  # Velero backup to be configured separately.
   persistence:
     library:
       existingClaim: immich-library
