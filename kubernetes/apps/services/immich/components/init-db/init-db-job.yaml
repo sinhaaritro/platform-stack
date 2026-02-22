@@ -24,10 +24,6 @@ spec:
               psql -h postgresql-14.infrastructure.svc.cluster.local -U postgres -d immich -c "CREATE EXTENSION IF NOT EXISTS vectors;"
           env:
             - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: immich-postgresql-secret
-                  key: password
-                  optional: true
+              value: "superadminpassword"
       restartPolicy: Never
   backoffLimit: 2

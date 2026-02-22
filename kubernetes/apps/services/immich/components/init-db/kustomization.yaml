@@ -3,9 +3,3 @@ kind: Component
 
 resources:
   - init-db-job.yaml
-
-patches:
-  - path: patch-init-db.yaml
-    target:
-      kind: Job
-      name: immich-init-db
