@@ -22,14 +22,6 @@ spec:
 
               # Apply the vectors extension
               psql -h postgresql-14.infrastructure.svc.cluster.local -U postgres -d immich -c "CREATE EXTENSION IF NOT EXISTS vectors;"
-
-              # Initialize storage structure
-              echo "Initializing storage structure in /data..."
-              mkdir -p /data/library /data/upload /data/profile /data/thumbs /data/encoded-video /data/backups
-              for dir in library upload profile thumbs encoded-video backups; do
-                touch "/data/$dir/.immich"
-              done
-              chown -R 1000:1000 /data
           env:
             - name: DB_PASSWORD
               valueFrom:
@@ -37,12 +29,5 @@ spec:
                   name: immich-postgresql-secret
                   key: password
                   optional: true
-          volumeMounts:
-            - name: library
-              mountPath: /data
-      volumes:
-        - name: library
-          persistentVolumeClaim:
-            claimName: immich-library
       restartPolicy: Never
   backoffLimit: 2
