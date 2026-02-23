@@ -17,13 +17,30 @@ spec:
             - -c
             - |
               export PGPASSWORD=$DB_PASSWORD
-              # Check if the database exists; if not, create it
-              psql -h postgresql-14.infrastructure.svc.cluster.local -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = 'immich'" | grep -q 1 || psql -h postgresql-14.infrastructure.svc.cluster.local -U postgres -c "CREATE DATABASE immich;"
+              PG_HOST="postgresql-14.infrastructure.svc.cluster.local"
+
+              # Wait until PostgreSQL is ready (max 5 minutes)
+              echo "Waiting for PostgreSQL at $PG_HOST..."
+              RETRIES=60
+              until pg_isready -h "$PG_HOST" -U postgres -t 1 > /dev/null 2>&1; do
+                RETRIES=$((RETRIES - 1))
+                if [ "$RETRIES" -le 0 ]; then
+                  echo "ERROR: Timed out waiting for PostgreSQL."
+                  exit 1
+                fi
+                echo "  Not ready yet. Retrying in 5s... ($RETRIES attempts left)"
+                sleep 5
+              done
+              echo "PostgreSQL is ready."
+
+              # Create database if it does not exist
+              psql -h "$PG_HOST" -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = 'immich'" | grep -q 1 \
+                || psql -h "$PG_HOST" -U postgres -c "CREATE DATABASE immich;"
 
               # Apply the vectors extension
-              psql -h postgresql-14.infrastructure.svc.cluster.local -U postgres -d immich -c "CREATE EXTENSION IF NOT EXISTS vectors;"
+              psql -h "$PG_HOST" -U postgres -d immich -c "CREATE EXTENSION IF NOT EXISTS vectors;"
           env:
             - name: DB_PASSWORD
               value: "superadminpassword"
       restartPolicy: Never
-  backoffLimit: 2
+  backoffLimit: 4
