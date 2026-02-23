@@ -12,3 +12,8 @@ commonConfiguration: ""
 primary:
   persistence:
     enabled: false
+  # Redis is used as a cache/session store only — no data worth persisting.
+  # Disabling AOF and RDB prevents corruption after power loss.
+  extraFlags:
+    - "--appendonly no"
+    - "--save ''"
