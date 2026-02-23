@@ -1,11 +1,13 @@
 architecture: standalone
 auth:
   enabled: true
-  # Password is rendered into the ConfigMap by Helm (Helm cannot read k8s secrets at render time).
-  # Keep this in sync with redis-secret.password.
-  password: "change-me-please-redis-password"
   existingSecret: redis-secret
   existingSecretPasswordKey: password
+
+# Setting commonConfiguration to empty suppresses Helm's ConfigMap generation.
+# Without the ConfigMap, the entrypoint reads the password from $REDIS_PASSWORD
+# env var (sourced from redis-secret), making secrets.yaml the single source of truth.
+commonConfiguration: ""
 
 primary:
   persistence:
