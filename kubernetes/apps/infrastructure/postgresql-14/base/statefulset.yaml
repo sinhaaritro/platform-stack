@@ -31,11 +31,15 @@ spec:
               mountPath: /var/lib/postgresql/data
               subPath: postgresql
   volumeClaimTemplates:
-    - metadata:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
         name: data
       spec:
-        accessModes: ["ReadWriteOnce"]
+        accessModes:
+          - ReadWriteOnce
         storageClassName: "longhorn"
         resources:
           requests:
             storage: 15Gi
+        volumeMode: Filesystem
