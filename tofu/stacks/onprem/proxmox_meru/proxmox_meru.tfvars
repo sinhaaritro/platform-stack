@@ -86,6 +86,7 @@ resources = {
           ipv4_address = "192.168.0.20/24"
           cpu_cores    = 12
           memory_size  = 16384
+          disk_size    = 32
           additional_disks = [
             {
               interface    = "scsi1"
