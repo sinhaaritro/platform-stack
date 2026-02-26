@@ -3,12 +3,16 @@
 # 1. Identify the Remote Master
 - name: "Identify Bootstrap Node: {{ target_cluster_group }}"
   ansible.builtin.set_fact:
-    remote_master: "{{ hostvars[groups[target_cluster_group][0]]['kubeadm_bootstrap_node'] }}"
+    remote_master: "{{ hostvars[groups[target_cluster_group][0]]['kubeadm_bootstrap_node'] if 'kubeadm' in group_names else hostvars[groups[target_cluster_group][0]]['k3s_bootstrap_node'] }}"
 
 - name: "Identify API URL: {{ target_cluster_group }}"
   ansible.builtin.set_fact:
     remote_api_url: "https://{{ target_cluster_group }}-api.example.com:6443"
     remote_api_ip: "{{ hostvars[remote_master]['ansible_host'] }}"
+
+- name: "Determine Remote Kubeconfig Path: {{ remote_master }}"
+  ansible.builtin.set_fact:
+    cluster_kubeconfig: "{{ '/etc/rancher/k3s/k3s.yaml' if remote_master in groups['k3s'] else '/etc/kubernetes/admin.conf' }}"
 
 # 2. Execute on Remote Cluster (Create Access)
 - name: "Create ArgoCD Manager ServiceAccount: {{ remote_master }}"
@@ -23,7 +27,7 @@
     executable: /bin/bash
   delegate_to: "{{ remote_master }}"
   environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
+    KUBECONFIG: "{{ cluster_kubeconfig }}"
   register: sa_create
   changed_when: "'created' in sa_create.stdout"
 
@@ -44,7 +48,7 @@
     executable: /bin/bash
   delegate_to: "{{ remote_master }}"
   environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
+    KUBECONFIG: "{{ cluster_kubeconfig }}"
   changed_when: false
 
 # NEW LOGIC: Get Raw JSON to preserve certificate formatting
@@ -53,7 +57,7 @@
     kubectl get secret argocd-manager-token -n kube-system -o json
   delegate_to: "{{ remote_master }}"
   environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
+    KUBECONFIG: "{{ cluster_kubeconfig }}"
   register: remote_secret_json
   changed_when: false
 
@@ -64,7 +68,7 @@
     # Keep CA as Base64. Do NOT decode. The target secret needs it as Base64.
     remote_ca_b64: "{{ (remote_secret_json.stdout | from_json).data['ca.crt'] }}"
 
-# 3. Ensure TLS Certificate SANs
+# 3. Ensure TLS Certificate SANs (Kubeadm Only)
 - name: "Check API Server Cert SANs: {{ remote_master }}"
   ansible.builtin.command: openssl x509 -in /etc/kubernetes/pki/apiserver.crt -noout -text
   delegate_to: "{{ remote_master }}"
@@ -72,6 +76,7 @@
   register: cert_text
   changed_when: false
   failed_when: false
+  when: remote_master in groups['kubeadm']
 
 - name: "Update API Server Cert with SANs: {{ remote_master }}"
   ansible.builtin.shell: |
@@ -80,6 +85,7 @@
   delegate_to: "{{ remote_master }}"
   become: true
   when:
+    - remote_master in groups['kubeadm']
     - cert_text.rc == 0
     - target_cluster_group ~ '-api.example.com' not in cert_text.stdout
   changed_when: true
@@ -91,6 +97,7 @@
   register: apiserver_id
   changed_when: false
   when:
+    - remote_master in groups['kubeadm']
     - cert_text.rc == 0
     - target_cluster_group ~ '-api.example.com' not in cert_text.stdout
 
@@ -100,12 +107,13 @@
   delegate_to: "{{ remote_master }}"
   become: true
   when:
+    - remote_master in groups['kubeadm']
     - cert_text.rc == 0
     - target_cluster_group ~ '-api.example.com' not in cert_text.stdout
     - apiserver_id.stdout_lines | length > 0
   changed_when: true
 
-# 3. Execute on Local Management Cluster (Register)
+# 4. Execute on Local Management Cluster (Register)
 - name: "Ensure DNS Resolution for Cluster: {{ target_cluster_group }}"
   ansible.builtin.lineinfile:
     path: /etc/hosts
@@ -121,6 +129,7 @@
 
 - name: "Apply Cluster Secret: {{ target_cluster_group }}"
   ansible.builtin.command: kubectl apply -f "/tmp/secret-{{ target_cluster_group }}.yaml"
+  # This uses the LOCAL admin.conf because we are applying to ArgoCD hub
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
   register: secret_apply
