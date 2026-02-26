@@ -8,6 +8,11 @@
 #   generators:
 #     - list:
 #         elements:
+#           - app: system-patches
+#             namespace: kube-system
+#             serverSideApply: "true"
+#             replace: "false"
+#             wave: "0"
 #           - app: podinfo
 #             namespace: podinfo
 #             serverSideApply: "false"

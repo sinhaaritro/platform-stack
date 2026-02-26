@@ -11,11 +11,6 @@ spec:
           - clusters: {}
           - list:
               elements:
-                - app: system-patches
-                  namespace: kube-system
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "0"
                 - app: kyverno
                   namespace: security
                   serverSideApply: "true"
