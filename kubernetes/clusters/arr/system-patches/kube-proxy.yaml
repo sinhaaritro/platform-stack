@@ -1,3 +1,14 @@
+# ==============================================================================
+# IMPORTANT: KUBEADM CLUSTERS ONLY
+# ==============================================================================
+# This patch modifies the kube-proxy ConfigMap to enable strictARP (required
+# for MetalLB L2 mode).
+#
+# NOTE FOR HYBRID CLUSTERS (k3s):
+# Do NOT apply this patch to k3s clusters. K3s does not use this ConfigMap.
+# For k3s, you must pass `--kube-proxy-arg="strict-arp=true"` to the installer
+# or configure it in `/etc/rancher/k3s/config.yaml` on the nodes.
+# ==============================================================================
 apiVersion: v1
 kind: ConfigMap
 metadata:

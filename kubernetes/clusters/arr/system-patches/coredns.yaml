@@ -1,31 +1,44 @@
+# ==============================================================================
+# IMPORTANT: KUBEADM CLUSTERS ONLY
+# ==============================================================================
+# This patch modifies the default CoreDNS ConfigMap deployed by kubeadm
+# to add custom hosts (loki.ruth.example.com).
+#
+# NOTE FOR HYBRID CLUSTERS (k3s):
+# Do NOT apply this patch to k3s clusters. K3s manages CoreDNS via a Helm chart
+# and will overwrite manual modifications to the 'coredns' ConfigMap on restart.
+#
+# For k3s, custom DNS entries should be added via a separate ConfigMap named
+# 'coredns-custom' in the 'kube-system' namespace, which K3s automatically imports.
+# ==============================================================================
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: coredns
-  namespace: kube-system
+   name: coredns
+   namespace: kube-system
 data:
-  Corefile: |
-    .:53 {
-        errors
-        health {
-           lameduck 5s
-        }
-        ready
-        hosts {
-           192.168.0.240 loki.ruth.example.com
-           fallthrough
-        }
-        kubernetes cluster.local in-addr.arpa ip6.arpa {
-           pods insecure
-           fallthrough in-addr.arpa ip6.arpa
-           ttl 30
-        }
-        prometheus :9153
-        forward . /etc/resolv.conf {
-           max_concurrent 1000
-        }
-        cache 30
-        loop
-        reload
-        loadbalance
-    }
+   Corefile: |
+      .:53 {
+          errors
+          health {
+             lameduck 5s
+          }
+          ready
+          hosts {
+             192.168.0.240 loki.ruth.example.com
+             fallthrough
+          }
+          kubernetes cluster.local in-addr.arpa ip6.arpa {
+             pods insecure
+             fallthrough in-addr.arpa ip6.arpa
+             ttl 30
+          }
+          prometheus :9153
+          forward . /etc/resolv.conf {
+             max_concurrent 1000
+          }
+          cache 30
+          loop
+          reload
+          loadbalance
+      }
