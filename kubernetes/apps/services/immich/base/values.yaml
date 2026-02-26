@@ -57,6 +57,4 @@ machine-learning:
   persistence:
     cache:
       type: persistentVolumeClaim
-      size: 10Gi
-      storageClass: longhorn
-      accessMode: ReadWriteMany
+      existingClaim: immich-machine-learning-cache
