@@ -5,12 +5,12 @@
     src: root-application.yaml.j2
     dest: /tmp/root-application.yaml
     mode: "0644"
-  when: inventory_hostname == kubeadm_bootstrap_node
+  when: inventory_hostname == argocd_bootstrap_node
 
 - name: Apply Root Application
   ansible.builtin.command: kubectl apply -f /tmp/root-application.yaml
   environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
+    KUBECONFIG: "{{ argocd_kubeconfig }}"
   register: gitops_apply
   changed_when: "'created' in gitops_apply.stdout or 'configured' in gitops_apply.stdout"
-  when: inventory_hostname == kubeadm_bootstrap_node
+  when: inventory_hostname == argocd_bootstrap_node

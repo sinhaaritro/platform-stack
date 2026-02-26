@@ -17,4 +17,4 @@
   when:
     - argocd_managed_fleets is defined
     - argocd_managed_fleets | length > 0
-    - inventory_hostname == kubeadm_bootstrap_node
+    - inventory_hostname == argocd_bootstrap_node

@@ -26,13 +26,6 @@
     - "'k_control' in group_names"
     - is_bootstrap
 
-# Configure Taints (Scheduling)
-- name: Configure Taints
-  ansible.builtin.include_tasks: taint.yml
-  when:
-    - "'k_control' in group_names"
-    - is_bootstrap
-
 - name: Join Secondary Control Planes (HA)
   ansible.builtin.include_tasks: join_control.yml
   when:

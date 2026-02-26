@@ -6,10 +6,10 @@ argocd_chart_version: "9.4.0"
 argocd_namespace: "argocd"
 
 # Network Configuration
-argocd_server_insecure: true       # Required for Cloudflare Tunnels (Terminates SSL at edge)
-argocd_service_type: "NodePort"    # Exposes UI on LAN IP
-argocd_node_port_http: 30080       # Fixed port for Web UI (HTTP)
-argocd_node_port_https: 30443      # Fixed port for Web UI (HTTPS)
+argocd_server_insecure: true # Required for Cloudflare Tunnels (Terminates SSL at edge)
+argocd_service_type: "NodePort" # Exposes UI on LAN IP
+argocd_node_port_http: 30080 # Fixed port for Web UI (HTTP)
+argocd_node_port_https: 30443 # Fixed port for Web UI (HTTPS)
 
 # GitOps Bootstrap Configuration
 # CHANGE THIS to your repository URL
@@ -17,3 +17,7 @@ argocd_git_repo_url: "https://github.com/sinhaaritro/platform-stack.git"
 argocd_git_repo_path: "kubernetes/bootstrap/ruth"
 argocd_git_repo_revision: "HEAD"
 argocd_root_app_name: "platform-root"
+
+# Generic Bootstrap Node Reference
+argocd_bootstrap_node: "{{ kubeadm_bootstrap_node | default(k3s_bootstrap_node | default('')) }}"
+argocd_kubeconfig: "{{ '/etc/rancher/k3s/k3s.yaml' if 'k3s' in group_names else '/etc/kubernetes/admin.conf' }}"
