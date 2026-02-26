@@ -14,10 +14,10 @@
   tags: vm
   become: true
   roles:
-    - role: base          # System basics (Timezone, Locales, Packages)
-    - role: security      # SSH Hardening, UFW, Fail2Ban
-    - role: monitoring    # Node Exporter, QEMU Agent
-    - role: users         # User creation, Git config, SSH Keys
+    - role: base # System basics (Timezone, Locales, Packages)
+    - role: security # SSH Hardening, UFW, Fail2Ban
+    - role: monitoring # Node Exporter, QEMU Agent
+    - role: users # User creation, Git config, SSH Keys
     - role: storage_setup # Mount additional disks (e.g., /dev/sdb -> /data/storage)
 
 # ==============================================================================
@@ -30,40 +30,39 @@
   tags: kind
   become: true
   roles:
-    - role: docker        # Runtime Dependency (Must run first)
-    - role: k8s_repo      # Manage the official Kubernetes Apt repositories.
-    - role: kind          # Cluster Manager (Provisions the cluster)
-    - role: helm          # Package Manager (Only installs Helm)
+    - role: docker # Runtime Dependency (Must run first)
+    - role: k8s_repo # Manage the official Kubernetes Apt repositories.
+    - role: kind # Cluster Manager (Provisions the cluster)
+    - role: helm # Package Manager (Only installs Helm)
 
 # ==============================================================================
-# PLAY 3A: PRODUCTION KUBERNETES - CONTROL PLANE BOOTSTRAP
-# Target: Control Plane Nodes Only
+# PLAY 3A: PRODUCTION KUBERNETES (KUBEADM) - CONTROL PLANE BOOTSTRAP
+# Target: Control Plane Nodes Only (in kubeadm group)
 # Purpose: Init Cluster, Install CNI, Generate Certs
 # Serial: 1 ensures HA clusters initialize the 1st node completely
 # before the 2nd/3rd node try to join it.
 # ==============================================================================
-- name: Bootstrap Control Plane (Init & CNI)
-  hosts: k_control
-  tags: k_control
+- name: Bootstrap Kubeadm Control Plane
+  hosts: "k_control:&kubeadm"
+  tags: [k_control, kubeadm]
   become: true
   serial: 1
   roles:
-    - role: docker          # Ensure Runtime
-    - role: k8s_repo        # Ensure Repos
-    - role: kubeadm         # Ensure Binaries/Kernel
+    - role: docker # Ensure Runtime
+    - role: k8s_repo # Ensure Repos
+    - role: kubeadm # Ensure Binaries/Kernel
     - role: kubeadm_cluster # Execute Init/CNI/Control-Join
-      # tags: [firewall]
-    - role: storage_local   # Setup Storage Class
-    - role: helm            # Ensure Helm
+    - role: storage_local # Setup Storage Class
+    - role: helm # Ensure Helm
 
 # ==============================================================================
-# PLAY 3B: PRODUCTION KUBERNETES - WORKER JOIN
-# Target: Worker Nodes Only
+# PLAY 3B: PRODUCTION KUBERNETES (KUBEADM) - WORKER JOIN
+# Target: Worker Nodes Only (in kubeadm group)
 # Purpose: Join the existing healthy cluster
 # ==============================================================================
-- name: Join Worker Nodes
-  hosts: k_worker
-  tags: k_worker
+- name: Join Kubeadm Worker Nodes
+  hosts: "k_worker:&kubeadm"
+  tags: [k_worker, kubeadm]
   become: true
   # Parallel is fine here - all workers can join at once
   roles:
@@ -71,6 +70,35 @@
     - role: k8s_repo
     - role: kubeadm
     - role: kubeadm_cluster # Execute Worker-Join
+
+# ==============================================================================
+# PLAY 3C: PRODUCTION KUBERNETES (K3S) - CONTROL PLANE BOOTSTRAP
+# Target: Control Plane Nodes Only (in k3s group)
+# Purpose: Run K3s Installer, wait for tokens
+# ==============================================================================
+- name: Bootstrap K3s Control Plane
+  hosts: "k_control:&k3s"
+  tags: [k_control, k3s]
+  become: true
+  serial: 1
+  roles:
+    - role: k3s # Ensure Dependencies/Script
+    - role: k3s_cluster # Execute Init/Control-Join
+    - role: storage_local # Setup Storage Class
+    - role: helm # Ensure Helm
+
+# ==============================================================================
+# PLAY 3D: PRODUCTION KUBERNETES (K3S) - WORKER JOIN
+# Target: Worker Nodes Only (in k3s group)
+# Purpose: Join the existing healthy cluster as agents
+# ==============================================================================
+- name: Join K3s Worker Nodes
+  hosts: "k_worker:&k3s"
+  tags: [k_worker, k3s]
+  become: true
+  roles:
+    - role: k3s
+    - role: k3s_cluster # Execute Worker-Join
 
 # ==============================================================================
 # PLAY 4: PRODUCTION KUBERNETES - MANAGEMENT LAYER
@@ -94,7 +122,6 @@
   become: true
   roles:
     - role: nginx
-
 # # ==============================================================================
 # # PLAY 6: DATA LAYER
 # # Target: Postgres Database

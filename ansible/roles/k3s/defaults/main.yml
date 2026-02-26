@@ -1,0 +1,17 @@
+# defaults/main.yml
+---
+# Version inherits from k8s_repo_version (e.g., v1.31) if needed,
+# but usually k3s versions are specific.
+# Here we can let it default to getting the latest stable from the install script.
+k3s_version: ""
+
+# Kernel Modules required for K8s Networking
+k3s_kernel_modules:
+  - overlay
+  - br_netfilter
+
+# Sysctl parameters for bridged networking
+k3s_sysctl_params:
+  net.bridge.bridge-nf-call-iptables: 1
+  net.bridge.bridge-nf-call-ip6tables: 1
+  net.ipv4.ip_forward: 1

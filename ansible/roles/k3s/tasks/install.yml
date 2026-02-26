@@ -1,0 +1,9 @@
+# tasks/install.yml
+---
+- name: Download K3s install script
+  ansible.builtin.get_url:
+    url: https://get.k3s.io
+    dest: /tmp/k3s-install.sh
+    mode: "0755"
+    owner: root
+    group: root

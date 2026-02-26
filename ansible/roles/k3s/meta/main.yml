@@ -1,5 +1,2 @@
-
 ---
-
-dependencies:
-- role: kubernetes-prereqs
+dependencies: []

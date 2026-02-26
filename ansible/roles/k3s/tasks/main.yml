@@ -1,10 +1,7 @@
-
+# tasks/main.yml
 ---
-# This role intentionally left sparse.
-# The core logic of downloading and running the k3s installer script
-# will be handled in the main playbook, as it requires complex logic
-# to handle the server/agent distinction and token management.
+- name: Prepare System (Swap, Kernel, Sysctl)
+  ansible.builtin.include_tasks: system.yml
 
-- name: Placeholder task for K3s role
-  ansible.builtin.debug:
-  msg: "The k3s role is a dependency placeholder. The main installation logic is in the playbook."
+- name: Download the install script
+  ansible.builtin.include_tasks: install.yml

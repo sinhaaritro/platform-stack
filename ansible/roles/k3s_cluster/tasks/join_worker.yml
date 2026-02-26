@@ -1,0 +1,15 @@
+# tasks/join_worker.yml
+---
+- name: Check if Worker is already joined
+  ansible.builtin.stat:
+    path: /etc/rancher/node/password
+  register: k3s_worker_joined
+
+- name: Join K3s cluster as Worker (Agent)
+  ansible.builtin.shell: |
+    INSTALL_K3S_SKIP_DOWNLOAD=true \
+    K3S_URL=https://{{ hostvars[k3s_bootstrap_node]['ansible_default_ipv4']['address'] }}:6443 \
+    K3S_TOKEN={{ hostvars[k3s_bootstrap_node]['k3s_token'] }} \
+    /tmp/k3s-install.sh agent
+  when: not k3s_worker_joined.stat.exists
+  changed_when: true

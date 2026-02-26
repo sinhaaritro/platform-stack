@@ -1,0 +1,20 @@
+# tasks/join_control.yml
+---
+- name: Check if Node is already joined
+  ansible.builtin.stat:
+    path: /etc/rancher/k3s/k3s.yaml
+  register: k3s_conf
+
+- name: Join K3s cluster as Secondary Control Plane
+  ansible.builtin.shell: |
+    INSTALL_K3S_SKIP_DOWNLOAD=true \
+    K3S_TOKEN={{ hostvars[k3s_bootstrap_node]['k3s_token'] }} \
+    /tmp/k3s-install.sh server \
+      --server https://{{ hostvars[k3s_bootstrap_node]['ansible_default_ipv4']['address'] }}:6443 \
+      --disable=servicelb \
+      --disable=traefik \
+      --kube-proxy-arg="strict-arp=true" \
+      --kube-proxy-arg="proxy-mode=iptables" \
+      --tls-san={{ k3s_control_plane_endpoint if k3s_control_plane_endpoint else ansible_default_ipv4.address }}
+  when: not k3s_conf.stat.exists
+  changed_when: true

@@ -1,0 +1,29 @@
+# tasks/firewall.yml
+---
+- name: Allow Kubernetes Pod Network
+  community.general.ufw:
+    rule: allow
+    src: "10.42.0.0/16"
+  tags: [k8s, firewall]
+
+- name: Allow Kubernetes Service Network
+  community.general.ufw:
+    rule: allow
+    src: "10.43.0.0/16"
+  tags: [k8s, firewall]
+
+- name: Allow K3s & Required Ports
+  community.general.ufw:
+    rule: allow
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+    comment: "{{ item.name }}"
+  loop:
+    - { port: "6443", proto: "tcp", name: "K3s API" }
+    - { port: "10250", proto: "tcp", name: "Kubelet" }
+    - { port: "8472", proto: "udp", name: "Flannel VXLAN" }
+    - { port: "51820", proto: "udp", name: "Flannel Wireguard" }
+    - { port: "51821", proto: "udp", name: "Flannel Wireguard IPv6" }
+    - { port: "2379", proto: "tcp", name: "etcd client port" }
+    - { port: "2380", proto: "tcp", name: "etcd peer port" }
+  tags: [k8s, firewall]
