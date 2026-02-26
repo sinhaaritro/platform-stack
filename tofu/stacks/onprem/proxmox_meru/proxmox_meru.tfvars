@@ -55,14 +55,14 @@ resources = {
     type        = "vm"
     node_name   = "moo-moo"
     description = "Kubernets servers. Ubuntu 24.04."
-    tags        = ["ruth", "ansible", "ubuntu", "kubeadm", "k_management"]
+    tags        = ["ruth", "ansible", "ubuntu", "k3s", "k_management"]
     ansible_groups = {
       "timezone" = {
         "user_timezone" = "Asia/Kolkata"
         "user_locale"   = "en_US.UTF-8"
       },
-      "kubeadm" = {
-        "kubeadm_bootstrap_node" : "ruth-01"
+      "k3s" = {
+        "k3s_bootstrap_node" : "ruth-01"
       },
       # "k_management" = {
       #   "argocd_managed_fleets" : "arr"
@@ -133,14 +133,14 @@ resources = {
     type        = "vm"
     node_name   = "moo-moo"
     description = "Kubernets servers. Ubuntu 24.04."
-    tags        = ["arr", "ansible", "ubuntu", "kubeadm", "k_fleet_local", "k_arr"]
+    tags        = ["arr", "ansible", "ubuntu", "k3s", "k_fleet_local", "k_arr"]
     ansible_groups = {
       "timezone" = {
         "user_timezone" = "Asia/Kolkata"
         "user_locale"   = "en_US.UTF-8"
       },
-      "kubeadm" = {
-        kubeadm_bootstrap_node : "arr-01"
+      "k3s" = {
+        k3s_bootstrap_node : "arr-01"
       }
     }
 
