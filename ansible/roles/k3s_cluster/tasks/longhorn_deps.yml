@@ -20,10 +20,11 @@
   changed_when: false
 
 - name: Verify iSCSI Daemon is Active (Guardrail)
-  ansible.builtin.command: systemctl is-active iscsid
+  ansible.builtin.systemd:
+    name: iscsid
   register: iscsid_check
   changed_when: false
-  failed_when: iscsid_check.rc != 0
+  failed_when: iscsid_check.status.ActiveState != 'active'
 
 - name: Disable Multipathd (Conflicts with Longhorn)
   ansible.builtin.systemd:
