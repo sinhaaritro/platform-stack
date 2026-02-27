@@ -7,3 +7,4 @@ resources:
 components:
   - ../../../apps/infrastructure/sealed-secrets/components/minimal
   - ../../../apps/infrastructure/sealed-secrets/components/resource-limits
+  - ../../../apps/infrastructure/sealed-secrets/components/security-context
