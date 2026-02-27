@@ -1,0 +1,46 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: Deployment
+      name: metallb-controller
+      namespace: networking
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: metallb-controller
+      spec:
+        template:
+          spec:
+            containers:
+              - name: controller
+                resources:
+                  limits:
+                    cpu: 200m
+                    memory: 256Mi
+                  requests:
+                    cpu: 20m
+                    memory: 64Mi
+  - target:
+      kind: DaemonSet
+      name: metallb-speaker
+      namespace: networking
+    patch: |-
+      apiVersion: apps/v1
+      kind: DaemonSet
+      metadata:
+        name: metallb-speaker
+      spec:
+        template:
+          spec:
+            containers:
+              - name: speaker
+                resources:
+                  limits:
+                    cpu: 200m
+                    memory: 256Mi
+                  requests:
+                    cpu: 20m
+                    memory: 64Mi
