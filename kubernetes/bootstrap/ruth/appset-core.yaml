@@ -21,66 +21,66 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "2"
-                - app: redis
-                  namespace: storage
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "2"
-                - app: cert-manager
-                  namespace: networking
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "2"
-                - app: metallb-system
-                  namespace: networking
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "3"
-                - app: traefik
-                  namespace: networking
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "3"
-                - app: external-dns
-                  namespace: external-dns
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "4"
-                - app: longhorn
-                  namespace: longhorn-system
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "4"
-                - app: seaweedfs
-                  namespace: storage
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "5"
-                - app: mimir
-                  namespace: monitoring
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "6"
-                - app: grafana
-                  namespace: monitoring
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "7"
-                - app: node-exporter
-                  namespace: monitoring
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "6"
-                - app: alloy
-                  namespace: monitoring
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "6"
-                - app: alertmanager
-                  namespace: monitoring
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "6"
+                # - app: redis
+                #   namespace: storage
+                #   serverSideApply: "true"
+                #   replace: "false"
+                #   wave: "2"
+                # - app: cert-manager
+                #   namespace: networking
+                #   serverSideApply: "true"
+                #   replace: "false"
+                #   wave: "2"
+                # - app: metallb-system
+                #   namespace: networking
+                #   serverSideApply: "true"
+                #   replace: "false"
+                #   wave: "3"
+                # - app: traefik
+                #   namespace: networking
+                #   serverSideApply: "true"
+                #   replace: "false"
+                #   wave: "3"
+                # - app: external-dns
+                #   namespace: external-dns
+                #   serverSideApply: "true"
+                #   replace: "false"
+                #   wave: "4"
+                # - app: longhorn
+                #   namespace: longhorn-system
+                #   serverSideApply: "true"
+                #   replace: "false"
+                #   wave: "4"
+                # - app: seaweedfs
+                #   namespace: storage
+                #   serverSideApply: "true"
+                #   replace: "false"
+                #   wave: "5"
+                # - app: mimir
+                #   namespace: monitoring
+                #   serverSideApply: "true"
+                #   replace: "false"
+                #   wave: "6"
+                # - app: grafana
+                #   namespace: monitoring
+                #   serverSideApply: "true"
+                #   replace: "false"
+                #   wave: "7"
+                # - app: node-exporter
+                #   namespace: monitoring
+                #   serverSideApply: "true"
+                #   replace: "false"
+                #   wave: "6"
+                # - app: alloy
+                #   namespace: monitoring
+                #   serverSideApply: "true"
+                #   replace: "false"
+                #   wave: "6"
+                # - app: alertmanager
+                #   namespace: monitoring
+                #   serverSideApply: "true"
+                #   replace: "false"
+                #   wave: "6"
                 # - app: velero
                 #   namespace: velero
                 #   serverSideApply: "true"

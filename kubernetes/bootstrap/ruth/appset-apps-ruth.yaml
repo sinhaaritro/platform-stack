@@ -13,31 +13,31 @@ spec:
           #   serverSideApply: "true"
           #   replace: "false"
           #   wave: "0"
-          - app: postgresql-14
-            namespace: infrastructure
-            serverSideApply: "true"
-            replace: "false"
-            wave: "5"
-          - app: loki
-            namespace: logging
-            serverSideApply: "false"
-            replace: "false"
-            wave: "6"
-          - app: authentik
-            namespace: security
-            serverSideApply: "true"
-            replace: "false"
-            wave: "6"
-          - app: immich
-            namespace: personal
-            serverSideApply: "true"
-            replace: "false"
-            wave: "7"
-          - app: obsidian
-            namespace: obsidian
-            serverSideApply: "true"
-            replace: "false"
-            wave: "7"
+          # - app: postgresql-14
+          #   namespace: infrastructure
+          #   serverSideApply: "true"
+          #   replace: "false"
+          #   wave: "5"
+          # - app: loki
+          #   namespace: logging
+          #   serverSideApply: "false"
+          #   replace: "false"
+          #   wave: "6"
+          # - app: authentik
+          #   namespace: security
+          #   serverSideApply: "true"
+          #   replace: "false"
+          #   wave: "6"
+          # - app: immich
+          #   namespace: personal
+          #   serverSideApply: "true"
+          #   replace: "false"
+          #   wave: "7"
+          # - app: obsidian
+          #   namespace: obsidian
+          #   serverSideApply: "true"
+          #   replace: "false"
+          #   wave: "7"
           # - app: podinfo
           #   namespace: podinfo
           #   serverSideApply: "false"
