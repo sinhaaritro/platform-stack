@@ -1,8 +1,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: authentik-postgresql
-  namespace: security
+  name: postgresql-14
 spec:
   volumeClaimTemplates:
     - apiVersion: v1
@@ -10,8 +9,10 @@ spec:
       metadata:
         name: data
       spec:
-        accessModes: ["ReadWriteOnce"]
-        storageClassName: longhorn
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: "longhorn"
         resources:
           requests:
-            storage: 10Gi
+            storage: 15Gi
+        volumeMode: Filesystem

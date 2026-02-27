@@ -4,3 +4,7 @@ namespace: infrastructure
 
 resources:
   - ../../../apps/infrastructure/postgresql-14/base
+
+components:
+  - ../../../apps/infrastructure/postgresql-14/components/secrets
+  - ../../../apps/infrastructure/postgresql-14/components/storage

@@ -17,10 +17,6 @@ spec:
         - name: postgres
           image: tensorchord/pgvecto-rs:pg14-v0.2.0
           env:
-            - name: POSTGRES_USER
-              value: postgres
-            - name: POSTGRES_PASSWORD
-              value: superadminpassword # In a real scenario, this should be a SealedSecret
             - name: POSTGRES_INITDB_ARGS
               value: "--data-checksums"
           ports:
@@ -30,16 +26,3 @@ spec:
             - name: data
               mountPath: /var/lib/postgresql/data
               subPath: postgresql
-  volumeClaimTemplates:
-    - apiVersion: v1
-      kind: PersistentVolumeClaim
-      metadata:
-        name: data
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        storageClassName: "longhorn"
-        resources:
-          requests:
-            storage: 15Gi
-        volumeMode: Filesystem

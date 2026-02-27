@@ -3,7 +3,7 @@ authentik:
   error_reporting:
     enabled: true
   postgresql:
-    host: "authentik-postgresql"
+    host: "postgresql-14.infrastructure.svc.cluster.local"
     user: "file:///postgres-creds/username"
     password: "file:///postgres-creds/password"
 
@@ -87,9 +87,4 @@ worker:
     failureThreshold: 5
 
 postgresql:
-  enabled: true
-  auth:
-    existingSecret: authentik-secrets
-    secretKeys:
-      userPasswordKey: password
-      adminPasswordKey: password
+  enabled: false
