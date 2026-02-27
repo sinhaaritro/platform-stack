@@ -21,16 +21,16 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "2"
-                # - app: cert-manager
-                #   namespace: networking
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "2"
-                # - app: metallb-system
-                #   namespace: networking
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "3"
+                - app: cert-manager
+                  namespace: networking
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "2"
+                - app: metallb-system
+                  namespace: networking
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "3"
                 # - app: traefik
                 #   namespace: networking
                 #   serverSideApply: "true"
