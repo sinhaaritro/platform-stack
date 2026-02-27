@@ -2,7 +2,43 @@ apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 
 patches:
-  - path: patch-limits.yaml
-    target:
+  - target:
       kind: Deployment
-      labelSelector: "app.kubernetes.io/instance=immich"
+      name: ".*immich-server.*"
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: immich-server
+      spec:
+        template:
+          spec:
+            containers:
+              - name: immich-server
+                resources:
+                  limits:
+                    cpu: 1000m
+                    memory: 1Gi
+                  requests:
+                    cpu: 100m
+                    memory: 256Mi
+  - target:
+      kind: Deployment
+      name: ".*immich-machine-learning.*"
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: immich-machine-learning
+      spec:
+        template:
+          spec:
+            containers:
+              - name: immich-machine-learning
+                resources:
+                  limits:
+                    cpu: 2000m
+                    memory: 4Gi
+                  requests:
+                    cpu: 500m
+                    memory: 1Gi

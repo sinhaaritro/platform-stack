@@ -8,6 +8,3 @@ helmCharts:
     namespace: monitoring
     version: 11.1.0
     valuesFile: values.yaml
-
-components:
-  - components/resource-limits

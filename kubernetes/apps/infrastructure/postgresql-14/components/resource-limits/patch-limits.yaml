@@ -2,15 +2,16 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgresql-14
+  namespace: storage
 spec:
   template:
     spec:
       containers:
-        - name: postgres
-          resources:
-            limits:
-              cpu: 1000m
-              memory: 1Gi
-            requests:
-              cpu: 100m
-              memory: 256Mi
+      - name: postgres
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 256Mi

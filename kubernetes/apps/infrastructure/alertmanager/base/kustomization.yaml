@@ -12,6 +12,3 @@ helmCharts:
 
 resources:
   - namespace.yaml
-
-components:
-  - components/resource-limits

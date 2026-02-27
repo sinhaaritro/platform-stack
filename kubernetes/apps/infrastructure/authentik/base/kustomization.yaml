@@ -13,4 +13,4 @@ helmCharts:
 resources: []
 
 components:
-  - components/resource-limits
+  - ../components/ingress

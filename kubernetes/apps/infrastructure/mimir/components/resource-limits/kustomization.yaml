@@ -2,39 +2,183 @@ apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 
 patches:
-  - path: patch-limits.yaml
-    target:
+  - target:
       kind: StatefulSet
-      name: mimir-ingester
-  - path: patch-limits.yaml
-    target:
-      kind: Deployment
-      name: mimir-distributor
-  - path: patch-limits.yaml
-    target:
+      name: ".*mimir-ingester.*"
+    patch: |-
+      apiVersion: apps/v1
       kind: StatefulSet
-      name: mimir-compactor
-  - path: patch-limits.yaml
-    target:
+      metadata:
+        name: mimir-ingester
+      spec:
+        template:
+          spec:
+            containers:
+              - name: ingester
+                resources:
+                  limits:
+                    cpu: 1000m
+                    memory: 2Gi
+                  requests:
+                    cpu: 100m
+                    memory: 256Mi
+  - target:
       kind: Deployment
-      name: mimir-ruler
-  - path: patch-limits.yaml
-    target:
+      name: ".*mimir-distributor.*"
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: mimir-distributor
+      spec:
+        template:
+          spec:
+            containers:
+              - name: distributor
+                resources:
+                  limits:
+                    cpu: 500m
+                    memory: 1Gi
+                  requests:
+                    cpu: 50m
+                    memory: 128Mi
+  - target:
       kind: StatefulSet
-      name: mimir-store-gateway
-  - path: patch-limits.yaml
-    target:
-      kind: Deployment
-      name: mimir-query-frontend
-  - path: patch-limits.yaml
-    target:
-      kind: Deployment
-      name: mimir-query-scheduler
-  - path: patch-limits.yaml
-    target:
-      kind: Deployment
-      name: mimir-nginx
-  - path: patch-limits.yaml
-    target:
+      name: ".*mimir-compactor.*"
+    patch: |-
+      apiVersion: apps/v1
       kind: StatefulSet
-      name: mimir-alertmanager
+      metadata:
+        name: mimir-compactor
+      spec:
+        template:
+          spec:
+            containers:
+              - name: compactor
+                resources:
+                  limits:
+                    cpu: 500m
+                    memory: 1Gi
+                  requests:
+                    cpu: 50m
+                    memory: 128Mi
+  - target:
+      kind: Deployment
+      name: ".*mimir-ruler.*"
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: mimir-ruler
+      spec:
+        template:
+          spec:
+            containers:
+              - name: ruler
+                resources:
+                  limits:
+                    cpu: 500m
+                    memory: 1Gi
+                  requests:
+                    cpu: 50m
+                    memory: 128Mi
+  - target:
+      kind: StatefulSet
+      name: ".*mimir-store-gateway.*"
+    patch: |-
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: mimir-store-gateway
+      spec:
+        template:
+          spec:
+            containers:
+              - name: store-gateway
+                resources:
+                  limits:
+                    cpu: 500m
+                    memory: 1Gi
+                  requests:
+                    cpu: 50m
+                    memory: 128Mi
+  - target:
+      kind: Deployment
+      name: ".*mimir-query-frontend.*"
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: mimir-query-frontend
+      spec:
+        template:
+          spec:
+            containers:
+              - name: query-frontend
+                resources:
+                  limits:
+                    cpu: 500m
+                    memory: 1Gi
+                  requests:
+                    cpu: 50m
+                    memory: 128Mi
+  - target:
+      kind: Deployment
+      name: ".*mimir-query-scheduler.*"
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: mimir-query-scheduler
+      spec:
+        template:
+          spec:
+            containers:
+              - name: query-scheduler
+                resources:
+                  limits:
+                    cpu: 200m
+                    memory: 512Mi
+                  requests:
+                    cpu: 25m
+                    memory: 64Mi
+  - target:
+      kind: Deployment
+      name: ".*mimir-nginx.*"
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: mimir-nginx
+      spec:
+        template:
+          spec:
+            containers:
+              - name: nginx
+                resources:
+                  limits:
+                    cpu: 200m
+                    memory: 512Mi
+                  requests:
+                    cpu: 25m
+                    memory: 64Mi
+  - target:
+      kind: StatefulSet
+      name: ".*mimir-alertmanager.*"
+    patch: |-
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: mimir-alertmanager
+      spec:
+        template:
+          spec:
+            containers:
+              - name: alertmanager
+                resources:
+                  limits:
+                    cpu: 200m
+                    memory: 512Mi
+                  requests:
+                    cpu: 50m
+                    memory: 128Mi
