@@ -11,3 +11,6 @@ helmCharts:
     valuesFile: values.yaml
 
 resources: []
+
+components:
+  - components/resource-limits

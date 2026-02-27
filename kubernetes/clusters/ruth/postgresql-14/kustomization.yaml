@@ -1,6 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: infrastructure
+namespace: storage
 
 resources:
   - ../../../apps/infrastructure/postgresql-14/base
@@ -8,3 +8,4 @@ resources:
 components:
   - ../../../apps/infrastructure/postgresql-14/components/secrets
   - ../../../apps/infrastructure/postgresql-14/components/storage
+  - ../../../apps/infrastructure/postgresql-14/components/resource-limits

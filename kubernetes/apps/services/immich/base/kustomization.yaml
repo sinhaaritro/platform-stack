@@ -18,3 +18,4 @@ components:
   - ../components/init-db
   - ../components/ingress
   - ../components/secrets
+  - ../components/resource-limits

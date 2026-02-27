@@ -1,0 +1,40 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - path: patch-limits.yaml
+    target:
+      kind: StatefulSet
+      name: mimir-ingester
+  - path: patch-limits.yaml
+    target:
+      kind: Deployment
+      name: mimir-distributor
+  - path: patch-limits.yaml
+    target:
+      kind: StatefulSet
+      name: mimir-compactor
+  - path: patch-limits.yaml
+    target:
+      kind: Deployment
+      name: mimir-ruler
+  - path: patch-limits.yaml
+    target:
+      kind: StatefulSet
+      name: mimir-store-gateway
+  - path: patch-limits.yaml
+    target:
+      kind: Deployment
+      name: mimir-query-frontend
+  - path: patch-limits.yaml
+    target:
+      kind: Deployment
+      name: mimir-query-scheduler
+  - path: patch-limits.yaml
+    target:
+      kind: Deployment
+      name: mimir-nginx
+  - path: patch-limits.yaml
+    target:
+      kind: StatefulSet
+      name: mimir-alertmanager

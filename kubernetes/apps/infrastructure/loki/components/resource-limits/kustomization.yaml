@@ -101,3 +101,23 @@ patches:
                     memory: 256Mi
                   limits:
                     memory: 512Mi
+  - target:
+      kind: DaemonSet
+      name: loki-canary
+    patch: |
+      apiVersion: apps/v1
+      kind: DaemonSet
+      metadata:
+        name: loki-canary
+      spec:
+        template:
+          spec:
+            containers:
+              - name: loki-canary
+                resources:
+                  requests:
+                    cpu: 10m
+                    memory: 32Mi
+                  limits:
+                    cpu: 100m
+                    memory: 128Mi

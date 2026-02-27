@@ -9,3 +9,6 @@ helmCharts:
     namespace: monitoring
     includeCRDs: true
     valuesFile: values.yaml
+
+components:
+  - components/resource-limits

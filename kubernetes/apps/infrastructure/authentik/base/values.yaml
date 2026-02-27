@@ -3,7 +3,7 @@ authentik:
   error_reporting:
     enabled: true
   postgresql:
-    host: "postgresql-14.infrastructure.svc.cluster.local"
+    host: "postgresql-14.storage.svc.cluster.local"
     user: "file:///postgres-creds/username"
     password: "file:///postgres-creds/password"
 

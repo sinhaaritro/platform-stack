@@ -3,3 +3,10 @@ kind: Kustomization
 
 resources:
   - kube-proxy.yaml
+
+patches:
+  - path: patch-local-path.yaml
+    target:
+      kind: Deployment
+      name: local-path-provisioner
+      namespace: kube-system
