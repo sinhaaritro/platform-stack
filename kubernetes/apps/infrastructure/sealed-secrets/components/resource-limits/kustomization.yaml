@@ -15,7 +15,7 @@ patches:
         template:
           spec:
             containers:
-              - name: sealed-secrets
+              - name: controller
                 resources:
                   limits:
                     cpu: 200m
