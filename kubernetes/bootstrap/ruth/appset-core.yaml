@@ -21,11 +21,6 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "2"
-                # - app: redis
-                #   namespace: storage
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "2"
                 # - app: cert-manager
                 #   namespace: networking
                 #   serverSideApply: "true"
@@ -51,6 +46,11 @@ spec:
                 #   serverSideApply: "true"
                 #   replace: "false"
                 #   wave: "4"
+                # - app: redis
+                #   namespace: storage
+                #   serverSideApply: "true"
+                #   replace: "false"
+                #   wave: "5"
                 # - app: seaweedfs
                 #   namespace: storage
                 #   serverSideApply: "true"
