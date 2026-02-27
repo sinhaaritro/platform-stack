@@ -4,7 +4,7 @@ kind: Component
 patches:
   - target:
       kind: Deployment
-      name: sealed-secrets
+      name: ".*sealed-secrets.*"
     patch: |-
       - op: replace
         path: /spec/replicas
