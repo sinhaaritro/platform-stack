@@ -7,6 +7,8 @@ resources:
 components:
   - ../../../apps/infrastructure/metallb/components/minimal
   - ../../../apps/infrastructure/metallb/components/resource-limits
+  # - ../../../apps/infrastructure/metallb/components/maintenance
+
 patches:
   - path: pool-patch.yaml
     target:

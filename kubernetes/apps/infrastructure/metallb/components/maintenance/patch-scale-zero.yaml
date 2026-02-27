@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metallb-controller
+  namespace: networking
+spec:
+  replicas: 0
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: metallb-speaker
+  namespace: networking
+spec:
+  template:
+    spec:
+      nodeSelector:
+        kubernetes.io/os: "maintenance-mode-active"
