@@ -33,11 +33,11 @@ spec:
             serverSideApply: "true"
             replace: "false"
             wave: "7"
-          # - app: obsidian
-          #   namespace: obsidian
-          #   serverSideApply: "true"
-          #   replace: "false"
-          #   wave: "7"
+          - app: obsidian
+            namespace: obsidian
+            serverSideApply: "true"
+            replace: "false"
+            wave: "7"
           # - app: podinfo
           #   namespace: podinfo
           #   serverSideApply: "false"
