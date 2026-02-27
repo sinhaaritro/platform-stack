@@ -4,7 +4,8 @@ kind: Component
 patches:
   - target:
       kind: Deployment
-      name: ".*sealed-secrets.*"
+      name: sealed-secrets
+      namespace: security
     patch: |-
       apiVersion: apps/v1
       kind: Deployment
