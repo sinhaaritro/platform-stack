@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: Deployment
+      name: traefik
+      namespace: networking
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: traefik
+      spec:
+        template:
+          spec:
+            containers:
+              - name: traefik
+                resources:
+                  limits:
+                    cpu: 500m
+                    memory: 256Mi
+                  requests:
+                    cpu: 50m
+                    memory: 64Mi
