@@ -8,6 +8,7 @@ components:
   - ../../../apps/infrastructure/traefik/components/minimal
   - ../../../apps/infrastructure/traefik/components/resource-limits
   - ../../../apps/infrastructure/traefik/components/certificate
+  # - ../../../apps/infrastructure/traefik/components/maintenance
 patches:
   - target:
       group: traefik.io
