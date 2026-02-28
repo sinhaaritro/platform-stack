@@ -18,11 +18,11 @@ spec:
             serverSideApply: "true"
             replace: "false"
             wave: "5"
-          # - app: loki
-          #   namespace: logging
-          #   serverSideApply: "false"
-          #   replace: "false"
-          #   wave: "6"
+          - app: loki
+            namespace: logging
+            serverSideApply: "false"
+            replace: "false"
+            wave: "6"
           # - app: authentik
           #   namespace: security
           #   serverSideApply: "true"

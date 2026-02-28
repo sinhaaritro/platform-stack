@@ -61,36 +61,36 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "6"
-                # - app: grafana
-                #   namespace: monitoring
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "7"
+                - app: grafana
+                  namespace: monitoring
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "7"
                 # - app: node-exporter
                 #   namespace: monitoring
                 #   serverSideApply: "true"
                 #   replace: "false"
-                #   wave: "6"
+                #   wave: "8"
                 # - app: alloy
                 #   namespace: monitoring
                 #   serverSideApply: "true"
                 #   replace: "false"
-                #   wave: "6"
+                #   wave: "8"
                 # - app: alertmanager
                 #   namespace: monitoring
                 #   serverSideApply: "true"
                 #   replace: "false"
-                #   wave: "6"
+                #   wave: "9"
                 # - app: velero
                 #   namespace: velero
                 #   serverSideApply: "true"
                 #   replace: "false"
-                #   wave: "6"
+                #   wave: "10"
                 # - app: copyparty
                 #   namespace: copyparty
                 #   serverSideApply: "true"
                 #   replace: "false"
-                #   wave: "7"
+                #   wave: "10"
 
   template:
     metadata:
