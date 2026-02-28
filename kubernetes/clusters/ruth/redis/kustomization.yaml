@@ -10,3 +10,4 @@ components:
   - ../../../apps/infrastructure/redis/components/storage
   - ../../../apps/infrastructure/redis/components/secrets
   - ../../../apps/infrastructure/redis/components/resource-limits
+  # - ../../../apps/infrastructure/redis/components/maintenance
