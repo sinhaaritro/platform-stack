@@ -66,16 +66,16 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "7"
-                # - app: node-exporter
-                #   namespace: monitoring
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "8"
-                # - app: alloy
-                #   namespace: monitoring
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "8"
+                - app: node-exporter
+                  namespace: monitoring
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "8"
+                - app: alloy
+                  namespace: monitoring
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "8"
                 # - app: alertmanager
                 #   namespace: monitoring
                 #   serverSideApply: "true"
