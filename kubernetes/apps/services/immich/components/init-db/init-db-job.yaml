@@ -17,7 +17,7 @@ spec:
             - -c
             - |
               export PGPASSWORD=$DB_PASSWORD
-              PG_HOST="postgresql-14.infrastructure.svc.cluster.local"
+              PG_HOST="postgresql-14.storage.svc.cluster.local"
 
               # Wait until PostgreSQL is ready (max 5 minutes)
               echo "Waiting for PostgreSQL at $PG_HOST..."

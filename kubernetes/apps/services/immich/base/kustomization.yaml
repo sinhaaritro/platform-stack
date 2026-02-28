@@ -12,9 +12,3 @@ helmCharts:
 
 resources:
   - namespace.yaml
-
-components:
-  - ../components/storage
-  - ../components/init-db
-  - ../components/ingress
-  - ../components/secrets
