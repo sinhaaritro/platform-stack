@@ -1,0 +1,9 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter-prometheus-node-exporter
+spec:
+  template:
+    spec:
+      nodeSelector:
+        maintenance: "true"

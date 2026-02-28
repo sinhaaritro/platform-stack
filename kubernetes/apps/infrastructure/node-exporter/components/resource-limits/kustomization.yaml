@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: DaemonSet
+      name: node-exporter-prometheus-node-exporter
+    patch: |-
+      apiVersion: apps/v1
+      kind: DaemonSet
+      metadata:
+        name: node-exporter-prometheus-node-exporter
+      spec:
+        template:
+          spec:
+            containers:
+              - name: node-exporter
+                resources:
+                  limits:
+                    cpu: 50m
+                    memory: 64Mi
+                  requests:
+                    cpu: 10m
+                    memory: 32Mi

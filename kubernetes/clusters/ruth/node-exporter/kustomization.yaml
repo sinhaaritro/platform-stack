@@ -3,6 +3,9 @@ kind: Kustomization
 namespace: monitoring
 
 resources:
-  - ../../../apps/infrastructure/node-exporter/overlays/prod
-# patches:
-#   - path: patch-ingress.yaml
+  - ../../../apps/infrastructure/node-exporter/base
+
+components:
+  - ../../../apps/infrastructure/node-exporter/components/custom-config
+  - ../../../apps/infrastructure/node-exporter/components/resource-limits
+  # - ../../../apps/infrastructure/node-exporter/components/maintenance
