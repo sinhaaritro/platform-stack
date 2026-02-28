@@ -8,3 +8,4 @@ components:
   - ../../../apps/infrastructure/alertmanager/components/resources
   - ../../../apps/infrastructure/alertmanager/components/persistence
   - ../../../apps/infrastructure/alertmanager/components/resource-limits
+  # - ../../../apps/infrastructure/alertmanager/components/maintenance
