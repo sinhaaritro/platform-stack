@@ -3,6 +3,13 @@ kind: Kustomization
 namespace: monitoring
 
 resources:
-  - ../../../apps/infrastructure/alloy/overlays/prod
+  - ../../../apps/infrastructure/alloy/base
+
+components:
+  - ../../../apps/infrastructure/alloy/components/custom-config
+  - ../../../apps/infrastructure/alloy/components/resource-limits
+  - ../../../apps/infrastructure/alloy/components/replica-count
+  # - ../../../apps/infrastructure/alloy/components/maintenance
+
 patches:
   - path: patch-ingress.yaml

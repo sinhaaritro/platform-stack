@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+# The default controller type was DaemonSet, meaning replica-count component shouldn't patch 'replicas'.
+# This component acts as a placeholder or safely patches if it relies on a Deployment topology.
+patches:
+  - target:
+      kind: Deployment
+      name: alloy
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: alloy
+      spec:
+        replicas: 1
