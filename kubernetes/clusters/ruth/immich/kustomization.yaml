@@ -8,3 +8,5 @@ components:
   #   - ../../../apps/services/immich/components/ingress
   #   - ../../../apps/services/immich/components/storage
   - ../../../apps/services/immich/components/resource-limits
+  - ../../../apps/services/immich/components/replica-count
+  # - ../../../apps/services/immich/components/maintenance

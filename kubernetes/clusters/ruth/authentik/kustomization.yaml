@@ -11,3 +11,5 @@ components:
   - ../../../apps/infrastructure/authentik/components/secrets
   - ../../../apps/infrastructure/authentik/components/ingress
   - ../../../apps/infrastructure/authentik/components/resource-limits
+  - ../../../apps/infrastructure/authentik/components/replica-count
+  # - ../../../apps/infrastructure/authentik/components/maintenance
