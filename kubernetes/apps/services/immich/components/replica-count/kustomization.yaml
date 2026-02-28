@@ -4,7 +4,7 @@ kind: Component
 patches:
   - target:
       kind: Deployment
-      name: immich-server
+      name: ".*immich-server.*"
       namespace: personal
     patch: |-
       apiVersion: apps/v1
@@ -16,7 +16,7 @@ patches:
         replicas: 1
   - target:
       kind: Deployment
-      name: immich-machine-learning
+      name: ".*immich-machine-learning.*"
       namespace: personal
     patch: |-
       apiVersion: apps/v1
