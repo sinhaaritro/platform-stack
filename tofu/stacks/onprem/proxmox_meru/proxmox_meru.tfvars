@@ -85,7 +85,7 @@ resources = {
         vm_config = {
           ipv4_address = "192.168.0.20/24"
           cpu_cores    = 4
-          memory_size  = 6144
+          memory_size  = 8192
           disk_size    = 32
           additional_disks = [
             {
