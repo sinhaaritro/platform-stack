@@ -41,6 +41,6 @@ spec:
               psql -h "$PG_HOST" -U postgres -d immich -c "CREATE EXTENSION IF NOT EXISTS vectors;"
           env:
             - name: DB_PASSWORD
-              value: "superadminpassword"
+              value: "change-me-please-postgres-password"
       restartPolicy: Never
   backoffLimit: 4
