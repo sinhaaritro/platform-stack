@@ -5,20 +5,24 @@ patches:
   - target:
       kind: Deployment
       name: authentik-server
+      namespace: security
     patch: |-
       apiVersion: apps/v1
       kind: Deployment
       metadata:
         name: authentik-server
+        namespace: security
       spec:
         replicas: 0
   - target:
       kind: Deployment
       name: authentik-worker
+      namespace: security
     patch: |-
       apiVersion: apps/v1
       kind: Deployment
       metadata:
         name: authentik-worker
+        namespace: security
       spec:
         replicas: 0
