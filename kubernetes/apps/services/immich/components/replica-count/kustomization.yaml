@@ -1,28 +1,5 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 
-patches:
-  - target:
-      kind: Deployment
-      name: immich-server
-      namespace: personal
-    patch: |-
-      apiVersion: apps/v1
-      kind: Deployment
-      metadata:
-        name: immich-server
-        namespace: personal
-      spec:
-        replicas: 1
-  - target:
-      kind: Deployment
-      name: immich-machine-learning
-      namespace: personal
-    patch: |-
-      apiVersion: apps/v1
-      kind: Deployment
-      metadata:
-        name: immich-machine-learning
-        namespace: personal
-      spec:
-        replicas: 1
+patchesStrategicMerge:
+  - patch-replica.yaml

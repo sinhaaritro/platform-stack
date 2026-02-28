@@ -1,46 +1,5 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 
-patches:
-  - target:
-      kind: Deployment
-      name: immich-server
-      namespace: personal
-    patch: |-
-      apiVersion: apps/v1
-      kind: Deployment
-      metadata:
-        name: immich-server
-      spec:
-        template:
-          spec:
-            containers:
-              - name: immich-server
-                resources:
-                  limits:
-                    cpu: 1000m
-                    memory: 1Gi
-                  requests:
-                    cpu: 100m
-                    memory: 256Mi
-  - target:
-      kind: Deployment
-      name: immich-machine-learning
-      namespace: personal
-    patch: |-
-      apiVersion: apps/v1
-      kind: Deployment
-      metadata:
-        name: immich-machine-learning
-      spec:
-        template:
-          spec:
-            containers:
-              - name: immich-machine-learning
-                resources:
-                  limits:
-                    cpu: 2000m
-                    memory: 4Gi
-                  requests:
-                    cpu: 500m
-                    memory: 1Gi
+patchesStrategicMerge:
+  - patch-resources.yaml
