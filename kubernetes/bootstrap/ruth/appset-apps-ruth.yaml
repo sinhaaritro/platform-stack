@@ -23,16 +23,16 @@ spec:
             serverSideApply: "false"
             replace: "false"
             wave: "6"
-          # - app: authentik
-          #   namespace: security
-          #   serverSideApply: "true"
-          #   replace: "false"
-          #   wave: "6"
-          # - app: immich
-          #   namespace: personal
-          #   serverSideApply: "true"
-          #   replace: "false"
-          #   wave: "7"
+          - app: authentik
+            namespace: security
+            serverSideApply: "true"
+            replace: "false"
+            wave: "6"
+          - app: immich
+            namespace: personal
+            serverSideApply: "true"
+            replace: "false"
+            wave: "7"
           # - app: obsidian
           #   namespace: obsidian
           #   serverSideApply: "true"
