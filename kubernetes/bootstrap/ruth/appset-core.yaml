@@ -46,16 +46,16 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "4"
-                # - app: redis
-                #   namespace: storage
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "5"
-                # - app: seaweedfs
-                #   namespace: storage
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "5"
+                - app: redis
+                  namespace: storage
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "5"
+                - app: seaweedfs
+                  namespace: storage
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "5"
                 # - app: mimir
                 #   namespace: monitoring
                 #   serverSideApply: "true"
