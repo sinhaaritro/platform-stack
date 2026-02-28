@@ -76,11 +76,11 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "8"
-                # - app: alertmanager
-                #   namespace: monitoring
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "9"
+                - app: alertmanager
+                  namespace: monitoring
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "9"
                 # - app: velero
                 #   namespace: velero
                 #   serverSideApply: "true"
