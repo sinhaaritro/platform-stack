@@ -2,8 +2,21 @@ apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 
 patches:
+  - target:
+      kind: Service
+      name: node-exporter-prometheus-node-exporter
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          prometheus.io/scrape: "true"
+      - op: replace
+        path: /spec/ports
+        value:
+          - name: metrics
+            port: 9101
+            targetPort: 9101
   - path: patch-args.yaml
     target:
       kind: DaemonSet
       name: node-exporter-prometheus-node-exporter
-  - path: patch-service.yaml
