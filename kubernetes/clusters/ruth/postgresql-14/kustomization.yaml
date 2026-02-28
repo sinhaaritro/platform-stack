@@ -9,3 +9,4 @@ components:
   - ../../../apps/infrastructure/postgresql-14/components/secrets
   - ../../../apps/infrastructure/postgresql-14/components/storage
   - ../../../apps/infrastructure/postgresql-14/components/resource-limits
+  # - ../../../apps/infrastructure/postgresql-14/components/maintenance
