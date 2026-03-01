@@ -91,7 +91,7 @@ resources = {
             {
               interface    = "scsi1"
               datastore_id = "data-storage"
-              size         = 100
+              size         = 150
               ssd          = true
             }
           ]
