@@ -1,0 +1,98 @@
+# kubernetes/Taskfile.yml
+# -----------------------------------------------------------------------------
+# Taskfile for Kubernetes Operations and Secret Management
+#
+# This file provides a standardized interface for common kubectl commands,
+# GitOps workflows, and Sealed Secrets management.
+#
+# PREREQUISITES:
+#   - kubectl and Task are installed.
+#   - ANSIBLE_VAULT_PASSWORD environment variable for secret encryption.
+# -----------------------------------------------------------------------------
+
+version: "3"
+
+vars:
+  # Default namespace for Sealed Secrets controller
+  SEALED_SECRETS_NAMESPACE: "security"
+  # Filename for the master key backup
+  MASTER_KEY_FILE: "master.yaml"
+
+tasks:
+  default:
+    desc: "Lists all available tasks for Kubernetes."
+    cmds:
+      - task -l
+
+  # ---------------------------------------------------------------------------
+  # SEALED SECRETS MASTER KEY MANAGEMENT
+  # ---------------------------------------------------------------------------
+
+  master-key:extract:
+    desc: "Extracts the active Sealed Secrets master key from the cluster."
+    summary: |
+      This task grabs the private key pair that the Sealed Secrets controller 
+      is currently using and saves it to a local YAML file for backup.
+    cmds:
+      - |
+        kubectl get secret -n {{.SEALED_SECRETS_NAMESPACE}} \
+          -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml > {{.MASTER_KEY_FILE}}
+      - 'echo "Master key extracted to {{.MASTER_KEY_FILE}}. Please sanitize it before encrypting."'
+    status:
+      - "test -f {{.MASTER_KEY_FILE}}"
+
+  master-key:encrypt:
+    desc: "Encrypts the extracted master key using Ansible Vault."
+    summary: |
+      Uses the $ANSIBLE_VAULT_PASSWORD environment variable to securely 
+      encrypt the master key file before it is committed or moved.
+    cmds:
+      - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD is not set" && exit 1)'
+      - 'eval "ansible-vault encrypt --vault-password-file <(echo \"$ANSIBLE_VAULT_PASSWORD\") {{.MASTER_KEY_FILE}}"'
+      - 'echo "Master key encrypted successfully."'
+
+  master-key:view:
+    desc: "Displays the decrypted content of the master key (temporary)."
+    cmds:
+      - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD is not set" && exit 1)'
+      - 'eval "ansible-vault view --vault-password-file <(echo \"$ANSIBLE_VAULT_PASSWORD\") {{.MASTER_KEY_FILE}}"'
+
+  master-key:decrypt:
+    desc: "Permanently decrypts the master key to plain text. USE WITH CAUTION."
+    cmds:
+      - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD is not set" && exit 1)'
+      - 'eval "ansible-vault decrypt --vault-password-file <(echo \"$ANSIBLE_VAULT_PASSWORD\") {{.MASTER_KEY_FILE}}"'
+      - 'echo "WARNING: Master key is now in PLAIN TEXT."'
+
+  # ---------------------------------------------------------------------------
+  # SECRET SEALING
+  # ---------------------------------------------------------------------------
+
+  seal:
+    desc: "Seals a Kubernetes secret manifest (with Docker fallback if kubeseal missing)."
+    summary: |
+      Usage: task k8s:seal SECRET_FILE=path/to/secret.yaml
+      This command encrypts a standard Secret into a SealedSecret.
+    vars:
+      OUTPUT_FILE: "{{dir .SECRET_FILE}}/sealed-{{base .SECRET_FILE}}"
+    cmds:
+      - |
+        if command -v kubeseal >/dev/null 2>&1; then
+          kubeseal --format=yaml < {{.SECRET_FILE}} > {{.OUTPUT_FILE}}
+        else
+          echo "kubeseal not found locally, attempting to use Docker..."
+          docker run --rm -i bitnami/sealed-secrets-kubeseal:latest --format=yaml < {{.SECRET_FILE}} > {{.OUTPUT_FILE}}
+        fi
+      - 'echo "Sealed secret created at {{.OUTPUT_FILE}}"'
+    preconditions:
+      - sh: 'test -f "{{.SECRET_FILE}}"'
+        msg: "Secret file not found: {{.SECRET_FILE}}"
+
+  # ---------------------------------------------------------------------------
+  # UTILITIES
+  # ---------------------------------------------------------------------------
+
+  get-pods:
+    desc: "Lists pods in all namespaces (shortcut)."
+    cmds:
+      - kubectl get pods -A
