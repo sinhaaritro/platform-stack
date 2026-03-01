@@ -31,6 +31,7 @@ For complex apps (like SeaweedFS) where features need to be toggled or configure
 2.  **Use Case:**
     *   **Features**: `components/s3-config` (Jobs/Scripts).
     *   **Configuration**: `components/replicas-1` (Replica Counts), `components/storage-longhorn` (Storage Classes).
+    *   **Secrets**: `components/secrets` (SealedSecrets + env patches). → **MUST load `@[skills/secrets-management]`**.
     *   **Maintenance**: `components/maintenance` (Scale to Zero).
 3.  **Usage:** Import logically in `clusters/[cluster]/[app]/kustomization.yaml` or `overlays/[env]/kustomization.yaml`.
 
