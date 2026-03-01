@@ -48,3 +48,66 @@
     path: /home/{{ ansible_user }}/.kube/config
     regexp: 'https://127\.0\.0\.1:6443'
     replace: "https://{{ ansible_default_ipv4.address }}:6443"
+
+- name: "Resolve master key path from git reference variables (highest priority)"
+  block:
+    - name: "Sparse-clone the repo to fetch only the master key file"
+      ansible.builtin.command: >
+        git clone
+        --depth 1
+        --filter=blob:none
+        --sparse
+        --branch {{ sealed_secrets_master_key_revision | replace('HEAD', 'main') }}
+        {{ sealed_secrets_master_key_url }}
+        /tmp/sealed-secrets-fetch-{{ inventory_hostname }}
+      args:
+        creates: /tmp/sealed-secrets-fetch-{{ inventory_hostname }}
+      delegate_to: localhost
+      become: false
+    - name: "Set sparse-checkout to only the master key file"
+      ansible.builtin.command: >
+        git -C /tmp/sealed-secrets-fetch-{{ inventory_hostname }}
+        sparse-checkout set {{ sealed_secrets_master_key_path }}
+      delegate_to: localhost
+      become: false
+    - name: "Resolve absolute path from sparse clone"
+      ansible.builtin.set_fact:
+        sealed_secrets_master_key_path: "/tmp/sealed-secrets-fetch-{{ inventory_hostname }}/{{ sealed_secrets_master_key_path }}"
+  when:
+    - sealed_secrets_master_key_url is defined
+    - sealed_secrets_master_key_path is defined
+    - sealed_secrets_master_key_revision is defined
+    - not (sealed_secrets_master_key_path | regex_search('^/'))
+
+- name: "Find candidate master key paths based on Ansible group names"
+  ansible.builtin.set_fact:
+    candidate_key_paths: "{{ candidate_key_paths | default([]) + sealed_secrets_master_key_candidate_paths }}"
+  loop: "{{ group_names }}"
+  when: sealed_secrets_master_key_path is not defined
+  no_log: true
+
+- name: "Check which candidate master key path exists"
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop: "{{ candidate_key_paths | default([]) }}"
+  register: stat_key_paths
+  when: sealed_secrets_master_key_path is not defined
+  no_log: true
+
+- name: Set path to the valid Sealed Secrets Master Key (from dynamic search)
+  ansible.builtin.set_fact:
+    sealed_secrets_master_key_path: "{{ item.stat.path }}"
+  loop: "{{ stat_key_paths.results | default([]) }}"
+  when:
+    - sealed_secrets_master_key_path is not defined
+    - item.stat.exists
+
+- name: Inject Sealed Secrets Master Key
+  ansible.builtin.command: |
+    kubectl apply -f {{ sealed_secrets_master_key_path }}
+  environment:
+    KUBECONFIG: /home/{{ ansible_user }}/.kube/config
+  when:
+    - k3s_conf.stat.exists == false
+    - sealed_secrets_master_key_path is defined
+  changed_when: true

@@ -10,3 +10,9 @@ k3s_bootstrap_node: "" # MUST BE SET IN INVENTORY
 
 # Safety Switches
 allow_destructive_reset: false
+
+# Sealed Secrets Master Key Management
+sealed_secrets_master_key_candidate_paths:
+  # Iterates through assigned Ansible groups (like 'ruth', 'arr')
+  # to dynamically locate the cluster's specific master key.
+  - "{{ playbook_dir }}/../kubernetes/clusters/{{ item }}/sealed-secrets/master.secret.yaml"

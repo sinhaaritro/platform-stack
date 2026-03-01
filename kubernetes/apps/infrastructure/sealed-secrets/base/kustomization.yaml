@@ -8,3 +8,7 @@ helmCharts:
     releaseName: sealed-secrets
     namespace: security
     includeCRDs: true
+    valuesInline:
+      # Disable automatic key rotation. We manage the master key manually
+      # via Ansible Vault to ensure sealed secrets survive cluster rebuilds.
+      keyrenewperiod: "0"

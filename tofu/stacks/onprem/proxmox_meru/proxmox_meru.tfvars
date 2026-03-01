@@ -63,6 +63,9 @@ resources = {
       },
       "k3s" = {
         "k3s_bootstrap_node" : "ruth-01"
+        "sealed_secrets_master_key_url" : "https://github.com/sinhaaritro/platform-stack.git"
+        "sealed_secrets_master_key_path" : "kubernetes/clusters/ruth/sealed-secrets/master.secret.yaml"
+        "sealed_secrets_master_key_revision" : "HEAD"
       },
       # "k_management" = {
       #   "argocd_managed_fleets" : "arr"
