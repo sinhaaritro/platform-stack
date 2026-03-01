@@ -30,6 +30,12 @@
     - "'k_control' in group_names"
     - is_bootstrap
 
+- name: Inject Sealed Secrets Master Key
+  ansible.builtin.include_tasks: inject-sealed-secrets-key.yml
+  when:
+    - "'k_control' in group_names"
+    - is_bootstrap
+
 - name: Join Secondary Control Planes (HA)
   ansible.builtin.include_tasks: join_control.yml
   when:
