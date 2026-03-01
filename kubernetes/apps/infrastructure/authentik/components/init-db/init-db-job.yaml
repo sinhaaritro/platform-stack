@@ -1,0 +1,50 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: authentik-init-db
+  namespace: security
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  template:
+    spec:
+      containers:
+        - name: init-db
+          image: postgres:14-alpine
+          command:
+            - /bin/sh
+            - -c
+            - |
+              export PGPASSWORD=$DB_PASSWORD
+              PG_HOST="postgresql-14.storage.svc.cluster.local"
+
+              # Wait until PostgreSQL is ready (max 5 minutes)
+              echo "Waiting for PostgreSQL at $PG_HOST..."
+              RETRIES=180
+              until pg_isready -h "$PG_HOST" -U postgres -t 1 > /dev/null 2>&1; do
+                RETRIES=$((RETRIES - 1))
+                if [ "$RETRIES" -le 0 ]; then
+                  echo "ERROR: Timed out waiting for PostgreSQL."
+                  exit 1
+                fi
+                echo "  Not ready yet. Retrying in 5s... ($RETRIES attempts left)"
+                sleep 5
+              done
+              echo "PostgreSQL is ready."
+
+              # Create user if it does not exist
+              psql -h "$PG_HOST" -U postgres -tc "SELECT 1 FROM pg_roles WHERE rolname = 'authentik'" | grep -q 1 \
+                || psql -h "$PG_HOST" -U postgres -c "CREATE USER authentik WITH PASSWORD 'ThisIsNotASecurePassword';"
+
+              # Create database if it does not exist
+              psql -h "$PG_HOST" -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = 'authentik'" | grep -q 1 \
+                || psql -h "$PG_HOST" -U postgres -c "CREATE DATABASE authentik OWNER authentik;"
+
+              # Ensure privileges are structurally applied
+              psql -h "$PG_HOST" -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE authentik TO authentik;"
+          env:
+            - name: DB_PASSWORD
+              value: "change-me-please-postgres-password"
+      restartPolicy: Never
+  backoffLimit: 4
