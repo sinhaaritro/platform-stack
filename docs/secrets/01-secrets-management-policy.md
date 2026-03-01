@@ -1,4 +1,4 @@
-list# Secrets Management Policy
+# Secrets Management Policy
 
 This document is the single source of truth for the policy and procedures related to managing all sensitive information within this project. Adherence to this policy is mandatory.
 
@@ -10,13 +10,13 @@ This document is the single source of truth for the policy and procedures relate
 
 ## Table of Contents
 
-1.  [What is Considered a Secret?](#1-what-is-considered-a-secret)
-2.  [The Primary Tool: Ansible Vault](#2-the-primary-tool-ansible-vault)
-3.  [File Naming Convention (MANDATORY)](#3-file-naming-convention-mandatory)
-4.  [Managing the Vault Password](#4-managing-the-vault-password)
-5.  [Developer Workflow: Working with Secret Files](#5-developer-workflow-working-with-secret-files)
-6.  [Using Secrets in Automation](#6-using-secrets-in-automation)
-7.  [Secrets in Kubernetes](#7-secrets-in-kubernetes)
+1. [What is Considered a Secret?](#1-what-is-considered-a-secret)
+2. [The Primary Tools: Ansible Vault & Sealed Secrets](#2-the-primary-tools-ansible-vault--sealed-secrets)
+3. [File Naming Convention (MANDATORY)](#3-file-naming-convention-mandatory)
+4. [Managing the Vault Password](#4-managing-the-vault-password)
+5. [Developer Workflow: Working with Secret Files](#5-developer-workflow-working-with-secret-files)
+6. [Using Secrets in Automation](#6-using-secrets-in-automation)
+7. [Secrets in Kubernetes (GitOps)](#7-secrets-in-kubernetes-gitops)
 
 ---
 
@@ -30,29 +30,29 @@ This includes, but is not limited to:
 -   **Service Configuration:** Database connection strings, authentication provider client secrets.
 -   **Personal Information:** Personal email addresses or domain names not intended for public use.
 
-All such information **must** be stored in an encrypted file using Ansible Vault.
-
 ---
 
-## 2. The Primary Tool: Ansible Vault
+## 2. The Primary Tools: Ansible Vault & Sealed Secrets
 
-**Ansible Vault** is the designated tool for secrets management in this project. It is a feature of Ansible that allows for the encryption of data files at rest. It integrates seamlessly with our Ansible-based configuration management and provides a command-line interface that can be used by other tools like OpenTofu.
+We utilize a two-pronged approach to secrets management due to our Infrastructure-as-Code (OpenTofu/Ansible) and GitOps (ArgoCD/K3s) architecture:
+
+1.  **Ansible Vault:** Used for infrastructure-level secrets (VM passwords, OpenTofu variables, K3s bootstrap tokens) and for backing up the Kubernetes Sealed Secrets Master Key.
+2.  **Bitnami Sealed Secrets:** Used for application-level Kubernetes secrets. This allows developers to safely commit encrypted Kubernetes `Secret` manifests directly into the Git repository for ArgoCD to deploy.
 
 ---
 
 ## 3. File Naming Convention (MANDATORY)
 
-To allow our automated hooks to distinguish between secret and non-secret files, all encrypted files **must** follow a strict naming convention.
+To allow our automated hooks to distinguish between secret and non-secret files, all **Ansible Vault encrypted files** must follow a strict naming convention.
 
 **The Rule:** Add `.secret` as a suffix to the filename, before the file extension.
 **Pattern:** `[filename].secret.[extension]`
 
-This convention is not a suggestion; it is a **mandatory rule enforced by our pre-commit hook**. If you commit a file that matches this pattern but is not encrypted, your commit will be rejected.
+*Note: This convention is strictly for Ansible Vault files. Kubernetes `SealedSecret` YAML files generated via `kubeseal` do NOT require this suffix, as they are a custom Kubernetes resource inherently safe for Git.*
 
 #### Examples:
 -   An Ansible variables file: `vars.secret.yml`
 -   An OpenTofu variables file for production: `prod.secret.tfvars`
--   A file with miscellaneous keys: `api-keys.secret.json`
 
 ---
 
@@ -62,7 +62,7 @@ The Ansible Vault is encrypted with a master password.
 
 1.  **Obtaining the Password:** The vault password must be obtained from a project administrator through a secure, out-of-band channel (e.g., a password manager share).
 2.  **Configuring Your Environment:** You must set the `ANSIBLE_VAULT_PASSWORD` environment variable.
-    > **See [GETTING_STARTED.md](./GETTING_STARTED.md#3-configure-secrets) for the official setup instructions.**
+   > **See [GETTING_STARTED.md](./GETTING_STARTED.md#3-configure-secrets) for the official setup instructions.**
 
 ---
 
@@ -113,28 +113,28 @@ If you have a plaintext file that needs to be converted into a secret:
 
 ## 6. Using Secrets in Automation
 
-#### 6.1. With Ansible
-Ansible automatically decrypts any vaulted file it encounters during a playbook run, using the `ANSIBLE_VAULT_PASSWORD` environment variable. No extra configuration is needed.
-
-#### 6.2. With OpenTofu
-OpenTofu cannot read Ansible Vault files directly. We feed secrets to it by decrypting the files on-the-fly. This is handled by our `Taskfile`. A typical command in `Taskfile.yml` looks like this:
-
-```yaml
-# In Taskfile.yml
-tasks:
-  tofu:plan:
-    cmds:
-      - |
-        tofu plan \
-          -var-file=<(ansible-vault view environments/prod.secret.tfvars)
-```
-When you run `task tofu:plan`, the `ansible-vault view` command decrypts the secrets file and pipes the contents directly into the Tofu process without ever writing the plaintext secrets to disk.
+-   **With Ansible:** Ansible automatically decrypts vaulted files during a playbook run using the `ANSIBLE_VAULT_PASSWORD` environment variable.
+-   **With OpenTofu:** OpenTofu cannot read Ansible Vault directly. Our `Taskfile` handles on-the-fly decryption into standard input:
+    ```yaml
+    # In Taskfile.yml
+    tasks:
+      tofu:plan:
+        cmds:
+          - tofu plan -var-file=<(ansible-vault view environments/prod.secret.tfvars)
+    ```
+> **Note:** (When you run `task tofu:plan`, the `ansible-vault view` command decrypts the secrets file and pipes the contents directly into the Tofu process without ever writing the plaintext secrets to disk.)
 
 ---
 
-## 7. Secrets in Kubernetes
+## 7. Secrets in Kubernetes (GitOps)
 
-Kubernetes has its own native object for managing secrets.
+Because we use ArgoCD for continuous deployment, our Kubernetes manifests live in Git. Standard Kubernetes `Secret` objects are only base64 encoded, meaning they **cannot** be committed to Git.
 
--   **Current Method (Via Ansible):** Ansible playbooks are used to create or update Kubernetes `Secret` objects. The playbook reads the vaulted variables (from a `*.secret.yml` file) and applies them directly to the cluster. This keeps the secret data out of the declarative Kubernetes manifests in the `/k8s` directory.
--   **Future Direction (Sealed Secrets):** We may evolve to use a tool like **Sealed Secrets**, which would allow us to commit encrypted Kubernetes `Secret` manifests to the Git repository.
+To solve this, we use **Sealed Secrets**. 
+- Application secrets are encrypted locally using the `kubeseal` CLI tool.
+- The resulting `SealedSecret` object is committed to Git.
+- ArgoCD deploys the `SealedSecret` to K3s.
+- The Sealed Secrets Controller running inside K3s decrypts it into a standard Kubernetes `Secret`.
+
+For details on how the encryption master key survives cluster rebuilds, see [Sealed Secrets Architecture & Disaster Recovery](./02-sealed-secrets-architecture.md).  
+For developer instructions on creating these secrets, see [Creating Kubernetes Secrets](./03-creating-kubernetes-secrets.md).
