@@ -9,9 +9,18 @@ metadata:
 spec:
   template:
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: init-db
           image: postgres:14-alpine
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           command:
             - /bin/sh
             - -c
