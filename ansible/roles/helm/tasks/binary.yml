@@ -1,35 +1,53 @@
 # tasks/binary.yml
 ---
-- name: Determine Helm download URL
-  ansible.builtin.set_fact:
-    helm_url: "https://get.helm.sh/helm-{{ helm_version }}-linux-{{ helm_arch_map[ansible_architecture] }}.tar.gz"
+- name: Check if Helm binary is installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/helm
+  register: helm_bin
 
-- name: Create temporary directory for Helm
-  ansible.builtin.file:
-    path: /tmp/helm_install
-    state: directory
-    mode: "0755"
-  tags: [helm, binary]
+- name: Get current Helm version
+  ansible.builtin.command: /usr/local/bin/helm version --short
+  register: helm_current_version
+  changed_when: false
+  failed_when: false
+  when: helm_bin.stat.exists
 
-- name: Download and Unarchive Helm
-  ansible.builtin.unarchive:
-    src: "{{ helm_url }}"
-    dest: /tmp/helm_install
-    remote_src: true
-  tags: [helm, binary]
+- name: Install Helm Binary
+  # Skip if the binary already exists at the correct version.
+  when: >
+    not helm_bin.stat.exists or
+    (helm_version not in helm_current_version.stdout | default(''))
+  block:
+    - name: Determine Helm download URL
+      ansible.builtin.set_fact:
+        helm_url: "https://get.helm.sh/helm-{{ helm_version }}-linux-{{ helm_arch_map[ansible_architecture] }}.tar.gz"
 
-- name: Move Helm binary to system path
-  ansible.builtin.copy:
-    src: "/tmp/helm_install/linux-{{ helm_arch_map[ansible_architecture] }}/helm"
-    dest: /usr/local/bin/helm
-    mode: "0755"
-    owner: root
-    group: root
-    remote_src: true
-  tags: [helm, binary]
+    - name: Create temporary directory for Helm
+      ansible.builtin.file:
+        path: /tmp/helm_install
+        state: directory
+        mode: "0755"
+      tags: [helm, binary]
 
-- name: Cleanup temporary files
-  ansible.builtin.file:
-    path: /tmp/helm_install
-    state: absent
-  tags: [helm, binary]
+    - name: Download and Unarchive Helm
+      ansible.builtin.unarchive:
+        src: "{{ helm_url }}"
+        dest: /tmp/helm_install
+        remote_src: true
+      tags: [helm, binary]
+
+    - name: Move Helm binary to system path
+      ansible.builtin.copy:
+        src: "/tmp/helm_install/linux-{{ helm_arch_map[ansible_architecture] }}/helm"
+        dest: /usr/local/bin/helm
+        mode: "0755"
+        owner: root
+        group: root
+        remote_src: true
+      tags: [helm, binary]
+
+    - name: Cleanup temporary files
+      ansible.builtin.file:
+        path: /tmp/helm_install
+        state: absent
+      tags: [helm, binary]

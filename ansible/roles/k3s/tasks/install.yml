@@ -7,3 +7,4 @@
     mode: "0755"
     owner: root
     group: root
+    force: false # Skip download if script already exists on this boot cycle
