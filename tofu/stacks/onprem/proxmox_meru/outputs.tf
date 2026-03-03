@@ -26,15 +26,16 @@
 #       "a_Description" = "Check 'proxmox_virtual_environment_file.custom_image_upload' state for per-version upload status."
 #     }
 #     "STEP_5_FLATTEN_AND_MERGE" = {
-#       # "resources"              = var.resources
-#       "a_Filtered_VM_Groups"  = local.vm_groups
-#       "b_Filtered_LXC_Groups" = local.lxc_groups
-#       "c_Flattened_VM_Map"    = local.flattened_vms
-#       "d_Flattened_LXC_Map"   = local.flattened_lxcs
-#       "e_Potential_VM_List"   = local.all_potential_vms
-#       "f_Potential_LXC_List"  = local.all_potential_lxc
-#       "g_VM_List"             = local.final_vm_list
-#       "h_LXC_List"            = local.final_lxc_list
+#       # Phase 1: normalized_resources is the pre-filter view (all clusters with defaults applied)
+#       "a_Normalized_Resources" = local.normalized_resources
+#       # Phase 2: split by type + flattened to per-node items
+#       "b_VM_Groups"      = local._vm_groups
+#       "c_LXC_Groups"     = local._lxc_groups
+#       "d_Flattened_VMs"  = local._flattened_vms
+#       "e_Flattened_LXCs" = local._flattened_lxcs
+#       # Phase 3: final outputs (enabled-only, fully resolved)
+#       "f_Final_VM_List"  = local.final_vm_list
+#       "g_Final_LXC_List" = local.final_lxc_list
 #     }
 #   }
 # }

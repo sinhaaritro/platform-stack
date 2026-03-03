@@ -100,38 +100,40 @@ resources = {
           ]
         }
       },
-      # "ruth-02" = {
-      #   vm_id           = 1021
-      #   tags            = ["k_worker"]
-      #   cloud_init_user = "dev"
-      #   vm_config = {
-      #     ipv4_address = "192.168.0.21/24"
-      #     additional_disks = [
-      #       {
-      #         interface    = "scsi1"
-      #         datastore_id = "data-storage"
-      #         size         = 64
-      #         ssd          = true
-      #       }
-      #     ]
-      #   }
-      # },
-      # "ruth-03" = {
-      #   vm_id           = 1022
-      #   tags            = ["k_worker"]
-      #   cloud_init_user = "dev"
-      #   vm_config = {
-      #     ipv4_address = "192.168.0.22/24"
-      #     additional_disks = [
-      #       {
-      #         interface    = "scsi1"
-      #         datastore_id = "data-storage"
-      #         size         = 64
-      #         ssd          = true
-      #       }
-      #     ]
-      #   }
-      # }
+      "ruth-02" = {
+        enabled         = false
+        vm_id           = 1021
+        tags            = ["k_worker"]
+        cloud_init_user = "dev"
+        vm_config = {
+          ipv4_address = "192.168.0.21/24"
+          additional_disks = [
+            {
+              interface    = "scsi1"
+              datastore_id = "data-storage"
+              size         = 64
+              ssd          = true
+            }
+          ]
+        }
+      },
+      "ruth-03" = {
+        enabled         = false
+        vm_id           = 1022
+        tags            = ["k_worker"]
+        cloud_init_user = "dev"
+        vm_config = {
+          ipv4_address = "192.168.0.22/24"
+          additional_disks = [
+            {
+              interface    = "scsi1"
+              datastore_id = "data-storage"
+              size         = 64
+              ssd          = true
+            }
+          ]
+        }
+      }
     }
   },
   "arr" = {

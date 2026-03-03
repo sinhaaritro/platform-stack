@@ -21,19 +21,19 @@ locals {
   architecture = "amd64"
 
   # Infer OS versions from usage:
-  # Scan the 'var.resources' map to find all unique 'os_version' values requested
-  # by the user (either at group level or node level).
+  # Scan 'normalized_resources' (not var.resources directly) so all fields
+  # are guaranteed to exist with their defaults already applied.
   requested_versions = distinct(concat(
-    # Scan Groups
+    # Scan cluster-level vm_config
     [
-      for group in var.resources : group.vm_config.os_version
-      if group.type == "vm" && try(group.vm_config.os_version, null) != null
+      for group in local.normalized_resources : group.vm_config.os_version
+      if group.type == "vm" && group.vm_config != null && group.vm_config.os_version != null
     ],
-    # Scan Nodes (nested)
+    # Scan node-level vm_config (nested)
     flatten([
-      for group in var.resources : [
+      for group in local.normalized_resources : [
         for node in group.nodes : node.vm_config.os_version
-        if try(node.vm_config.os_version, null) != null
+        if group.type == "vm" && node.vm_config != null && node.vm_config.os_version != null
       ]
     ])
   ))
