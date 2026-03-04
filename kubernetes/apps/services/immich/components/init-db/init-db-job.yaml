@@ -41,8 +41,11 @@ spec:
               psql -h "$PG_HOST" -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = '$DB_NAME'" | grep -q 1 \
                 || psql -h "$PG_HOST" -U postgres -c "CREATE DATABASE \"$DB_NAME\" OWNER \"$DB_USER\";"
 
-              # Apply the vectors extension
+              # Apply required extensions as superuser
               psql -h "$PG_HOST" -U postgres -d "$DB_NAME" -c "CREATE EXTENSION IF NOT EXISTS vectors;"
+              psql -h "$PG_HOST" -U postgres -d "$DB_NAME" -c "GRANT ALL PRIVILEGES ON SCHEMA vectors TO \"$DB_USER\";"
+              psql -h "$PG_HOST" -U postgres -d "$DB_NAME" -c "CREATE EXTENSION IF NOT EXISTS cube;"
+              psql -h "$PG_HOST" -U postgres -d "$DB_NAME" -c "CREATE EXTENSION IF NOT EXISTS earthdistance;"
           env:
             - name: ADMIN_PASSWORD
               valueFrom:
