@@ -13,3 +13,12 @@ subjects:
   - kind: ServiceAccount
     name: kyverno-admission-controller
     namespace: security
+  - kind: ServiceAccount
+    name: kyverno-background-controller
+    namespace: security
+  - kind: ServiceAccount
+    name: kyverno-cleanup-controller
+    namespace: security
+  - kind: ServiceAccount
+    name: kyverno-reports-controller
+    namespace: security
