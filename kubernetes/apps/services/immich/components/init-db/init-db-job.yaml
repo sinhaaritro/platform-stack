@@ -19,26 +19,21 @@ spec:
               # The pod uses optional secretKeyRefs. If Kyverno hasn't mirrored
               # the secret yet, ADMIN_PASSWORD will be empty. We wait for it.
               echo "Waiting for postgres-admin secret to be mirrored by Kyverno..."
-              RETRIES=60
-              while [ -z "$ADMIN_PASSWORD" ]; do
-                RETRIES=$((RETRIES - 1))
-                if [ "$RETRIES" -le 0 ]; then
-                  echo "ERROR: Timed out waiting for postgres-admin secret."
-                  exit 1
-                fi
-                echo "  Secret not found. Retrying in 5s... ($RETRIES attempts left)"
-                sleep 5
-                # Note: To re-evaluate the env var, the pod itself must be recreated
-                # by the Job controller if it fails. So we exit 1 here to trigger a restart.
+              if [ -z "$ADMIN_PASSWORD" ]; then
+                echo "ERROR: Secret not found in environment."
+                echo "  Because Kubernetes doesn't dynamically reload environment variables,"
+                echo "  we must exit to let the Job controller recreate this pod."
+                echo "  Sleeping 30s before exiting to prevent rapid backoff exhaustion..."
+                sleep 30
                 exit 1
-              done
+              fi
 
               export PGPASSWORD=$ADMIN_PASSWORD
               PG_HOST="postgresql-14.storage.svc.cluster.local"
 
               # Wait until PostgreSQL is ready (max 5 minutes)
               echo "Waiting for PostgreSQL at $PG_HOST..."
-              RETRIES=180
+              RETRIES=60
               until pg_isready -h "$PG_HOST" -U postgres -t 1 > /dev/null 2>&1; do
                 RETRIES=$((RETRIES - 1))
                 if [ "$RETRIES" -le 0 ]; then
@@ -86,4 +81,4 @@ spec:
                   name: immich-db-credentials
                   key: DB_DATABASE_NAME
       restartPolicy: Never
-  backoffLimit: 4
+  backoffLimit: 10000
