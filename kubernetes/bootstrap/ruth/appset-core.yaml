@@ -11,6 +11,11 @@ spec:
           - clusters: {}
           - list:
               elements:
+                - app: namespaces
+                  namespace: default
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "0"
                 - app: kyverno
                   namespace: security
                   serverSideApply: "true"
