@@ -16,6 +16,23 @@ spec:
             - /bin/sh
             - -c
             - |
+              # The pod uses optional secretKeyRefs. If Kyverno hasn't mirrored
+              # the secret yet, ADMIN_PASSWORD will be empty. We wait for it.
+              echo "Waiting for postgres-admin secret to be mirrored by Kyverno..."
+              RETRIES=60
+              while [ -z "$ADMIN_PASSWORD" ]; do
+                RETRIES=$((RETRIES - 1))
+                if [ "$RETRIES" -le 0 ]; then
+                  echo "ERROR: Timed out waiting for postgres-admin secret."
+                  exit 1
+                fi
+                echo "  Secret not found. Retrying in 5s... ($RETRIES attempts left)"
+                sleep 5
+                # Note: To re-evaluate the env var, the pod itself must be recreated
+                # by the Job controller if it fails. So we exit 1 here to trigger a restart.
+                exit 1
+              done
+
               export PGPASSWORD=$ADMIN_PASSWORD
               PG_HOST="postgresql-14.storage.svc.cluster.local"
 
@@ -52,6 +69,7 @@ spec:
                 secretKeyRef:
                   name: postgres-admin
                   key: POSTGRES_PASSWORD
+                  optional: true
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
