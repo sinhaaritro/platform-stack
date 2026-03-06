@@ -3,4 +3,7 @@ kind: Kustomization
 namespace: security
 
 resources:
-  - ../../../apps/infrastructure/external-secrets
+  - ../../../apps/infrastructure/external-secrets/base
+
+components:
+  - ../../../apps/infrastructure/external-secrets/components/cluster-secret-store
