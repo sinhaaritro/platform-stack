@@ -31,6 +31,11 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "2"
+                - app: external-secrets
+                  namespace: security
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "3"
                 - app: metallb-system
                   namespace: networking
                   serverSideApply: "true"

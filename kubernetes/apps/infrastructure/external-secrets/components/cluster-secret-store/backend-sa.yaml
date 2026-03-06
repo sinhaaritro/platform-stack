@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eso-kubernetes-backend
+  namespace: security
+  labels:
+    app.kubernetes.io/name: eso-kubernetes-backend
+  annotations:
+    description: "ServiceAccount used by ESO ClusterSecretStore to read secrets from target namespaces."
