@@ -17,6 +17,16 @@ spec:
             - /bin/sh
             - -c
             - |
+              # Check if secrets exist yet. If not, fail the pod to trigger a retry.
+              echo "Checking if secrets have been created by the Operators..."
+              if [ -z "$ADMIN_PASSWORD" ] ||[ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ] || [ -z "$DB_NAME" ]; then
+                echo "ERROR: Secrets are not ready in the namespace yet."
+                echo "ExternalSecrets or SealedSecrets operators are still processing."
+                echo "Exiting so Kubernetes can retry this pod..."
+                sleep 5
+                exit 1
+              fi
+
               PG_HOST="postgresql-14.storage.svc.cluster.local"
 
               # 1. Wait until PostgreSQL is actually reachable
@@ -55,14 +65,18 @@ spec:
                 secretKeyRef:
                   name: immich-db-credentials
                   key: DB_USERNAME
+                  optional: true
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: immich-db-credentials
                   key: DB_PASSWORD
+                  optional: true
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
                   name: immich-db-credentials
                   key: DB_DATABASE_NAME
+                  optional: true
       restartPolicy: OnFailure
+  backoffLimit: 20
