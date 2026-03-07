@@ -56,37 +56,36 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "6"
-                # - app: seaweedfs
-                #   namespace: storage
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "6"
-                # - app: mimir
-                #   namespace: monitoring
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "7"
-                # - app: grafana
-                #   namespace: monitoring
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "8"
-                # - app: node-exporter
-                #   namespace: monitoring
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "9"
-                # - app: alloy
-                #   namespace: monitoring
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "9"
-                # - app: alertmanager
-                #   namespace: monitoring
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "10"
-
+                - app: seaweedfs
+                  namespace: storage
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "6"
+                - app: mimir
+                  namespace: monitoring
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "7"
+                - app: grafana
+                  namespace: monitoring
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "8"
+                - app: node-exporter
+                  namespace: monitoring
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "9"
+                - app: alloy
+                  namespace: monitoring
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "9"
+                - app: alertmanager
+                  namespace: monitoring
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "10"
                 # - app: velero
                 #   namespace: velero
                 #   serverSideApply: "true"
