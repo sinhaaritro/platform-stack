@@ -11,23 +11,23 @@ spec:
           - clusters: {}
           - list:
               elements:
-                - app: kyverno
-                  namespace: security
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "1"
                 - app: sealed-secrets
                   namespace: security
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "2"
-                - app: cert-manager
-                  namespace: networking
+                  wave: "1"
+                - app: external-secrets
+                  namespace: security
                   serverSideApply: "true"
                   replace: "false"
                   wave: "2"
-                - app: external-secrets
+                - app: kyverno
                   namespace: security
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "3"
+                - app: cert-manager
+                  namespace: networking
                   serverSideApply: "true"
                   replace: "false"
                   wave: "3"
@@ -35,67 +35,67 @@ spec:
                   namespace: networking
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "3"
+                  wave: "4"
                 - app: traefik
                   namespace: networking
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "3"
+                  wave: "4"
                 - app: external-dns
                   namespace: external-dns
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "4"
+                  wave: "5"
                 - app: longhorn
                   namespace: longhorn-system
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "4"
+                  wave: "5"
                 - app: redis
                   namespace: storage
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "5"
+                  wave: "6"
                 - app: seaweedfs
                   namespace: storage
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "5"
+                  wave: "6"
                 - app: mimir
                   namespace: monitoring
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "6"
+                  wave: "7"
                 - app: grafana
                   namespace: monitoring
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "7"
+                  wave: "8"
                 - app: node-exporter
                   namespace: monitoring
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "8"
+                  wave: "9"
                 - app: alloy
                   namespace: monitoring
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "8"
+                  wave: "9"
                 - app: alertmanager
                   namespace: monitoring
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "9"
+                  wave: "10"
                 # - app: velero
                 #   namespace: velero
                 #   serverSideApply: "true"
                 #   replace: "false"
-                #   wave: "10"
+                #   wave: "11"
                 # - app: copyparty
                 #   namespace: copyparty
                 #   serverSideApply: "true"
                 #   replace: "false"
-                #   wave: "10"
+                #   wave: "11"
 
   template:
     metadata:

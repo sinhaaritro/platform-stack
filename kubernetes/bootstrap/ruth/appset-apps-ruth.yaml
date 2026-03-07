@@ -17,32 +17,32 @@ spec:
             namespace: storage
             serverSideApply: "true"
             replace: "false"
-            wave: "5"
+            wave: "6"
           - app: loki
             namespace: logging
             serverSideApply: "false"
             replace: "false"
-            wave: "6"
+            wave: "7"
           - app: authentik
             namespace: security
             serverSideApply: "true"
             replace: "false"
-            wave: "6"
+            wave: "7"
           - app: immich
             namespace: personal
             serverSideApply: "true"
             replace: "false"
-            wave: "7"
+            wave: "8"
           # - app: obsidian
           #   namespace: obsidian
           #   serverSideApply: "true"
           #   replace: "false"
-          #   wave: "7"
+          #   wave: "8"
           # - app: podinfo
           #   namespace: podinfo
           #   serverSideApply: "false"
           #   replace: "false"
-          #   wave: "6"
+          #   wave: "20"
   template:
     metadata:
       name: "ruth-{{.app}}"
