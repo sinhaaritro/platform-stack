@@ -4,9 +4,8 @@ metadata:
   name: immich-init-db
   namespace: personal
   annotations:
-    # argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/sync-wave: "3"
-    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    # argocd.argoproj.io/hook-delete-policy: HookSucceeded
 spec:
   template:
     spec:
