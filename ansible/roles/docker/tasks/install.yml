@@ -19,3 +19,15 @@
 # This ensures the session reflects the group change immediately for subsequent tasks
 - name: Reset ssh connection to apply group changes
   ansible.builtin.meta: reset_connection
+
+- name: Ensure containerd is enabled on boot
+  ansible.builtin.service:
+    name: containerd
+    enabled: true
+  tags: [docker, service]
+
+- name: Ensure docker is enabled on boot
+  ansible.builtin.service:
+    name: docker
+    enabled: true
+  tags: [docker, service]

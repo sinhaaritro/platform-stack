@@ -8,6 +8,19 @@
 
 - name: Handle Firewall Rules
   ansible.builtin.import_tasks: firewall.yml
+  when: >
+    ('kubeadm' not in group_names) and
+    ('k3s' not in group_names) and
+    ('kind' not in group_names)
+
+- name: Disable Firewall on Kubernetes nodes
+  community.general.ufw:
+    state: disabled
+  when: >
+    ('kubeadm' in group_names) or
+    ('k3s' in group_names) or
+    ('kind' in group_names)
+  tags: [security, ufw]
 
 - name: Handle Intrusion Prevention
   ansible.builtin.import_tasks: fail2ban.yml

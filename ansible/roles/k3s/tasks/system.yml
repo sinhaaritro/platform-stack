@@ -33,3 +33,28 @@
     sysctl_file: /etc/sysctl.d/k8s.conf
     reload: true
   loop: "{{ k3s_sysctl_params | dict2items }}"
+
+- name: Create k3s-flannel-config systemd service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/k3s-flannel-config.service
+    content: |
+      [Unit]
+      Description=K3s Flannel Config Workaround
+      Before=k3s.service k3s-agent.service
+
+      [Service]
+      Type=oneshot
+      ExecStartPre=/bin/mkdir -p /run/flannel
+      ExecStart=/bin/sh -c 'if [ ! -f /run/flannel/subnet.env ]; then echo "FLANNEL_NETWORK={{ k3s_cluster_cidr }}\nFLANNEL_SUBNET={{ k3s_cluster_cidr | ipsubnet(24, 0) }}\nFLANNEL_MTU=1450\nFLANNEL_IPMASQ=true" > /run/flannel/subnet.env; fi'
+      RemainAfterExit=yes
+
+      [Install]
+      WantedBy=multi-user.target
+    mode: "0644"
+  tags: [k3s, network]
+
+- name: Enable k3s-flannel-config service on boot
+  ansible.builtin.systemd:
+    name: k3s-flannel-config
+    enabled: true
+  tags: [k3s, network]
