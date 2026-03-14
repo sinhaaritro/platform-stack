@@ -4,8 +4,8 @@ metadata:
   name: authentik-init-db
   namespace: security
   annotations:
-    argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    # argocd.argoproj.io/hook: PreSync
+    # argocd.argoproj.io/hook-delete-policy: HookSucceeded
     argocd.argoproj.io/sync-wave: "-1"
 spec:
   template:
