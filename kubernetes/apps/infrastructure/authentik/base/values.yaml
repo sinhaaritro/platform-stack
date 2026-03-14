@@ -35,11 +35,11 @@ server:
   volumes:
     - name: postgres-creds
       secret:
-        secretName: authentik-secrets
+        secretName: authentik-db-credentials
         items:
-          - key: username
+          - key: DB_USERNAME
             path: username
-          - key: password
+          - key: DB_PASSWORD
             path: password
   volumeMounts:
     - name: postgres-creds
@@ -63,11 +63,11 @@ worker:
   volumes:
     - name: postgres-creds
       secret:
-        secretName: authentik-secrets
+        secretName: authentik-db-credentials
         items:
-          - key: username
+          - key: DB_USERNAME
             path: username
-          - key: password
+          - key: DB_PASSWORD
             path: password
   volumeMounts:
     - name: postgres-creds

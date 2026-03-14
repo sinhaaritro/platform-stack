@@ -6,6 +6,7 @@ metadata:
   annotations:
     argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   template:
     spec:
@@ -27,7 +28,7 @@ spec:
             - /bin/sh
             - -c
             - |
-              export PGPASSWORD=$DB_PASSWORD
+              export PGPASSWORD=$ADMIN_PASSWORD
               PG_HOST="postgresql-14.storage.svc.cluster.local"
 
               # Wait until PostgreSQL is ready (max 5 minutes)
@@ -45,17 +46,35 @@ spec:
               echo "PostgreSQL is ready."
 
               # Create user if it does not exist
-              psql -h "$PG_HOST" -U postgres -tc "SELECT 1 FROM pg_roles WHERE rolname = 'authentik'" | grep -q 1 \
-                || psql -h "$PG_HOST" -U postgres -c "CREATE USER authentik WITH PASSWORD 'ThisIsNotASecurePassword';"
+              psql -h "$PG_HOST" -U postgres -tc "SELECT 1 FROM pg_roles WHERE rolname = '$DB_USER'" | grep -q 1 \
+                || psql -h "$PG_HOST" -U postgres -c "CREATE USER \"$DB_USER\" WITH PASSWORD '$DB_PASSWORD';"
 
               # Create database if it does not exist
-              psql -h "$PG_HOST" -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = 'authentik'" | grep -q 1 \
-                || psql -h "$PG_HOST" -U postgres -c "CREATE DATABASE authentik OWNER authentik;"
+              psql -h "$PG_HOST" -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = '$DB_NAME'" | grep -q 1 \
+                || psql -h "$PG_HOST" -U postgres -c "CREATE DATABASE \"$DB_NAME\" OWNER \"$DB_USER\";"
 
               # Ensure privileges are structurally applied
-              psql -h "$PG_HOST" -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE authentik TO authentik;"
+              psql -h "$PG_HOST" -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE \"$DB_NAME\" TO \"$DB_USER\";"
           env:
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-admin
+                  key: POSTGRES_PASSWORD
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-db-credentials
+                  key: DB_USERNAME
             - name: DB_PASSWORD
-              value: "change-me-please-postgres-password"
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-db-credentials
+                  key: DB_PASSWORD
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-db-credentials
+                  key: DB_DATABASE_NAME
       restartPolicy: Never
   backoffLimit: 4
