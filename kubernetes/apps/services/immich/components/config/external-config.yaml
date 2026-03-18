@@ -1,0 +1,47 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: immich-config
+  namespace: personal
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-2"
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: shared-secrets
+    kind: ClusterSecretStore
+  target:
+    name: immich-config
+    creationPolicy: Owner
+    template:
+      engineVersion: v2
+      data:
+        immich-config.yaml: |
+          oauth:
+            enabled: true
+            issuerUrl: "https://authentik.ruth.example.com/application/o/immich/.well-known/openid-configuration"
+            clientId: "{{ .IMMICH_OAUTH_CLIENT_ID }}"
+            clientSecret: "{{ .IMMICH_OAUTH_CLIENT_SECRET }}"
+            autoRegister: true
+            autoLaunch: false
+            buttonText: "Login with Authentik"
+            scope: "openid email profile"
+            signingAlgorithm: "RS256"
+          storageTemplate:
+            enabled: true
+            template: "{{y}}/{{y}}-{{MM}}-{{dd}}/{{filename}}"
+          trash:
+            enabled: true
+            days: 30
+          theme:
+            customCss: ""
+  data:
+    - secretKey: IMMICH_OAUTH_CLIENT_ID
+      remoteRef:
+        key: authentik-oauth-immich
+        property: IMMICH_OAUTH_CLIENT_ID
+    - secretKey: IMMICH_OAUTH_CLIENT_SECRET
+      remoteRef:
+        key: authentik-oauth-immich
+        property: IMMICH_OAUTH_CLIENT_SECRET

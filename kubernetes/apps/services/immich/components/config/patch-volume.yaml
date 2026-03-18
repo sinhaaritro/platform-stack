@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: placeholder
+spec:
+  template:
+    spec:
+      containers:
+        - name: main
+          env:
+            - name: IMMICH_CONFIG_FILE
+              value: /etc/immich/immich-config.yaml
+          volumeMounts:
+            - name: immich-config
+              mountPath: /etc/immich
+              readOnly: true
+      volumes:
+        - name: immich-config
+          secret:
+            secretName: immich-config
