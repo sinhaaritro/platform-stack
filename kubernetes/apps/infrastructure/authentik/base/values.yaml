@@ -28,10 +28,16 @@ authentik:
     use_tls: true
     from: "authentik@example.com"
 
+blueprints:
+  configMaps:
+    - name: authentik-immich-blueprint
+
 server:
   envFrom:
     - secretRef:
         name: authentik-secrets
+    - secretRef:
+        name: authentik-oauth-immich
   volumes:
     - name: postgres-creds
       secret:
@@ -76,6 +82,8 @@ worker:
   envFrom:
     - secretRef:
         name: authentik-secrets
+    - secretRef:
+        name: authentik-oauth-immich
 
   # Tune probes to wait for PID file creation in /dev/shm
   startupProbe:
