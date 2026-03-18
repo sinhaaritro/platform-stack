@@ -7,4 +7,4 @@ configMapGenerator:
       - blueprint.yaml
 
 resources:
-  - external-oauth-immich.yaml
+  - sealed-oauth-immich.yaml
