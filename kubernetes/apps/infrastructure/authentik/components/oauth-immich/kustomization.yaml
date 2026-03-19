@@ -4,7 +4,9 @@ kind: Component
 configMapGenerator:
   - name: authentik-immich-blueprint
     files:
-      - blueprint.yaml
+      - configs/immich-oauth-provider.yaml
+    options:
+      disableNameSuffixHash: true
 
 resources:
   - sealed-oauth-immich.yaml

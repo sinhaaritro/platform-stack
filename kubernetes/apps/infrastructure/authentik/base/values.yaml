@@ -28,6 +28,10 @@ authentik:
     use_tls: true
     from: "authentik@example.com"
 
+blueprints:
+  configMaps:
+    - authentik-immich-blueprint
+
 server:
   envFrom:
     - secretRef:

@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+version: 1
+metadata:
+  name: immich-oauth-setup
+entries:
+  - model: authentik_providers_oauth2.oauth2provider
+    state: present
+    id: immich-provider
+    identifiers:
+      name: Immich
+    attrs:
+      client_id: !Env IMMICH_OAUTH_CLIENT_ID
+      client_secret: !Env IMMICH_OAUTH_CLIENT_SECRET
+      authorization_flow:
+        !Find [
+          authentik_flows.flow,
+          [slug, default-provider-authorization-implicit-consent],
+        ]
+      property_mappings:
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+      redirect_uris:
+        - "app.immich:///oauth-callback"
+        - "https://immich.ruth.example.com/auth/login"
+        - "https://immich.ruth.example.com/user-settings"
+      signing_key:
+        !Find [
+          authentik_crypto.certificatekeypair,
+          [name, "authentik Self-signed Certificate"],
+        ]
+
+  - model: authentik_core.application
+    state: present
+    id: immich-app
+    identifiers:
+      slug: immich
+    attrs:
+      name: Immich
+      provider: !KeyOf immich-provider
+      meta_launch_url: "https://immich.ruth.example.com/auth/login?autoLaunch=1"
+      meta_icon: "https://raw.githubusercontent.com/immich-app/immich/main/docs/static/img/favicon.png"
