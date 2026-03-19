@@ -2,12 +2,28 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: security
 
+# This section creates the ConfigMap named 'authentik-blueprints'
+configMapGenerator:
+  - name: authentik-blueprints
+    namespace: security
+    # It will create a key for each file in the 'configs' directory
+    files:
+      - configs/01-users-and-groups.yaml
+      - configs/02-flows-and-providers.yaml
+      - configs/03-applications.yaml
+      - configs/04-immich-oauth-provider.yaml
+      - configs/05-immich-auth-flow.yaml
+      - configs/06-immich-application.yaml
+    options:
+      # This tells Kustomize not to add a hash suffix to the ConfigMap name
+      disableNameSuffixHash: true
+
 helmCharts:
   - name: authentik
     repo: https://charts.goauthentik.io
     releaseName: authentik
     namespace: security
-    version: 2025.12.4
+    version: 2025.12.3
     valuesFile: values.yaml
 
 resources: []

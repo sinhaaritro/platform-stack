@@ -1,0 +1,30 @@
+apiVersion: blueprints.goauthentik.io/v1
+kind: Flow
+metadata:
+  name: "immich-auth-flow"
+spec:
+  title: "Immich Authentication Flow"
+  layout: "stacked"
+  bindings:
+    - target: "identification-stage"
+      order: 10
+    - target: "password-stage"
+      order: 20
+---
+apiVersion: blueprints.goauthentik.io/v1
+kind: Stage
+metadata:
+  name: "identification-stage"
+spec:
+  type: "identification"
+  sources:
+    - "default-source"
+---
+apiVersion: blueprints.goauthentik.io/v1
+kind: Stage
+metadata:
+  name: "password-stage"
+spec:
+  type: "password"
+  sources:
+    - "default-source"

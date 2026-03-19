@@ -1,0 +1,35 @@
+# apiVersion: blueprints.goauthentik.io/v1
+# kind: User
+# metadata:
+#   name: sinhaaritro
+# spec:
+#   username: "sinhaaritro"
+#   name: "Aritro Sinha"
+#   email: "sinhaaritro@gmail.com"
+#   # This user is created but cannot log in until this is set to true
+#   is_active: false
+#   # You can't set the password here directly for security.
+#   # We will set it in the UI for the first time.
+# ---
+# apiVersion: blueprints.goauthentik.io/v1
+# kind: Group
+# metadata:
+#   name: admins
+# spec:
+#   # This makes the group available to things like Grafana role mapping
+#   is_superuser: true
+# ---
+# apiVersion: blueprints.goauthentik.io/v1
+# kind: Group
+# metadata:
+#   name: family
+# spec:
+#   is_superuser: false
+# ---
+# apiVersion: blueprints.goauthentik.io/v1
+# kind: UserGroupBinding
+# metadata:
+#   name: sinhaaritro-admins-binding
+# spec:
+#   user: "sinhaaritro"
+#   group: "admins"

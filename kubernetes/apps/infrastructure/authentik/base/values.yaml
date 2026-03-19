@@ -30,7 +30,7 @@ authentik:
 
 blueprints:
   configMaps:
-    - name: authentik-immich-blueprint
+    - name: authentik-blueprints
 
 server:
   envFrom:
