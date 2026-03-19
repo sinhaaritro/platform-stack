@@ -23,7 +23,7 @@ helmCharts:
     repo: https://charts.goauthentik.io
     releaseName: authentik
     namespace: security
-    version: 2025.12.3
+    version: 2026.2.1
     valuesFile: values.yaml
 
 resources: []
