@@ -9,8 +9,8 @@ entries:
     identifiers:
       name: Immich
     attrs:
-      client_id: !Env IMMICH_OAUTH_CLIENT_ID
-      client_secret: !Env IMMICH_OAUTH_CLIENT_SECRET
+      client_id: "immich"
+      client_secret: "immich-oauth-secret-placeholder"
       authorization_flow:
         !Find [
           authentik_flows.flow,
@@ -20,10 +20,7 @@ entries:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
-      redirect_uris:
-        - "app.immich:///oauth-callback"
-        - "https://immich.ruth.example.com/auth/login"
-        - "https://immich.ruth.example.com/user-settings"
+      redirect_uris: "app.immich:///oauth-callback\nhttps://immich.ruth.example.com/auth/login\nhttps://immich.ruth.example.com/user-settings"
       signing_key:
         !Find [
           authentik_crypto.certificatekeypair,
