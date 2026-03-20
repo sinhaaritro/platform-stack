@@ -10,3 +10,13 @@ configMapGenerator:
 
 resources:
   - sealed-oauth-immich.yaml
+
+patches:
+  - path: patch-blueprint-volume.yaml
+    target:
+      kind: Deployment
+      name: authentik-server
+  - path: patch-blueprint-volume-worker.yaml
+    target:
+      kind: Deployment
+      name: authentik-worker
