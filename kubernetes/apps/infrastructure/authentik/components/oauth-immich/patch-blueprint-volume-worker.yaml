@@ -10,7 +10,7 @@ spec:
           configMap:
             name: authentik-immich-blueprint
       containers:
-        - name: authentik-worker
+        - name: authentik
           volumeMounts:
             - name: blueprints-immich-oauth
               mountPath: "/blueprints/mounted/oauth-immich"
