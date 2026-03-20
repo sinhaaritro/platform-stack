@@ -1,16 +1,11 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: authentik-server
-spec:
-  template:
-    spec:
-      volumes:
-        - name: blueprints-immich-oauth
-          configMap:
-            name: authentik-immich-blueprint
-      containers:
-        - name: authentik
-          volumeMounts:
-            - name: blueprints-immich-oauth
-              mountPath: "/blueprints/mounted/oauth-immich"
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: blueprints-immich-oauth
+    configMap:
+      name: authentik-immich-blueprint
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: blueprints-immich-oauth
+    mountPath: "/blueprints/mounted/oauth-immich"
