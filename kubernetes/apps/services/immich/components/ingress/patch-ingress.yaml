@@ -5,10 +5,15 @@ metadata:
   namespace: personal
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    cert-manager.io/cluster-issuer: "selfsigned-issuer"
   labels:
     app.kubernetes.io/name: immich
 spec:
   ingressClassName: traefik
+  tls:
+    - hosts:
+        - immich.ruth.example.com
+      secretName: immich-tls
   rules:
     - host: immich.ruth.example.com
       http:
