@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  ruth.override: |
+    rewrite name exact authentik.ruth.example.com traefik.networking.svc.cluster.local

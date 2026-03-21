@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - kube-proxy.yaml
+  - coredns-custom.yaml
 
 patches:
   - path: patch-local-path.yaml
