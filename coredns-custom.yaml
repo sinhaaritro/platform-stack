@@ -1,0 +1,15 @@
+# TODO: Resolve this
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  authentik.server: |
+    authentik.ruth.example.com:53 {
+        errors
+        cache 30
+        template IN A authentik.ruth.example.com {
+            answer "{{ .Name }} 60 IN A 192.168.0.240"
+        }
+    }

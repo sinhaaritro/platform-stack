@@ -48,7 +48,7 @@ module "proxmox_vms" {
   additional_disks = each.value.additional_disks
 
   # DNS
-  dns_servers = ["192.168.0.1", "8.8.8.8"]
+  dns_servers = ["8.8.8.8"]
 }
 
 # -----------------------------------------------------------------------------
@@ -103,5 +103,5 @@ module "module_lxc" {
   user_account_keys     = each.value.user_account_keys
 
   # DNS
-  dns_servers = ["192.168.0.1", "8.8.8.8"]
+  dns_servers = ["8.8.8.8"]
 }
