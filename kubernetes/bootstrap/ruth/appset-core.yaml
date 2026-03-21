@@ -21,6 +21,11 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "2"
+                - app: system-patches
+                  namespace: kube-system
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "2"
                 - app: kyverno
                   namespace: security
                   serverSideApply: "true"
