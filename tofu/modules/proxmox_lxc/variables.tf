@@ -143,3 +143,9 @@ variable "user_account_keys" {
   type        = list(string)
   sensitive   = true
 }
+
+variable "dns_servers" {
+  description = "A list of DNS servers for the LXC container."
+  type        = list(string)
+  default     = []
+}

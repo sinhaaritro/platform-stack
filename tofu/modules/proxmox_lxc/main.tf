@@ -52,6 +52,10 @@ resource "proxmox_virtual_environment_container" "module_lxc" {
       }
     }
 
+    dns {
+      servers = var.dns_servers
+    }
+
     user_account {
       password = var.user_account_password
       keys     = var.user_account_keys

@@ -44,8 +44,11 @@ module "proxmox_vms" {
   user_account_password = each.value.user_account_password
   user_account_keys     = each.value.user_account_keys
 
-  # Aditional Disks
+  # Additional Disks
   additional_disks = each.value.additional_disks
+
+  # DNS
+  dns_servers = ["192.168.0.1", "8.8.8.8"]
 }
 
 # -----------------------------------------------------------------------------
@@ -98,4 +101,7 @@ module "module_lxc" {
   ipv4_gateway          = each.value.ipv4_gateway
   user_account_password = each.value.user_account_password
   user_account_keys     = each.value.user_account_keys
+
+  # DNS
+  dns_servers = ["192.168.0.1", "8.8.8.8"]
 }

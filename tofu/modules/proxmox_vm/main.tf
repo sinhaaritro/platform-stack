@@ -93,6 +93,10 @@ resource "proxmox_virtual_environment_vm" "module_vm" {
       }
     }
 
+    dns {
+      servers = var.dns_servers
+    }
+
     user_account {
       username = var.user_account_username
       password = var.user_account_password

@@ -140,3 +140,9 @@ variable "additional_disks" {
   }))
   default = []
 }
+
+variable "dns_servers" {
+  description = "A list of DNS servers for the VM."
+  type        = list(string)
+  default     = []
+}
