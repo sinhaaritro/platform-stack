@@ -16,26 +16,12 @@ spec:
     creationPolicy: Owner
     template:
       engineVersion: v2
-      data:
-        immich-config.yaml: |
-          oauth:
-            enabled: true
-            issuerUrl: "https://authentik.ruth.example.com/application/o/immich/.well-known/openid-configuration"
-            clientId: "{{ .IMMICH_OAUTH_CLIENT_ID }}"
-            clientSecret: "{{ .IMMICH_OAUTH_CLIENT_SECRET }}"
-            autoRegister: true
-            autoLaunch: false
-            buttonText: "Login with Authentik"
-            scope: "openid email profile"
-            signingAlgorithm: "RS256"
-          storageTemplate:
-            enabled: true
-            template: "{{y}}/{{y}}-{{MM}}-{{dd}}/{{filename}}"
-          trash:
-            enabled: true
-            days: 30
-          theme:
-            customCss: ""
+      templateFrom:
+        - configMap:
+            name: immich-config-tpl
+            items:
+              - key: immich-config.yaml
+                templateAs: Values
   data:
     - secretKey: IMMICH_OAUTH_CLIENT_ID
       remoteRef:
