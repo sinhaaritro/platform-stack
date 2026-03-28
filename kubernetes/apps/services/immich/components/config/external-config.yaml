@@ -9,7 +9,7 @@ metadata:
 spec:
   refreshInterval: 1h
   secretStoreRef:
-    name: shared-secrets
+    name: security-secret-store
     kind: ClusterSecretStore
   target:
     name: immich-config
@@ -25,9 +25,9 @@ spec:
   data:
     - secretKey: IMMICH_OAUTH_CLIENT_ID
       remoteRef:
-        key: security/authentik-oauth-immich
+        key: authentik-oauth-immich
         property: IMMICH_OAUTH_CLIENT_ID
     - secretKey: IMMICH_OAUTH_CLIENT_SECRET
       remoteRef:
-        key: security/authentik-oauth-immich
+        key: authentik-oauth-immich
         property: IMMICH_OAUTH_CLIENT_SECRET
