@@ -9,8 +9,8 @@ entries:
     identifiers:
       name: Immich
     attrs:
-      client_id: "immich"
-      client_secret: "immich-oauth-secret-placeholder"
+      client_id: !Env IMMICH_OAUTH_CLIENT_ID
+      client_secret: !Env IMMICH_OAUTH_CLIENT_SECRET
       authorization_flow:
         !Find [
           authentik_flows.flow,
