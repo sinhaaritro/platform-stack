@@ -25,9 +25,9 @@ spec:
   data:
     - secretKey: IMMICH_OAUTH_CLIENT_ID
       remoteRef:
-        key: authentik-oauth-immich
+        key: security/authentik-oauth-immich
         property: IMMICH_OAUTH_CLIENT_ID
     - secretKey: IMMICH_OAUTH_CLIENT_SECRET
       remoteRef:
-        key: authentik-oauth-immich
+        key: security/authentik-oauth-immich
         property: IMMICH_OAUTH_CLIENT_SECRET
