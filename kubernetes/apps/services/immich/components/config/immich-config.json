@@ -201,7 +201,7 @@
   "storageTemplate": {
     "enabled": true,
     "hashVerificationEnabled": true,
-    "template": "{{y}}-{{MM}}/{{filename}}"
+    "template": "{{ `{{y}}-{{MM}}/{{filename}}` }}"
   },
   "templates": {
     "email": {
