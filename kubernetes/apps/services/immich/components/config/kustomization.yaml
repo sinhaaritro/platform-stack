@@ -9,6 +9,10 @@ configMapGenerator:
   - name: immich-config-tpl
     files:
       - immich-config.yaml
+    options:
+      annotations:
+        argocd.argoproj.io/hook: PreSync
+        argocd.argoproj.io/sync-wave: "-3"
 generatorOptions:
   disableNameSuffixHash: true
 
