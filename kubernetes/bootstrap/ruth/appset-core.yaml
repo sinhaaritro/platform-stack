@@ -16,23 +16,18 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "1"
+                - app: cert-manager
+                  namespace: networking
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "2"
                 - app: external-secrets
                   namespace: security
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "2"
-                - app: system-patches
-                  namespace: kube-system
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "2"
+                  wave: "3"
                 - app: kyverno
                   namespace: security
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "3"
-                - app: cert-manager
-                  namespace: networking
                   serverSideApply: "true"
                   replace: "false"
                   wave: "3"
