@@ -9,7 +9,7 @@ spec:
         - name: main
           env:
             - name: IMMICH_CONFIG_FILE
-              value: /etc/immich/immich-config.yaml
+              value: /etc/immich/immich-config.json
           volumeMounts:
             - name: immich-config
               mountPath: /etc/immich

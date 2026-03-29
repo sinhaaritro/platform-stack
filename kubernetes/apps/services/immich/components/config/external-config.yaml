@@ -20,7 +20,7 @@ spec:
         - configMap:
             name: immich-config-tpl
             items:
-              - key: immich-config.yaml
+              - key: immich-config.json
                 templateAs: Values
   data:
     - secretKey: IMMICH_OAUTH_CLIENT_ID

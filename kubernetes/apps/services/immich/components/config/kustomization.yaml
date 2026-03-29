@@ -8,7 +8,7 @@ resources:
 configMapGenerator:
   - name: immich-config-tpl
     files:
-      - immich-config.yaml
+      - immich-config.json
     options:
       annotations:
         argocd.argoproj.io/hook: PreSync
