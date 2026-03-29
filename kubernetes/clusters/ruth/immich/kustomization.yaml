@@ -10,5 +10,5 @@ components:
   - ../../../apps/services/immich/components/secrets
   - ../../../apps/services/immich/components/resource-limits
   - ../../../apps/services/immich/components/replica-count
-  - ../../../apps/services/immich/components/config
+  # - ../../../apps/services/immich/components/config
   # - ../../../apps/services/immich/components/maintenance
