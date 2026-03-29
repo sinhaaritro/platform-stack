@@ -3,28 +3,6 @@ backup:
     cronExpression: "0 02 * * *"
     enabled: true
     keepLastAmount: 14
-ffmpeg:
-  accel: "disabled"
-  accelDecode: false
-  acceptedAudioCodecs: ["aac", "mp3", "opus"]
-  acceptedContainers: ["mov", "ogg", "webm"]
-  acceptedVideoCodecs: ["h264"]
-  bframes: -1
-  cqMode: "auto"
-  crf: 23
-  gopSize: 0
-  maxBitrate: "0"
-  preferredHwDevice: "auto"
-  preset: "ultrafast"
-  refs: 0
-  targetAudioCodec: "aac"
-  targetResolution: "720"
-  targetVideoCodec: "h264"
-  temporalAQ: false
-  threads: 0
-  tonemap: "hable"
-  transcode: "required"
-  twoPass: false
 image:
   colorspace: "p3"
   extractEmbedded: false
