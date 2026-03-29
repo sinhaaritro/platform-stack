@@ -39,3 +39,11 @@ tasks:
     preconditions:
       - sh: "! command -v git"
         msg: "Git is already installed."
+
+  vm:build:
+    desc: "Completely build VMs, wait 5 mins, and provision with Ansible"
+    cmds:
+      - task: tofu:apply:approve
+      - cmd: echo "VMs have been requested. Waiting 300 seconds (5 minutes) for boot and network initialization before running Ansible..."
+      - cmd: sleep 300
+      - task: ansible:apply:all

@@ -4,7 +4,6 @@ metadata:
   name: immich-config
   namespace: personal
   annotations:
-    argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/sync-wave: "-2"
 spec:
   refreshInterval: 1h
