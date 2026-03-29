@@ -145,10 +145,6 @@ server:
   externalDomain: ""
   loginPageMessage: ""
   publicUsers: true
-storageTemplate:
-  enabled: true
-  hashVerificationEnabled: true
-  template: "{{y}}-{{MM}}/{{filename}}"
 templates:
   email:
     albumInviteTemplate: ""
