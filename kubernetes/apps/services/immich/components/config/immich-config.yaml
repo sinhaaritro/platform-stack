@@ -148,7 +148,7 @@ server:
 storageTemplate:
   enabled: true
   hashVerificationEnabled: true
-  template: "{{y}}-{{MM}}/{{filename}}"
+  template: "{{yyyy}}-{{MM}}/{{filename}}"
 templates:
   email:
     albumInviteTemplate: ""
