@@ -86,11 +86,11 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "10"
-                # - app: velero
-                #   namespace: velero
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "11"
+                - app: velero
+                  namespace: backup
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "11"
                 # - app: copyparty
                 #   namespace: copyparty
                 #   serverSideApply: "true"
