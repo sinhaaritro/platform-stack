@@ -1,0 +1,31 @@
+clusterSize: 1
+
+createAdminSecret: false
+adminUsername: admin
+
+persistentVolume:
+  enabled: true
+  storageClass: longhorn
+  size: 5Gi
+
+couchdbConfig:
+  couchdb:
+    single_node: true
+    uuid: 9c679f68-6719-4ce5-8deb-ef113111ff32
+  chttpd:
+    bind_address: any
+    require_valid_user: true
+    max_http_request_size: 4294967296
+    enable_cors: true
+  cors:
+    origins: "*"
+    credentials: "true"
+    methods: GET, PUT, POST, HEAD, DELETE
+    headers: accept, authorization, content-type, origin, referer
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi

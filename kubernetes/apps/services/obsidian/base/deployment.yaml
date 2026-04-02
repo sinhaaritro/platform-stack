@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: obsidian
+  namespace: personal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: obsidian
+  template:
+    metadata:
+      labels:
+        app: obsidian
+    spec:
+      containers:
+        - name: obsidian
+          image: lscr.io/linuxserver/obsidian:latest
+          ports:
+            - containerPort: 3000
+              name: http
+            - containerPort: 3001
+              name: https
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "Asia/Kolkata"
+            # Basic Auth (Temporary until Authentik)
+            - name: CUSTOM_USER
+              valueFrom:
+                secretKeyRef:
+                  name: obsidian-credentials
+                  key: username
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: obsidian-credentials
+                  key: password
+          volumeMounts:
+            - name: config
+              mountPath: /config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: obsidian-config

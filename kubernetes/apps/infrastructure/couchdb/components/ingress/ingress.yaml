@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: couchdb
+  namespace: storage
+  annotations:
+    cert-manager.io/cluster-issuer: "selfsigned-issuer"
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - couchdb.ruth.example.com
+      secretName: couchdb-tls
+  rules:
+    - host: couchdb.ruth.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: couchdb-couchdb
+                port:
+                  number: 5984
