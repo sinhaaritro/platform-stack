@@ -6,6 +6,7 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
+    link.argocd.argoproj.io/external-link: "https://obsidian.ruth.example.com/"
 spec:
   rules:
     - host: obsidian.ruth.example.com
