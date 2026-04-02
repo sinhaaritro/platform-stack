@@ -22,6 +22,8 @@ spec:
             - containerPort: 3001
               name: https
           env:
+            - name: PIXELFLUX_WAYLAND
+              value: "true"
             - name: PUID
               value: "1000"
             - name: PGID
@@ -44,11 +46,11 @@ spec:
               mountPath: /config
           resources:
             requests:
-              cpu: 100m
-              memory: 256Mi
+              cpu: 200m
+              memory: 512Mi
             limits:
-              cpu: 500m
-              memory: 1Gi
+              cpu: 1000m
+              memory: 2Gi
       volumes:
         - name: config
           persistentVolumeClaim:
