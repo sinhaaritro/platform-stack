@@ -4,12 +4,13 @@ metadata:
   name: obsidian
   namespace: personal
   annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-    link.argocd.argoproj.io/external-link: "https://obsidian.ruth.example.com/"
+    link.argocd.argoproj.io/external-link: "https://obsidian.ruth.aritrosinha.dpdns.org/"
 spec:
   rules:
-    - host: obsidian.ruth.example.com
+    - host: obsidian.ruth.aritrosinha.dpdns.org
       http:
         paths:
           - path: /
@@ -21,4 +22,5 @@ spec:
                   name: http
   tls:
     - hosts:
-        - obsidian.ruth.example.com
+        - obsidian.ruth.aritrosinha.dpdns.org
+      secretName: obsidian-tls

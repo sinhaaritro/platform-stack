@@ -11,6 +11,7 @@
 
 ## Feature Ideas
 *   [ ] **Authentik SSO for Obsidian Web** — Add forward auth proxy via Authentik since linuxserver/obsidian has no OAuth. Required before exposing via Cloudflare Tunnel. Implement using Authentik blueprints-as-code.
+*   [ ] **Migrate remaining apps to Let's Encrypt** — Move Immich, SeaweedFS, Loki, Mimir, Longhorn, and Traefik dashboard to the new wildcard cert system under `*.ruth.aritrosinha.dpdns.org`.
 *   [ ] ...
 
 ## Bugs

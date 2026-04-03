@@ -9,6 +9,9 @@ includes:
   ansible:
     taskfile: ./ansible/Taskfile.yml
     dir: .
+  kubernetes:
+    taskfile: ./kubernetes/Taskfile.yml
+    dir: .
 
 tasks:
   default:

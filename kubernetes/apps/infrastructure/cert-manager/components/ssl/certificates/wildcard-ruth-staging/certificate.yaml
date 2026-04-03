@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-ruth-aritrosinha-staging
+  namespace: networking
+spec:
+  secretName: wildcard-ruth-aritrosinha-staging-tls
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  commonName: "*.ruth.aritrosinha.dpdns.org"
+  dnsNames:
+    - "*.ruth.aritrosinha.dpdns.org"
+    - "ruth.aritrosinha.dpdns.org"

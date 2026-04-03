@@ -64,6 +64,16 @@ tasks:
       - 'eval "ansible-vault decrypt --vault-password-file <(echo \"$ANSIBLE_VAULT_PASSWORD\") {{.MASTER_KEY_FILE}}"'
       - 'echo "WARNING: Master key is now in PLAIN TEXT."'
 
+  master-key:fetch-cert:
+    desc: "Fetches the public certificate for sealing secrets from the cluster."
+    cmds:
+      - |
+        kubeseal --fetch-cert \
+          --controller-name=sealed-secrets \
+          --controller-namespace={{.SEALED_SECRETS_NAMESPACE}} \
+          > cert.pem
+      - echo "Public certificate fetched to cert.pem"
+
   # ---------------------------------------------------------------------------
   # SECRET SEALING
   # ---------------------------------------------------------------------------
