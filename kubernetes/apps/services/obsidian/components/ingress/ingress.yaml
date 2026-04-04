@@ -4,7 +4,7 @@ metadata:
   name: obsidian
   namespace: personal
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
     link.argocd.argoproj.io/external-link: "https://obsidian.ruth.aritrosinha.dpdns.org/"

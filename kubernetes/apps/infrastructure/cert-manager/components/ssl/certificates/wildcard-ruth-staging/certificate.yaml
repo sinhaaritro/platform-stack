@@ -6,7 +6,7 @@ metadata:
 spec:
   secretName: wildcard-ruth-aritrosinha-staging-tls
   issuerRef:
-    name: letsencrypt-staging
+    name: letsencrypt-staging-aritrosinha
     kind: ClusterIssuer
   commonName: "*.ruth.aritrosinha.dpdns.org"
   dnsNames:
