@@ -18,7 +18,7 @@ couchdbConfig:
     max_http_request_size: 4294967296
     enable_cors: true
   cors:
-    origins: "https://obsidian.ruth.example.com"
+    origins: "app://obsidian.md,capacitor://localhost,http://localhost"
     credentials: "true"
     methods: GET, PUT, POST, HEAD, DELETE
     headers: accept, authorization, content-type, origin, referer
