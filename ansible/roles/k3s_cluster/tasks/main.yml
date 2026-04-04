@@ -1,5 +1,32 @@
 # tasks/main.yml
 ---
+# 0. Discover Cluster Name (Dynamic resolution based on inventory group vs folder)
+- name: "Identify candidate cluster names from Ansible groups"
+  ansible.builtin.stat:
+    path: "{{ role_path }}/../../../kubernetes/clusters/{{ item }}"
+  loop: "{{ group_names }}"
+  register: cluster_folder_stats
+  delegate_to: localhost
+  become: false
+
+- name: "Set k3s_cluster_name based on existing folder discovery"
+  ansible.builtin.set_fact:
+    k3s_cluster_name: "{{ item.item }}"
+  loop: "{{ cluster_folder_stats.results }}"
+  when:
+    - item.stat.exists
+    - item.stat.isdir
+    - k3s_cluster_name is not defined
+
+- name: "Fallback to default cluster name if no matching folder found"
+  ansible.builtin.set_fact:
+    k3s_cluster_name: "k3s-default"
+  when: k3s_cluster_name is not defined
+
+- name: "Debug Discovered Cluster Name"
+  ansible.builtin.debug:
+    msg: "Targeting Cluster: {{ k3s_cluster_name }}"
+
 # 1. Run Safety Checks first
 - name: Execute Safety Checks
   ansible.builtin.include_tasks: safety_checks.yml
@@ -45,3 +72,9 @@
 - name: Join Worker Nodes
   ansible.builtin.include_tasks: join_worker.yml
   when: "'k_worker' in group_names"
+
+- name: Synchronize Kubeconfig to Local Machine
+  ansible.builtin.include_tasks: sync-kubeconfig.yml
+  when:
+    - "'k_control' in group_names"
+    - is_bootstrap

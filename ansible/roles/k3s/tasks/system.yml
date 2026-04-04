@@ -45,7 +45,12 @@
       [Service]
       Type=oneshot
       ExecStartPre=/bin/mkdir -p /run/flannel
-      ExecStart=/bin/sh -c 'if [ ! -f /run/flannel/subnet.env ]; then echo "FLANNEL_NETWORK={{ k3s_cluster_cidr }}\nFLANNEL_SUBNET={{ k3s_cluster_cidr | ipsubnet(24, 0) }}\nFLANNEL_MTU=1450\nFLANNEL_IPMASQ=true" > /run/flannel/subnet.env; fi'
+      ExecStart=/bin/sh -c 'if [ ! -f /run/flannel/subnet.env ]; then \
+        echo "FLANNEL_NETWORK={{ k3s_cluster_cidr }}" > /run/flannel/subnet.env; \
+        echo "FLANNEL_SUBNET={{ k3s_cluster_cidr | ipsubnet(24, 0) }}" >> /run/flannel/subnet.env; \
+        echo "FLANNEL_MTU=1450" >> /run/flannel/subnet.env; \
+        echo "FLANNEL_IPMASQ=true" >> /run/flannel/subnet.env; \
+        fi'
       RemainAfterExit=yes
 
       [Install]
