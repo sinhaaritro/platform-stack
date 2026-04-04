@@ -4,7 +4,7 @@ metadata:
   name: couchdb
   namespace: storage
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
   ingressClassName: traefik
