@@ -29,3 +29,8 @@ resources:
     memory: 256Mi
   limits:
     memory: 512Mi
+
+livenessProbe:
+  initialDelaySeconds: 5
+readinessProbe:
+  initialDelaySeconds: 5
