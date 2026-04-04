@@ -8,7 +8,5 @@ spec:
   issuerRef:
     name: letsencrypt-staging-aritrosinha
     kind: ClusterIssuer
-  commonName: "*.ruth.aritrosinha.dpdns.org"
   dnsNames:
     - "*.ruth.aritrosinha.dpdns.org"
-    - "ruth.aritrosinha.dpdns.org"

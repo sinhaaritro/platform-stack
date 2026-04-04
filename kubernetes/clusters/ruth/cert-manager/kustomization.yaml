@@ -6,6 +6,7 @@ resources:
 
 components:
   - ../../../apps/infrastructure/cert-manager/components/ssl
+  - ../../../apps/infrastructure/cert-manager/components/dns-recursors
   - ../../../apps/infrastructure/cert-manager/components/minimal-replicas
   - ../../../apps/infrastructure/cert-manager/components/resource-limits
   # - ../../../apps/infrastructure/cert-manager/components/maintenance
