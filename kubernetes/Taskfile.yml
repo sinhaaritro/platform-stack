@@ -78,6 +78,30 @@ tasks:
   # SECRET SEALING
   # ---------------------------------------------------------------------------
 
+  seal:literal:
+    desc: "Seals a secret from a literal value for a specific cluster."
+    summary: |
+      Usage: task seal:literal CLUSTER=ruth NAME=my-secret NS=my-ns VALUE=my-token-value [KEY=api-token]
+    cmds:
+      - 'kubectl config use-context {{.CLUSTER}}'
+      - |
+        kubeseal --fetch-cert \
+          --controller-name=sealed-secrets \
+          --controller-namespace={{.SEALED_SECRETS_NAMESPACE}} \
+          > cert-{{.CLUSTER}}.pem
+      - |
+        kubectl create secret generic {{.NAME}} \
+          --namespace {{.NS}} \
+          --from-literal={{.KEY}}={{.VALUE}} \
+          --dry-run=client -o yaml \
+          | kubeseal --cert cert-{{.CLUSTER}}.pem --format=yaml
+      - 'shred -u cert-{{.CLUSTER}}.pem'
+    vars:
+      KEY: '{{.KEY | default "api-token"}}'
+    preconditions:
+      - sh: 'command -v kubeseal'
+        msg: "kubeseal CLI is required."
+
   seal:
     desc: "Seals a Kubernetes secret manifest (with Docker fallback if kubeseal missing)."
     summary: |
