@@ -7,4 +7,5 @@ resources:
 components:
   - ../../../apps/infrastructure/couchdb/components/secrets
   - ../../../apps/infrastructure/couchdb/components/ingress
+  - ../../../apps/infrastructure/couchdb/components/storage
   # - ../../../apps/infrastructure/couchdb/components/maintenance
