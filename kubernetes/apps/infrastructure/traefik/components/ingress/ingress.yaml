@@ -1,32 +1,30 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
 metadata:
   name: traefik-dashboard
   namespace: networking
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
-    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
-  ingressClassName: traefik
-  rules:
-    - host: traefik.ruth.aritrosinha.dpdns.org
-      http:
-        paths:
-          - path: /api
-            pathType: Prefix
-            backend:
-              service:
-                name: traefik
-                port:
-                  number: 9000
-          - path: /dashboard
-            pathType: Prefix
-            backend:
-              service:
-                name: traefik
-                port:
-                  number: 9000
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`traefik.ruth.aritrosinha.dpdns.org`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
   tls:
-    - hosts:
-        - traefik.ruth.aritrosinha.dpdns.org
-      secretName: traefik-dashboard-cert
+    secretName: traefik-dashboard-cert
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: traefik-dashboard-cert
+  namespace: networking
+spec:
+  issuerRef:
+    name: letsencrypt-prod-aritrosinha
+    kind: ClusterIssuer
+  secretName: traefik-dashboard-cert
+  dnsNames:
+    - traefik.ruth.aritrosinha.dpdns.org
+  commonName: traefik.ruth.aritrosinha.dpdns.org
