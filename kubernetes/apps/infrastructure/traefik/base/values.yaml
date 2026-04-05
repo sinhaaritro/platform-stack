@@ -1,3 +1,8 @@
 ingressRoute:
   dashboard:
     enabled: false
+
+ports:
+  traefik:
+    expose:
+      default: true
