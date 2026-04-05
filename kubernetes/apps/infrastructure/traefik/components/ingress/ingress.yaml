@@ -9,7 +9,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: traefik.ruth.aritrosinha.com
+    - host: traefik.ruth.aritrosinha.dpdns.org
       http:
         paths:
           - path: /api
@@ -28,5 +28,5 @@ spec:
                   number: 9000
   tls:
     - hosts:
-        - traefik.ruth.aritrosinha.com
+        - traefik.ruth.aritrosinha.dpdns.org
       secretName: traefik-dashboard-cert
