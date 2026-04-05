@@ -1,11 +1,10 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
-
-resources:
-  - resource-ingress-extras.yaml
-
+metadata:
+  name: admin
+resources: []
 patches:
-  - path: fix-admin-pvc.yaml
+  - path: patch-pvc.yaml
     target:
       kind: StatefulSet
       name: seaweedfs-admin

@@ -3,8 +3,6 @@ kind: Kustomization
 
 resources:
   - ../../../apps/infrastructure/longhorn/base
-  - ingress-local.yaml
-  # - ingress-remote.yaml # Disabled until Cloudflare Tunnel is linked
 
 components:
   - ../../../apps/infrastructure/longhorn/components/settings
@@ -14,4 +12,5 @@ components:
   - ../../../apps/infrastructure/longhorn/components/metrics
   - ../../../apps/infrastructure/longhorn/components/minimal
   - ../../../apps/infrastructure/longhorn/components/resource-limits
+  - ../../../apps/infrastructure/longhorn/components/ingress
   # - ../../../apps/infrastructure/longhorn/components/maintenance-scale-down

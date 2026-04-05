@@ -1,18 +1,19 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress-seaweedfs-master
+  name: seaweedfs-master
   namespace: storage
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    cert-manager.io/cluster-issuer: selfsigned-issuer
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
+  ingressClassName: traefik
   tls:
     - hosts:
-        - seaweedfs.ruth.example.com
-      secretName: seaweedfs-cert
+        - seaweedfs.ruth.aritrosinha.dpdns.org
+      secretName: seaweedfs-master-tls
   rules:
-    - host: seaweedfs.ruth.example.com
+    - host: seaweedfs.ruth.aritrosinha.dpdns.org
       http:
         paths:
           - path: /
@@ -26,18 +27,20 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress-seaweedfs-filer
+  name: seaweedfs-filer
   namespace: storage
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    cert-manager.io/cluster-issuer: selfsigned-issuer
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+    link.argocd.argoproj.io/external-link: "https://filer.seaweedfs.ruth.aritrosinha.dpdns.org/"
 spec:
+  ingressClassName: traefik
   tls:
     - hosts:
-        - filerseaweed.ruth.example.com
-      secretName: seaweedfs-cert
+        - filer.seaweedfs.ruth.aritrosinha.dpdns.org
+      secretName: seaweedfs-filer-tls
   rules:
-    - host: filerseaweed.ruth.example.com
+    - host: filer.seaweedfs.ruth.aritrosinha.dpdns.org
       http:
         paths:
           - path: /
@@ -51,18 +54,19 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress-seaweedfs-s3
+  name: seaweedfs-s3
   namespace: storage
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    cert-manager.io/cluster-issuer: selfsigned-issuer
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
+  ingressClassName: traefik
   tls:
     - hosts:
-        - s3.ruth.example.com
-      secretName: seaweedfs-cert
+        - s3.seaweedfs.ruth.aritrosinha.dpdns.org
+      secretName: seaweedfs-s3-tls
   rules:
-    - host: s3.ruth.example.com
+    - host: s3.seaweedfs.ruth.aritrosinha.dpdns.org
       http:
         paths:
           - path: /
@@ -76,18 +80,20 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress-seaweedfs-admin
+  name: seaweedfs-admin
   namespace: storage
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    cert-manager.io/cluster-issuer: selfsigned-issuer
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+    link.argocd.argoproj.io/external-link: "https://admin.seaweedfs.ruth.aritrosinha.dpdns.org/"
 spec:
+  ingressClassName: traefik
   tls:
     - hosts:
-        - admin.seaweedfs.ruth.example.com
-      secretName: seaweedfs-cert
+        - admin.seaweedfs.ruth.aritrosinha.dpdns.org
+      secretName: seaweedfs-admin-tls
   rules:
-    - host: admin.seaweedfs.ruth.example.com
+    - host: admin.seaweedfs.ruth.aritrosinha.dpdns.org
       http:
         paths:
           - path: /
@@ -104,15 +110,16 @@ metadata:
   name: seaweedfs-webdav
   namespace: storage
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    cert-manager.io/cluster-issuer: selfsigned-issuer
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
+  ingressClassName: traefik
   tls:
     - hosts:
-        - webdav.seaweedfs.ruth.example.com
-      secretName: seaweedfs-cert
+        - webdav.seaweedfs.ruth.aritrosinha.dpdns.org
+      secretName: seaweedfs-webdav-tls
   rules:
-    - host: webdav.seaweedfs.ruth.example.com
+    - host: webdav.seaweedfs.ruth.aritrosinha.dpdns.org
       http:
         paths:
           - path: /
@@ -129,15 +136,17 @@ metadata:
   name: seaweedfs-volume
   namespace: storage
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    cert-manager.io/cluster-issuer: selfsigned-issuer
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
+  ingressClassName: traefik
   tls:
     - hosts:
-        - volume.seaweedfs.ruth.example.com
-      secretName: seaweedfs-cert
+        - volume.seaweedfs.ruth.aritrosinha.dpdns.org
+        - "*.volume.seaweedfs.ruth.aritrosinha.dpdns.org"
+      secretName: seaweedfs-volume-tls
   rules:
-    - host: volume.seaweedfs.ruth.example.com
+    - host: volume.seaweedfs.ruth.aritrosinha.dpdns.org
       http:
         paths:
           - path: /
@@ -147,7 +156,7 @@ spec:
                 name: seaweedfs-volume
                 port:
                   number: 8080
-    - host: "*.seaweedfs-volume.seaweedfs.ruth.example.com"
+    - host: "*.volume.seaweedfs.ruth.aritrosinha.dpdns.org"
       http:
         paths:
           - path: /
