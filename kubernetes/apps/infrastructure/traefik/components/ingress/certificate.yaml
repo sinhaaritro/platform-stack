@@ -4,11 +4,10 @@ metadata:
   name: traefik-dashboard-cert
   namespace: networking
 spec:
-  # TODO: Switch to Cloudflare Origin Issuer when user provides API keys
   issuerRef:
-    name: selfsigned-issuer
+    name: letsencrypt-prod-aritrosinha
     kind: ClusterIssuer
   secretName: traefik-dashboard-cert
   dnsNames:
-    - traefik.example.com
-  commonName: traefik.example.com
+    - traefik.ruth.aritrosinha.com
+  commonName: traefik.ruth.aritrosinha.com
