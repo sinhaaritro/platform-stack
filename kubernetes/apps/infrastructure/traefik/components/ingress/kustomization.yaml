@@ -3,4 +3,3 @@ kind: Component
 
 resources:
   - ingress.yaml
-  - certificate.yaml
