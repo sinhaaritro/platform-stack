@@ -1,21 +1,19 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: mimir-gateway
+  name: mimir
   namespace: monitoring
   annotations:
-    cert-manager.io/cluster-issuer: "selfsigned-issuer"
-    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - mimir.ruth.example.com
-      secretName: mimir-gateway-tls
+        - mimir.ruth.aritrosinha.dpdns.org
+      secretName: mimir-tls
   rules:
-    - host: mimir.ruth.example.com
+    - host: mimir.ruth.aritrosinha.dpdns.org
       http:
         paths:
           - path: /

@@ -9,7 +9,4 @@ components:
   - ../../../apps/infrastructure/alloy/components/custom-config
   - ../../../apps/infrastructure/alloy/components/resource-limits
   - ../../../apps/infrastructure/alloy/components/replica-count
-  # - ../../../apps/infrastructure/alloy/components/maintenance
-
-patches:
-  - path: patch-ingress.yaml
+  - ../../../apps/infrastructure/alloy/components/ingress

@@ -3,9 +3,17 @@ kind: Ingress
 metadata:
   name: alloy
   namespace: monitoring
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - alloy.ruth.aritrosinha.dpdns.org
+      secretName: alloy-tls
   rules:
-    - host: alloy.ruth.example.com
+    - host: alloy.ruth.aritrosinha.dpdns.org
       http:
         paths:
           - path: /

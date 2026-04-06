@@ -4,11 +4,16 @@ metadata:
   name: alertmanager
   namespace: monitoring
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
   ingressClassName: traefik
+  tls:
+    - hosts:
+        - alertmanager.ruth.aritrosinha.dpdns.org
+      secretName: alertmanager-tls
   rules:
-    - host: alertmanager.ruth.example.com
+    - host: alertmanager.ruth.aritrosinha.dpdns.org
       http:
         paths:
           - path: /
