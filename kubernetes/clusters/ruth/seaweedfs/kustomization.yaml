@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: storage
 
 resources:
-  - ../../../apps/infrastructure/seaweedfs/overlays/prod
+  - ../../../apps/infrastructure/seaweedfs/base
 
 components:
   - ../../../apps/infrastructure/seaweedfs/components/s3-config
