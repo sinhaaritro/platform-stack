@@ -3,9 +3,17 @@ kind: Ingress
 metadata:
   name: authentik-server
   namespace: security
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - authentik.ruth.aritrosinha.dpdns.org
+      secretName: authentik-tls
   rules:
-    - host: authentik.ruth.example.com
+    - host: authentik.ruth.aritrosinha.dpdns.org
       http:
         paths:
           - path: /
