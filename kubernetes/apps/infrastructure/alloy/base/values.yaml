@@ -1,6 +1,6 @@
 alloy:
   clustering:
-    enabled: true
+    enabled: false
     portName: http
 
   stabilityLevel: "generally-available"
@@ -26,7 +26,7 @@ controller:
   enableStatefulSetAutoDeletePVC: false
 
 service:
-  enabled: true
+  enabled: false
   type: ClusterIP
   internalTrafficPolicy: Cluster
 
@@ -34,7 +34,7 @@ serviceMonitor:
   enabled: false
 
 ingress:
-  enabled: true
+  enabled: false
   ingressClassName: traefik
   hosts:
     - alloy.local
@@ -47,4 +47,4 @@ serviceAccount:
   automountServiceAccountToken: true
 
 configReloader:
-  enabled: true
+  enabled: false
