@@ -26,7 +26,7 @@ controller:
   enableStatefulSetAutoDeletePVC: false
 
 service:
-  enabled: false
+  enabled: true
   type: ClusterIP
   internalTrafficPolicy: Cluster
 
@@ -47,4 +47,4 @@ serviceAccount:
   automountServiceAccountToken: true
 
 configReloader:
-  enabled: false
+  enabled: true
