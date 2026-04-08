@@ -42,7 +42,7 @@ immich:
 server:
   ingress:
     main:
-      enabled: true
+      enabled: false
       annotations: {}
       hosts: []
 
