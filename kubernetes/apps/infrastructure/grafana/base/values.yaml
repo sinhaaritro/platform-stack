@@ -7,11 +7,7 @@ serviceMonitor:
   enabled: false
 
 ingress:
-  enabled: true
-  ingressClassName: traefik
-  annotations: {}
-  hosts:
-    - grafana.local
+  enabled: false
 
 sidecar:
   datasources:
