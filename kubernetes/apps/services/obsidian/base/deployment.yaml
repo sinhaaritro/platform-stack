@@ -13,6 +13,11 @@ spec:
       labels:
         app: obsidian
     spec:
+      hostAliases:
+      - ip: "192.168.0.240"
+        hostnames:
+        - "couchdb.ruth.aritrosinha.dpdns.org"
+        - "obsidian.ruth.aritrosinha.dpdns.org"
       containers:
         - name: obsidian
           image: lscr.io/linuxserver/obsidian:latest
