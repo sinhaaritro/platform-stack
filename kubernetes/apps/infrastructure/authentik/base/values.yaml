@@ -48,9 +48,7 @@ server:
       mountPath: /postgres-creds
       readOnly: true
   ingress:
-    enabled: true
-    hosts:
-      - authentik.domain.tld
+    enabled: false
 
   # Tune probes to avoid initial 502 errors during Gunicorn startup
   startupProbe:
