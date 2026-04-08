@@ -12,11 +12,14 @@ couchdbConfig:
   couchdb:
     single_node: true
     uuid: 9c679f68-6719-4ce5-8deb-ef113111ff32
+    max_document_size: 50000000
   chttpd:
     bind_address: any
     require_valid_user: true
     max_http_request_size: 4294967296
     enable_cors: true
+  httpd:
+    WWW-Authenticate: 'Basic realm="server"'
   cors:
     origins: "app://obsidian.md,capacitor://localhost,http://localhost"
     credentials: "true"
