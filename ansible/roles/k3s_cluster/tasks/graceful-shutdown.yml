@@ -1,6 +1,15 @@
 # tasks/graceful-shutdown.yml
 ---
-# 1. Deploy kubelet configuration for graceful shutdown
+# 1. Ensure K3s config directory exists (required before deploying any config)
+- name: Ensure K3s config directory exists
+  ansible.builtin.file:
+    path: /etc/rancher/k3s
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+# 2. Deploy kubelet configuration for graceful shutdown
 - name: Deploy Kubelet Graceful Shutdown Configuration
   ansible.builtin.template:
     src: kubelet.config.j2
@@ -10,7 +19,7 @@
     mode: "0644"
   notify: restart k3s
 
-# 2. Ensure logind.conf.d directory exists
+# 3. Ensure logind.conf.d directory exists
 - name: Ensure logind.conf.d directory exists
   ansible.builtin.file:
     path: /etc/systemd/logind.conf.d
@@ -19,7 +28,7 @@
     group: root
     mode: "0755"
 
-# 3. Deploy logind inhibitor configuration
+# 4. Deploy logind inhibitor configuration
 - name: Deploy systemd-logind Inhibitor Configuration
   ansible.builtin.template:
     src: logind-inhibit.conf.j2
@@ -29,7 +38,7 @@
     mode: "0644"
   register: logind_config
 
-# 4. Restart logind to apply inhibitor settings
+# 5. Restart logind to apply inhibitor settings
 - name: Restart systemd-logind
   ansible.builtin.systemd:
     name: systemd-logind
@@ -37,15 +46,7 @@
     daemon_reload: true
   when: logind_config.changed
 
-# 5. Ensure kubelet-arg is in K3s persistent config (for existing clusters)
-- name: Ensure K3s config directory exists
-  ansible.builtin.file:
-    path: /etc/rancher/k3s
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-
+# 6. Deploy K3s persistent configuration (for existing clusters)
 - name: Deploy K3s persistent configuration
   ansible.builtin.template:
     src: k3s-config.yaml.j2
