@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: obsidian
+  namespace: personal
+spec:
+  template:
+    spec:
+      hostAliases:
+      - ip: "192.168.0.240"
+        hostnames:
+        - "couchdb.ruth.aritrosinha.dpdns.org"
+        - "obsidian.ruth.aritrosinha.dpdns.org"

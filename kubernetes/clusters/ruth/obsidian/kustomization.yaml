@@ -7,4 +7,6 @@ resources:
 components:
   - ../../../apps/services/obsidian/components/secrets
   - ../../../apps/services/obsidian/components/ingress
+  - ../../../apps/services/obsidian/components/dns-fix
+  - ../../../apps/services/obsidian/components/storage
   # - ../../../apps/services/obsidian/components/maintenance
