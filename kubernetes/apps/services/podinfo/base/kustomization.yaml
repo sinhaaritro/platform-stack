@@ -9,5 +9,3 @@ helmCharts:
     namespace: podinfo
     includeCRDs: true
     valuesFile: values.yaml
-
-resources: []
