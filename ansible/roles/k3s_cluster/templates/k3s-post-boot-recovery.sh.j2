@@ -1,0 +1,77 @@
+#!/bin/bash
+# k3s-post-boot-recovery.sh
+# Managed by Ansible - k3s_cluster role
+#
+# PURPOSE: Clean up pods left in a bad state after an unclean node shutdown.
+# This script runs ONCE after K3s starts on every boot.
+#
+# WHAT IT DOES:
+#   1. Waits for the K3s API to be reachable
+#   2. Deletes pods in "Unknown" phase (killed mid-run, no SIGTERM received)
+#   3. Deletes pods with init containers stuck in CrashLoopBackOff
+#      (stale emptyDir causing non-idempotent init containers to fail)
+#
+# WHY THIS IS SAFE:
+#   - "Unknown" pods are already dead; deleting triggers recreation with fresh volumes
+#   - CrashLoopBackOff init containers will loop forever; deletion is the only fix
+#   - Runs once at boot, not continuously, so it cannot mask real issues
+
+set -euo pipefail
+
+KUBECONFIG="/etc/rancher/k3s/k3s.yaml"
+export KUBECONFIG
+
+LOG_TAG="k3s-post-boot-recovery"
+MAX_WAIT={{ k3s_recovery_api_wait_seconds | default(120) }}
+
+log() {
+  logger -t "$LOG_TAG" "$1"
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+}
+
+# --- Step 1: Wait for K3s API ---
+log "Waiting for K3s API server to become ready (max ${MAX_WAIT}s)..."
+waited=0
+until kubectl get nodes &>/dev/null; do
+  if [ "$waited" -ge "$MAX_WAIT" ]; then
+    log "ERROR: K3s API not ready after ${MAX_WAIT}s. Aborting recovery."
+    exit 1
+  fi
+  sleep 5
+  waited=$((waited + 5))
+done
+log "K3s API is ready (waited ${waited}s)."
+
+# --- Step 2: Clean up "Unknown" phase pods ---
+unknown_pods=$(kubectl get pods -A --field-selector=status.phase=Unknown -o json 2>/dev/null \
+  | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name)"' 2>/dev/null || true)
+
+if [ -n "$unknown_pods" ]; then
+  log "Found pods in Unknown phase — deleting:"
+  echo "$unknown_pods" | while IFS='/' read -r ns name; do
+    log "  Deleting $ns/$name"
+    kubectl delete pod -n "$ns" "$name" --force --grace-period=0 2>/dev/null || true
+  done
+else
+  log "No pods in Unknown phase. Clean boot."
+fi
+
+# --- Step 3: Clean up init container CrashLoopBackOff pods ---
+crashloop_pods=$(kubectl get pods -A -o json 2>/dev/null \
+  | jq -r '
+    .items[]
+    | select(.status.initContainerStatuses // [] | any(.state.waiting.reason == "CrashLoopBackOff"))
+    | "\(.metadata.namespace)/\(.metadata.name)"
+  ' 2>/dev/null || true)
+
+if [ -n "$crashloop_pods" ]; then
+  log "Found pods with init containers in CrashLoopBackOff — deleting:"
+  echo "$crashloop_pods" | while IFS='/' read -r ns name; do
+    log "  Deleting $ns/$name"
+    kubectl delete pod -n "$ns" "$name" --force --grace-period=0 2>/dev/null || true
+  done
+else
+  log "No init container CrashLoopBackOff pods found."
+fi
+
+log "Post-boot recovery complete."

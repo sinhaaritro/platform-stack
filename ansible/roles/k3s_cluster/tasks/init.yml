@@ -12,6 +12,7 @@
       --service-cidr={{ k3s_service_cidr }} \
       --disable=servicelb \
       --disable=traefik \
+      --kubelet-arg="config=/etc/rancher/k3s/kubelet.config" \
       {{ '--cluster-init' if groups['k_control'] | length > 1 else '' }} \
       --tls-san={{ k3s_control_plane_endpoint if k3s_control_plane_endpoint else ansible_default_ipv4.address }}
   when: not k3s_conf.stat.exists

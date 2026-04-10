@@ -1,0 +1,17 @@
+# Managed by Ansible - k3s_cluster role
+# Runs a one-time pod cleanup after K3s starts on every boot.
+# Handles stale pods from unclean shutdowns (power outages, crashes).
+[Unit]
+Description=K3s Post-Boot Pod Recovery (stale pod cleanup)
+After=k3s.service
+Requires=k3s.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/k3s-post-boot-recovery.sh
+RemainAfterExit=no
+# Give the script enough time to wait for API + run cleanup
+TimeoutStartSec={{ (k3s_recovery_api_wait_seconds | default(120)) + 60 }}
+
+[Install]
+WantedBy=multi-user.target

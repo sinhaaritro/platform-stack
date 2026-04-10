@@ -1,20 +1,9 @@
 # Helm Values Override
-server:
-  extraArgs:
-    - --insecure # Disables internal TLS, allows Cloudflare to handle it
-  service:
-    type: {{ argocd_service_type }}
-    nodePortHttp: {{ argocd_node_port_http }}
-    nodePortHttps: {{ argocd_node_port_https }}
 
-configs:
-  cm:
-    kustomize.buildOptions: --enable-helm
-  params:
-    server.insecure: "{{ argocd_server_insecure | lower }}"
-
-{% if argocd_managed_fleets is defined %}
+# --- Global Settings ---
 global:
+  priorityClassName: {{ argocd_priority_class }}
+{% if argocd_managed_fleets is defined %}
   hostAliases:
     # Dynamically inject DNS records for all managed fleets
     # so ArgoCD can resolve 'arr-api.example.com' to '192.168.0.x'
@@ -27,3 +16,19 @@ global:
 {% endif %}
 {% endfor %}
 {% endif %}
+
+# --- Server ---
+server:
+  extraArgs:
+    - --insecure # Disables internal TLS, allows Cloudflare to handle it
+  service:
+    type: {{ argocd_service_type }}
+    nodePortHttp: {{ argocd_node_port_http }}
+    nodePortHttps: {{ argocd_node_port_https }}
+
+# --- Configs ---
+configs:
+  cm:
+    kustomize.buildOptions: --enable-helm
+  params:
+    server.insecure: "{{ argocd_server_insecure | lower }}"

@@ -1,0 +1,6 @@
+# /etc/rancher/k3s/config.yaml
+# Managed by Ansible - k3s_cluster role
+# K3s reads this file on every start, so changes persist across upgrades.
+
+kubelet-arg:
+  - "config=/etc/rancher/k3s/kubelet.config"

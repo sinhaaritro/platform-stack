@@ -1,0 +1,49 @@
+# tasks/recovery.yml
+---
+# Delete pods in bad state so Helm's --wait can succeed
+# This is idempotent: if no bad pods exist, it's a no-op
+
+- name: Clean up ArgoCD pods in Unknown state
+  ansible.builtin.shell: |
+    set -o pipefail
+    kubectl get pods -n {{ argocd_namespace }} --field-selector=status.phase=Unknown -o name \
+    | xargs -r kubectl delete -n {{ argocd_namespace }} --force --grace-period=0
+  args:
+    executable: /bin/bash
+  environment:
+    KUBECONFIG: "{{ argocd_kubeconfig }}"
+  when: inventory_hostname == argocd_bootstrap_node
+  register: cleanup_unknown
+  changed_when: "'deleted' in (cleanup_unknown.stdout | default(''))"
+  failed_when: false
+
+- name: Clean up ArgoCD pods with CrashLoopBackOff init containers
+  ansible.builtin.shell: |
+    set -o pipefail
+    kubectl get pods -n {{ argocd_namespace }} -o json \
+    | jq -r '
+        .items[]
+        | select(.status.initContainerStatuses // [] | any(.state.waiting.reason == "CrashLoopBackOff"))
+        | .metadata.name
+      ' \
+    | xargs -r kubectl delete -n {{ argocd_namespace }} pod --force --grace-period=0
+  args:
+    executable: /bin/bash
+  environment:
+    KUBECONFIG: "{{ argocd_kubeconfig }}"
+  when: inventory_hostname == argocd_bootstrap_node
+  register: cleanup_crashloop
+  changed_when: "'deleted' in (cleanup_crashloop.stdout | default(''))"
+  failed_when: false
+
+- name: Wait for ArgoCD pods to stabilize after cleanup
+  ansible.builtin.command: >
+    kubectl rollout status deployment/argocd-repo-server
+    -n {{ argocd_namespace }}
+    --timeout=120s
+  environment:
+    KUBECONFIG: "{{ argocd_kubeconfig }}"
+  when:
+    - inventory_hostname == argocd_bootstrap_node
+    - (cleanup_unknown.changed | default(false)) or (cleanup_crashloop.changed | default(false))
+  changed_when: false

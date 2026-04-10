@@ -1,0 +1,34 @@
+# tasks/post-boot-recovery.yml
+---
+# 1. Deploy the recovery script
+- name: Deploy K3s post-boot recovery script
+  ansible.builtin.template:
+    src: k3s-post-boot-recovery.sh.j2
+    dest: /usr/local/bin/k3s-post-boot-recovery.sh
+    owner: root
+    group: root
+    mode: "0755"
+
+# 2. Ensure jq is installed (used by the recovery script)
+- name: Ensure jq is installed for recovery script
+  ansible.builtin.apt:
+    name: jq
+    state: present
+  when: ansible_os_family == "Debian"
+
+# 3. Deploy the systemd service unit
+- name: Deploy K3s post-boot recovery systemd service
+  ansible.builtin.template:
+    src: k3s-post-boot-recovery.service.j2
+    dest: /etc/systemd/system/k3s-post-boot-recovery.service
+    owner: root
+    group: root
+    mode: "0644"
+  register: recovery_service
+
+# 4. Enable the service (runs on every boot)
+- name: Enable K3s post-boot recovery service
+  ansible.builtin.systemd:
+    name: k3s-post-boot-recovery
+    enabled: true
+    daemon_reload: "{{ recovery_service.changed }}"

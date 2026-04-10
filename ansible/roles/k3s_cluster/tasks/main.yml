@@ -35,6 +35,14 @@
 - name: Configure Kubernetes Firewall Rules
   ansible.builtin.include_tasks: firewall.yml
 
+# 2.5. Configure Graceful Shutdown
+- name: Configure Graceful Node Shutdown
+  ansible.builtin.include_tasks: graceful-shutdown.yml
+
+# 2.6. Configure Post-Boot Recovery
+- name: Configure Post-Boot Pod Recovery
+  ansible.builtin.include_tasks: post-boot-recovery.yml
+
 # 3. Configure Longhorn Dependencies
 - name: Configure Longhorn Dependencies
   ansible.builtin.include_tasks: longhorn_deps.yml

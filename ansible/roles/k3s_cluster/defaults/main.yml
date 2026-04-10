@@ -11,6 +11,18 @@ k3s_bootstrap_node: "" # MUST BE SET IN INVENTORY
 # Safety Switches
 allow_destructive_reset: false
 
+# Graceful Node Shutdown
+# Total time kubelet delays shutdown to terminate pods
+k3s_shutdown_grace_period: "60s"
+# Of that total, how much is reserved for critical pods (e.g., CNI, storage)
+k3s_shutdown_grace_period_critical: "20s"
+# Numeric version for systemd InhibitDelayMaxSec (must match k3s_shutdown_grace_period)
+k3s_shutdown_grace_period_seconds: 60
+
+# Post-Boot Recovery
+# How long the recovery script waits for K3s API before aborting
+k3s_recovery_api_wait_seconds: 120
+
 # Sealed Secrets Master Key Management
 sealed_secrets_master_key_candidate_paths:
   # Iterates through assigned Ansible groups (like 'ruth', 'arr')

@@ -3,6 +3,9 @@
 - name: Install System Dependencies
   ansible.builtin.include_tasks: dependencies.yml
 
+- name: Recover from Bad State (if applicable)
+  ansible.builtin.include_tasks: recovery.yml
+
 - name: Install ArgoCD Infrastructure
   ansible.builtin.include_tasks: install.yml
 
