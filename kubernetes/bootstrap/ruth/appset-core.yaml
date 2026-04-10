@@ -31,7 +31,7 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "3"
-                - app: metallb-system
+                - app: metallb
                   namespace: networking
                   serverSideApply: "true"
                   replace: "false"
