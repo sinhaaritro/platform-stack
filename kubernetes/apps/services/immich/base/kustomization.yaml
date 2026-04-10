@@ -9,6 +9,3 @@ helmCharts:
     namespace: personal
     version: 0.10.3
     valuesFile: values.yaml
-
-resources:
-  - namespace.yaml

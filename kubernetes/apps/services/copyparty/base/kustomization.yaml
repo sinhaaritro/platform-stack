@@ -9,6 +9,3 @@ helmCharts:
     namespace: copyparty
     version: 2.0.0
     valuesFile: values.yaml
-
-resources:
-  - namespace.yaml

@@ -11,5 +11,7 @@ helmCharts:
     includeCRDs: true
     valuesFile: values.yaml
 
+namespace: security
+
 resources:
-  - namespace.yaml
+  - policy-exception.yaml
