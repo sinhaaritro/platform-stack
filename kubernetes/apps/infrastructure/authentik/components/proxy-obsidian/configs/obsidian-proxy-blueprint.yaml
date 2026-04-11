@@ -24,8 +24,6 @@ entries:
           [slug, default-provider-authorization-implicit-consent],
         ]
       external_host: https://obsidian.ruth.aritrosinha.dpdns.org
-      # In forward_auth mode, internal_host isn't strictly used for routing but good for metadata
-      internal_host: http://obsidian.personal.svc.cluster.local
 
   - model: authentik_core.application
     state: present
