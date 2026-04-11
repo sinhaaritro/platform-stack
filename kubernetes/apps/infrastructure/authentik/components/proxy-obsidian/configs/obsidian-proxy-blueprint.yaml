@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+version: 1
+metadata:
+  name: obsidian-proxy-setup
+entries:
+  - model: authentik_core.group
+    state: present
+    id: obsidian-access-group
+    identifiers:
+      name: obsidian-access
+    attrs:
+      is_superuser: false
+
+  - model: authentik_providers_proxy.proxyprovider
+    state: present
+    id: obsidian-provider
+    identifiers:
+      name: Obsidian
+    attrs:
+      mode: forward_single
+      authorization_flow:
+        !Find [
+          authentik_flows.flow,
+          [slug, default-provider-authorization-implicit-consent],
+        ]
+      external_host: https://obsidian.ruth.aritrosinha.dpdns.org
+      # In forward_auth mode, internal_host isn't strictly used for routing but good for metadata
+      internal_host: http://obsidian.personal.svc.cluster.local
+
+  - model: authentik_core.application
+    state: present
+    id: obsidian-app
+    identifiers:
+      slug: obsidian
+    attrs:
+      name: Obsidian
+      provider: !KeyOf obsidian-provider
+      meta_launch_url: "https://obsidian.ruth.aritrosinha.dpdns.org"
+      meta_icon: "https://raw.githubusercontent.com/walkxorg/dashboard-icons/master/png/obsidian.png"
+
+  - model: authentik_policies.policybinding
+    state: present
+    identifiers:
+      target: !KeyOf obsidian-app
+      policy: !KeyOf obsidian-access-group
+      order: 0
+    attrs:
+      enabled: true
+      timeout: 30

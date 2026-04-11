@@ -30,17 +30,9 @@ spec:
               value: "1000"
             - name: TZ
               value: "Asia/Kolkata"
-            # Basic Auth (Temporary until Authentik)
-            - name: CUSTOM_USER
-              valueFrom:
-                secretKeyRef:
-                  name: obsidian-credentials
-                  key: username
-            - name: PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: obsidian-credentials
-                  key: password
+            # Managed via Authentik Forward Auth
+            - name: AUTH_CONFIG
+              value: "None"
           volumeMounts:
             - name: config
               mountPath: /config

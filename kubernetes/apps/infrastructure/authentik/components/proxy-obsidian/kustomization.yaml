@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+configMapGenerator:
+  - name: authentik-obsidian-blueprint
+    files:
+      - configs/obsidian-proxy-blueprint.yaml
+    options:
+      disableNameSuffixHash: true
+
+patches:
+  - path: patch-blueprint-volume.yaml
+    target:
+      kind: Deployment
+      name: authentik-server
+  - path: patch-blueprint-volume-worker.yaml
+    target:
+      kind: Deployment
+      name: authentik-worker

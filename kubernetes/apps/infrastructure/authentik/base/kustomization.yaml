@@ -2,6 +2,17 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: security
 
+components:
+  - ../components/ingress
+  - ../components/init-db
+  - ../components/maintenance
+  - ../components/oauth-immich
+  - ../components/replica-count
+  - ../components/resource-limits
+  - ../components/secrets
+  - ../components/security-context
+  - ../components/proxy-obsidian
+
 helmCharts:
   - name: authentik
     repo: https://charts.goauthentik.io
