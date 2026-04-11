@@ -9,5 +9,3 @@ helmCharts:
     namespace: storage
     version: 4.0.409
     valuesFile: values.yaml
-
-resources:

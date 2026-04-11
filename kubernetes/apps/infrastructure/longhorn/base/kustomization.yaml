@@ -10,6 +10,3 @@ helmCharts:
     namespace: longhorn-system
     includeCRDs: true
     valuesFile: values.yaml
-
-resources:
-  - storage-class.yaml
