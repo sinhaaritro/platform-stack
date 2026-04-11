@@ -42,7 +42,7 @@ entries:
     state: present
     identifiers:
       target: !KeyOf obsidian-app
-      policy: !KeyOf obsidian-access-group
+      group: !KeyOf obsidian-access-group
       order: 0
     attrs:
       enabled: true
