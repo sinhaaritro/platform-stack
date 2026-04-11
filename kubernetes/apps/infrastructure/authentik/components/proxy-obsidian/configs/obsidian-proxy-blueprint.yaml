@@ -17,5 +17,11 @@ entries:
     identifiers:
       name: Obsidian Proxy
     attrs:
+      name: Obsidian Proxy
       mode: forward_single
+      authorization_flow:
+        !Find [
+          authentik_flows.flow,
+          [slug, default-provider-authorization-implicit-consent],
+        ]
       external_host: https://obsidian.ruth.aritrosinha.dpdns.org
