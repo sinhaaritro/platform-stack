@@ -10,3 +10,17 @@ entries:
       name: obsidian-access
     attrs:
       is_superuser: false
+
+  - model: authentik_providers_proxy.proxyprovider
+    state: present
+    id: obsidian-provider
+    identifiers:
+      name: Obsidian
+    attrs:
+      mode: forward_single
+      authorization_flow:
+        !Find [
+          authentik_flows.flow,
+          [slug, default-provider-authorization-implicit-consent],
+        ]
+      external_host: https://obsidian.ruth.aritrosinha.dpdns.org
