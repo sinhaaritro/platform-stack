@@ -1,17 +1,11 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: authentik-worker
-spec:
-  template:
-    spec:
-      containers:
-        - name: authentik-worker
-          volumeMounts:
-            - name: blueprint-obsidian
-              mountPath: /blueprints/obsidian-proxy.yaml
-              subPath: obsidian-proxy-blueprint.yaml
-      volumes:
-        - name: blueprint-obsidian
-          configMap:
-            name: authentik-obsidian-blueprint
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: blueprint-obsidian
+    configMap:
+      name: authentik-obsidian-blueprint
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: blueprint-obsidian
+    mountPath: "/blueprints/mounted/obsidian-proxy"
