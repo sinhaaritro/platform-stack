@@ -9,7 +9,3 @@ helmCharts:
     namespace: monitoring
     version: 1.33.0
     valuesFile: values.yaml
-
-resources:
-  - secret.yaml
-  - configmap.yaml
