@@ -9,4 +9,4 @@ helmCharts:
     namespace: backup
     version: 12.0.0
     includeCRDs: true
-    valuesFile: values.yaml
+    # valuesFile: values.yaml
