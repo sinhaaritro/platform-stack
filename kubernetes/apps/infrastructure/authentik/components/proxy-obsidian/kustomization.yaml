@@ -17,3 +17,7 @@ patches:
     target:
       kind: Deployment
       name: authentik-worker
+  - path: patch-ingress.yaml
+    target:
+      kind: Ingress
+      name: authentik-server

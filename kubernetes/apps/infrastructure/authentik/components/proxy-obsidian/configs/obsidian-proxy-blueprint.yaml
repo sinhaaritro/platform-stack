@@ -10,14 +10,16 @@ entries:
       name: obsidian-access
     attrs:
       is_superuser: false
+      users:
+        - !Find [authentik_core.user, [username, akadmin]]
 
   - model: authentik_providers_proxy.proxyprovider
     state: present
     id: obsidian-provider
     identifiers:
-      name: Obsidian Proxy
+      name: Obsidian
     attrs:
-      name: Obsidian Proxy
+      name: Obsidian
       mode: forward_single
       authorization_flow:
         !Find [
@@ -48,3 +50,11 @@ entries:
     attrs:
       enabled: true
       timeout: 30
+
+  - model: authentik_outposts.outpost
+    state: present
+    identifiers:
+      name: authentik Embedded Outpost
+    attrs:
+      providers:
+        - !KeyOf obsidian-provider
