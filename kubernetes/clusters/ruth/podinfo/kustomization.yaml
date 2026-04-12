@@ -6,15 +6,7 @@ resources:
 
 namespace: podinfo
 
-patches:
-  - path: patch-ingress.yaml
-  - path: patch-log-level.yaml
-    target:
-      group: apps
-      version: v1
-      kind: Deployment
-      name: podinfo
-  - path: ../../../apps/maintenance/patch-scale-zero.yaml
-    target:
-      kind: Deployment
-      name: .*
+components:
+  - ../../../apps/services/podinfo/components/ingress
+  - ../../../apps/services/podinfo/components/log-level
+# - ../../../apps/services/podinfo/components/maintenance
