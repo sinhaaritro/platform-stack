@@ -29,7 +29,7 @@ entries:
       invalidation_flow:
         !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
       external_host: https://obsidian.ruth.aritrosinha.dpdns.org
-      internal_host: http://obsidian.personal.svc.cluster.local
+      internal_host: http://obsidian.personal.svc.cluster.local:3000
       internal_host_ssl_validation: false
 
   - model: authentik_core.application
