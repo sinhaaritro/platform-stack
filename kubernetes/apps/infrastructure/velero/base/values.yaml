@@ -1,18 +1,17 @@
-# Velero Helm values — Chart v12.0.0 / Velero v1.18.0
-# Base: provider-agnostic defaults. BSL and credentials configured via components.
-
 image:
   repository: docker.io/velero/velero
   tag: v1.18.0
   pullPolicy: IfNotPresent
 
-# initContainers:
-#   - name: velero-plugin-for-aws
-#     image: velero/velero-plugin-for-aws:v1.13.1
-#     imagePullPolicy: IfNotPresent
-#     volumeMounts:
-#       - mountPath: /target
-#         name: plugins
+initContainers:
+  - name: velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:v1.13.1
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+
+upgradeCRDs: true
 
 # # BSL placeholder — patched by s3-seaweedfs component
 # configuration:
@@ -24,11 +23,11 @@ image:
 
 #   volumeSnapshotLocation: []
 
-# # Credentials — managed by secrets component
-# credentials:
-#   useSecret: true
-#   name: velero-aws-creds
-#   secretContents: {}
+# Credentials - explicitly enabled for AWS plugin
+credentials:
+  useSecret: true
+  name: velero-aws-creds
+  secretContents: {}
 
 deployNodeAgent: true
 
