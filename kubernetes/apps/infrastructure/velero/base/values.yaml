@@ -6,35 +6,44 @@ image:
   tag: v1.18.0
   pullPolicy: IfNotPresent
 
-initContainers:
-  - name: velero-plugin-for-aws
-    image: velero/velero-plugin-for-aws:v1.13.1
-    imagePullPolicy: IfNotPresent
-    volumeMounts:
-      - mountPath: /target
-        name: plugins
+# initContainers:
+#   - name: velero-plugin-for-aws
+#     image: velero/velero-plugin-for-aws:v1.13.1
+#     imagePullPolicy: IfNotPresent
+#     volumeMounts:
+#       - mountPath: /target
+#         name: plugins
 
-# BSL placeholder — patched by s3-seaweedfs component
-configuration:
-  backupStorageLocation:
-    - name: default
-      provider: ""
-      bucket: ""
-      default: true
+# # BSL placeholder — patched by s3-seaweedfs component
+# configuration:
+#   backupStorageLocation:
+#     - name: default
+#       provider: ""
+#       bucket: ""
+#       default: true
 
-  volumeSnapshotLocation: []
+#   volumeSnapshotLocation: []
 
-# Credentials — managed by secrets component
-credentials:
-  useSecret: true
-  name: velero-aws-creds
-  secretContents: {}
+# # Credentials — managed by secrets component
+# credentials:
+#   useSecret: true
+#   name: velero-aws-creds
+#   secretContents: {}
 
-deployNodeAgent: false
+deployNodeAgent: true
 
-schedules: {}
+# schedules: {}
 
 metrics:
   enabled: true
   serviceMonitor:
+    enabled: true
+  prometheusRule:
     enabled: false
+
+rbac:
+  create: true
+
+serviceAccount:
+  server:
+    create: true
