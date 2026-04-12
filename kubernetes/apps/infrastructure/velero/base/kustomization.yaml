@@ -10,8 +10,6 @@ helmCharts:
     version: 12.0.0
     valuesFile: values.yaml
 
-namespace: backup
 
-resources:
-  - storage/
-  - secrets/
+
+
