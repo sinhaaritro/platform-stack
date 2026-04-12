@@ -20,7 +20,7 @@ entries:
       name: Obsidian
     attrs:
       name: Obsidian
-      mode: forward_single
+      mode: proxy
       authorization_flow:
         !Find [
           authentik_flows.flow,
@@ -29,6 +29,8 @@ entries:
       invalidation_flow:
         !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
       external_host: https://obsidian.ruth.aritrosinha.dpdns.org
+      internal_host: http://obsidian.personal.svc.cluster.local
+      internal_host_ssl_validation: false
 
   - model: authentik_core.application
     state: present
