@@ -13,15 +13,29 @@ initContainers:
 
 upgradeCRDs: true
 
-# # BSL placeholder — patched by s3-seaweedfs component
-# configuration:
-#   backupStorageLocation:
-#     - name: default
-#       provider: ""
-#       bucket: ""
-#       default: true
+# BSL/VSL defaults — storage components patch these per-environment
+configuration:
+  backupStorageLocation:
+    - name: default
+      provider: aws
+      bucket: velero
+      default: true
+      credential:
+        name: velero-aws-creds
+        key: cloud
+      config:
+        region: us-east-1
 
-#   volumeSnapshotLocation: []
+  volumeSnapshotLocation:
+    - name: default
+      provider: aws
+      credential:
+        name: velero-aws-creds
+        key: cloud
+      config:
+        region: us-east-1
+
+  uploaderType: kopia
 
 # Credentials - explicitly enabled for AWS plugin
 credentials:

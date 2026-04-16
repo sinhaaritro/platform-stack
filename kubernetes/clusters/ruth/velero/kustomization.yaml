@@ -6,6 +6,6 @@ namespace: backup
 resources:
   - ../../../apps/infrastructure/velero/base
 
-# components:
-#   - ../../../apps/infrastructure/velero/components/s3-seaweedfs
-#   - ../../../apps/infrastructure/velero/components/secrets
+components:
+  - ../../../apps/infrastructure/velero/components/s3-seaweedfs
+  # - ../../../apps/infrastructure/velero/components/secrets
