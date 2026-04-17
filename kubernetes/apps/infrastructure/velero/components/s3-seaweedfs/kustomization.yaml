@@ -1,13 +1,14 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 
-resources:
-  - secret.yaml
-
 # Configures Velero's BackupStorageLocation for SeaweedFS S3.
-# Patches the rendered BSL from the Helm chart.
+# Patches the rendered resources from the Helm chart.
 patches:
   - target:
       kind: BackupStorageLocation
       name: default
     path: patch-bsl.yaml
+  - target:
+      kind: Secret
+      name: velero-aws-creds
+    path: secret.yaml
