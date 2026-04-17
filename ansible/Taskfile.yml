@@ -129,6 +129,22 @@ tasks:
     cmds:
       - ansible-galaxy install -r requirements.yml
 
+  # ---------------------------------------------------------------------------
+  # READINESS & STATUS
+  # ---------------------------------------------------------------------------
+
+  wait-ready:
+    desc: "Waits until cloud-init has finished its first-boot tasks on all hosts."
+    dir: "{{.USER_WORKING_DIR}}/ansible"
+    cmds:
+      - ansible all -i {{.INVENTORY_FILE}} -m shell -a "cloud-init status --wait" -b
+
+  logs:init:
+    desc: "Tails the cloud-init output log for manual debugging of the boot process."
+    dir: "{{.USER_WORKING_DIR}}/ansible"
+    cmds:
+      - ansible all -i {{.INVENTORY_FILE}} -m shell -a "tail -n 50 /var/log/cloud-init-output.log" -b
+
   setup-ssh:
     desc: "Configures local SSH client to ignore keys for Lab IPs (Optional Manual Fix)"
     cmds:

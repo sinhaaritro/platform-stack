@@ -44,9 +44,8 @@ tasks:
         msg: "Git is already installed."
 
   vm:build:
-    desc: "Completely build VMs, wait 5 mins, and provision with Ansible"
+    desc: "Completely build VMs and provision with Ansible (Smart Wait)"
     cmds:
       - task: tofu:apply:approve
-      - cmd: echo "VMs have been requested. Waiting 300 seconds (5 minutes) for boot and network initialization before running Ansible..."
-      - cmd: sleep 300
+      - task: ansible:wait-ready
       - task: ansible:apply:all
