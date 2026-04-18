@@ -14,6 +14,38 @@ includes:
     dir: .
 
 tasks:
+  # ---------------------------------------------------------------------------
+  # ENVIRONMENT SETUP
+  # ---------------------------------------------------------------------------
+
+  env:init:
+    desc: "Setup full development environment (Python venv + Platform Tools)"
+    cmds:
+      - |
+        echo "--> Installing system dependencies..."
+        sudo apt update && sudo apt install -y python3-venv python3-pip
+        
+        echo "--> Installing/Updating Platform Tools (kubectl, helm, kustomize)..."
+        # kubectl
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        sudo install -o root -g root -m 0755 kubectl /usr/bin/kubectl
+        rm kubectl
+        # helm
+        curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+        # kustomize
+        curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+        sudo install -o root -g root -m 0755 kustomize /usr/bin/kustomize
+        rm kustomize
+
+        echo "--> Initializing Python Virtual Environment..."
+        python3 -m venv .venv
+        ./.venv/bin/pip install --upgrade pip
+        
+        echo "--> Setup complete. Scoped Python is at ./.venv/bin/python"
+
+  # ---------------------------------------------------------------------------
+  # CORE WORKFLOWS
+  # ---------------------------------------------------------------------------
   default:
     desc: "Lists all available tasks from all included files."
     silent: true
