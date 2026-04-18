@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: podinfo
+spec:
+  template:
+    metadata:
+      annotations:
+        backup.velero.io/backup-volumes: test-data
+    spec:
+      containers:
+        - name: podinfo
+          volumeMounts:
+            - name: test-data
+              mountPath: /data
+      volumes:
+        - name: test-data
+          persistentVolumeClaim:
+            claimName: podinfo-test-data

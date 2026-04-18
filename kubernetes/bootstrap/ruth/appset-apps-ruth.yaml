@@ -38,6 +38,11 @@ spec:
             serverSideApply: "true"
             replace: "false"
             wave: "8"
+          - app: podinfo
+            namespace: podinfo
+            serverSideApply: "true"
+            replace: "false"
+            wave: "8"
   template:
     metadata:
       name: "ruth-{{.app}}"

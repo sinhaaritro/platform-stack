@@ -9,4 +9,5 @@ namespace: podinfo
 components:
   - ../../../apps/services/podinfo/components/ingress
   - ../../../apps/services/podinfo/components/log-level
+  - ../../../apps/services/podinfo/components/test-pvc  # TEMPORARY: Velero backup tests
 # - ../../../apps/services/podinfo/components/maintenance
