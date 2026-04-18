@@ -2,6 +2,7 @@ apiVersion: velero.io/v1
 kind: BackupStorageLocation
 metadata:
   name: default
+  namespace: backup
 spec:
   provider: aws
   default: true
@@ -12,5 +13,5 @@ spec:
     s3ForcePathStyle: "true"
     s3Url: http://seaweedfs-s3.storage.svc:8333
   credential:
-    name: velero-aws-creds
+    name: velero-seaweedfs-creds
     key: cloud

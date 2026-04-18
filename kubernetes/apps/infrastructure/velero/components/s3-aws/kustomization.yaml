@@ -3,4 +3,4 @@ kind: Component
 
 resources:
   - bsl.yaml
-  - secret.yaml
+  - sealed-secret.yaml

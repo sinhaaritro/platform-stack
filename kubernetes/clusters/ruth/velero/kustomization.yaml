@@ -8,4 +8,5 @@ resources:
 
 components:
   - ../../../apps/infrastructure/velero/components/s3-seaweedfs
-  # - ../../../apps/infrastructure/velero/components/secrets
+  - ../../../apps/infrastructure/velero/components/s3-aws
+  - ../../../apps/infrastructure/velero/components/encryption-kopia

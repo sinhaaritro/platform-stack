@@ -13,35 +13,12 @@ initContainers:
 
 upgradeCRDs: true
 
-# BSL/VSL defaults — storage components patch these per-environment
+# BSL/VSL defaults are removed. They are injected by Kustomize components (e.g. s3-seaweedfs or s3-aws)
 configuration:
-  backupStorageLocation:
-    - name: default
-      provider: aws
-      bucket: velero
-      default: true
-      credential:
-        name: velero-aws-creds
-        key: cloud
-      config:
-        region: us-east-1
-
-  volumeSnapshotLocation:
-    - name: default
-      provider: aws
-      credential:
-        name: velero-aws-creds
-        key: cloud
-      config:
-        region: us-east-1
-
+  backupStorageLocation: []
+  volumeSnapshotLocation: []
   uploaderType: kopia
 
-# Credentials - explicitly enabled for AWS plugin
-credentials:
-  useSecret: true
-  name: velero-aws-creds
-  secretContents: {}
 
 deployNodeAgent: true
 
