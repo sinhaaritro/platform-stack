@@ -42,6 +42,10 @@ until kubectl get nodes &>/dev/null; do
 done
 log "K3s API is ready (waited ${waited}s)."
 
+# Allow the cluster and scheduler to settle so failing pods enter CrashLoopBackOff
+log "Waiting 5 minutes (300s) for pod states to stabilize under load..."
+sleep 300
+
 # --- Step 2: Clean up "Unknown" phase pods ---
 unknown_pods=$(kubectl get pods -A --field-selector=status.phase=Unknown -o json 2>/dev/null \
   | jq -r '.items[] | "\(.metadata.namespace)/\(.metadata.name)"' 2>/dev/null || true)

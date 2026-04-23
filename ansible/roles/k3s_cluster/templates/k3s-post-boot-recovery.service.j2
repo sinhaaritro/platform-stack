@@ -10,8 +10,8 @@ Requires=k3s.service
 Type=oneshot
 ExecStart=/usr/local/bin/k3s-post-boot-recovery.sh
 RemainAfterExit=no
-# Give the script enough time to wait for API + run cleanup
-TimeoutStartSec={{ (k3s_recovery_api_wait_seconds | default(120)) + 60 }}
+# Give the script enough time to wait for API + 5 min sleep + run cleanup
+TimeoutStartSec={{ (k3s_recovery_api_wait_seconds | default(120)) + 360 }}
 
 [Install]
 WantedBy=multi-user.target
