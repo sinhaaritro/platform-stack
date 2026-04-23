@@ -8,7 +8,7 @@ spec:
   objectStorage:
     bucket: aritro-homelab-velero-backups
   config:
-    region: us-east-1
+    region: ap-south-1
   credential:
     name: velero-aws-creds
     key: cloud
