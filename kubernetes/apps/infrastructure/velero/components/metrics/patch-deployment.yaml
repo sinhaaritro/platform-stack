@@ -14,5 +14,5 @@ spec:
       containers:
         - name: velero
           ports:
-            - name: metrics
+            - name: http-monitoring
               containerPort: 8085

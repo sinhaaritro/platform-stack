@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/instance: velero
 spec:
   endpoints:
-    - port: metrics
+    - port: http-monitoring
       path: /metrics
   selector:
     matchLabels:
