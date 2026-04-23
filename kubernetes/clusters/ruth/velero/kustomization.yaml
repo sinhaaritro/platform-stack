@@ -11,3 +11,4 @@ components:
   - ../../../apps/infrastructure/velero/components/s3-aws
   - ../../../apps/infrastructure/velero/components/encryption-kopia
   - ../../../apps/infrastructure/velero/components/metrics
+  - ../../../apps/infrastructure/velero/components/schedules/ssl-cert

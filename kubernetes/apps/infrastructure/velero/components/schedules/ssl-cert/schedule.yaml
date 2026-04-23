@@ -1,0 +1,13 @@
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: daily-ssl-certs
+  namespace: backup
+spec:
+  schedule: "0 1 * * *"
+  template:
+    includedNamespaces:
+      - networking
+      - cert-manager
+    storageLocation: aws
+    ttl: 720h0m0s # 30 days
