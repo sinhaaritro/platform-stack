@@ -21,15 +21,11 @@ configuration:
 
 
 deployNodeAgent: true
+defaultVolumesToFsBackup: true
 
 # schedules: {}
 
-metrics:
-  enabled: true
-  serviceMonitor:
-    enabled: true
-  prometheusRule:
-    enabled: false
+
 
 rbac:
   create: true

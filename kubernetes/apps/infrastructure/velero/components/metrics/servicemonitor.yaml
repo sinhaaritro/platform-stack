@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: velero-metrics
+  namespace: backup
+  labels:
+    app.kubernetes.io/name: velero
+    app.kubernetes.io/instance: velero
+spec:
+  endpoints:
+    - port: metrics
+      path: /metrics
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: velero
+      app.kubernetes.io/instance: velero

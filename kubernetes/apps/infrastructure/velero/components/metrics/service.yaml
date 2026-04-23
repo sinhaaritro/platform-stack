@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: velero-metrics
+  namespace: backup
+  labels:
+    app.kubernetes.io/name: velero
+    app.kubernetes.io/instance: velero
+spec:
+  ports:
+    - name: metrics
+      port: 8085
+      targetPort: 8085
+      protocol: TCP
+  selector:
+    name: velero
