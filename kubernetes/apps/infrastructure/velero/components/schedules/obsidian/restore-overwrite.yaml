@@ -1,0 +1,34 @@
+# ============================================================
+# RESTORE TEMPLATE: Obsidian — OVERWRITE MODE
+# ============================================================
+# USE CASE: Level 1 — App corruption or bad config change.
+#
+# BEHAVIOR: Overwrites existing resources with backup data.
+#
+# USAGE:
+#   1. List available backups:
+#      kubectl get backups.velero.io -n backup -l velero.io/schedule-name=daily-obsidian
+#
+#   2. Pick a known-good backup and replace BACKUP_NAME below.
+#
+#   3. Apply:
+#      kubectl apply -f restore-overwrite.yaml
+#
+#   4. Monitor:
+#      kubectl get restore -n backup
+#      kubectl describe restore obsidian-restore-overwrite -n backup
+# ============================================================
+apiVersion: velero.io/v1
+kind: Restore
+metadata:
+  name: obsidian-restore-overwrite
+  namespace: backup
+spec:
+  backupName: BACKUP_NAME # <-- REPLACE with actual backup name (e.g., daily-obsidian-20260424010000)
+  includedNamespaces:
+    - personal
+  labelSelector:
+    matchLabels:
+      app: obsidian
+  existingResourcePolicy: update # Overwrites existing resources
+  restorePVs: true

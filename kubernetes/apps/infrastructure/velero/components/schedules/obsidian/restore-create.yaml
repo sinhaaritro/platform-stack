@@ -1,0 +1,37 @@
+# ============================================================
+# RESTORE TEMPLATE: Obsidian — CREATE MODE
+# ============================================================
+# USE CASE: Level 1 — App accidentally deleted.
+#           Level 2 — Full rebuild from new VM.
+#
+# BEHAVIOR: Only creates missing resources. Skips anything
+#           that already exists (e.g., resources ArgoCD has
+#           already recreated from Git).
+#
+# USAGE:
+#   1. List available backups:
+#      kubectl get backups.velero.io -n backup -l velero.io/schedule-name=daily-obsidian
+#
+#   2. Pick the most recent backup and replace BACKUP_NAME below.
+#
+#   3. Apply:
+#      kubectl apply -f restore-create.yaml
+#
+#   4. Monitor:
+#      kubectl get restore -n backup
+#      kubectl describe restore obsidian-restore-create -n backup
+# ============================================================
+apiVersion: velero.io/v1
+kind: Restore
+metadata:
+  name: obsidian-restore-create
+  namespace: backup
+spec:
+  backupName: BACKUP_NAME # <-- REPLACE with actual backup name (e.g., daily-obsidian-20260424010000)
+  includedNamespaces:
+    - personal
+  labelSelector:
+    matchLabels:
+      app: obsidian
+  existingResourcePolicy: none # Skips resources that already exist
+  restorePVs: true

@@ -1,0 +1,15 @@
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: daily-obsidian
+  namespace: backup
+spec:
+  schedule: "0 1 * * *"
+  template:
+    includedNamespaces:
+      - personal
+    labelSelector:
+      matchLabels:
+        app: obsidian
+    storageLocation: aws
+    ttl: 720h0m0s # 30 days
