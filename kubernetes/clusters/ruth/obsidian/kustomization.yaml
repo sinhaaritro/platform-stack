@@ -13,4 +13,4 @@ components:
   - ../../../apps/services/obsidian/components/dns-fix
   - ../../../apps/services/obsidian/components/storage
   - ../../../apps/services/obsidian/components/auth-authentik
-  - ../../../apps/services/obsidian/components/maintenance
+  # - ../../../apps/services/obsidian/components/maintenance
