@@ -17,7 +17,7 @@ upgradeCRDs: true
 configuration:
   backupStorageLocation: []
   volumeSnapshotLocation: []
-  defaultVolumesToFsBackup: true
+  defaultVolumesToFsBackup: false # Not needed, Global Opt-Out / Per-Schedule Opt-In Strategy
 
 deployNodeAgent: true
 

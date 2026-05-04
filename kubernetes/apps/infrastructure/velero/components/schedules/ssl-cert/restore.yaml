@@ -18,7 +18,7 @@
 #      kubectl get restore ssl-cert-restore -n backup
 #
 #   4. Copy secrets from restore namespace to live namespace:
-#      kubectl get secret -n restore -l app=obsidian -o yaml \
+#      kubectl get secret -n restore --field-selector type=kubernetes.io/tls -o yaml \
 #        | sed 's/namespace: restore/namespace: networking/' \
 #        | kubectl apply -f -
 #
