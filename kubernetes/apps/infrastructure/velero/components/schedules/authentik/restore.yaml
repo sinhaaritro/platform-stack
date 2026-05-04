@@ -1,0 +1,38 @@
+# ============================================================
+# USE CASE: Any scenario — corruption, deletion, or full rebuild.
+#
+# BEHAVIOR: Restores into the shared 'restore' namespace.
+#           ArgoCD does NOT manage this namespace, so there
+#           are no race conditions or conflicts.
+#
+# RUNBOOK:
+#   1. Replace BACKUP_NAME below:
+#      kubectl get backups.velero.io -n backup -l velero.io/schedule-name=daily-security
+#
+#   2. Apply:
+#      kubectl apply -f restore.yaml
+#
+#   3. Wait for completion:
+#      kubectl get restore security-restore -n backup
+#
+#   4. Restore Database from backup dump:
+#      Deploy a temporary postgres pod in the restore namespace mounted to the authentik-db-backup PVC, and execute:
+#      PGPASSWORD=$DB_PASSWORD psql -h postgresql-14.storage.svc.cluster.local -U $DB_USERNAME -d $DB_DATABASE_NAME -f /backup/authentik-db.sql
+#
+#   5. Cleanup:
+#      kubectl delete ns restore
+#      kubectl delete restore security-restore -n backup
+# ============================================================
+apiVersion: velero.io/v1
+kind: Restore
+metadata:
+  name: security-restore
+  namespace: backup
+spec:
+  backupName: BACKUP_NAME # <-- REPLACE with actual backup name
+  includedNamespaces:
+    - security
+  namespaceMapping:
+    security: restore
+  existingResourcePolicy: none
+  restorePVs: true

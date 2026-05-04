@@ -1,0 +1,13 @@
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: daily-security
+  namespace: backup
+spec:
+  schedule: "0 21 * * *" # 02:30 AM IST (21:00 UTC)
+  template:
+    includedNamespaces:
+      - security
+    storageLocation: aws
+    defaultVolumesToFsBackup: true
+    ttl: 720h0m0s # 30 days

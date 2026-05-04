@@ -15,4 +15,5 @@ components:
   - ../../../apps/infrastructure/authentik/components/init-db
   - ../../../apps/infrastructure/authentik/components/oauth-immich
   - ../../../apps/infrastructure/authentik/components/proxy-obsidian
+  - ../../../apps/infrastructure/authentik/components/backup-job
   # - ../../../apps/infrastructure/authentik/components/maintenance
