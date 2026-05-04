@@ -13,3 +13,4 @@ components:
   - ../../../apps/infrastructure/velero/components/metrics
   - ../../../apps/infrastructure/velero/components/schedules/ssl-cert
   - ../../../apps/infrastructure/velero/components/schedules/obsidian
+  - ../../../apps/infrastructure/velero/components/schedules/immich

@@ -22,6 +22,8 @@ controllers:
               for dir in library upload profile thumbs encoded-video backups; do
                 touch "/data/$dir/.immich"
               done
+              # Generate Kopia ignore file to exclude massive media folders from Velero backups
+              printf "library/\nencoded-video/\nthumbs/\n" > /data/.kopiaignore
               chown -R 1000:1000 /data
             else
               echo "/data not found, skipping initialization"

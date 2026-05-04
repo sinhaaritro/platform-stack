@@ -1,0 +1,44 @@
+# ============================================================
+# USE CASE: Any scenario — corruption, deletion, or full rebuild.
+#
+# BEHAVIOR: Restores into the shared 'restore' namespace.
+#           ArgoCD does NOT manage this namespace, so there
+#           are no race conditions or conflicts.
+#
+# RUNBOOK:
+#   1. Replace BACKUP_NAME below:
+#      kubectl get backups.velero.io -n backup -l velero.io/schedule-name=daily-immich
+#
+#   2. Apply:
+#      kubectl apply -f restore.yaml
+#
+#   3. Wait for completion:
+#      kubectl get restore immich-restore -n backup
+#
+#   4. Re-deploy the database hook/temp pods to copy data from
+#      restore/immich-library to personal/immich-library, or use standard
+#      kubectl cp techniques for PVC migration.
+#
+#   5. Restore Database from backup dump:
+#      kubectl exec -n personal deploy/immich-server -- /bin/sh -c "PGPASSWORD=\$DB_PASSWORD psql -h \$DB_HOSTNAME -U \$DB_USERNAME -d \$DB_DATABASE_NAME -f /data/backups/immich-db.sql"
+#
+#   6. Cleanup:
+#      kubectl delete ns restore
+#      kubectl delete restore immich-restore -n backup
+# ============================================================
+apiVersion: velero.io/v1
+kind: Restore
+metadata:
+  name: immich-restore
+  namespace: backup
+spec:
+  backupName: BACKUP_NAME # <-- REPLACE with actual backup name
+  includedNamespaces:
+    - personal
+  labelSelector:
+    matchLabels:
+      app.kubernetes.io/instance: immich
+  namespaceMapping:
+    personal: restore
+  existingResourcePolicy: none
+  restorePVs: true
