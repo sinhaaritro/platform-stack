@@ -1,0 +1,41 @@
+# ============================================================
+# RESTORE TEMPLATE: SSL Certificates — NAMESPACE MAPPED
+# ============================================================
+# USE CASE: Any scenario — corruption, deletion, or full rebuild.
+#
+# BEHAVIOR: Restores into the shared 'restore' namespace.
+#           ArgoCD does NOT manage this namespace, so there
+#           are no race conditions or conflicts.
+#
+# RUNBOOK:
+#   1. Replace BACKUP_NAME below:
+#      kubectl get backups.velero.io -n backup -l velero.io/schedule-name=daily-ssl-certs
+#
+#   2. Apply:
+#      kubectl apply -f restore.yaml
+#
+#   3. Wait for completion:
+#      kubectl get restore ssl-cert-restore -n backup
+#
+#   4. Copy secrets from restore namespace to live namespace:
+#      kubectl get secret -n restore -l app=obsidian -o yaml \
+#        | sed 's/namespace: restore/namespace: networking/' \
+#        | kubectl apply -f -
+#
+#   5. Cleanup:
+#      kubectl delete ns restore
+#      kubectl delete restore ssl-cert-restore -n backup
+# ============================================================
+apiVersion: velero.io/v1
+kind: Restore
+metadata:
+  name: ssl-cert-restore
+  namespace: backup
+spec:
+  backupName: BACKUP_NAME # <-- REPLACE with actual backup name (e.g., daily-ssl-certs-20260503010047)
+  includedNamespaces:
+    - networking
+  namespaceMapping:
+    networking: restore
+  existingResourcePolicy: none
+  restorePVs: false # SSL certs are K8s Secrets, no PVCs to restore

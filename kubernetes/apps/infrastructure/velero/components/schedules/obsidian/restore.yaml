@@ -1,0 +1,117 @@
+# ============================================================
+# RESTORE TEMPLATE: Obsidian — NAMESPACE MAPPED
+# ============================================================
+# USE CASE: Any scenario — corruption, deletion, or full rebuild.
+#
+# BEHAVIOR: Restores into the shared 'restore' namespace.
+#           ArgoCD does NOT manage this namespace, so there
+#           are no race conditions or conflicts.
+#
+# RUNBOOK:
+#   1. Replace BACKUP_NAME below:
+#      kubectl get backups.velero.io -n backup -l velero.io/schedule-name=daily-obsidian
+#
+#   2. Enable maintenance mode (scales Obsidian to 0 replicas via Git):
+#      In kubernetes/clusters/ruth/obsidian/kustomization.yaml,
+#      uncomment the maintenance component:
+#        - ../../../apps/services/obsidian/components/maintenance
+#      Commit and push. Wait for ArgoCD to sync.
+#      Verify: kubectl get deploy obsidian -n personal
+#      (READY should show 0/0)
+#
+#   3. Apply this restore:
+#      kubectl apply -f kubernetes/apps/infrastructure/velero/components/schedules/obsidian/restore.yaml
+#
+#   4. Wait for completion:
+#      kubectl get restore obsidian-restore -n backup
+#      kubectl describe restore obsidian-restore -n backup
+#      (Phase should show 'Completed')
+#
+#   5. Copy data from restore PVC to live PVC:
+#      # a) Start a temp pod in 'personal' ns mounting the live PVC
+#      cat <<'EOF' | kubectl apply -f -
+#      apiVersion: v1
+#      kind: Pod
+#      metadata:
+#        name: pvc-mount
+#        namespace: personal
+#      spec:
+#        containers:
+#        - name: mount
+#          image: alpine
+#          command: ["sleep", "3600"]
+#          volumeMounts:
+#          - name: data
+#            mountPath: /config
+#        volumes:
+#        - name: data
+#          persistentVolumeClaim:
+#            claimName: obsidian-config
+#        restartPolicy: Never
+#      EOF
+#
+#      # b) Start a temp pod in 'restore' ns mounting the restored PVC
+#      cat <<'EOF' | kubectl apply -f -
+#      apiVersion: v1
+#      kind: Pod
+#      metadata:
+#        name: pvc-mount
+#        namespace: restore
+#      spec:
+#        containers:
+#        - name: mount
+#          image: alpine
+#          command: ["sleep", "3600"]
+#          volumeMounts:
+#          - name: data
+#            mountPath: /config
+#        volumes:
+#        - name: data
+#          persistentVolumeClaim:
+#            claimName: obsidian-config
+#        restartPolicy: Never
+#      EOF
+#
+#      # c) Wait for both pods to be Running
+#      kubectl wait pod/pvc-mount -n personal --for=condition=Ready --timeout=60s
+#      kubectl wait pod/pvc-mount -n restore --for=condition=Ready --timeout=60s
+#
+#      # d) Copy: restore → local → live
+#      kubectl cp restore/pvc-mount:/config ./obsidian-restore-data
+#      kubectl cp ./obsidian-restore-data personal/pvc-mount:/config
+#
+#      # e) Cleanup temp pods
+#      kubectl delete pod pvc-mount -n personal
+#      kubectl delete pod pvc-mount -n restore
+#      rm -rf ./obsidian-restore-data
+#
+#   6. Disable maintenance mode:
+#      In kubernetes/clusters/ruth/obsidian/kustomization.yaml,
+#      re-comment the maintenance component:
+#        # - ../../../apps/services/obsidian/components/maintenance
+#      Commit and push. ArgoCD scales Obsidian back to 1.
+#
+#   7. Verify app is healthy:
+#      kubectl get deploy obsidian -n personal
+#      kubectl get pods -n personal -l app=obsidian
+#
+#   8. Cleanup:
+#      kubectl delete ns restore
+#      kubectl delete restore obsidian-restore -n backup
+# ============================================================
+apiVersion: velero.io/v1
+kind: Restore
+metadata:
+  name: obsidian-restore
+  namespace: backup
+spec:
+  backupName: BACKUP_NAME # <-- REPLACE with actual backup name (e.g., daily-obsidian-20260424010000)
+  includedNamespaces:
+    - personal
+  namespaceMapping:
+    personal: restore
+  labelSelector:
+    matchLabels:
+      app: obsidian
+  existingResourcePolicy: none
+  restorePVs: true
