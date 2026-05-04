@@ -4,7 +4,7 @@ metadata:
   name: daily-obsidian
   namespace: backup
 spec:
-  schedule: "0 1 * * *"
+  schedule: "30 21 * * *" # 03:00 AM IST (21:30 UTC)
   template:
     includedNamespaces:
       - personal
@@ -12,4 +12,5 @@ spec:
       matchLabels:
         app: obsidian
     storageLocation: aws
+    defaultVolumesToFsBackup: true
     ttl: 720h0m0s # 30 days

@@ -4,7 +4,7 @@ metadata:
   name: daily-ssl-certs
   namespace: backup
 spec:
-  schedule: "0 1 * * *"
+  schedule: "30 21 * * *" # 03:00 AM IST (21:30 UTC)
   template:
     includedNamespaces:
       - networking

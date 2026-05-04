@@ -17,11 +17,9 @@ upgradeCRDs: true
 configuration:
   backupStorageLocation: []
   volumeSnapshotLocation: []
-  uploaderType: kopia
-
+  defaultVolumesToFsBackup: true
 
 deployNodeAgent: true
-defaultVolumesToFsBackup: true
 
 # schedules: {}
 
