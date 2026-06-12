@@ -24,13 +24,15 @@
 #   3. Wait for Rclone completion:
 #      kubectl wait --for=condition=complete job/immich-rclone-restore -n personal --timeout=1h
 #
-#   4. Re-trigger Velero restore (to extract database dump into restore namespace PVC):
+#   4. Prepare the restore namespace and trigger Velero restore (only PVCs):
 #      a) Find latest backup name:
 #         kubectl get backups.velero.io -n backup --sort-by=.metadata.creationTimestamp
 #      b) Replace BACKUP_NAME in this file (at the bottom)
-#      c) Apply this restore file:
+#      c) Create the target restore namespace (required since we only restore PVCs and not the namespace resource):
+#         kubectl create ns restore
+#      d) Apply this restore file:
 #         kubectl apply -f restore.yaml
-#      d) Verify completion (Phase: Completed):
+#      e) Verify completion (Phase: Completed):
 #         kubectl get restore immich-restore -n backup
 #
 #   5. Spin up temporary pod to mount the restored PVC in the restore namespace:
