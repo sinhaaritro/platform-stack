@@ -22,14 +22,4 @@ spec:
         - name: db-backup
           persistentVolumeClaim:
             claimName: immich-db-backup
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: immich-machine-learning
-spec:
-  template:
-    metadata:
-      annotations:
-        # Exclude ML cache volume from Velero volume backups
-        backup.velero.io/exclude-volumes: cache
+
