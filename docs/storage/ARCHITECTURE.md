@@ -1,6 +1,6 @@
 # Storage Architecture
 
-> **Scope:** This document defines the storage layer architecture for the platform. It describes the tiered storage model, data flows, tenant isolation, and technology choices. For backup and disaster recovery, see [`docs/backup/`](../backup/).
+> **Scope:** This document defines the storage layer architecture for the platform. It describes the tiered storage model, data flows, tenant isolation, and technology choices. For backup strategy, recovery objectives, restore runbooks, and cost planning, see [`docs/backup/`](../backup/README.md).
 
 ---
 
@@ -400,5 +400,5 @@ All storage requests in Kubernetes are mediated through StorageClasses. The plat
 | [SEAWEEDFS.md](./SEAWEEDFS.md) | Object storage: S3 backend, buckets, retention profiles, architecture |
 | [NFS.md](./NFS.md) | User data: TrueNAS ideal, LXC interim, NFS provisioner comparison |
 | [CAPACITY_PLANNING.md](./CAPACITY_PLANNING.md) | Storage categories, growth projections, expansion playbooks |
-| [`docs/backup/`](../backup/) | Backup strategy, disaster recovery (separate documentation) |
+| [`docs/backup/`](../backup/README.md) | Backup strategy, ABC model, restore runbooks, verification, cost planning |
 | [`docs/ARCHITECTURE.md`](../ARCHITECTURE.md) | Overall platform architecture (parent document) |

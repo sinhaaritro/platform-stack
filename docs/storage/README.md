@@ -115,6 +115,6 @@ Storage budgets are percentage-based, not size-based. The system scales by addin
 | Document | Relationship |
 |---|---|
 | [`docs/ARCHITECTURE.md`](../ARCHITECTURE.md) | Overall platform architecture — storage is Section 1.3 |
-| [`docs/backup/`](../backup/) | Backup strategy and disaster recovery (separate scope) |
+| [`docs/backup/`](../backup/README.md) | Backup strategy, ABC model, restore runbooks, verification, cost planning |
 | [`docs/secrets/`](../secrets/) | Secrets management for S3 credentials, admin passwords |
 | [`docs/network/`](../network/) | Network architecture — storage network, NFS traffic routing |
