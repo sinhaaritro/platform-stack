@@ -10,3 +10,26 @@ spec:
         # This guarantees a consistent database snapshot is stored alongside the file data.
         pre.hook.backup.velero.io/container: main
         pre.hook.backup.velero.io/command: '["/bin/sh", "-c", "PGPASSWORD=$DB_PASSWORD pg_dump -h $DB_HOSTNAME -U $DB_USERNAME -f /data/backups/immich-db.sql -c -C -O $DB_DATABASE_NAME"]'
+        # Exclude massive media volume from Velero volume backups
+        backup.velero.io/exclude-volumes: library
+    spec:
+      containers:
+        - name: main
+          volumeMounts:
+            - name: db-backup
+              mountPath: /data/backups
+      volumes:
+        - name: db-backup
+          persistentVolumeClaim:
+            claimName: immich-db-backup
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immich-machine-learning
+spec:
+  template:
+    metadata:
+      annotations:
+        # Exclude ML cache volume from Velero volume backups
+        backup.velero.io/exclude-volumes: cache

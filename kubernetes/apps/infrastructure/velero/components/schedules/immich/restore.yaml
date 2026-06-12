@@ -53,14 +53,17 @@
 #        volumes:
 #        - name: data
 #          persistentVolumeClaim:
-#            claimName: immich-library
+#            claimName: immich-db-backup
 #      EOF
+#
+#      # c) Wait for the restore-temp pod to be Running and Ready:
+#      kubectl wait pod/restore-temp -n restore --for=condition=Ready --timeout=120s
 #
 #   6. Import the DB dump directly into Postgres:
 #      # a) Terminate existing database connections:
 #      kubectl exec -i -n storage postgresql-14-0 -- psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'immich';"
 #      # b) Import database dump (drops, recreates, and populates 'immich' DB):
-#      kubectl exec -n restore restore-temp -- cat /data/backups/immich-db.sql | kubectl exec -i -n storage postgresql-14-0 -- psql -U postgres
+#      kubectl exec -n restore restore-temp -- cat /data/immich-db.sql | kubectl exec -i -n storage postgresql-14-0 -- psql -U postgres
 #
 #   7. Disable maintenance mode:
 #      In kubernetes/clusters/ruth/immich/kustomization.yaml,
@@ -85,10 +88,8 @@ spec:
     - personal
   includedResources:
     - persistentvolumeclaims
-  labelSelector:
-    matchLabels:
-      app.kubernetes.io/instance: immich
   namespaceMapping:
     personal: restore
   existingResourcePolicy: none
   restorePVs: true
+
