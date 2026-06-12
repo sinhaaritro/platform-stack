@@ -1,9 +1,11 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: immich-library-glacier-sync
+  name: immich-library-backup
 spec:
   schedule: "0 0 1 * *" # 1st of every month
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
       template:
@@ -15,9 +17,25 @@ spec:
                 - /bin/sh
                 - -c
                 - |
-                  echo "Syncing Immich Library to AWS Glacier Deep Archive..."
-                  # Uncomment and configure with proper rclone.conf
-                  # rclone sync /data/library aws-glacier:my-immich-bucket/library --transfers 4 --checkers 8
+                  echo "Syncing Immich Library to AWS S3 (nas_backup/immich)..."
+                  rclone sync /data aws:aritro-homelab-velero-backups/nas_backup/immich --transfers 4 --checkers 8 --verbose
+              env:
+                - name: RCLONE_CONFIG_AWS_TYPE
+                  value: s3
+                - name: RCLONE_CONFIG_AWS_PROVIDER
+                  value: AWS
+                - name: RCLONE_CONFIG_AWS_REGION
+                  value: ap-south-1
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: immich-aws-creds
+                      key: AWS_ACCESS_KEY_ID
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: immich-aws-creds
+                      key: AWS_SECRET_ACCESS_KEY
               volumeMounts:
                 - name: library
                   mountPath: /data
@@ -27,3 +45,4 @@ spec:
               persistentVolumeClaim:
                 claimName: immich-library
           restartPolicy: OnFailure
+

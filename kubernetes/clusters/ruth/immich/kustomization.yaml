@@ -12,4 +12,6 @@ components:
   - ../../../apps/services/immich/components/replica-count
   - ../../../apps/services/immich/components/config
   - ../../../apps/services/immich/components/backup-hooks
+  - ../../../apps/services/immich/components/rclone-archive
   # - ../../../apps/services/immich/components/maintenance
+
