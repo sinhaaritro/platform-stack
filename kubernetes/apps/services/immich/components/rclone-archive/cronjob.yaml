@@ -26,16 +26,17 @@ spec:
                   value: AWS
                 - name: RCLONE_CONFIG_AWS_REGION
                   value: ap-south-1
-                - name: AWS_ACCESS_KEY_ID
+                - name: RCLONE_CONFIG_AWS_ACCESS_KEY_ID
                   valueFrom:
                     secretKeyRef:
                       name: immich-aws-creds
                       key: AWS_ACCESS_KEY_ID
-                - name: AWS_SECRET_ACCESS_KEY
+                - name: RCLONE_CONFIG_AWS_SECRET_ACCESS_KEY
                   valueFrom:
                     secretKeyRef:
                       name: immich-aws-creds
                       key: AWS_SECRET_ACCESS_KEY
+
               volumeMounts:
                 - name: library
                   mountPath: /data
