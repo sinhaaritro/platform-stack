@@ -5,26 +5,32 @@
 #           ArgoCD does NOT manage this namespace, so there
 #           are no race conditions or conflicts.
 #
-# RUNBOOK:
-#   1. Replace BACKUP_NAME below:
+# RUNBOOK (MULTI-STAGE DR TEST):
+#
+#   1. Rclone Restore (Media files):
+#      kubectl create job --from=cronjob/immich-rclone-backup immich-rclone-restore -n personal --dry-run=client -o yaml \
+#        | sed 's/rclone sync \/data/rclone copy/g; s/aws:aritro-homelab\/nas_backup\/immich/aws:aritro-homelab\/nas_backup\/immich \/data/g' \
+#        | kubectl apply -f -
+#
+#   2. Wait for Rclone completion:
+#      kubectl wait --for=condition=complete job/immich-rclone-restore -n personal --timeout=30m
+#
+#   3. Replace BACKUP_NAME below for Velero DB Restore:
 #      kubectl get backups.velero.io -n backup -l velero.io/schedule-name=daily-immich
 #
-#   2. Apply:
+#   4. Apply this file:
 #      kubectl apply -f restore.yaml
 #
-#   3. Wait for completion:
+#   5. Wait for Velero completion:
 #      kubectl get restore immich-restore -n backup
 #
-#   4. Re-deploy the database hook/temp pods to copy data from
-#      restore/immich-library to personal/immich-library, or use standard
-#      kubectl cp techniques for PVC migration.
-#
-#   5. Restore Database from backup dump:
+#   6. Restore Database from backup dump:
 #      kubectl exec -n personal deploy/immich-server -- /bin/sh -c "PGPASSWORD=\$DB_PASSWORD psql -h \$DB_HOSTNAME -U \$DB_USERNAME -d \$DB_DATABASE_NAME -f /data/backups/immich-db.sql"
 #
-#   6. Cleanup:
+#   7. Cleanup:
 #      kubectl delete ns restore
 #      kubectl delete restore immich-restore -n backup
+#      kubectl delete job immich-rclone-restore -n personal
 # ============================================================
 apiVersion: velero.io/v1
 kind: Restore

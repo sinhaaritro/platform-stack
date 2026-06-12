@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: immich-library-backup
+  name: immich-rclone-backup
 spec:
   schedule: "0 0 1 * *" # 1st of every month
   successfulJobsHistoryLimit: 1
@@ -18,7 +18,7 @@ spec:
                 - -c
                 - |
                   echo "Syncing Immich Library to AWS S3 (nas_backup/immich)..."
-                  rclone sync /data aws:aritro-homelab-velero-backups/nas_backup/immich --transfers 4 --checkers 8 --verbose
+                  rclone sync /data aws:aritro-homelab/nas_backup/immich --transfers 4 --checkers 8 --verbose
               env:
                 - name: RCLONE_CONFIG_AWS_TYPE
                   value: s3

@@ -1,0 +1,46 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: immich-rclone-restore
+  namespace: personal
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      containers:
+        - name: rclone
+          image: rclone/rclone:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Restoring Immich Library from AWS S3 (nas_backup/immich) to PVC..."
+              rclone copy aws:aritro-homelab-velero-backups/nas_backup/immich /data --transfers 4 --checkers 8 --verbose
+              echo "Restore complete. Fixing permissions..."
+              chown -R 1000:1000 /data
+          env:
+            - name: RCLONE_CONFIG_AWS_TYPE
+              value: s3
+            - name: RCLONE_CONFIG_AWS_PROVIDER
+              value: AWS
+            - name: RCLONE_CONFIG_AWS_REGION
+              value: ap-south-1
+            - name: RCLONE_CONFIG_AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: immich-aws-creds
+                  key: AWS_ACCESS_KEY_ID
+            - name: RCLONE_CONFIG_AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: immich-aws-creds
+                  key: AWS_SECRET_ACCESS_KEY
+          volumeMounts:
+            - name: library
+              mountPath: /data
+              subPath: library
+      volumes:
+        - name: library
+          persistentVolumeClaim:
+            claimName: immich-library
+      restartPolicy: Never
