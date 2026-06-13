@@ -24,18 +24,20 @@
 #   3. Wait for Rclone completion:
 #      kubectl wait --for=condition=complete job/immich-rclone-restore -n personal --timeout=1h
 #
-#   4. Prepare the restore namespace and trigger Velero restore (only PVCs):
+#   4. Prepare the restore namespace and trigger Velero restore (PVCs, PVs, and Pods):
 #      a) Find latest backup name:
 #         kubectl get backups.velero.io -n backup --sort-by=.metadata.creationTimestamp
 #      b) Replace BACKUP_NAME in this file (at the bottom)
-#      c) Create the target restore namespace (required since we only restore PVCs and not the namespace resource):
+#      c) Create the target restore namespace:
 #         kubectl create ns restore
-#      d) Apply this restore file:
-#         kubectl apply -f restore.yaml
-#      e) Verify completion (Phase: Completed):
-#         kubectl get restore immich-restore -n backup
-#         kubectl describe restore immich-restore -n backup
-#         (Look for completed)
+#      d) Copy secrets from personal namespace to restore namespace (required for Kopia pods uploader init-containers to mount config/credentials):
+#         kubectl get secret immich-config -n personal -o json | jq 'del(.metadata.ownerReferences, .metadata.uid, .metadata.resourceVersion, .metadata.creationTimestamp) | .metadata.namespace="restore"' | kubectl apply -f -
+#         kubectl get secret immich-db-credentials -n personal -o json | jq 'del(.metadata.ownerReferences, .metadata.uid, .metadata.resourceVersion, .metadata.creationTimestamp) | .metadata.namespace="restore"' | kubectl apply -f -
+#      e) Apply this restore file:
+#         kubectl apply -f kubernetes/apps/infrastructure/velero/components/schedules/immich/restore.yaml
+#      f) Verify completion (Phase: Completed):
+#         kubectl get restore immich-restore -n backup -o jsonpath='{.status.phase}' && echo ""
+#         (Look for Completed)
 #
 #   5. Spin up temporary pod to mount the restored PVC in the restore namespace:
 #      cat <<'EOF' | kubectl apply -f -
@@ -90,6 +92,8 @@ spec:
     - personal
   includedResources:
     - persistentvolumeclaims
+    - persistentvolumes
+    - pods
   namespaceMapping:
     personal: restore
   existingResourcePolicy: none
