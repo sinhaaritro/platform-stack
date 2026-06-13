@@ -11,7 +11,7 @@ spec:
         pre.hook.backup.velero.io/container: main
         pre.hook.backup.velero.io/command: '["/bin/sh", "-c", "PGPASSWORD=$DB_PASSWORD pg_dump -h $DB_HOSTNAME -U $DB_USERNAME -f /data/backups/immich-db.sql -c -C -O $DB_DATABASE_NAME"]'
         # Exclude massive media volume from Velero volume backups
-        backup.velero.io/exclude-volumes: data
+        backup.velero.io/backup-volumes-excludes: data
     spec:
       containers:
         - name: main

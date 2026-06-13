@@ -7,4 +7,4 @@ spec:
     metadata:
       annotations:
         # Exclude ML cache volume from Velero volume backups
-        backup.velero.io/exclude-volumes: cache
+        backup.velero.io/backup-volumes-excludes: cache
