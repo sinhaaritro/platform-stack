@@ -90,6 +90,7 @@ spec:
     - personal
   includedResources:
     - persistentvolumeclaims
+    - pods
   namespaceMapping:
     personal: restore
   existingResourcePolicy: none
