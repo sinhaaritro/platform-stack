@@ -88,9 +88,7 @@ spec:
   backupName: immich-manual-backup-5 # <-- REPLACE with actual backup name
   includedNamespaces:
     - personal
-  includedResources:
-    - persistentvolumeclaims
-    - pods
+
   namespaceMapping:
     personal: restore
   existingResourcePolicy: none
