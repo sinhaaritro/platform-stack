@@ -148,7 +148,7 @@ The backup unit is the **application**, not the infrastructure. Each app's backu
 | K8s resources (per namespace) | ✅ | Velero | AWS S3 | Daily | 30 days (TTL) |
 | Longhorn PVCs (app data) | ✅ Per-schedule opt-in | Velero (fs-backup) | AWS S3 | Daily | 30 days (TTL) |
 | Database dumps | ✅ Pre-backup hooks | Velero | AWS S3 | Daily (triggered before Velero) | 30 days |
-| NFS user data (per-app) | 🔜 Planned | rclone (CronJob) | Cloud S3 | Per-app policy | Per-app versions |
+| NFS user data (per-app) | 🟡 Semi-Active | rclone (CronJob) | Cloud S3 | Per-app policy | Per-app versions (NFS hardware integration pending) |
 | ZFS snapshots | ✅ Local | ZFS (automated) | Local HDD pool | Daily | Per retention policy |
 | Proxmox VMs | ❌ Intentional | N/A | N/A | N/A | IaC rebuilds |
 | SeaweedFS data | ❌ Intentional | N/A | N/A | N/A | Replayable |

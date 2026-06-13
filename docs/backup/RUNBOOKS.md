@@ -107,6 +107,14 @@ kubectl get all -n restore
 # 5. If satisfied, apply to live namespace via ArgoCD sync
 #    (ArgoCD manages the live namespace — restoring directly would conflict)
 
+# ⚠️ WARNING: Dynamically generated in-cluster state (e.g., cert-manager SSL/TLS Secrets)
+# is not stored in Git and cannot be synced by ArgoCD. If you are restoring a dynamically
+# generated Secret/TLS Cert, you must manually copy it from the 'restore' namespace:
+#
+# kubectl get secret <SECRET_NAME> -n restore -o yaml \
+#   | sed 's/namespace: restore/namespace: <NAMESPACE>/' \
+#   | kubectl apply -f -
+
 # 6. Cleanup
 kubectl delete ns restore
 kubectl delete restore <APP>-restore -n backup
@@ -119,6 +127,9 @@ kubectl delete restore <APP>-restore -n backup
 **When to use:** App has a Longhorn PVC with config or data that is NOT a database (no consistency hook needed). Velero backed up the PVC via `defaultVolumesToFsBackup: true`.
 
 **Examples:** Obsidian (config PVC), any app with a `/config` directory on Longhorn.
+
+> [!WARNING]
+> The placeholders `/data` and `<PVC_NAME>` in this template are generic. You must replace them with the application's actual mount path (e.g., `/config` for Obsidian) and specific PVC name (e.g., `obsidian-config`).
 
 **Estimated time:** 15-30 minutes.
 
@@ -295,21 +306,39 @@ EOF
 kubectl wait pod/db-restore -n restore --for=condition=Ready --timeout=60s
 
 # 5. Restore the database
-#    Adjust the connection string to point to the LIVE database host.
-kubectl exec -n restore db-restore -- /bin/sh -c \
-  "PGPASSWORD=<DB_PASSWORD> psql \
-   -h <DB_HOSTNAME> \
-   -U <DB_USERNAME> \
-   -d <DB_DATABASE_NAME> \
-   -f /backup/<APP>-db.sql"
+#    Choose the appropriate connection option based on your database setup:
+
+#    --- OPTION 1: Network-based Connection ---
+#    Use when: Restoring to an external database, managed database service (e.g., AWS RDS), 
+#    or a database server on a different network subnet.
+#    Note: Requires a psql client inside the restore pod and network routing to the host.
+#
+#    kubectl exec -n restore db-restore -- /bin/sh -c \
+#      "PGPASSWORD=<DB_PASSWORD> psql \
+#       -h <DB_HOSTNAME> \
+#       -U <DB_USERNAME> \
+#       -d <DB_DATABASE_NAME> \
+#       -f /backup/<APP>-db.sql"
+
+#    --- OPTION 2: UNIX Socket / Super-user Exec Stream (Recommended for internal DBs) ---
+#    Use when: Restoring to a cluster-internal database container (e.g., postgresql-14-0) 
+#    where we want to bypass network constraints, avoid raw password exposure, and utilize 
+#    direct Unix socket peer authentication on the database pod.
+#
+#    kubectl exec -n restore db-restore -- cat /backup/<APP>-db.sql | \
+#      kubectl exec -i -n <DB_NAMESPACE> <DB_POD_NAME> -- psql -U postgres -d <DB_DATABASE_NAME>
 
 # 6. Verify database integrity
-kubectl exec -n restore db-restore -- /bin/sh -c \
-  "PGPASSWORD=<DB_PASSWORD> psql \
-   -h <DB_HOSTNAME> \
-   -U <DB_USERNAME> \
-   -d <DB_DATABASE_NAME> \
-   -c '\dt'"
+#    For Option 1:
+#    kubectl exec -n restore db-restore -- /bin/sh -c \
+#      "PGPASSWORD=<DB_PASSWORD> psql \
+#       -h <DB_HOSTNAME> \
+#       -U <DB_USERNAME> \
+#       -d <DB_DATABASE_NAME> \
+#       -c '\dt'"
+#
+#    For Option 2:
+#    kubectl exec -i -n <DB_NAMESPACE> <DB_POD_NAME> -- psql -U postgres -d <DB_DATABASE_NAME> -c "\dt"
 
 # 7. Cleanup
 kubectl delete pod db-restore -n restore
@@ -319,61 +348,116 @@ kubectl delete restore <APP>-restore -n backup
 
 ---
 
-## Template D: App with NFS User Data
+## Template D: App with NFS User Data / Large Media Plane
 
-**When to use:** App has both K8s state (Velero) AND user data on NFS (rclone). The restore requires both planes.
+**When to use:** App has both K8s state (Velero) AND large user data on NFS/Object Storage (rclone). The restore requires recovering both planes in a specific order to prevent resource locks and Longhorn storage exhaustion.
 
-**Examples:** Immich (DB on Longhorn + photos on NFS), any app with uploaded user files.
+**Examples:** Immich (DB on Longhorn + photos on NFS/RWX volume).
 
-**Estimated time:** 1-8 hours (depends on NFS data volume).
+**Estimated time:** 1-8 hours (depends on media data volume).
 
 ```bash
-# Phase 1: Restore K8s state via Velero (same as Template C)
-# Follow Template C steps 1-6 to restore the database.
+# 1. Enable maintenance mode (scale app to 0 to prevent conflicting writes)
+#    Option A: Via Git (ArgoCD-safe)
+#      Uncomment the maintenance component in the kustomization.yaml.
+#    Option B: Direct
+#      kubectl scale deploy <APP> -n <NAMESPACE> --replicas=0
 
-# Phase 2: Restore NFS data via rclone
-# Run rclone to pull the app's data from cloud back to NFS.
+# 2. Prepare the target namespace and Secrets
+kubectl create ns restore
+kubectl get secret <APP>-config -n <NAMESPACE> -o json | jq 'del(.metadata.ownerReferences, .metadata.uid, .metadata.resourceVersion, .metadata.creationTimestamp) | .metadata.namespace="restore"' | kubectl apply -f -
+kubectl get secret <APP>-db-credentials -n <NAMESPACE> -o json | jq 'del(.metadata.ownerReferences, .metadata.uid, .metadata.resourceVersion, .metadata.creationTimestamp) | .metadata.namespace="restore"' | kubectl apply -f -
 
-# 1. Deploy a temporary rclone pod with NFS mount
-cat <<'EOF' | kubectl apply -f -
+# 3. Pre-create mock 1Gi PVCs in target 'restore' namespace
+#    ⚠️ WARNING: Crucial to prevent duplicate 50Gi allocations in Longhorn, which exhaust node disks.
+#    Replace placeholders with actual PVC names (e.g. immich-library).
+cat <<EOF | kubectl apply -f -
 apiVersion: v1
-kind: Pod
+kind: PersistentVolumeClaim
 metadata:
-  name: rclone-restore
-  namespace: <NAMESPACE>
+  name: <APP>-library
+  namespace: restore
 spec:
-  containers:
-  - name: rclone
-    image: rclone/rclone:latest
-    command: ["sleep", "3600"]
-    volumeMounts:
-    - name: nfs-data
-      mountPath: /data/<APP>
-    - name: rclone-config
-      mountPath: /config/rclone
-  volumes:
-  - name: nfs-data
-    persistentVolumeClaim:
-      claimName: <APP>-user-data
-  - name: rclone-config
-    secret:
-      secretName: <APP>-rclone-config
-  restartPolicy: Never
+  accessModes: [ "ReadWriteMany" ]
+  resources: { requests: { storage: 1Gi } }
+  storageClassName: longhorn
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: <APP>-machine-learning-cache
+  namespace: restore
+spec:
+  accessModes: [ "ReadWriteMany" ]
+  resources: { requests: { storage: 1Gi } }
+  storageClassName: longhorn
 EOF
 
-kubectl wait pod/rclone-restore -n <NAMESPACE> --for=condition=Ready --timeout=60s
+# 4. Trigger Velero restore (recovers DB PVC and uploader pod)
+kubectl apply -f restore.yaml
 
-# 2. Run rclone sync from cloud to NFS
-kubectl exec -n <NAMESPACE> rclone-restore -- rclone sync \
-  remote:backup-bucket/<APP>/ /data/<APP>/ \
-  --transfers=8 \
-  --progress
+# 5. Re-create the database with correct ownership and extensions as superuser
+kubectl exec -i -n <DB_NAMESPACE> <DB_POD> -- psql -U postgres -c "DROP DATABASE IF EXISTS \"<DB_NAME>\";"
+kubectl exec -i -n <DB_NAMESPACE> <DB_POD> -- psql -U postgres -c "CREATE USER \"<DB_USER>\" WITH PASSWORD '\''<DB_PASSWORD>'\''" || echo "User exists"
+kubectl exec -i -n <DB_NAMESPACE> <DB_POD> -- psql -U postgres -c "CREATE DATABASE \"<DB_NAME>\" OWNER \"<DB_USER>\";"
+kubectl exec -i -n <DB_NAMESPACE> <DB_POD> -- psql -U postgres -d "<DB_NAME>" -c "CREATE EXTENSION IF NOT EXISTS vectors; GRANT ALL PRIVILEGES ON SCHEMA vectors TO \"<DB_USER>\"; CREATE EXTENSION IF NOT EXISTS cube; CREATE EXTENSION IF NOT EXISTS earthdistance;"
 
-# 3. Verify data
-kubectl exec -n <NAMESPACE> rclone-restore -- ls -la /data/<APP>/
+# 6. Stream import DB dump, filtering out incompatible database creation lines
+#    a) Start a temp mount pod in 'restore' namespace
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Pod
+metadata: { name: restore-temp, namespace: restore }
+spec:
+  containers:
+  - name: utils, image: busybox, command: ["sleep", "3600"]
+    volumeMounts: [ { name: data, mountPath: /data } ]
+  volumes: [ { name: data, persistentVolumeClaim: { claimName: <APP>-db-backup } } ]
+EOF
 
-# 4. Cleanup
-kubectl delete pod rclone-restore -n <NAMESPACE>
+kubectl wait pod/restore-temp -n restore --for=condition=Ready --timeout=120s
+
+#    b) Stream SQL dump directly to DB pod
+kubectl exec -n restore restore-temp -- cat /data/<APP>-db.sql | \
+  sed -E '/^(DROP DATABASE|CREATE DATABASE|ALTER DATABASE|\\connect postgres)/Id' | \
+  kubectl exec -i -n <DB_NAMESPACE> <DB_POD> -- psql -U postgres -d <DB_NAME>
+
+# 7. Correct ownership of restored objects in the DB public schema to app user
+kubectl exec -i -n <DB_NAMESPACE> <DB_POD> -- psql -U postgres -d <DB_NAME> -c '
+DO $$
+DECLARE r RECORD;
+BEGIN
+    IF (SELECT pg_catalog.pg_get_userbyid(nspowner) FROM pg_catalog.pg_namespace WHERE nspname = '\''public'\'') = '\''postgres'\'' THEN
+        EXECUTE '\''ALTER SCHEMA public OWNER TO <DB_USER>'\'';
+    END IF;
+    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = '\''public'\'' AND (SELECT pg_catalog.pg_get_userbyid(relowner) FROM pg_catalog.pg_class WHERE relname = tablename AND relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = '\''public'\'')) = '\''postgres'\'') LOOP
+        EXECUTE '\''ALTER TABLE public.'\'' || quote_ident(r.tablename) || '\'' OWNER TO <DB_USER>'\'';
+    END LOOP;
+    FOR r IN (SELECT sequencename FROM pg_sequences WHERE schemaname = '\''public'\'' AND (SELECT pg_catalog.pg_get_userbyid(relowner) FROM pg_catalog.pg_class WHERE relname = sequencename AND relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = '\''public'\'')) = '\''postgres'\'') LOOP
+        EXECUTE '\''ALTER SEQUENCE public.'\'' || quote_ident(r.sequencename) || '\'' OWNER TO <DB_USER>'\'';
+    END LOOP;
+    FOR r IN (SELECT viewname FROM pg_views WHERE schemaname = '\''public'\'' AND (SELECT pg_catalog.pg_get_userbyid(relowner) FROM pg_catalog.pg_class WHERE relname = viewname AND relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = '\''public'\'')) = '\''postgres'\'') LOOP
+        EXECUTE '\''ALTER VIEW public.'\'' || quote_ident(r.viewname) || '\'' OWNER TO <DB_USER>'\'';
+    END LOOP;
+END$$;'
+
+# 8. Restore files via rclone to live PVC
+#    Run rclone copy from cloud bucket to the live app PVC:
+kubectl create job --from=cronjob/<APP>-rclone-backup <APP>-rclone-restore -n <NAMESPACE> --dry-run=client -o yaml \
+  | sed 's/rclone sync \/data/rclone copy/g; s/remote:backup-bucket\/<APP>/remote:backup-bucket\/<APP> \/data/g' \
+  | kubectl apply -f -
+
+kubectl wait --for=condition=complete job/<APP>-rclone-restore -n <NAMESPACE> --timeout=12h
+
+# 9. Disable maintenance mode (scale app to 1) and delete old pod to force migration
+#    Scale up deploy via Git/ArgoCD, then restart:
+kubectl delete pod -n <NAMESPACE> -l app.kubernetes.io/name=<APP>,app.kubernetes.io/component=server
+
+# 10. Cleanup
+kubectl delete pod restore-temp -n restore
+kubectl delete ns restore
+kubectl delete restore <APP>-restore -n backup
+kubectl delete job <APP>-rclone-restore -n <NAMESPACE>
 ```
 
 ---

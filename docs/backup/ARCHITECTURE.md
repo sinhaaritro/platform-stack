@@ -161,7 +161,7 @@ All schedules use a staggered daily window to avoid I/O contention:
 
 ## rclone — Tier 4: NFS User Data
 
-> **Status:** 🔜 Not yet implemented. This section describes the ideal architecture.
+> **Status:** 🟡 Semi-Active (Orchestration & sync are fully active using Longhorn RWX volumes; integration with physical NFS hardware is the final remaining task).
 
 ### Why Per-App rclone (Not Whole-NFS)
 
