@@ -34,6 +34,8 @@
 #         kubectl apply -f restore.yaml
 #      e) Verify completion (Phase: Completed):
 #         kubectl get restore immich-restore -n backup
+#         kubectl describe restore immich-restore -n backup
+#         (Look for completed)
 #
 #   5. Spin up temporary pod to mount the restored PVC in the restore namespace:
 #      cat <<'EOF' | kubectl apply -f -
@@ -92,4 +94,3 @@ spec:
     personal: restore
   existingResourcePolicy: none
   restorePVs: true
-
