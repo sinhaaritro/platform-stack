@@ -1,10 +1,10 @@
 apiVersion: velero.io/v1
 kind: Schedule
 metadata:
-  name: daily-immich
+  name: monthly-immich
   namespace: backup
 spec:
-  schedule: "30 20 * * *" # 02:00 AM IST (20:30 UTC)
+  schedule: "30 20 1 * *" # 02:00 AM IST on the 2nd (20:30 UTC on the 1st) of every month
   template:
     includedNamespaces:
       - personal
