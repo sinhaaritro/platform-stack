@@ -191,11 +191,11 @@ Themes are not limited to ancient mythology. Names from anime, sci-fi, video gam
 #### 6.2. Hostnames & FQDNs
 *Fully Qualified Domain Names for all physical and virtual machines.*
 -   **Internal FQDNs:** Used inside the local network for routing, SSH, or RDP.
-    -   *Fixed Physical Hosts:* `{host-codename}.{location}.internal.{domain}` (e.g., `atlas.asgard.internal.your.domain`)
-    -   *Mobile VMs & LXCs:* `{hostname}.internal.{domain}` (e.g., `ruth-master-01.internal.your.domain`)
+    -   *Fixed Physical Hosts:* `{host-codename}.{location}.{domain}` (e.g., `atlas.olympus.example.com`)
+    -   *Mobile VMs & LXCs:* `{hostname}.{location}.{domain}` (e.g., `k8s-node-01.olympus.example.com`)
 -   **External FQDNs (Public SSH/RDP):** Used when direct host access is exposed to the internet.
     -   *Obfuscation Rule:* Never use the internal hostname or location in public DNS. Use a generic, randomized, or abstract alias to prevent mapping/probing of your infrastructure.
-    -   *Example:* Exposing `ruth-master-01` via `bastion-alpha.your.domain` instead of exposing the cluster name.
+    -   *Example:* Exposing `k8s-node-01` via `bastion-alpha.your.domain` instead of exposing the cluster name.
 
 #### 6.3. IP Address Reservations
 *A scheme for assigning static IPs or managing DHCP reservations for stable network addresses.*
@@ -205,7 +205,7 @@ Themes are not limited to ancient mythology. Names from anime, sci-fi, video gam
 #### 6.4. DNS Records
 *The `A`, `CNAME`, `TXT`, and other records managed in your domain.*
 -   **Internal DNS Records:** Map services directly using their functional names.
-    -   *Pattern:* `{service-name}.internal.{domain}` (e.g., `grafana.internal.your.domain`)
+    -   *Pattern:* `{service-name}.{location}.{domain}` (e.g., `grafana.olympus.example.com`)
 -   **Public DNS Records (Obfuscated):** Used for services exposed externally via Cloudflare Tunnels.
     -   *Obfuscation Rule:* Publicly resolved endpoints should mask specific product names, clusters, or hosting nodes. Use generic role names or abstract codenames.
     -   *Generic Role Name Example:* `dash.your.domain` (masks that it is Grafana running on cluster `ruth`)
