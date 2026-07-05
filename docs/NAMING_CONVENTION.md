@@ -24,7 +24,7 @@ This document is the single source of truth for naming all resources within the 
 
 -   **Clarity over Brevity:** Names should be easy to understand for all users.
 -   **Logical Hierarchy:** It should be possible to guess the name and function of a related resource.
--   **Automation-Friendly:** All names **must** be `kebab-case` (lowercase, numbers, and hyphens) for script compatibility.
+-   **Automation-Friendly:** Both `kebab-case` and `snake_case` are acceptable depending on the context. Use `kebab-case` for Kubernetes, DNS, hostnames, and URLs (where underscores are illegal). Use `snake_case` for Ansible variables/groups and OpenTofu variables/modules (where hyphens are illegal or cause templating issues).
 -   **Clarity through Documentation:** All chosen thematic names **must** be documented in the tables below before being used.
 
 ---
@@ -70,9 +70,8 @@ Themes are not limited to ancient mythology. Names from anime, sci-fi, video gam
 
 | Category                | Theme Suggestions                               | Example          |
 | :---------------------- | :---------------------------------------------- | :--------------- |
-| **Kubernetes Clusters** | Constellations, Sci-Fi Fleets                   | `orion-cluster`  |
+| **Kubernetes Clusters** | Constellations, Sci-Fi Fleets                   | `orion`          |
 | **Kubernetes Namespaces** | Deities, Starship Classes, Elements             | `zeus-ns`        |
-| **Helm Releases**       | Moons, Famous Scientists, Fictional Characters  | `luna`           |
 | **Networking (VLANs)**  | Mythical Rivers, Sci-Fi Gates/Relays            | `styx-vlan`      |
 
 
@@ -104,11 +103,14 @@ Themes are not limited to ancient mythology. Names from anime, sci-fi, video gam
 -   **Pattern:** `{location-codename}-{host-codename}`
 -   **Example:** `asgard-atlas`
 
-#### 5.2. Virtual Machines (VMs)
-*All virtual machines, including Kubernetes nodes, utility servers, and Home Assistant instances.*
--   **Pattern:** `{location-codename}-{environment}-{role}-{instance}`
--   **Notes:** `environment` is omitted for `prod`. `instance` is `01`, `02`, etc.
--   **Examples:** `asgard-k8s-master-01`, `asgard-dev-authentik-01`
+#### 5.2. Virtual Machines (VMs) & LXC Containers
+*All virtual machines and LXC containers, including Kubernetes nodes, utility servers, and Home Assistant instances.*
+*VMs and LXC containers are mobile — they can migrate between hardware nodes and locations during failover. Therefore, names must be **location-agnostic**. Track location via labels/tags (see §12.4).*
+-   **K8s Node VMs:** `{cluster-name}-{role}-{instance}`
+    -   **Examples:** `ruth-master-01`, `ruth-worker-02`, `orion-worker-01`
+-   **Standalone VMs & LXC Containers:** `{env}-{purpose}-{instance}`
+    -   **Notes:** `env` is omitted for `prod`. `instance` is `01`, `02`, etc. LXC containers are always treated as standalone hosts.
+    -   **Examples:** `web-server-01`, `dev-authentik-01`, `adguard-01`
 
 #### 5.3. VM Templates
 *The base 'golden images' used by OpenTofu or Proxmox to provision new VMs.*
@@ -129,9 +131,9 @@ Themes are not limited to ancient mythology. Names from anime, sci-fi, video gam
 #### 5.6. Backup Jobs & Snapshots
 *Naming for backup tasks, snapshot schedules, and the resulting data artifacts.*
 -   **Jobs:** `{resource-type}-{resource-name}-{frequency}`
-    -   **Example:** `vm-asgard-k8s-master-01-daily`
+    -   **Example:** `vm-ruth-master-01-daily`
 -   **Snapshots:** `{resource-name}-{timestamp}` (often automated).
-    -   **Example:** `asgard-k8s-master-01-20250928T180000Z`
+    -   **Example:** `ruth-master-01-20250928T180000Z`
 
 
 ---
@@ -146,18 +148,26 @@ Themes are not limited to ancient mythology. Names from anime, sci-fi, video gam
 
 #### 6.2. Hostnames & FQDNs
 *Fully Qualified Domain Names for all physical and virtual machines.*
--   Hostnames follow resource patterns. FQDN is `hostname.your.domain`.
--   **Example:** `asgard-k8s-master-01.your.domain`
+-   **Internal FQDNs:** Used inside the local network for routing, SSH, or RDP.
+    -   *Fixed Physical Hosts:* `{host-codename}.{location}.internal.{domain}` (e.g., `atlas.asgard.internal.your.domain`)
+    -   *Mobile VMs & LXCs:* `{hostname}.internal.{domain}` (e.g., `ruth-master-01.internal.your.domain`)
+-   **External FQDNs (Public SSH/RDP):** Used when direct host access is exposed to the internet.
+    -   *Obfuscation Rule:* Never use the internal hostname or location in public DNS. Use a generic, randomized, or abstract alias to prevent mapping/probing of your infrastructure.
+    -   *Example:* Exposing `ruth-master-01` via `bastion-alpha.your.domain` instead of exposing the cluster name.
 
 #### 6.3. IP Address Reservations
 *A scheme for assigning static IPs or managing DHCP reservations for stable network addresses.*
 -   **Pattern:** Use a structured description field in your DHCP server: `{hostname} - {owner}`
--   **Example:** `asgard-k8s-master-01 - Alex`
+-   **Example:** `ruth-master-01 - Alex`
 
 #### 6.4. DNS Records
 *The `A`, `CNAME`, `TXT`, and other records managed in your domain.*
--   **Pattern:** `{service-name}.{subzone}.{domain}`
--   **Examples:** `grafana.your.domain`, `proxmox.asgard.your.domain`
+-   **Internal DNS Records:** Map services directly using their functional names.
+    -   *Pattern:* `{service-name}.internal.{domain}` (e.g., `grafana.internal.your.domain`)
+-   **Public DNS Records (Obfuscated):** Used for services exposed externally via Cloudflare Tunnels.
+    -   *Obfuscation Rule:* Publicly resolved endpoints should mask specific product names, clusters, or hosting nodes. Use generic role names or abstract codenames.
+    -   *Generic Role Name Example:* `dash.your.domain` (masks that it is Grafana running on cluster `ruth`)
+    -   *Abstract Codename Example:* `solaris.your.domain` (fully obfuscates access to a Proxmox Web UI or a critical service)
 
 #### 6.5. Cloudflare Tunnels
 *The specific tunnel configurations providing secure, external access to internal services.*
@@ -171,13 +181,16 @@ Themes are not limited to ancient mythology. Names from anime, sci-fi, video gam
 
 #### 7.1. Clusters
 *The Kubernetes clusters themselves, which orchestrate containerized applications.*
--   **Pattern:** `{location-codename}-{thematic-name}-cluster`
--   **Example:** `asgard-orion-cluster`
+*Clusters are logical — they can span hardware nodes and even locations. Names must be **location-agnostic**.*
+-   **Pattern:** `{thematic-name}`
+-   **Theme:** Constellations, Sci-Fi Fleets (must **not** overlap with Hardware Node themes).
+-   **Examples:** `ruth`, `orion`, `andromeda`
 
 #### 7.2. Nodes
 *The worker and control-plane VMs that form the cluster.*
--   The Kubernetes node name **must** match the VM hostname.
--   **Example:** `asgard-k8s-worker-01`
+-   The Kubernetes node name **must** match the VM hostname (see §5.2).
+-   **Pattern:** `{cluster-name}-{role}-{instance}`
+-   **Examples:** `ruth-master-01`, `ruth-worker-01`, `orion-worker-03`
 
 #### 7.3. Namespaces
 *Virtual clusters within Kubernetes used to separate applications and environments.*
@@ -185,21 +198,18 @@ Themes are not limited to ancient mythology. Names from anime, sci-fi, video gam
 -   **Theme:** Deities.
 -   **Example:** `zeus-ns` (networking), `freya-ns` (media).
 
-#### 7.4. Helm Release Names
-*The unique name for each application stack deployed via Helm.*
--   **Pattern:** A unique thematic name.
--   **Theme:** Moons.
--   **Example:** Deploying `prometheus-stack` with the release name `luna`.
-
-#### 7.5. Workloads, Services, Ingresses, ConfigMaps, Secrets
+#### 7.4. Workloads, Services, Ingresses, ConfigMaps, Secrets
 *All the core Kubernetes objects that define a running application.*
--   **Pattern:** `{release-name}-{chart-component}`. This is usually handled by Helm.
--   **Examples:** `luna-prometheus`, `luna-grafana-ingress`.
+-   **Helm Chart Apps:** Names are auto-generated by the chart via Kustomize `helmCharts`. The chart controls the naming (typically `{releaseName}-{component}`). Do not override these.
+-   **Hand-written Manifests (Docker→K8s):** When converting a Docker app to a Kubernetes manifest, use the following pattern:
+    -   **Pattern:** `{app-name}-{resource-type}`
+    -   **Examples:** `jellyfin-deployment`, `jellyfin-service`, `jellyfin-ingressroute`
+    -   **Labels:** Use `app: {app-name}` as the primary selector label.
 
-#### 7.6. Persistent Volume Claims (PVCs)
+#### 7.5. Persistent Volume Claims (PVCs)
 *Requests for storage made by applications running in the cluster.*
--   **Pattern:** `{release-name}-{component}-pvc`
--   **Example:** `gitea-data-pvc`
+-   **Pattern:** `{app-name}-{purpose}`
+-   **Examples:** `immich-library`, `immich-db-backup`, `obsidian-config`, `qbittorrent-downloads`
 
 
 ---
@@ -273,7 +283,7 @@ Themes are not limited to ancient mythology. Names from anime, sci-fi, video gam
 
 #### 10.4. Directory Structure
 *The folder layout within the GitOps repository is a form of convention.*
--   Use a logical structure, e.g., `/kubernetes/{cluster}/{namespace}/{release}.yaml`.
+-   Use a logical structure, e.g., `/kubernetes/clusters/{cluster}/{app-name}`.
 
 #### 10.5. Commit Messages
 *A standardized format for Git commit messages to ensure a clean, readable history.*

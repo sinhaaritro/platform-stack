@@ -149,8 +149,50 @@ filtering:
   rewrites:
     - domain: nginx.localhost
       answer: 192.168.0.14
-    - domain: traefik.localhost
+    - domain: jellyfin.localdev
       answer: 192.168.0.14
+    - domain: grafana.localdev
+      answer: 192.168.0.14
+    - domain: auth.localdev
+      answer: 192.168.0.14
+    - domain: radarr.localdev
+      answer: 192.168.0.14
+    - domain: sonarr.localdev
+      answer: 192.168.0.14
+    - domain: lidarr.localdev
+      answer: 192.168.0.14
+    - domain: readarr.localdev
+      answer: 192.168.0.14
+    - domain: whisparr.localdev
+      answer: 192.168.0.14
+    - domain: bazarr.localdev
+      answer: 192.168.0.14
+    - domain: jellyseerr.localdev
+      answer: 192.168.0.14
+    - domain: qbittorrent.localdev
+      answer: 192.168.0.14
+    - domain: gluetun.localdev
+      answer: 192.168.0.14
+    - domain: prowlarr.localdev
+      answer: 192.168.0.14
+    - domain: nginx.localdev
+      answer: 192.168.0.13
+    - domain: traefik.localdev
+      answer: 192.168.0.14
+    - domain: qbittorrentvpn.localdev
+      answer: 192.168.0.14
+    - domain: homepage.localdev
+      answer: 192.168.0.14
+    - domain: immich.localdev
+      answer: 192.168.0.14
+    - domain: obsidian.localdev
+      answer: 192.168.0.14
+    - domain: '*.ruth.example.com'
+      answer: 192.168.0.240
+    - domain: '*.arr.example.com'
+      answer: 192.168.0.230
+    - domain: '*.ruth.aritrosinha.dpdns.org'
+      answer: 192.168.0.240
   safe_fs_patterns:
     - /opt/AdGuardHome/userfilters/*
   safebrowsing_cache_size: 1048576
