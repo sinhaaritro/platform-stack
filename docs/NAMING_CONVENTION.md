@@ -52,6 +52,9 @@ Themes are not limited to ancient mythology. Names from anime, sci-fi, video gam
 | `babylon`     | History           | AWS cloud environment          |
 | `wano`        | One Piece         | Second homelab location        |
 | `coruscant`   | Star Wars         | Oracle Cloud environment       |
+| `olympus`     | Greek Mythology   | Primary cloud / management region |
+| `delphi`      | Greek Mythology   | Monitoring or staging location |
+| `elysium`     | Greek Mythology   | Backup or disaster recovery location |
 | *(add more)*  |                   |                                |
 
 ### Theme Table: Physical Hosts (Servers, NAS)
@@ -63,7 +66,11 @@ Themes are not limited to ancient mythology. Names from anime, sci-fi, video gam
 | `atlas`       | Greek Mythology   | First Proxmox host in `asgard` |
 | `prometheus`  | Greek Mythology   | Second Proxmox host in `asgard`|
 | `zunesha`     | One Piece         | TrueNAS server in `wano`       |
-| `godzilla`    | Toho               | Proxmox host with a GPU        |
+| `godzilla`    | Toho              | Proxmox host with a GPU        |
+| `yggdrasil`   | Norse Mythology   | Hypervisor host supporting multiple VMs |
+| `sleipnir`    | Norse Mythology   | High-speed network node / gateway host |
+| `fenrir`      | Norse Mythology   | High-performance compute / GPU node |
+| `jormungandr` | Norse Mythology   | Large-capacity storage / backup server |
 | *(add more)*  |                   |                                |
 
 ### Other Approved Themes
@@ -74,6 +81,41 @@ Themes are not limited to ancient mythology. Names from anime, sci-fi, video gam
 | **Kubernetes Namespaces** | Deities, Starship Classes, Elements             | `zeus-ns`        |
 | **Networking (VLANs)**  | Mythical Rivers, Sci-Fi Gates/Relays            | `styx-vlan`      |
 
+### Theme Table: Kubernetes Clusters
+*   **Purpose:** Names logical clusters running containerized workloads.
+*   **Source Ideas:** Constellations, Sci-Fi Fleets (must not overlap with Hardware Node themes).
+
+| Codename      | Source / Universe | Description / Role             |
+| :------------ | :---------------- | :----------------------------- |
+| `orion`       | Constellations    | Primary development cluster    |
+| `andromeda`   | Constellations    | Production cluster             |
+| `pegasus`     | Constellations    | Staging or auxiliary cluster   |
+| `enterprise`  | Star Trek         | Multi-tenant cluster           |
+| *(add more)*  |                   |                                |
+
+### Theme Table: Kubernetes Namespaces
+*   **Purpose:** Isolates workloads logically inside a cluster.
+*   **Source Ideas:** Deities, Starship Classes, Elements.
+
+| Codename      | Source / Universe | Description / Role             |
+| :------------ | :---------------- | :----------------------------- |
+| `zeus-ns`     | Greek Deities     | Core networking & ingress      |
+| `freya-ns`    | Norse Deities     | Media, storage & streaming     |
+| `apollo-ns`   | Greek Deities     | Observability & monitoring     |
+| `defiant-ns`  | Star Trek         | Isolated or DMZ security       |
+| *(add more)*  |                   |                                |
+
+### Theme Table: Networking (VLANs)
+*   **Purpose:** Segments network traffic physically or virtually.
+*   **Source Ideas:** Mythical Rivers, Sci-Fi Gates/Relays.
+
+| Codename       | Source / Universe | Description / Role             |
+| :------------- | :---------------- | :----------------------------- |
+| `styx-vlan`    | Greek Mythology   | Isolated database/backend VLAN |
+| `bifrost-vlan` | Norse Mythology   | Primary transit/gateway VLAN   |
+| `lethe-vlan`   | Greek Mythology   | Untrusted guest/IoT VLAN       |
+| `rubicon-vlan` | History / Sci-Fi  | DMZ/ingress entry network VLAN |
+| *(add more)*   |                   |                                |
 
 ---
 
