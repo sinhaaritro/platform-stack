@@ -2,8 +2,8 @@
 # -----------------------------------------------------------------------------
 # UBUNTU CUSTOMIZATION TEMPLATE
 # -----------------------------------------------------------------------------
-# This script downloads a base Ubuntu cloud image, fetches the qemu-guest-agent
-# and its dependencies, and uses virt-customize to inject them offline.
+# This script downloads a base Ubuntu cloud image, and uses virt-customize to 
+# install the guest agent and configure the system.
 # -----------------------------------------------------------------------------
 set -e
 
@@ -11,7 +11,6 @@ IMAGE_FILE="${image_file}"
 SOURCE_URL="${source_url}"
 TEMP_DIR="${temp_dir}"
 AGENT_PACKAGE="${agent_package}"
-AGENT_DEPS="${agent_dependencies}" # Space-separated string
 BUILD_NEEDED="${build_needed}"
 
 # Check if build is needed
@@ -28,38 +27,14 @@ if [ ! -f "$IMAGE_FILE" ]; then
   echo "Image not found locally. Downloading from $SOURCE_URL"
   wget -O "$IMAGE_FILE" "$SOURCE_URL"
 
-  echo "Downloading guest agent and its dependencies"
-  apt-get download "$AGENT_PACKAGE"
-  for dep in $AGENT_DEPS; do
-    apt-get download "$dep"
-  done
-
-  echo "Renaming downloaded packages for consistency"
-  AGENT_DEB_SRC=$(ls $AGENT_PACKAGE*.deb | head -n 1)
-  mv "$AGENT_DEB_SRC" "guest-agent.deb"
-  
-  i=0
-  for dep in $AGENT_DEPS; do
-    DEP_DEB_SRC=$(ls $dep*.deb | head -n 1)
-    mv "$DEP_DEB_SRC" "dependency-$i.deb"
-    i=$((i+1))
-  done
-
   # Build the virt-customize command dynamically
   echo "Constructing virt-customize command"
   VIRT_CMD="sudo virt-customize -a $IMAGE_FILE"
 
-  # 1. Install Dependencies FIRST
-  for deb in dependency-*.deb; do
-    if [ -f "$deb" ]; then
-       VIRT_CMD="$VIRT_CMD --upload $deb:/tmp/$deb --run-command 'dpkg -i /tmp/$deb'"
-    fi
-  done
+  # Install Guest Agent natively inside the guest chroot
+  VIRT_CMD="$VIRT_CMD --install $AGENT_PACKAGE"
 
-  # 2. Install Guest Agent SECOND
-  VIRT_CMD="$VIRT_CMD --upload guest-agent.deb:/tmp/guest-agent.deb --run-command 'dpkg -i /tmp/guest-agent.deb'"
-
-  # 3. Add System Configuration changes
+  # Add System Configuration changes
   # - Enable SSH (Critical Fix)
   # - Set Timezone
   # - Clean Cloud-Init logs
@@ -69,8 +44,8 @@ if [ ! -f "$IMAGE_FILE" ]; then
   VIRT_CMD="$VIRT_CMD --run-command 'cloud-init clean --logs --seed'"
   VIRT_CMD="$VIRT_CMD --run-command 'truncate -s 0 /etc/machine-id'"
 
-  # 4. Verify Installation
-  VIRT_CMD="$VIRT_CMD --run-command 'dpkg -s qemu-guest-agent'"
+  # Verify Installation
+  VIRT_CMD="$VIRT_CMD --run-command 'dpkg -s $AGENT_PACKAGE'"
 
   echo "Executing: $VIRT_CMD"
   

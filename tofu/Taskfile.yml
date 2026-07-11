@@ -18,6 +18,9 @@
 
 version: "3"
 
+env:
+  TMPDIR: "/var/tmp"
+
 # --- GLOBAL VARIABLES ---
 # These variables define the context for the tasks.
 vars:

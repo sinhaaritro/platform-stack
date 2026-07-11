@@ -53,7 +53,7 @@ locals {
       checksum_url      = "https://cloud-images.ubuntu.com/releases/server/%s/release/SHA256SUMS"
       checksum_regex    = "(?m)^([a-f0-9]{64})\\s+\\*?%s$"
       agent_package     = "qemu-guest-agent"
-      dependencies      = ["liburing2"]
+      dependencies      = ["liburing2", "ubuntu-virt", "ubuntu-helper-virt-hwe"]
       customize_script  = "customize_ubuntu.sh.tftpl"
     }
   }
