@@ -183,6 +183,9 @@ tasks:
           echo "  🎉 All tools ready!"
         fi
         echo "=============================================="
+        echo ""
+        echo "  Activate the Python venv in your terminal:"
+        echo "    source .venv/bin/activate"
 
   # ---------------------------------------------------------------------------
   # CORE WORKFLOWS
