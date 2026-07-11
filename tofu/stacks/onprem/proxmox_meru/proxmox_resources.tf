@@ -8,7 +8,7 @@ module "proxmox_vms" {
   source   = "../../../modules/proxmox_vm"
   for_each = local.final_vm_list
 
-  depends_on = [proxmox_virtual_environment_file.custom_image_upload]
+  depends_on = [module.image_pipeline]
 
   # Main info
   vm_id          = each.value.vm_id
@@ -61,7 +61,7 @@ module "module_lxc" {
   source   = "../../../modules/proxmox_lxc"
   for_each = local.final_lxc_list
 
-  depends_on = [proxmox_virtual_environment_file.custom_image_upload]
+  depends_on = [module.image_pipeline]
 
   # Main info
   vm_id       = each.value.vm_id
@@ -75,13 +75,13 @@ module "module_lxc" {
   unprivileged = each.value.unprivileged
 
   # Features 
-  nesting = true
-  fuse    = true
-  keyctl  = true
+  nesting = each.value.nesting
+  fuse    = each.value.fuse
+  keyctl  = each.value.keyctl
 
   # --- OS Template ---
-  template_file_id = "local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst"
-  os_type          = "debian"
+  template_file_id = each.value.template_file_id
+  os_type          = each.value.os_type
 
   # Hardware
   cpu_cores = each.value.cpu_cores

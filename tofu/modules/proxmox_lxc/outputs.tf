@@ -5,12 +5,11 @@
 # -----------------------------------------------------------------------------
 
 output "lxc_details" {
-  description = "A complete object containing all attributes of the created Proxmox LXC resource."
-  # By outputting the entire resource, we give the calling module full access
-  # to all computed values like IP/MAC addresses, final disk paths, etc.
-  value = merge(proxmox_virtual_environment_container.module_lxc,
-    {
-      "app_key" = var.app_key
-    }
-  )
+  description = "Filtered attributes of the created Proxmox LXC resource to avoid deprecated warnings."
+  value = {
+    id        = proxmox_virtual_environment_container.module_lxc.id
+    node_name = proxmox_virtual_environment_container.module_lxc.node_name
+    tags      = proxmox_virtual_environment_container.module_lxc.tags
+    app_key   = var.app_key
+  }
 }

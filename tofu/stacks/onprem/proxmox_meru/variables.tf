@@ -89,3 +89,12 @@ variable "resources" {
   type        = any
   default     = {}
 }
+
+# -----------------------------------------------------------------------------
+# DEBUG TOGGLE
+# -----------------------------------------------------------------------------
+variable "enable_debug" {
+  description = "Controls whether the diagnostic output 'DEBUG_Diagnostic' is rendered. When false, returns a clean status placeholder."
+  type        = bool
+  default     = true
+}

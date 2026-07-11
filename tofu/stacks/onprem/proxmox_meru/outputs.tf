@@ -4,41 +4,26 @@
 # This file contains outputs used for debugging and verifying the plan.
 # -----------------------------------------------------------------------------
 
-# output "DEBUG_Diagnostic" {
-#   description = "A summary of the data gathering and decision-making steps."
-
-#   value = {
-#     "STEP_1_GATHER_INFO" = {
-#       "a_OS_Images_Config"        = local.os_images
-#       "b_Proxmox_Datastore_Files" = local.existing_files_on_proxmox
-#     }
-#     "STEP_2_DECISION_MAKING" = {
-#       "a_Image_State_Hashes"       = local.image_state
-#       "b_Target_Image_Definitions" = local.final_image_defs
-#       "c_Build_Decisions" = {
-#         for k, v in local.build_decisions : k => (v == 1 ? "Build Required" : "No Build Needed")
-#       }
-#     }
-#     "STEP_3_PREPARE_LOCAL_IMAGE" = {
-#       "a_Description" = "Check 'null_resource.image_builder' state for per-version build status."
-#     }
-#     "STEP_4_UPLOAD_IMAGE" = {
-#       "a_Description" = "Check 'proxmox_virtual_environment_file.custom_image_upload' state for per-version upload status."
-#     }
-#     "STEP_5_FLATTEN_AND_MERGE" = {
-#       # Phase 1: normalized_resources is the pre-filter view (all clusters with defaults applied)
-#       "a_Normalized_Resources" = local.normalized_resources
-#       # Phase 2: split by type + flattened to per-node items
-#       "b_VM_Groups"      = local._vm_groups
-#       "c_LXC_Groups"     = local._lxc_groups
-#       "d_Flattened_VMs"  = local._flattened_vms
-#       "e_Flattened_LXCs" = local._flattened_lxcs
-#       # Phase 3: final outputs (enabled-only, fully resolved)
-#       "f_Final_VM_List"  = local.final_vm_list
-#       "g_Final_LXC_List" = local.final_lxc_list
-#     }
-#   }
-# }
+output "DEBUG_Diagnostic" {
+  description = "A summary of the data gathering, decision-making, and normalization steps."
+  value = {
+    status      = var.enable_debug ? "active" : "disabled"
+    environment = "proxmox_meru"
+    message     = var.enable_debug ? "Diagnostic debugging output is active." : "Diagnostic debugging output is disabled. Set 'enable_debug = true' in your tfvars to enable."
+    data = var.enable_debug ? {
+      "IMAGE_PIPELINE" = module.image_pipeline.debug_info
+      "STEP_5_FLATTEN_AND_MERGE" = {
+        "a_Normalized_Resources" = local.normalized_resources
+        "b_VM_Groups"            = local._vm_groups
+        "c_LXC_Groups"           = local._lxc_groups
+        "d_Flattened_VMs"        = local._flattened_vms
+        "e_Flattened_LXCs"       = local._flattened_lxcs
+        "f_Final_VM_List"        = local.final_vm_list
+        "g_Final_LXC_List"       = local.final_lxc_list
+      }
+    } : null
+  }
+}
 
 
 output "created_vms" {

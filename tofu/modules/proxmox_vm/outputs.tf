@@ -5,13 +5,15 @@
 # -----------------------------------------------------------------------------
 
 output "vm_details" {
-  description = "A complete object containing all attributes of the created Proxmox VM resource."
-  # By outputting the entire resource, we give the calling module full access
-  # to all computed values like IP/MAC addresses, final disk paths, etc.
-  value = merge(proxmox_virtual_environment_vm.module_vm,
-    {
-      "app_key"        = var.app_key
-      "ansible_groups" = var.ansible_groups
-    }
-  )
+  description = "Filtered attributes of the created Proxmox VM resource to avoid deprecated warnings."
+  value = {
+    id             = proxmox_virtual_environment_vm.module_vm.id
+    name           = proxmox_virtual_environment_vm.module_vm.name
+    node_name      = proxmox_virtual_environment_vm.module_vm.node_name
+    tags           = proxmox_virtual_environment_vm.module_vm.tags
+    ipv4_addresses = proxmox_virtual_environment_vm.module_vm.ipv4_addresses
+    initialization = proxmox_virtual_environment_vm.module_vm.initialization
+    app_key        = var.app_key
+    ansible_groups = var.ansible_groups
+  }
 }

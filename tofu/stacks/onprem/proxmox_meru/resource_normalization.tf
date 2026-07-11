@@ -291,6 +291,7 @@ locals {
       memory_size = coalesce(item.node_override.lxc_config.memory_size, item.app_group.lxc_config.memory_size)
 
       disk_datastore_id = coalesce(item.node_override.lxc_config.disk_datastore_id, item.app_group.lxc_config.disk_datastore_id, var.target_datastore)
+      template_file_id  = coalesce(item.node_override.lxc_config.template_file_id, item.app_group.lxc_config.template_file_id)
       os_type           = coalesce(item.node_override.lxc_config.os_type, item.app_group.lxc_config.os_type)
       disk_size         = coalesce(item.node_override.lxc_config.disk_size, item.app_group.lxc_config.disk_size)
 

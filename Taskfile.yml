@@ -45,13 +45,13 @@ tasks:
 
 
   env:init:system:
-    desc: "Install system-level dependencies (python3-venv, python3-pip, sshpass)"
+    desc: "Install system-level dependencies (python3-venv, python3-pip, sshpass, libguestfs-tools)"
     internal: true
     cmds:
       - |
         echo "Installing system dependencies..."
         sudo apt-get update -qq
-        sudo apt-get install -y -qq python3-venv python3-pip sshpass
+        sudo apt-get install -y -qq python3-venv python3-pip sshpass libguestfs-tools
         echo "✅ System dependencies ready."
 
   env:init:tofu:
@@ -150,18 +150,18 @@ tasks:
             helm)
               version=$(helm version 2>/dev/null | grep -oE 'Version:"v[^"]+"' | head -n1 | cut -d'"' -f2)
               ;;
-            kubeseal)
-              version=$(kubeseal --version 2>/dev/null | awk '{print $NF}')
+            virt-customize)
+              version=$(virt-customize --version 2>/dev/null | awk '{print $2}')
               ;;
           esac
-          printf "  ✅ %-12s %s\n" "$cmd" "$version"
+          printf "  ✅ %-15s %s\n" "$cmd" "$version"
         }
 
-        for cmd in tofu kubectl helm kubeseal; do
+        for cmd in tofu kubectl helm kubeseal virt-customize; do
           if command -v "$cmd" > /dev/null 2>&1; then
             print_version "$cmd"
           else
-            printf "  ❌ %-12s NOT FOUND\n" "$cmd"
+            printf "  ❌ %-15s NOT FOUND\n" "$cmd"
             FAIL=1
           fi
         done
@@ -169,9 +169,9 @@ tasks:
         for venv_cmd in ansible ansible-playbook ansible-vault ansible-lint; do
           if [ -f ".venv/bin/$venv_cmd" ]; then
             VERSION=$(.venv/bin/$venv_cmd --version 2>/dev/null | head -1)
-            printf "  ✅ %-12s %s\n" "$venv_cmd" "$VERSION"
+            printf "  ✅ %-15s %s\n" "$venv_cmd" "$VERSION"
           else
-            printf "  ❌ %-12s NOT FOUND\n" "$venv_cmd"
+            printf "  ❌ %-15s NOT FOUND\n" "$venv_cmd"
             FAIL=1
           fi
         done
