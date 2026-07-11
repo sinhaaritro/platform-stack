@@ -1,0 +1,16 @@
+# =============================================================================
+# Python Dependencies for the Platform Stack Control Plane
+# =============================================================================
+# Install with: .venv/bin/pip install -r requirements.txt
+#
+# These are the tools needed on the CODE SERVER (hephaestus) to manage the
+# remote infrastructure. They are NOT installed on the target cluster VMs.
+# =============================================================================
+
+# --- Core IaC Tools ---
+ansible>=10.0,<12.0
+ansible-lint>=25.0
+
+# --- Utilities ---
+# Jinja2 is pulled by Ansible, but pinning for template debugging
+jinja2>=3.1

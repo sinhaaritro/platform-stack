@@ -19,29 +19,170 @@ tasks:
   # ---------------------------------------------------------------------------
 
   env:init:
-    desc: "Setup full development environment (Python venv + Platform Tools)"
+    desc: "Setup full development environment and Platform Tools"
+    summary: |
+      Bootstraps the control-plane code server with everything
+      needed to manage remote infrastructure. This machine does NOT run
+      workloads — it only runs commands against remote targets.
+
+      Sub-tasks run idempotently (skip if already installed).
+      Prerequisites: sudo access, internet connectivity, Task (pre-installed).
+    cmds:
+      - task: env:init:system
+      - task: env:init:python
+      - task: env:init:tofu
+      - task: env:init:kubectl
+      - task: env:init:helm
+      - task: env:init:kubeseal
+      - task: env:verify
+      - echo ""
+      - echo "👉 Activate the Python venv in your terminal:"
+      - echo "   source .venv/bin/activate"
+
+  # ---------------------------------------------------------------------------
+  # ENV:INIT SUB-TASKS
+  # ---------------------------------------------------------------------------
+
+
+  env:init:system:
+    desc: "Install system-level dependencies (python3-venv, python3-pip, sshpass)"
+    internal: true
     cmds:
       - |
-        echo "--> Installing system dependencies..."
-        sudo apt update && sudo apt install -y python3-venv python3-pip
-        
-        echo "--> Installing/Updating Platform Tools (kubectl, helm, kustomize)..."
-        # kubectl
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-        sudo install -o root -g root -m 0755 kubectl /usr/bin/kubectl
-        rm kubectl
-        # helm
-        curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-        # kustomize
-        curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
-        sudo install -o root -g root -m 0755 kustomize /usr/bin/kustomize
-        rm kustomize
+        echo "Installing system dependencies..."
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq python3-venv python3-pip sshpass
+        echo "✅ System dependencies ready."
 
-        echo "--> Initializing Python Virtual Environment..."
+  env:init:tofu:
+    desc: "Install OpenTofu via official apt repository"
+    internal: true
+    status:
+      - command -v tofu
+    cmds:
+      - |
+        echo "Installing OpenTofu..."
+        sudo install -m 0755 -d /etc/apt/keyrings
+        curl -fsSL https://get.opentofu.org/opentofu.gpg | sudo tee /etc/apt/keyrings/opentofu.gpg >/dev/null
+        curl -fsSL https://packages.opentofu.org/opentofu/tofu/gpgkey | sudo gpg --no-tty --batch --dearmor -o /etc/apt/keyrings/opentofu-repo.gpg 2>/dev/null
+        sudo chmod a+r /etc/apt/keyrings/opentofu.gpg /etc/apt/keyrings/opentofu-repo.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/opentofu.gpg,/etc/apt/keyrings/opentofu-repo.gpg] https://packages.opentofu.org/opentofu/tofu/any/ any main" | sudo tee /etc/apt/sources.list.d/opentofu.list > /dev/null
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq tofu
+        echo "✅ OpenTofu installed."
+
+  env:init:python:
+    desc: "Create Python venv and install Ansible + tools"
+    internal: true
+    cmds:
+      - |
+        echo "Setting up Python virtual environment..."
         python3 -m venv .venv
-        ./.venv/bin/pip install --upgrade pip
-        
-        echo "--> Setup complete. Scoped Python is at ./.venv/bin/python"
+        ./.venv/bin/pip install --upgrade pip --quiet
+        ./.venv/bin/pip install -r requirements.txt --quiet
+        echo "✅ Python venv ready at .venv/ (ansible $(. .venv/bin/activate && ansible --version | head -1))"
+
+  env:init:kubectl:
+    desc: "Install kubectl (latest stable)"
+    internal: true
+    status:
+      - command -v kubectl
+    cmds:
+      - |
+        echo "Installing kubectl..."
+        KUBECTL_VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+        curl -fsSLO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+        sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+        rm -f kubectl
+        echo "✅ kubectl ${KUBECTL_VERSION} installed."
+
+  env:init:helm:
+    desc: "Install Helm 3"
+    internal: true
+    status:
+      - command -v helm
+    cmds:
+      - |
+        echo "Installing Helm..."
+        curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+        echo "✅ Helm installed."
+
+
+  env:init:kubeseal:
+    desc: "Install kubeseal CLI for Sealed Secrets"
+    internal: true
+    status:
+      - command -v kubeseal
+    cmds:
+      - |
+        echo "Installing kubeseal..."
+        KUBESEAL_VERSION=$(curl -s https://api.github.com/repos/bitnami/sealed-secrets/tags | grep '"name"' | head -1 | sed -E 's/.*"v([^"]+)".*/\1/')
+        if [ -z "$KUBESEAL_VERSION" ]; then
+          echo "Failed to fetch the latest kubeseal version"
+          exit 1
+        fi
+        curl -fsSLO "https://github.com/bitnami/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz"
+        tar -xzf "kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz" kubeseal
+        sudo install -m 755 kubeseal /usr/local/bin/kubeseal
+        rm -f kubeseal "kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz"
+        echo "✅ kubeseal v${KUBESEAL_VERSION} installed."
+
+  env:verify:
+    desc: "Verify all platform tools are installed and accessible"
+    cmds:
+      - |
+        echo ""
+        echo "=============================================="
+        echo "        Platform Tool Verification"
+        echo "=============================================="
+        FAIL=0
+        # Function to print version cleanly
+        print_version() {
+          local cmd=$1
+          local version=""
+          case "$cmd" in
+            tofu)
+              version=$(tofu --version | head -n1 | awk '{print $NF}')
+              ;;
+            kubectl)
+              version=$(kubectl version --client 2>/dev/null | head -n1 | awk '{print $NF}')
+              ;;
+            helm)
+              version=$(helm version 2>/dev/null | grep -oE 'Version:"v[^"]+"' | head -n1 | cut -d'"' -f2)
+              ;;
+            kubeseal)
+              version=$(kubeseal --version 2>/dev/null | awk '{print $NF}')
+              ;;
+          esac
+          printf "  ✅ %-12s %s\n" "$cmd" "$version"
+        }
+
+        for cmd in tofu kubectl helm kubeseal; do
+          if command -v "$cmd" > /dev/null 2>&1; then
+            print_version "$cmd"
+          else
+            printf "  ❌ %-12s NOT FOUND\n" "$cmd"
+            FAIL=1
+          fi
+        done
+        # Check venv tools by file path (not PATH-dependent)
+        for venv_cmd in ansible ansible-playbook ansible-vault ansible-lint; do
+          if [ -f ".venv/bin/$venv_cmd" ]; then
+            VERSION=$(.venv/bin/$venv_cmd --version 2>/dev/null | head -1)
+            printf "  ✅ %-12s %s\n" "$venv_cmd" "$VERSION"
+          else
+            printf "  ❌ %-12s NOT FOUND\n" "$venv_cmd"
+            FAIL=1
+          fi
+        done
+        echo "=============================================="
+        if [ "$FAIL" -eq 1 ]; then
+          echo "  ⚠️  Some tools are missing. Run: task env:init"
+          exit 1
+        else
+          echo "  🎉 All tools ready!"
+        fi
+        echo "=============================================="
 
   # ---------------------------------------------------------------------------
   # CORE WORKFLOWS
