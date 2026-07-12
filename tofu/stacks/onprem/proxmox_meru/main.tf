@@ -21,10 +21,19 @@ module "normalizer" {
 # Downloads cloud images from upstream and customizes them with virt-customize.
 # Hypervisor independent. Outputs local qcow2 file paths.
 
-# ─── Data Sources ────────────────────────────────────────────────────────────
 data "proxmox_files" "proxmox_files" {
+  # Get a list of exiting files present in the target datastore, to prevent
+  # rebuilding images that already exist.
   node_name    = var.target_node
   datastore_id = var.target_datastore
+}
+
+locals {
+  # Parse storage contents from the native Proxmox data lookup.
+  existing_files_on_proxmox = [
+    for item in data.proxmox_files.proxmox_files.files :
+    item.file_name
+  ]
 }
 
 # ─── Build OS Images Locally ──────────────────────────────────────────────────
@@ -54,6 +63,15 @@ resource "proxmox_virtual_environment_file" "image_upload" {
 # ─── Step 4: Create Virtual Machines (VMs) ───────────────────────────────────
 # This block iterates over our final, flattened map of VMs and calls the
 # proxmox_vm module passing in its resolved configuration.
+
+locals {
+  # Maps the composite builder key (e.g., "ubuntu-24.04") to the uploaded path on Proxmox datastore.
+  image_import_paths = {
+    for key, img in module.image_builder.built_images :
+    key => "${var.target_datastore}:import/${img.filename}"
+  }
+}
+
 module "proxmox_vms" {
   source   = "../../../modules/proxmox_vm"
   for_each = module.normalizer.final_vm_list
@@ -164,15 +182,46 @@ module "inventory" {
   inventory_dir = "${path.root}/../../../../ansible/inventory.d"
 }
 
-# -----------------------------------------------------------------------------
-# STEP 7: TERRAFORM OUTPUT
-# -----------------------------------------------------------------------------
-# Logic extracted to: outputs.tf
-# 
-# Input:
-#   local.final_vm_list   → map of enabled VMs,  keyed by node name
-#   local.final_lxc_list  → map of enabled LXCs, keyed by node name
-# 
-# Output:
-#   cli_outputs
-# -----------------------------------------------------------------------------
+# ─── Step 7: Diagnostic and Resource Outputs ─────────────────────────────────
+output "DEBUG_Diagnostic" {
+  description = "A summary of the data gathering, decision-making, and normalization steps."
+  sensitive   = true
+  value = {
+    status      = var.enable_debug ? "active" : "disabled"
+    environment = "proxmox_meru"
+    message     = var.enable_debug ? "Diagnostic debugging output is active." : "Diagnostic debugging output is disabled. Set 'enable_debug = true' in your tfvars to enable."
+    data = var.enable_debug ? {
+      "IMAGE_PIPELINE"           = module.image_builder.debug_info
+      "STEP_5_FLATTEN_AND_MERGE" = module.normalizer.debug_info
+    } : null
+  }
+}
+
+output "created_vms" {
+  description = "A map of all virtual machines created by this stack, keyed by their names."
+  value = {
+    for vm_name, vm_instance in module.proxmox_vms :
+    vm_name => {
+      id         = vm_instance.vm_details.id
+      name       = vm_instance.vm_details.name
+      node_name  = vm_instance.vm_details.node_name
+      tags       = vm_instance.vm_details.tags
+      ip_address = try([for addr in flatten(vm_instance.vm_details.ipv4_addresses) : addr if addr != "127.0.0.1"][0], "pending")
+    }
+  }
+  sensitive = false
+}
+
+output "created_lxcs" {
+  description = "A map of all LXC containers created by this stack, keyed by their names."
+  value = {
+    for lxc_name, lxc_instance in module.module_lxc :
+    lxc_name => {
+      id        = lxc_instance.lxc_details.id
+      name      = lxc_name
+      node_name = lxc_instance.lxc_details.node_name
+      tags      = lxc_instance.lxc_details.tags
+    }
+  }
+  sensitive = false
+}
