@@ -30,8 +30,14 @@ vars:
   # Example: task apply STACK_NAME=proxmox_meru
   STACK_NAME: '{{.STACK_NAME | default ""}}'
 
-  # STACK_DIR: Constructs the full path to the target stack directory.
-  STACK_DIR: "./tofu/stacks/onprem/{{.STACK_NAME}}"
+  # STACK_DIR: Dynamically finds the stack folder in onprem/ or cloud/.
+  STACK_DIR:
+    sh: |
+      if [ -d "./tofu/stacks/onprem/{{.STACK_NAME}}" ] && [ -n "{{.STACK_NAME}}" ]; then
+        echo "./tofu/stacks/onprem/{{.STACK_NAME}}"
+      else
+        echo "./tofu/stacks/cloud/{{.STACK_NAME}}"
+      fi
 
   # CONFIG_FILE: The name of the non-secret .tfvars file for the stack.
   CONFIG_FILE: "schema.tfvars"
@@ -59,6 +65,8 @@ tasks:
     preconditions:
       - sh: 'test -n "{{.STACK_NAME}}"'
         msg: "Error: STACK_NAME is required. Usage: task tofu:<task> STACK_NAME=<stack_name>"
+      - sh: 'test -f main.tf'
+        msg: "Error: Stack '{{.STACK_NAME}}' is not a valid OpenTofu stack (main.tf not found)."
     cmds:
       - tofu init -upgrade
 

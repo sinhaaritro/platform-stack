@@ -221,7 +221,13 @@ tasks:
 
   vm:build:
     desc: "Completely build VMs and provision with Ansible (Smart Wait)"
+    preconditions:
+      - sh: 'test -n "{{.STACK_NAME}}"'
+        msg: "Error: STACK_NAME is required. Usage: task vm:build STACK_NAME=<stack_name>"
     cmds:
       - task: tofu:apply:approve
+        vars: { STACK_NAME: "{{.STACK_NAME}}" }
       - task: ansible:wait-ready
+        vars: { INVENTORY_FILE: "inventory.d/{{.STACK_NAME}}.yml" }
       - task: ansible:apply:all
+        vars: { INVENTORY_FILE: "inventory.d/{{.STACK_NAME}}.yml" }
