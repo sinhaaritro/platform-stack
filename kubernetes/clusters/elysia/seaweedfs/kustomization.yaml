@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: storage
+
+resources:
+  - ../../../apps/infrastructure/seaweedfs/base
+
+components:
+  - ../../../apps/infrastructure/seaweedfs/components/s3-config
+  - ../../../apps/infrastructure/seaweedfs/components/replicas-1
+  - ../../../apps/infrastructure/seaweedfs/components/storage-longhorn
+  - ../../../apps/infrastructure/seaweedfs/components/filer-client-service
+  - ../../../apps/infrastructure/seaweedfs/components/admin
+  - ../../../apps/infrastructure/seaweedfs/components/ingress
+
+  # - ../../../apps/infrastructure/seaweedfs/components/maintenance # Uncomment to scale down statefulsets

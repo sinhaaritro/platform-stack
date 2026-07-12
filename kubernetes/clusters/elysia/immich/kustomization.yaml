@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../../apps/services/immich/base
+components:
+  - ../../../apps/services/immich/components/init-db
+  - ../../../apps/services/immich/components/ingress
+  - ../../../apps/services/immich/components/storage
+  - ../../../apps/services/immich/components/secrets
+  - ../../../apps/services/immich/components/resource-limits
+  - ../../../apps/services/immich/components/replica-count
+  - ../../../apps/services/immich/components/config
+  - ../../../apps/services/immich/components/backup-hooks
+  - ../../../apps/services/immich/components/rclone-archive
+  # - ../../../apps/services/immich/components/maintenance

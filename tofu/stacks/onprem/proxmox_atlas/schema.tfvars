@@ -70,9 +70,9 @@ resources = {
         "sealed_secrets_master_key_path" : "kubernetes/clusters/hyperion/sealed-secrets/master.secret.yaml"
         "sealed_secrets_master_key_revision" : "HEAD"
       },
-      # "k_management" = {
-      #   "argocd_managed_fleets" : "quanta"
-      # }
+      "k_management" = {
+        "argocd_managed_fleets" : "quanta"
+      }
     }
 
     vm_config = {
@@ -214,6 +214,59 @@ resources = {
       }
     }
   },
+  "elysia" = {
+    enabled     = true
+    type        = "vm"
+    node_name   = "atlas"
+    description = "Kubernets servers. Ubuntu 24.04."
+    tags        = ["elysia", "ansible", "ubuntu", "k3s", "k_management"]
+    ansible_groups = {
+      "timezone" = {
+        "user_timezone" = "Asia/Kolkata"
+        "user_locale"   = "en_US.UTF-8"
+      },
+      "k3s" = {
+        "k3s_bootstrap_node" : "elysia-01"
+        "sealed_secrets_master_key_url" : "https://github.com/sinhaaritro/platform-stack.git"
+        "sealed_secrets_master_key_path" : "kubernetes/clusters/elysia/sealed-secrets/master.secret.yaml"
+        "sealed_secrets_master_key_revision" : "HEAD"
+      },
+      "argocd" = {
+        "argocd_git_repo_path" : "kubernetes/bootstrap/elysia"
+      }
+    }
+
+    vm_config = {
+      cpu_cores         = 4
+      memory_size       = 8192
+      disk_datastore_id = "WD1TB"
+      os_version        = "24.04"
+      disk_size         = 24
+    }
+
+    nodes = {
+      "elysia-01" = {
+        vm_id           = 1050
+        tags            = ["k_control"]
+        cloud_init_user = "dev"
+        vm_config = {
+          ipv4_address = "192.168.0.50/24"
+          cpu_cores    = 12
+          memory_size  = 16384
+          disk_size    = 32
+          additional_disks = [
+            {
+              interface    = "scsi1"
+              datastore_id = "WD4TB"
+              size         = 150
+              ssd          = true
+            }
+          ]
+        }
+      }
+    }
+  },
+
 
   "web_server" = {
     enabled     = true

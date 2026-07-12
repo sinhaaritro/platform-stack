@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: logging
+
+resources:
+  - ../../../apps/infrastructure/loki/base
+
+components:
+  - ../../../apps/infrastructure/loki/components/enable-backend
+  - ../../../apps/infrastructure/loki/components/minimal-replicas
+  - ../../../apps/infrastructure/loki/components/resource-limits
+  - ../../../apps/infrastructure/loki/components/storage-s3
+  - ../../../apps/infrastructure/loki/components/storage-retention
+  - ../../../apps/infrastructure/loki/components/storage-pvc
+  - ../../../apps/infrastructure/loki/components/ingress
+  # - ../../../apps/infrastructure/loki/components/maintenance
