@@ -85,7 +85,7 @@ variable "target_datastore" {
 # -----------------------------------------------------------------------------
 # TODO: Add hardware template
 variable "resources" {
-  description = "A map of VM/LXC cluster definitions. Uses 'any' to allow heterogeneous ansible_groups per cluster — each cluster's ansible_groups map may have a completely different key/value structure. All defaults and validation are applied in resource_normalization.tf."
+  description = "A map of VM/LXC cluster definitions. Uses 'any' to allow heterogeneous ansible_groups per cluster — each cluster's ansible_groups map may have a completely different key/value structure. All defaults and validation are applied in the 'resource_normalizer' module."
   type        = any
   default     = {}
 }

@@ -8,7 +8,7 @@
 # -----------------------------------------------------------------------------
 
 locals {
-  # --- STEP 7.A: Create a Flattened List of All Host-to-Group Mappings ---
+  # --- STEP 6.A: Create a Flattened List of All Host-to-Group Mappings ---
   # This is the first phase of the render. It creates a simple list of objects,
   # where each object represents one VM belonging to one group. We create a
   # mapping for every tag the VM has. This logic only uses data known at
@@ -36,7 +36,7 @@ locals {
     ]
   ])
 
-  # --- STEP 7.B: Transform the Flat List into a Grouped Map ---
+  # --- STEP 6.B: Transform the Flat List into a Grouped Map ---
   # This takes the flat list from the previous step and groups the hostnames
   # by their group name (tag). The result is a map where the key is the group
   # and the value is a list of hostnames.
@@ -45,7 +45,7 @@ locals {
     mapping.group => mapping.host...
   }
 
-  # --- STEP 7.C: Create a Master Map of All Created Module Outputs ---
+  # --- STEP 6.C: Create a Master Map of All Created Module Outputs ---
   # This local combines the outputs from the 'proxmox_vms' module into a single,
   # easy-to-query map, keyed by the VM's name. This will hold the final,
   # computed data like IP addresses after the 'apply' is complete.
@@ -55,7 +55,7 @@ locals {
   }
 }
 
-# --- STEP 7.D: Create the Ansible Inventory File Directly ---
+# --- STEP 6.D: Create the Ansible Inventory File Directly ---
 resource "local_file" "ansible_inventory" {
   # The 'content' is rendered from our template file.
   content = templatefile("${path.module}/templates/ansible_inventory.yml.tftpl", {
