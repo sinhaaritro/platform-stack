@@ -7,6 +7,7 @@
       - ca-certificates
       - curl
       - gpg
+      - python3-debian
     state: present
     update_cache: true
   tags: [k8s, repo]
@@ -27,9 +28,11 @@
   tags: [k8s, repo]
 
 - name: Add Kubernetes APT repository
-  ansible.builtin.apt_repository:
-    repo: "deb [signed-by={{ k8s_keyring_dir }}/{{ k8s_keyring_file }}] https://pkgs.k8s.io/core:/stable:/{{ k8s_repo_version }}/deb/ /"
-    filename: kubernetes
+  ansible.builtin.deb822_repository:
+    name: kubernetes
+    types: [deb]
+    uris: "https://pkgs.k8s.io/core:/stable:/{{ k8s_repo_version }}/deb/"
+    suites: ["/"]
+    signed_by: "{{ k8s_keyring_dir }}/{{ k8s_keyring_file }}"
     state: present
-    update_cache: true
   tags: [k8s, repo]

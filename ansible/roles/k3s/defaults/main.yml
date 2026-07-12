@@ -18,4 +18,3 @@ k3s_sysctl_params:
 
 # Networking Fallbacks
 k3s_cluster_cidr: "10.244.0.0/16"
-

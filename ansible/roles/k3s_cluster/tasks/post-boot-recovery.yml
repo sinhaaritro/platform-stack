@@ -14,7 +14,7 @@
   ansible.builtin.apt:
     name: jq
     state: present
-  when: ansible_os_family == "Debian"
+  when: ansible_facts.os_family == "Debian"
 
 # 3. Deploy the systemd service unit
 - name: Deploy K3s post-boot recovery systemd service
@@ -24,11 +24,11 @@
     owner: root
     group: root
     mode: "0644"
-  register: recovery_service
+  register: k3s_cluster_recovery_service
 
 # 4. Enable the service (runs on every boot)
 - name: Enable K3s post-boot recovery service
   ansible.builtin.systemd:
     name: k3s-post-boot-recovery
     enabled: true
-    daemon_reload: "{{ recovery_service.changed }}"
+    daemon_reload: "{{ k3s_cluster_recovery_service.changed }}"
