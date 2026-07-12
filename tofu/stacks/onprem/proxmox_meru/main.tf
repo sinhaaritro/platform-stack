@@ -2,8 +2,7 @@
 # RESOURCE ORCHESTRATION
 # -----------------------------------------------------------------------------
 # This file defines the sequence of resources to create the infrastructure
-# for the 'proxmox_meru' stack. It uses data from 'data.tf' and 'locals.tf'
-# to decide how to act.
+# for the stack.
 # -----------------------------------------------------------------------------
 
 # ─── Step 1: Normalize Resources ─────────────────────────────────────────────
@@ -21,6 +20,14 @@ module "normalizer" {
 # ─── Step 2: Build OS Images Locally (Generic) ───────────────────────────────
 # Downloads cloud images from upstream and customizes them with virt-customize.
 # Hypervisor independent. Outputs local qcow2 file paths.
+
+# ─── Data Sources ────────────────────────────────────────────────────────────
+data "proxmox_files" "proxmox_files" {
+  node_name    = var.target_node
+  datastore_id = var.target_datastore
+}
+
+# ─── Build OS Images Locally ──────────────────────────────────────────────────
 module "image_builder" {
   source           = "../../../modules/image_builder"
   requested_images = module.normalizer.requested_os_images
@@ -73,7 +80,7 @@ module "proxmox_vms" {
   disk_datastore_id = each.value.disk_datastore_id
   disk_size         = each.value.disk_size
   disk_ssd          = each.value.disk_ssd
-  source_image_path = local.final_image_paths[each.value.os_version]
+  source_image_path = local.image_import_paths["${each.value.os_type}-${each.value.os_version}"]
 
 
   # Network
@@ -149,7 +156,6 @@ module "module_lxc" {
 # ─── Step 6: Generate Ansible Inventory ───────────────────────────────────────
 # Instantiates the shared ansible_inventory module to write the dynamic hosts
 # inventory file for this stack.
-# -----------------------------------------------------------------------------
 module "inventory" {
   source        = "../../../modules/ansible_inventory"
   stack_name    = "proxmox_meru"

@@ -229,7 +229,7 @@ resources = {
       cpu_cores         = 2
       memory_size       = 2048
       disk_datastore_id = "WD1TB"
-      os_version        = "24.04"
+      os_version        = "25.04"
       disk_size         = 16
     }
 
