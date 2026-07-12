@@ -19,8 +19,8 @@ version: "3"
 
 # GLOBAL VARIABLES
 vars:
-  # INVENTORY_FILE: Path to the inventory file.
-  INVENTORY_FILE: "inventory.yml"
+  # INVENTORY_FILE: Path to the inventory directory (or a specific yml file).
+  INVENTORY_FILE: "inventory.d"
   # PLAYBOOK_FILE: Path to the main site playbook.
   PLAYBOOK_FILE: "site.yml"
 
