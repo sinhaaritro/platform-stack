@@ -37,7 +37,7 @@ resources = {
     vm_config = {
       cpu_cores         = 2
       memory_size       = 2048
-      disk_datastore_id = "WD1TB"
+      disk_datastore_id = "WD4TB"
       os_version        = "24.04"
       disk_size         = 16
     }
@@ -78,7 +78,7 @@ resources = {
     vm_config = {
       cpu_cores         = 4
       memory_size       = 8192
-      disk_datastore_id = "WD1TB"
+      disk_datastore_id = "WD4TB"
       os_version        = "24.04"
       disk_size         = 24
     }
@@ -104,7 +104,7 @@ resources = {
         }
       },
       "hyperion-02" = {
-        enabled         = false
+        enabled         = true
         vm_id           = 1041
         tags            = ["k_worker"]
         cloud_init_user = "dev"
@@ -140,7 +140,7 @@ resources = {
     }
   },
   "quanta" = {
-    enabled     = false
+    enabled     = true
     type        = "vm"
     node_name   = "atlas"
     description = "Kubernets servers. Ubuntu 24.04."
@@ -158,7 +158,7 @@ resources = {
     vm_config = {
       cpu_cores         = 2
       memory_size       = 4096
-      disk_datastore_id = "WD1TB"
+      disk_datastore_id = "WD4TB"
       os_version        = "24.04"
       disk_size         = 16
     }
@@ -181,6 +181,7 @@ resources = {
         }
       },
       "quanta-02" = {
+        enabled         = false
         vm_id           = 1046
         tags            = ["k_worker"]
         cloud_init_user = "dev"
@@ -197,6 +198,7 @@ resources = {
         }
       },
       "quanta-03" = {
+        enabled         = false
         vm_id           = 1047
         tags            = ["k_worker"]
         cloud_init_user = "dev"
@@ -239,7 +241,7 @@ resources = {
     vm_config = {
       cpu_cores         = 4
       memory_size       = 8192
-      disk_datastore_id = "WD1TB"
+      disk_datastore_id = "WD4TB"
       os_version        = "24.04"
       disk_size         = 24
     }
@@ -284,7 +286,7 @@ resources = {
     vm_config = {
       cpu_cores         = 2
       memory_size       = 2048
-      disk_datastore_id = "WD1TB"
+      disk_datastore_id = "WD4TB"
       os_version        = "25.04"
       disk_size         = 16
     }

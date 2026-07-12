@@ -30,6 +30,10 @@ vars:
   # Example: task apply STACK_NAME=proxmox_meru
   STACK_NAME: '{{.STACK_NAME | default ""}}'
 
+  # PARALLELISM: Limits concurrent resource creation to prevent saturating
+  # mechanical disk (WD1TB) I/O queue during disk resizing.
+  PARALLELISM: '{{.PARALLELISM | default "1"}}'
+
   # STACK_DIR: Dynamically finds the stack folder in onprem/ or cloud/.
   STACK_DIR:
     sh: |
@@ -79,7 +83,7 @@ tasks:
       - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
       # 'eval' is required to correctly process the process substitution '<()'.
       # Example:task tofu:plan STACK_NAME=proxmox_gana
-      - eval "tofu plan -var-file={{.CONFIG_FILE}} {{.TF_SECRET_ARGS}}"
+      - eval "tofu plan -parallelism={{.PARALLELISM}} -var-file={{.CONFIG_FILE}} {{.TF_SECRET_ARGS}}"
 
   apply:
     desc: "Applies infrastructure changes and generates the Ansible inventory in a single run. Needs approval"
@@ -89,7 +93,7 @@ tasks:
       - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
       # Any arguments after '--' will be passed to the end of the command (e.g., -auto-approve).
       # Example: task tofu:apply -- -auto-approve
-      - eval "tofu apply  -var-file={{.CONFIG_FILE}} {{.TF_SECRET_ARGS}} {{.CLI_ARGS}}"
+      - eval "tofu apply -parallelism={{.PARALLELISM}} -var-file={{.CONFIG_FILE}} {{.TF_SECRET_ARGS}} {{.CLI_ARGS}}"
 
   apply:approve:
     desc: "Applies infrastructure changes and generates the Ansible inventory in a single run."
@@ -97,7 +101,7 @@ tasks:
     deps: [init]
     cmds:
       - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
-      - eval "tofu apply -auto-approve -var-file={{.CONFIG_FILE}} {{.TF_SECRET_ARGS}} {{.CLI_ARGS}}"
+      - eval "tofu apply -auto-approve -parallelism={{.PARALLELISM}} -var-file={{.CONFIG_FILE}} {{.TF_SECRET_ARGS}} {{.CLI_ARGS}}"
 
   destroy:
     desc: "Destroys all infrastructure managed by the target stack."
@@ -105,7 +109,7 @@ tasks:
     deps: [init]
     cmds:
       - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
-      - eval "tofu destroy -var-file={{.CONFIG_FILE}} {{.TF_SECRET_ARGS}} {{.CLI_ARGS}}"
+      - eval "tofu destroy -parallelism={{.PARALLELISM}} -var-file={{.CONFIG_FILE}} {{.TF_SECRET_ARGS}} {{.CLI_ARGS}}"
 
   # ---------------------------------------------------------------------------
   # UTILITY & MAINTENANCE TASKS
