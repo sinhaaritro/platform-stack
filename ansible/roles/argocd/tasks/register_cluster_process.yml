@@ -12,7 +12,7 @@
 
 - name: "Determine Remote Kubeconfig Path: {{ remote_master }}"
   ansible.builtin.set_fact:
-    cluster_kubeconfig: "{{ '/etc/rancher/k3s/k3s.yaml' if remote_master in groups['k3s'] else '/etc/kubernetes/admin.conf' }}"
+    cluster_kubeconfig: "{{ '/etc/rancher/k3s/k3s.yaml' if remote_master in groups.get('k3s', []) else '/etc/kubernetes/admin.conf' }}"
 
 # 2. Execute on Remote Cluster (Create Access)
 - name: "Create ArgoCD Manager ServiceAccount: {{ remote_master }}"
@@ -68,50 +68,41 @@
     # Keep CA as Base64. Do NOT decode. The target secret needs it as Base64.
     remote_ca_b64: "{{ (remote_secret_json.stdout | from_json).data['ca.crt'] }}"
 
-# 3. Ensure TLS Certificate SANs (Kubeadm Only)
-- name: "Check API Server Cert SANs: {{ remote_master }}"
-  ansible.builtin.command: openssl x509 -in /etc/kubernetes/pki/apiserver.crt -noout -text
+# 3. Ensure TLS Certificate SANs (K3s Only)
+- name: "Check K3s API Server Cert SANs: {{ remote_master }}"
+  ansible.builtin.command: openssl x509 -in /var/lib/rancher/k3s/server/tls/serving-kube-apiserver.crt -noout -text
   delegate_to: "{{ remote_master }}"
   become: true
-  register: cert_text
+  register: k3s_cert_text
   changed_when: false
   failed_when: false
-  when: remote_master in groups['kubeadm']
+  when: remote_master in groups.get('k3s', [])
 
-- name: "Update API Server Cert with SANs: {{ remote_master }}"
-  ansible.builtin.shell: |
-    rm /etc/kubernetes/pki/apiserver.crt /etc/kubernetes/pki/apiserver.key
-    kubeadm init phase certs apiserver --apiserver-cert-extra-sans "{{ target_cluster_group }}-api.example.com"
+- name: "Add TLS SAN to K3s configuration: {{ remote_master }}"
+  ansible.builtin.blockinfile:
+    path: /etc/rancher/k3s/config.yaml
+    marker: "# {mark} ANSIBLE MANAGED K3S TLS SAN"
+    block: |
+      tls-san:
+        - "{{ target_cluster_group }}-api.example.com"
+  delegate_to: "{{ remote_master }}"
+  become: true
+  register: k3s_config_update
+  when:
+    - remote_master in groups.get('k3s', [])
+    - k3s_cert_text.rc == 0
+    - (target_cluster_group ~ '-api.example.com') not in k3s_cert_text.stdout
+
+- name: "Restart K3s to regenerate certificates: {{ remote_master }}"
+  ansible.builtin.systemd:
+    name: k3s
+    state: restarted
+    daemon_reload: true
   delegate_to: "{{ remote_master }}"
   become: true
   when:
-    - remote_master in groups['kubeadm']
-    - cert_text.rc == 0
-    - target_cluster_group ~ '-api.example.com' not in cert_text.stdout
-  changed_when: true
-
-- name: "Get API Server Container ID: {{ remote_master }}"
-  ansible.builtin.command: crictl ps --name kube-apiserver -q
-  delegate_to: "{{ remote_master }}"
-  become: true
-  register: apiserver_id
-  changed_when: false
-  when:
-    - remote_master in groups['kubeadm']
-    - cert_text.rc == 0
-    - target_cluster_group ~ '-api.example.com' not in cert_text.stdout
-
-- name: "Restart API Server (Force Reload): {{ remote_master }}"
-  ansible.builtin.command: "crictl stop {{ item }}"
-  loop: "{{ apiserver_id.stdout_lines }}"
-  delegate_to: "{{ remote_master }}"
-  become: true
-  when:
-    - remote_master in groups['kubeadm']
-    - cert_text.rc == 0
-    - target_cluster_group ~ '-api.example.com' not in cert_text.stdout
-    - apiserver_id.stdout_lines | length > 0
-  changed_when: true
+    - remote_master in groups.get('k3s', [])
+    - k3s_config_update is changed
 
 # 4. Execute on Local Management Cluster (Register)
 - name: "Ensure DNS Resolution for Cluster: {{ target_cluster_group }}"
@@ -129,9 +120,9 @@
 
 - name: "Apply Cluster Secret: {{ target_cluster_group }}"
   ansible.builtin.command: kubectl apply -f "/tmp/secret-{{ target_cluster_group }}.yaml"
-  # This uses the LOCAL admin.conf because we are applying to ArgoCD hub
+  # This uses the LOCAL Kubeconfig because we are applying to ArgoCD hub
   environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
+    KUBECONFIG: "{{ argocd_kubeconfig }}"
   register: secret_apply
   changed_when: "'created' in secret_apply.stdout or 'configured' in secret_apply.stdout"
 

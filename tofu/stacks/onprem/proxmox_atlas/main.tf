@@ -176,7 +176,7 @@ module "module_lxc" {
 # inventory file for this stack.
 module "inventory" {
   source        = "../../../modules/ansible_inventory"
-  stack_name    = "proxmox_meru"
+  stack_name    = "proxmox_atlas"
   vm_list       = module.normalizer.final_vm_list
   vm_outputs    = { for k, v in module.proxmox_vms : k => v.vm_details }
   inventory_dir = "${path.root}/../../../../ansible/inventory.d"
@@ -188,7 +188,7 @@ output "DEBUG_Diagnostic" {
   sensitive   = true
   value = {
     status      = var.enable_debug ? "active" : "disabled"
-    environment = "proxmox_meru"
+    environment = "proxmox_atlas"
     message     = var.enable_debug ? "Diagnostic debugging output is active." : "Diagnostic debugging output is disabled. Set 'enable_debug = true' in your tfvars to enable."
     data = var.enable_debug ? {
       "IMAGE_PIPELINE"           = module.image_builder.debug_info
