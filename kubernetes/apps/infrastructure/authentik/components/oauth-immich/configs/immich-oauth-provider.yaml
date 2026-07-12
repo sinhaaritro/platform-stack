@@ -29,9 +29,9 @@ entries:
         - matching_mode: strict
           url: "app.immich:///oauth-callback"
         - matching_mode: strict
-          url: "https://immich.ruth.example.com/auth/login"
+          url: "https://immich.hyperion.example.com/auth/login"
         - matching_mode: strict
-          url: "https://immich.ruth.example.com/user-settings"
+          url: "https://immich.hyperion.example.com/user-settings"
       signing_key:
         !Find [
           authentik_crypto.certificatekeypair,
@@ -46,5 +46,5 @@ entries:
     attrs:
       name: Immich
       provider: !KeyOf immich-provider
-      meta_launch_url: "https://immich.ruth.example.com/auth/login?autoLaunch=1"
+      meta_launch_url: "https://immich.hyperion.example.com/auth/login?autoLaunch=1"
       meta_icon: "https://raw.githubusercontent.com/immich-app/immich/main/docs/static/img/favicon.png"

@@ -10,10 +10,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - mimir.ruth.aritrosinha.dpdns.org
+        - mimir.hyperion.aritrosinha.dpdns.org
       secretName: mimir-tls
   rules:
-    - host: mimir.ruth.aritrosinha.dpdns.org
+    - host: mimir.hyperion.aritrosinha.dpdns.org
       http:
         paths:
           - path: /

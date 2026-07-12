@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: ruth-apps
+  name: hyperion-apps
   namespace: argocd
 spec:
   goTemplate: true
@@ -45,7 +45,7 @@ spec:
             wave: "8"
   template:
     metadata:
-      name: "ruth-{{.app}}"
+      name: "hyperion-{{.app}}"
       annotations:
         argocd.argoproj.io/sync-wave: '{{.wave | default "0"}}'
     spec:
@@ -53,7 +53,7 @@ spec:
       source:
         repoURL: https://github.com/sinhaaritro/platform-stack.git
         targetRevision: HEAD
-        path: "kubernetes/clusters/ruth/{{.app}}"
+        path: "kubernetes/clusters/hyperion/{{.app}}"
       destination:
         server: https://kubernetes.default.svc
         namespace: "{{.namespace}}"

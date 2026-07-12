@@ -4,5 +4,5 @@ metadata:
   name: coredns-custom
   namespace: kube-system
 data:
-  ruth.override: |
-    rewrite name exact authentik.ruth.example.com traefik.networking.svc.cluster.local
+  hyperion.override: |
+    rewrite name exact authentik.hyperion.example.com traefik.networking.svc.cluster.local

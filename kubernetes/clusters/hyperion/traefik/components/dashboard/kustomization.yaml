@@ -10,17 +10,17 @@ patches:
     patch: |-
       - op: replace
         path: /spec/routes/0/match
-        value: Host(`traefik.ruth.example.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
+        value: Host(`traefik.hyperion.example.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
   - target:
       kind: Certificate
       name: traefik-dashboard-cert
     patch: |-
       - op: replace
         path: /spec/dnsNames/0
-        value: traefik.ruth.example.com
+        value: traefik.hyperion.example.com
       - op: replace
         path: /spec/commonName
-        value: traefik.ruth.example.com
+        value: traefik.hyperion.example.com
   - target:
       kind: IngressRoute
       name: traefik-dashboard
@@ -28,4 +28,4 @@ patches:
       - op: add
         path: /metadata/annotations
         value:
-          link.argocd.argoproj.io/external-link: https://traefik.ruth.example.com/dashboard/
+          link.argocd.argoproj.io/external-link: https://traefik.hyperion.example.com/dashboard/

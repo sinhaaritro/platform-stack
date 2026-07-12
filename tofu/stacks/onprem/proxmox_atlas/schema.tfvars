@@ -53,25 +53,25 @@ resources = {
       }
     }
   },
-  "ruth" = {
+  "hyperion" = {
     enabled     = true
     type        = "vm"
     node_name   = "atlas"
     description = "Kubernets servers. Ubuntu 24.04."
-    tags        = ["ruth", "ansible", "ubuntu", "k3s", "k_management"]
+    tags        = ["hyperion", "ansible", "ubuntu", "k3s", "k_management"]
     ansible_groups = {
       "timezone" = {
         "user_timezone" = "Asia/Kolkata"
         "user_locale"   = "en_US.UTF-8"
       },
       "k3s" = {
-        "k3s_bootstrap_node" : "ruth-01"
+        "k3s_bootstrap_node" : "hyperion-01"
         "sealed_secrets_master_key_url" : "https://github.com/sinhaaritro/platform-stack.git"
-        "sealed_secrets_master_key_path" : "kubernetes/clusters/ruth/sealed-secrets/master.secret.yaml"
+        "sealed_secrets_master_key_path" : "kubernetes/clusters/hyperion/sealed-secrets/master.secret.yaml"
         "sealed_secrets_master_key_revision" : "HEAD"
       },
       # "k_management" = {
-      #   "argocd_managed_fleets" : "arr"
+      #   "argocd_managed_fleets" : "quanta"
       # }
     }
 
@@ -84,7 +84,7 @@ resources = {
     }
 
     nodes = {
-      "ruth-01" = {
+      "hyperion-01" = {
         vm_id           = 1040
         tags            = ["k_control"]
         cloud_init_user = "dev"
@@ -103,7 +103,7 @@ resources = {
           ]
         }
       },
-      "ruth-02" = {
+      "hyperion-02" = {
         enabled         = false
         vm_id           = 1041
         tags            = ["k_worker"]
@@ -120,7 +120,7 @@ resources = {
           ]
         }
       },
-      "ruth-03" = {
+      "hyperion-03" = {
         enabled         = false
         vm_id           = 1042
         tags            = ["k_worker"]
@@ -139,19 +139,19 @@ resources = {
       }
     }
   },
-  "arr" = {
+  "quanta" = {
     enabled     = false
     type        = "vm"
     node_name   = "atlas"
     description = "Kubernets servers. Ubuntu 24.04."
-    tags        = ["arr", "ansible", "ubuntu", "k3s", "k_fleet_local", "k_arr"]
+    tags        = ["quanta", "ansible", "ubuntu", "k3s", "k_fleet_local", "k_quanta"]
     ansible_groups = {
       "timezone" = {
         "user_timezone" = "Asia/Kolkata"
         "user_locale"   = "en_US.UTF-8"
       },
       "k3s" = {
-        k3s_bootstrap_node : "arr-01"
+        k3s_bootstrap_node : "quanta-01"
       }
     }
 
@@ -164,7 +164,7 @@ resources = {
     }
 
     nodes = {
-      "arr-01" = {
+      "quanta-01" = {
         vm_id           = 1045
         tags            = ["k_control"]
         cloud_init_user = "dev"
@@ -180,7 +180,7 @@ resources = {
           ]
         }
       },
-      "arr-02" = {
+      "quanta-02" = {
         vm_id           = 1046
         tags            = ["k_worker"]
         cloud_init_user = "dev"
@@ -196,7 +196,7 @@ resources = {
           ]
         }
       },
-      "arr-03" = {
+      "quanta-03" = {
         vm_id           = 1047
         tags            = ["k_worker"]
         cloud_init_user = "dev"

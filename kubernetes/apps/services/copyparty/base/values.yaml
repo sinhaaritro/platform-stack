@@ -4,14 +4,14 @@ ingress:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
   hosts:
-    - host: copyparty.ruth.example.com
+    - host: copyparty.hyperion.example.com
       paths:
         - path: /
           pathType: Prefix
           servicePortName: http
   tls:
     - hosts:
-        - copyparty.ruth.example.com
+        - copyparty.hyperion.example.com
       secretName: copyparty-tls
 
 volumeConfig:

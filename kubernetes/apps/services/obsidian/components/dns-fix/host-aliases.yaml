@@ -9,5 +9,5 @@ spec:
       hostAliases:
       - ip: "192.168.0.240"
         hostnames:
-        - "couchdb.ruth.aritrosinha.dpdns.org"
-        - "obsidian.ruth.aritrosinha.dpdns.org"
+        - "couchdb.hyperion.aritrosinha.dpdns.org"
+        - "obsidian.hyperion.aritrosinha.dpdns.org"

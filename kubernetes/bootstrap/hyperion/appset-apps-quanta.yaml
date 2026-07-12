@@ -1,7 +1,7 @@
 # apiVersion: argoproj.io/v1alpha1
 # kind: ApplicationSet
 # metadata:
-#   name: arr-apps
+#   name: quanta-apps
 #   namespace: argocd
 # spec:
 #   goTemplate: true
@@ -19,15 +19,15 @@
 #             replace: "false"
 #   template:
 #     metadata:
-#       name: "arr-{{.app}}"
+#       name: "quanta-{{.app}}"
 #     spec:
 #       project: default
 #       source:
 #         repoURL: https://github.com/sinhaaritro/platform-stack.git
 #         targetRevision: HEAD
-#         path: "kubernetes/clusters/arr/{{.app}}"
+#         path: "kubernetes/clusters/quanta/{{.app}}"
 #       destination:
-#         server: https://arr-api.example.com:6443
+#         server: https://quanta-api.example.com:6443
 #         namespace: "{{.namespace}}"
 #       syncPolicy:
 #         automated:

@@ -10,10 +10,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - seaweedfs.ruth.aritrosinha.dpdns.org
+        - seaweedfs.hyperion.aritrosinha.dpdns.org
       secretName: seaweedfs-master-tls
   rules:
-    - host: seaweedfs.ruth.aritrosinha.dpdns.org
+    - host: seaweedfs.hyperion.aritrosinha.dpdns.org
       http:
         paths:
           - path: /
@@ -32,15 +32,15 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-    link.argocd.argoproj.io/external-link: "https://filer.seaweedfs.ruth.aritrosinha.dpdns.org/"
+    link.argocd.argoproj.io/external-link: "https://filer.seaweedfs.hyperion.aritrosinha.dpdns.org/"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - filer.seaweedfs.ruth.aritrosinha.dpdns.org
+        - filer.seaweedfs.hyperion.aritrosinha.dpdns.org
       secretName: seaweedfs-filer-tls
   rules:
-    - host: filer.seaweedfs.ruth.aritrosinha.dpdns.org
+    - host: filer.seaweedfs.hyperion.aritrosinha.dpdns.org
       http:
         paths:
           - path: /
@@ -63,10 +63,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - s3.seaweedfs.ruth.aritrosinha.dpdns.org
+        - s3.seaweedfs.hyperion.aritrosinha.dpdns.org
       secretName: seaweedfs-s3-tls
   rules:
-    - host: s3.seaweedfs.ruth.aritrosinha.dpdns.org
+    - host: s3.seaweedfs.hyperion.aritrosinha.dpdns.org
       http:
         paths:
           - path: /
@@ -85,15 +85,15 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-    link.argocd.argoproj.io/external-link: "https://admin.seaweedfs.ruth.aritrosinha.dpdns.org/"
+    link.argocd.argoproj.io/external-link: "https://admin.seaweedfs.hyperion.aritrosinha.dpdns.org/"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - admin.seaweedfs.ruth.aritrosinha.dpdns.org
+        - admin.seaweedfs.hyperion.aritrosinha.dpdns.org
       secretName: seaweedfs-admin-tls
   rules:
-    - host: admin.seaweedfs.ruth.aritrosinha.dpdns.org
+    - host: admin.seaweedfs.hyperion.aritrosinha.dpdns.org
       http:
         paths:
           - path: /
@@ -116,10 +116,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - webdav.seaweedfs.ruth.aritrosinha.dpdns.org
+        - webdav.seaweedfs.hyperion.aritrosinha.dpdns.org
       secretName: seaweedfs-webdav-tls
   rules:
-    - host: webdav.seaweedfs.ruth.aritrosinha.dpdns.org
+    - host: webdav.seaweedfs.hyperion.aritrosinha.dpdns.org
       http:
         paths:
           - path: /
@@ -142,11 +142,11 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - volume.seaweedfs.ruth.aritrosinha.dpdns.org
-        - "*.volume.seaweedfs.ruth.aritrosinha.dpdns.org"
+        - volume.seaweedfs.hyperion.aritrosinha.dpdns.org
+        - "*.volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
       secretName: seaweedfs-volume-tls
   rules:
-    - host: volume.seaweedfs.ruth.aritrosinha.dpdns.org
+    - host: volume.seaweedfs.hyperion.aritrosinha.dpdns.org
       http:
         paths:
           - path: /
@@ -156,7 +156,7 @@ spec:
                 name: seaweedfs-volume
                 port:
                   number: 8080
-    - host: "*.volume.seaweedfs.ruth.aritrosinha.dpdns.org"
+    - host: "*.volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
       http:
         paths:
           - path: /

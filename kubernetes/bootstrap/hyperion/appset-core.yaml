@@ -104,7 +104,7 @@ spec:
 
   template:
     metadata:
-      name: '{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}-{{.app}}'
+      name: '{{if eq .name "in-cluster"}}hyperion{{else}}{{.name}}{{end}}-{{.app}}'
       annotations:
         argocd.argoproj.io/sync-wave: '{{.wave | default "0"}}'
     spec:
@@ -166,7 +166,7 @@ spec:
       source:
         repoURL: https://github.com/sinhaaritro/platform-stack.git
         targetRevision: HEAD
-        path: 'kubernetes/clusters/{{if eq .name "in-cluster"}}ruth{{else}}{{.name}}{{end}}/{{.app}}'
+        path: 'kubernetes/clusters/{{if eq .name "in-cluster"}}hyperion{{else}}{{.name}}{{end}}/{{.app}}'
       destination:
         server: "{{.server}}"
         namespace: "{{.namespace}}"

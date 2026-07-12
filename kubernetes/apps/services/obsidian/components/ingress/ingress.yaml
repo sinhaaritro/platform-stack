@@ -7,10 +7,10 @@ metadata:
     cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-    link.argocd.argoproj.io/external-link: "https://obsidian.ruth.aritrosinha.dpdns.org/"
+    link.argocd.argoproj.io/external-link: "https://obsidian.hyperion.aritrosinha.dpdns.org/"
 spec:
   rules:
-    - host: obsidian.ruth.aritrosinha.dpdns.org
+    - host: obsidian.hyperion.aritrosinha.dpdns.org
       http:
         paths:
           - path: /
@@ -22,5 +22,5 @@ spec:
                   name: http
   tls:
     - hosts:
-        - obsidian.ruth.aritrosinha.dpdns.org
+        - obsidian.hyperion.aritrosinha.dpdns.org
       secretName: obsidian-tls

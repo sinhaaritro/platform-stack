@@ -10,10 +10,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - alloy.ruth.aritrosinha.dpdns.org
+        - alloy.hyperion.aritrosinha.dpdns.org
       secretName: alloy-tls
   rules:
-    - host: alloy.ruth.aritrosinha.dpdns.org
+    - host: alloy.hyperion.aritrosinha.dpdns.org
       http:
         paths:
           - path: /

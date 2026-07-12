@@ -9,7 +9,7 @@ metadata:
 spec:
   ingressClassName: cloudflare-tunnel
   rules:
-    - host: "longhorn.ruth.example.com"
+    - host: "longhorn.hyperion.example.com"
       http:
         paths:
           - path: /

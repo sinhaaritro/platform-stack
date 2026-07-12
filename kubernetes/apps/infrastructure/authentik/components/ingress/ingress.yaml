@@ -10,10 +10,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - authentik.ruth.aritrosinha.dpdns.org
+        - authentik.hyperion.aritrosinha.dpdns.org
       secretName: authentik-tls
   rules:
-    - host: authentik.ruth.aritrosinha.dpdns.org
+    - host: authentik.hyperion.aritrosinha.dpdns.org
       http:
         paths:
           - path: /

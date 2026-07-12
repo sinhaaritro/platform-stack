@@ -8,7 +8,7 @@ metadata:
     cert-manager.io/cluster-issuer: selfsigned-issuer
 spec:
   rules:
-    - host: grafana.arr.example.com
+    - host: grafana.quanta.example.com
       http:
         paths:
           - path: /
@@ -18,7 +18,7 @@ spec:
                 name: prometheus-stack-grafana
                 port:
                   number: 80
-    - host: prometheus.arr.example.com
+    - host: prometheus.quanta.example.com
       http:
         paths:
           - path: /

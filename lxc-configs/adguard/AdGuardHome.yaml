@@ -217,13 +217,13 @@ filtering:
     - domain: obsidian.localdev
       answer: 192.168.0.14
       enabled: false
-    - domain: "*.ruth.example.com"
+    - domain: "*.hyperion.example.com"
       answer: 192.168.0.240
       enabled: false
-    - domain: "*.arr.example.com"
+    - domain: "*.quanta.example.com"
       answer: 192.168.0.230
       enabled: false
-    - domain: "*.ruth.aritrosinha.dpdns.org"
+    - domain: "*.hyperion.aritrosinha.dpdns.org"
       answer: 192.168.0.240
       enabled: false
     - domain: atlas.olympus.strawslabs.com

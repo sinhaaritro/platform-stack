@@ -91,6 +91,8 @@ Themes are not limited to ancient mythology. Names from anime, sci-fi, video gam
 | `andromeda`   | Constellations    | Production cluster             |
 | `pegasus`     | Constellations    | Staging or auxiliary cluster   |
 | `enterprise`  | Star Trek         | Multi-tenant cluster           |
+| `hyperion`    | Honkai Impact 3rd | Personal core & observability cluster (Obsidian, Immich, monitoring) |
+| `quanta`      | Honkai Impact 3rd | Media automation cluster (arr-stack, torrents, entertainment) |
 | *(add more)*  |                   |                                |
 
 ### Theme Table: Kubernetes Namespaces

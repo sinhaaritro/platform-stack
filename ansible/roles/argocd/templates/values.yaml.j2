@@ -6,7 +6,7 @@ global:
 {% if argocd_managed_fleets is defined %}
   hostAliases:
     # Dynamically inject DNS records for all managed fleets
-    # so ArgoCD can resolve 'arr-api.example.com' to '192.168.0.x'
+    # so ArgoCD can resolve 'quanta-api.example.com' to '192.168.0.x'
 {% for fleet in argocd_managed_fleets.split(';') %}
 {% if fleet in groups %}
 {% set fleet_master = groups[fleet][0] %}

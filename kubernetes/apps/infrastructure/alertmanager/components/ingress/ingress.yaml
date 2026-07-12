@@ -10,10 +10,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - alertmanager.ruth.aritrosinha.dpdns.org
+        - alertmanager.hyperion.aritrosinha.dpdns.org
       secretName: alertmanager-tls
   rules:
-    - host: alertmanager.ruth.aritrosinha.dpdns.org
+    - host: alertmanager.hyperion.aritrosinha.dpdns.org
       http:
         paths:
           - path: /

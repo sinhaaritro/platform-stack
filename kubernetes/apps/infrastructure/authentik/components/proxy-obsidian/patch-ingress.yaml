@@ -2,12 +2,12 @@
   path: /spec/tls/-
   value:
     hosts:
-      - obsidian.ruth.aritrosinha.dpdns.org
+      - obsidian.hyperion.aritrosinha.dpdns.org
     secretName: obsidian-tls
 - op: add
   path: /spec/rules/-
   value:
-    host: obsidian.ruth.aritrosinha.dpdns.org
+    host: obsidian.hyperion.aritrosinha.dpdns.org
     http:
       paths:
         - path: /

@@ -28,7 +28,7 @@ entries:
         ]
       invalidation_flow:
         !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
-      external_host: https://obsidian.ruth.aritrosinha.dpdns.org
+      external_host: https://obsidian.hyperion.aritrosinha.dpdns.org
       internal_host: http://obsidian.personal.svc.cluster.local:3000
       internal_host_ssl_validation: false
 
@@ -40,7 +40,7 @@ entries:
     attrs:
       name: Obsidian
       provider: !KeyOf obsidian-provider
-      meta_launch_url: "https://obsidian.ruth.aritrosinha.dpdns.org"
+      meta_launch_url: "https://obsidian.hyperion.aritrosinha.dpdns.org"
       meta_icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/obsidian.png"
 
   - model: authentik_policies.policybinding

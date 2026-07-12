@@ -6,15 +6,15 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-    link.argocd.argoproj.io/external-link: "https://longhorn.ruth.aritrosinha.dpdns.org/"
+    link.argocd.argoproj.io/external-link: "https://longhorn.hyperion.aritrosinha.dpdns.org/"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - longhorn.ruth.aritrosinha.dpdns.org
+        - longhorn.hyperion.aritrosinha.dpdns.org
       secretName: longhorn-tls
   rules:
-    - host: longhorn.ruth.aritrosinha.dpdns.org
+    - host: longhorn.hyperion.aritrosinha.dpdns.org
       http:
         paths:
           - path: /

@@ -10,10 +10,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - loki.ruth.aritrosinha.dpdns.org
+        - loki.hyperion.aritrosinha.dpdns.org
       secretName: loki-tls
   rules:
-    - host: loki.ruth.aritrosinha.dpdns.org
+    - host: loki.hyperion.aritrosinha.dpdns.org
       http:
         paths:
           - path: /

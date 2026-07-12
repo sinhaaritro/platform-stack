@@ -13,10 +13,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - immich.ruth.aritrosinha.dpdns.org
+        - immich.hyperion.aritrosinha.dpdns.org
       secretName: immich-tls
   rules:
-    - host: immich.ruth.aritrosinha.dpdns.org
+    - host: immich.hyperion.aritrosinha.dpdns.org
       http:
         paths:
           - path: /

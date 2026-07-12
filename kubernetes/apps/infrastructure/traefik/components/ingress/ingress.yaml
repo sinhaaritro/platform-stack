@@ -4,12 +4,12 @@ metadata:
   name: traefik-dashboard
   namespace: networking
   annotations:
-    link.argocd.argoproj.io/external-link: "https://traefik.ruth.aritrosinha.dpdns.org/dashboard/"
+    link.argocd.argoproj.io/external-link: "https://traefik.hyperion.aritrosinha.dpdns.org/dashboard/"
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`traefik.ruth.aritrosinha.dpdns.org`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
+    - match: Host(`traefik.hyperion.aritrosinha.dpdns.org`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
       kind: Rule
       services:
         - name: api@internal
@@ -28,5 +28,5 @@ spec:
     kind: ClusterIssuer
   secretName: traefik-dashboard-cert
   dnsNames:
-    - traefik.ruth.aritrosinha.dpdns.org
-  commonName: traefik.ruth.aritrosinha.dpdns.org
+    - traefik.hyperion.aritrosinha.dpdns.org
+  commonName: traefik.hyperion.aritrosinha.dpdns.org

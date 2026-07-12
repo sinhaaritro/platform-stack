@@ -1,12 +1,12 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: wildcard-ruth-aritrosinha-prod
+  name: wildcard-hyperion-aritrosinha-prod
   namespace: networking
 spec:
-  secretName: wildcard-ruth-aritrosinha-prod-tls
+  secretName: wildcard-hyperion-aritrosinha-prod-tls
   issuerRef:
     name: letsencrypt-prod-aritrosinha
     kind: ClusterIssuer
   dnsNames:
-    - "*.ruth.aritrosinha.dpdns.org"
+    - "*.hyperion.aritrosinha.dpdns.org"

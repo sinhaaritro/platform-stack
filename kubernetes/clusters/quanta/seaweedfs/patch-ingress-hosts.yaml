@@ -5,7 +5,7 @@ metadata:
   namespace: storage
 spec:
   rules:
-    - host: master.seaweedfs.arr.example.com
+    - host: master.seaweedfs.quanta.example.com
       http:
         paths:
           - path: /
@@ -23,7 +23,7 @@ metadata:
   namespace: storage
 spec:
   rules:
-    - host: filer.seaweedfs.arr.example.com
+    - host: filer.seaweedfs.quanta.example.com
       http:
         paths:
           - path: /
@@ -41,7 +41,7 @@ metadata:
   namespace: storage
 spec:
   rules:
-    - host: s3.seaweedfs.arr.example.com
+    - host: s3.seaweedfs.quanta.example.com
       http:
         paths:
           - path: /
@@ -59,7 +59,7 @@ metadata:
   namespace: storage
 spec:
   rules:
-    - host: admin.seaweedfs.arr.example.com
+    - host: admin.seaweedfs.quanta.example.com
       http:
         paths:
           - path: /
@@ -77,7 +77,7 @@ metadata:
   namespace: storage
 spec:
   rules:
-    - host: webdav.seaweedfs.arr.example.com
+    - host: webdav.seaweedfs.quanta.example.com
       http:
         paths:
           - path: /
@@ -95,7 +95,7 @@ metadata:
   namespace: storage
 spec:
   rules:
-    - host: volume.seaweedfs.arr.example.com
+    - host: volume.seaweedfs.quanta.example.com
       http:
         paths:
           - path: /
@@ -105,7 +105,7 @@ spec:
                 name: seaweedfs-volume
                 port:
                   number: 8080
-    - host: "*.seaweedfs-volume.seaweedfs.arr.example.com"
+    - host: "*.seaweedfs-volume.seaweedfs.quanta.example.com"
       http:
         paths:
           - path: /

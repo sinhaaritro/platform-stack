@@ -10,10 +10,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - grafana.ruth.aritrosinha.dpdns.org
+        - grafana.hyperion.aritrosinha.dpdns.org
       secretName: grafana-tls
   rules:
-    - host: grafana.ruth.aritrosinha.dpdns.org
+    - host: grafana.hyperion.aritrosinha.dpdns.org
       http:
         paths:
           - path: /

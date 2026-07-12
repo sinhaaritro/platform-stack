@@ -10,10 +10,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - couchdb.ruth.aritrosinha.dpdns.org
+        - couchdb.hyperion.aritrosinha.dpdns.org
       secretName: couchdb-tls
   rules:
-    - host: couchdb.ruth.aritrosinha.dpdns.org
+    - host: couchdb.hyperion.aritrosinha.dpdns.org
       http:
         paths:
           - path: /
