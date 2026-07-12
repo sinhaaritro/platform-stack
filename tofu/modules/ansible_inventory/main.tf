@@ -1,10 +1,5 @@
-
 # -----------------------------------------------------------------------------
-# ANSIBLE DYNAMIC INVENTORY GENERATION
-# -----------------------------------------------------------------------------
-# This file processes the created VM resources and generates a dynamic
-# Ansible inventory file using a template. It correctly handles computed
-# values like IP addresses by deferring their access until the 'apply' phase.
+# RESOURCE ORCHESTRATION - ANSIBLE INVENTORY GENERATION
 # -----------------------------------------------------------------------------
 
 locals {
@@ -15,7 +10,7 @@ locals {
   # 'plan' time (names and tags).
   host_group_mappings = flatten([
     # Loop through each of our final, fully resolved VM objects...
-    for vm in module.normalizer.final_vm_list : [
+    for vm in var.vm_list : [
       # 1. Create a single list containing all possible group names for this VM.
       #    - The VM's tags (e.g., "web", "ubuntu")
       #    - The VM's application key (e.g., "web_server")
@@ -44,18 +39,9 @@ locals {
     for mapping in local.host_group_mappings :
     mapping.group => mapping.host...
   }
-
-  # --- STEP 6.C: Create a Master Map of All Created Module Outputs ---
-  # This local combines the outputs from the 'proxmox_vms' module into a single,
-  # easy-to-query map, keyed by the VM's name. This will hold the final,
-  # computed data like IP addresses after the 'apply' is complete.
-  all_created_vms = {
-    for key, vm_module in module.proxmox_vms :
-    key => vm_module.vm_details
-  }
 }
 
-# --- STEP 6.D: Create the Ansible Inventory File Directly ---
+# --- STEP 6.C: Create the Ansible Inventory File Directly ---
 resource "local_file" "ansible_inventory" {
   # The 'content' is rendered from our template file.
   content = templatefile("${path.module}/templates/ansible_inventory.yml.tftpl", {
@@ -75,11 +61,11 @@ resource "local_file" "ansible_inventory" {
           for host in hostnames :
           host => merge(
             {
-              ansible_host = try([for addr in flatten(local.all_created_vms[host].ipv4_addresses) : addr if addr != "127.0.0.1"][0], "IP_PENDING")
-              ansible_user = module.normalizer.final_vm_list[host].user_account_username
+              ansible_host = try([for addr in flatten(var.vm_outputs[host].ipv4_addresses) : addr if addr != "127.0.0.1"][0], "IP_PENDING")
+              ansible_user = var.vm_list[host].user_account_username
             },
             # Merge in the variables for this specific group from the host's definition
-            try(module.normalizer.final_vm_list[host].ansible_groups[group_name], {})
+            try(var.vm_list[host].ansible_groups[group_name], {})
           )
         }
       }
@@ -87,8 +73,5 @@ resource "local_file" "ansible_inventory" {
   })
 
   # The 'filename' specifies where to save the file.
-  filename = "${path.root}/../../../../ansible/inventory.yml"
-
-  # This explicit dependency is good practice.
-  depends_on = [module.proxmox_vms]
+  filename = "${var.inventory_dir}/${var.stack_name}.yml"
 }

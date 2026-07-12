@@ -146,18 +146,17 @@ module "module_lxc" {
   dns_servers = ["8.8.8.8"]
 }
 
+# ─── Step 6: Generate Ansible Inventory ───────────────────────────────────────
+# Instantiates the shared ansible_inventory module to write the dynamic hosts
+# inventory file for this stack.
 # -----------------------------------------------------------------------------
-# STEP 6: ANSIBLE OUTPUT
-# -----------------------------------------------------------------------------
-# Logic extracted to: ansible.tf
-# 
-# Input:
-#   local.final_vm_list   → map of enabled VMs,  keyed by node name
-#   local.final_lxc_list  → map of enabled LXCs, keyed by node name
-# 
-# Output:
-#   ansible/inventory.yml
-# -----------------------------------------------------------------------------
+module "inventory" {
+  source        = "../../../modules/ansible_inventory"
+  stack_name    = "proxmox_meru"
+  vm_list       = module.normalizer.final_vm_list
+  vm_outputs    = { for k, v in module.proxmox_vms : k => v.vm_details }
+  inventory_dir = "${path.root}/../../../../ansible/inventory.d"
+}
 
 # -----------------------------------------------------------------------------
 # STEP 7: TERRAFORM OUTPUT
