@@ -15,7 +15,7 @@ locals {
   # 'plan' time (names and tags).
   host_group_mappings = flatten([
     # Loop through each of our final, fully resolved VM objects...
-    for vm in local.final_vm_list : [
+    for vm in module.normalizer.final_vm_list : [
       # 1. Create a single list containing all possible group names for this VM.
       #    - The VM's tags (e.g., "web", "ubuntu")
       #    - The VM's application key (e.g., "web_server")
@@ -76,10 +76,10 @@ resource "local_file" "ansible_inventory" {
           host => merge(
             {
               ansible_host = try([for addr in flatten(local.all_created_vms[host].ipv4_addresses) : addr if addr != "127.0.0.1"][0], "IP_PENDING")
-              ansible_user = local.final_vm_list[host].user_account_username
+              ansible_user = module.normalizer.final_vm_list[host].user_account_username
             },
             # Merge in the variables for this specific group from the host's definition
-            try(local.final_vm_list[host].ansible_groups[group_name], {})
+            try(module.normalizer.final_vm_list[host].ansible_groups[group_name], {})
           )
         }
       }

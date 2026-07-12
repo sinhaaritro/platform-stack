@@ -15,7 +15,7 @@ BUILD_NEEDED="${build_needed}"
 
 # Check if build is needed
 if [ "$BUILD_NEEDED" -eq 0 ]; then
-  echo "Image already exists on Proxmox storage. Local customization skipped."
+  echo "Image already exists on destination hypervisor or cache. Local customization skipped."
   exit 0
 fi
 

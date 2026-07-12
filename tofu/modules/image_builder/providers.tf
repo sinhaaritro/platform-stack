@@ -1,15 +1,9 @@
 # -----------------------------------------------------------------------------
-# REQUIRED PROVIDERS
-# -----------------------------------------------------------------------------
-# Defines the required providers and versions for the image pipeline module.
+# REQUIRED PROVIDERS - IMAGE BUILDER MODULE
 # -----------------------------------------------------------------------------
 
 terraform {
   required_providers {
-    proxmox = {
-      source  = "bpg/proxmox"
-      version = "0.111.1"
-    }
     http = {
       source  = "hashicorp/http"
       version = "3.5.0"

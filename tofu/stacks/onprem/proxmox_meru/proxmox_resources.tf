@@ -6,9 +6,9 @@
 # -----------------------------------------------------------------------------
 module "proxmox_vms" {
   source   = "../../../modules/proxmox_vm"
-  for_each = local.final_vm_list
+  for_each = module.normalizer.final_vm_list
 
-  depends_on = [module.image_pipeline]
+  depends_on = [proxmox_virtual_environment_file.image_upload]
 
   # Main info
   vm_id          = each.value.vm_id
@@ -59,9 +59,9 @@ module "proxmox_vms" {
 # -----------------------------------------------------------------------------
 module "module_lxc" {
   source   = "../../../modules/proxmox_lxc"
-  for_each = local.final_lxc_list
+  for_each = module.normalizer.final_lxc_list
 
-  depends_on = [module.image_pipeline]
+  depends_on = [proxmox_virtual_environment_file.image_upload]
 
   # Main info
   vm_id       = each.value.vm_id

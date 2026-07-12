@@ -6,17 +6,42 @@
 # to decide how to act.
 # -----------------------------------------------------------------------------
 
-# STEP 3: RUN IMAGE PREPARATION AND UPLOAD VIA MODULE
-# This module orchestrates image download, offline package customization (qemu-guest-agent),
-# and file uploads to the target Proxmox datastore.
-# TODO: To remove bpg/proxmox as a provider. We need to handle upload here. Image prep can be handled in the module
-module "image_pipeline" {
-  source = "../../../modules/proxmox_image_pipeline"
-
+# ─── Step 1: Normalize Resources ─────────────────────────────────────────────
+module "normalizer" {
+  source             = "../../../modules/resource_normalizer"
   resources          = var.resources
+  user_credentials   = var.user_credentials
   target_node        = var.target_node
   target_datastore   = var.target_datastore
-  proxmox_connection = var.proxmox_connection
+  default_os_type    = "ubuntu"
+  default_os_version = "24.04"
+  enable_debug       = var.enable_debug
+}
+
+# ─── Step 2: Build OS Images Locally (Generic) ───────────────────────────────
+# Downloads cloud images from upstream and customizes them with virt-customize.
+# Hypervisor independent. Outputs local qcow2 file paths.
+module "image_builder" {
+  source           = "../../../modules/image_builder"
+  requested_images = module.normalizer.requested_os_images
+  existing_images  = local.existing_files_on_proxmox
+  local_cache_dir  = "/var/tmp/tofu-artifacts/"
+}
+
+# ─── Step 3: Upload Custom Images to Proxmox (Proxmox-Specific Glue) ──────────
+# Uploads the locally built and customized qcow2 images to the designated
+# Proxmox storage datastore.
+resource "proxmox_virtual_environment_file" "image_upload" {
+  for_each   = module.image_builder.built_images
+  depends_on = [module.image_builder]
+
+  node_name    = var.target_node
+  datastore_id = var.target_datastore
+  content_type = "import"
+
+  source_file {
+    path = each.value.local_path
+  }
 }
 
 # -----------------------------------------------------------------------------

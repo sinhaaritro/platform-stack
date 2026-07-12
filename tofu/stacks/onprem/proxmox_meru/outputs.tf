@@ -6,21 +6,14 @@
 
 output "DEBUG_Diagnostic" {
   description = "A summary of the data gathering, decision-making, and normalization steps."
+  sensitive   = true
   value = {
     status      = var.enable_debug ? "active" : "disabled"
     environment = "proxmox_meru"
     message     = var.enable_debug ? "Diagnostic debugging output is active." : "Diagnostic debugging output is disabled. Set 'enable_debug = true' in your tfvars to enable."
     data = var.enable_debug ? {
-      "IMAGE_PIPELINE" = module.image_pipeline.debug_info
-      "STEP_5_FLATTEN_AND_MERGE" = {
-        "a_Normalized_Resources" = local.normalized_resources
-        "b_VM_Groups"            = local._vm_groups
-        "c_LXC_Groups"           = local._lxc_groups
-        "d_Flattened_VMs"        = local._flattened_vms
-        "e_Flattened_LXCs"       = local._flattened_lxcs
-        "f_Final_VM_List"        = local.final_vm_list
-        "g_Final_LXC_List"       = local.final_lxc_list
-      }
+      "IMAGE_PIPELINE"           = module.image_builder.debug_info
+      "STEP_5_FLATTEN_AND_MERGE" = module.normalizer.debug_info
     } : null
   }
 }

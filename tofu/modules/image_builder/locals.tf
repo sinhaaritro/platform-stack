@@ -1,51 +1,9 @@
 # -----------------------------------------------------------------------------
-# LOCAL VARIABLES
-# -----------------------------------------------------------------------------
-# Processes inputs and determines the image metadata, download configurations,
-# and build/upload decisions.
+# LOCAL VARIABLES - IMAGE BUILDER MODULE
 # -----------------------------------------------------------------------------
 
 locals {
-  # 1. Scan var.resources directly for target VM OS types and versions.
-  # This decouples the image pipeline from the main normalization logic.
-  raw_requested_images = distinct(concat(
-    # Scan cluster-level config
-    [
-      for group in var.resources : {
-        os_type    = try(group.vm_config.os_type, var.default_os_type)
-        os_version = try(group.vm_config.os_version, null)
-      }
-      if try(group.type, "") == "vm" && try(group.vm_config.os_version, null) != null
-    ],
-    # Scan node-level overrides
-    flatten([
-      for group in var.resources : [
-        for node in try(group.nodes, {}) : {
-          os_type    = try(node.vm_config.os_type, try(group.vm_config.os_type, var.default_os_type))
-          os_version = try(node.vm_config.os_version, try(group.vm_config.os_version, null))
-        }
-        if try(node.vm_config.os_version, null) != null || try(group.vm_config.os_version, null) != null
-      ]
-      if try(group.type, "") == "vm"
-    ])
-  ))
-
-  # Filter out any entries that don't have a valid os_version
-  requested_images = [
-    for img in local.raw_requested_images : img
-    if img.os_version != null
-  ]
-
-  # Map OS configurations using a composite key: "os_type-os_version"
-  os_images_map = {
-    for img in local.requested_images : "${img.os_type}-${img.os_version}" => {
-      os_type    = img.os_type
-      os_version = img.os_version
-    }
-  }
-
   # OS Registry containing configuration variables and pattern formats for building target URLs.
-  # Right now we focus on Ubuntu but scaffold the structure for others.
   os_registry = {
     ubuntu = {
       base_url          = "https://cloud-images.ubuntu.com/releases/server"
@@ -60,7 +18,7 @@ locals {
 
   # Compile full configurations dynamically
   os_images = {
-    for key, val in local.os_images_map : key => {
+    for key, val in var.requested_images : key => {
       os_type           = val.os_type
       os_version        = val.os_version
       base_url          = "${local.os_registry[val.os_type].base_url}/${val.os_version}/release"
@@ -72,14 +30,6 @@ locals {
       customize_script  = local.os_registry[val.os_type].customize_script
     }
   }
-
-  # Parse storage contents from the data lookup. Handles empty/null storage data gracefully.
-  proxmox_storage_content   = jsondecode(data.http.proxmox_storage_content.response_body)
-  existing_files_on_proxmox = [
-    for item in (lookup(local.proxmox_storage_content, "data", null) != null ? local.proxmox_storage_content.data : []) :
-    regex(".*/(.*)", item.volid)[0]
-    if try(item.volid, null) != null
-  ]
 
   # Parse SHA256 checksums from downloaded manifests
   image_state = {
@@ -104,13 +54,10 @@ locals {
     }
   }
 
-  # Decide if we need to run local-exec image builder
+  # Decide if we need to run local-exec image builder.
+  # Skip building if the file is already uploaded to the destination datastore, 
+  # or if the customized file is already present in the local cache.
   build_decisions = {
-    for key, def in local.final_image_defs : key => contains(local.existing_files_on_proxmox, def.target_filename) ? 0 : 1
-  }
-
-  # Output image paths for modules consuming this output
-  image_paths = {
-    for key, def in local.final_image_defs : key => "${var.target_datastore}:import/${def.target_filename}"
+    for key, def in local.final_image_defs : key => (contains(var.existing_images, def.target_filename) || fileexists(def.target_path)) ? 0 : 1
   }
 }
