@@ -1,13 +1,16 @@
 # -----------------------------------------------------------------------------
-# STACK CONFIGURATION FOR 'proxmox_meru'
+# STACK CONFIGURATION
 # -----------------------------------------------------------------------------
 # This file provides all the non-secret data for this specific stack.
 # -----------------------------------------------------------------------------
 # Run commands for this file: 
 # ```bash
-# tofu -chdir="tofu/stacks/onprem/proxmox_meru" apply \
-#   -var-file="proxmox_meru.tfvars" \
-#   -var-file=<(ansible-vault view --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") tofu/stacks/onprem/proxmox_meru/proxmox_meru.secret.tfvars)
+# tofu -chdir="tofu/stacks/onprem/proxmox_atlas" apply \
+#   -var-file="schema.tfvars" \
+#   -var-file=<(ansible-vault view --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") tofu/stacks/onprem/proxmox_meru/schema.secret.tfvars)
+#
+# Alternatively using task:
+# task tofu:apply:approve STACK_NAME=proxmox_atlas
 # ```
 
 # Target Proxmox Environment

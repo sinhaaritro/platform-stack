@@ -14,6 +14,7 @@
 #   - List all available tasks: task -l
 #   - Plan changes for a stack: task plan STACK_NAME=proxmox_gana
 #   - Apply changes (non-interactive): task apply STACK_NAME=proxmox_meru -- -auto-approve
+#   - etc..
 # -----------------------------------------------------------------------------
 
 version: "3"
@@ -25,18 +26,18 @@ env:
 # These variables define the context for the tasks.
 vars:
   # STACK_NAME: The target stack to operate on.
-  # This defaults to 'proxmox_meru' but should be overridden for other stacks.
-  # Example: task apply STACK_NAME=proxmox_other_node
-  STACK_NAME: proxmox_meru
+  # Must be explicitly specified on the command line.
+  # Example: task apply STACK_NAME=proxmox_meru
+  STACK_NAME: '{{.STACK_NAME | default ""}}'
 
   # STACK_DIR: Constructs the full path to the target stack directory.
   STACK_DIR: "./tofu/stacks/onprem/{{.STACK_NAME}}"
 
   # CONFIG_FILE: The name of the non-secret .tfvars file for the stack.
-  CONFIG_FILE: "{{.STACK_NAME}}.tfvars"
+  CONFIG_FILE: "schema.tfvars"
 
   # SECRET_FILE: The name of the encrypted secrets file for the stack.
-  SECRET_FILE: "{{.STACK_NAME}}.secret.tfvars"
+  SECRET_FILE: "schema.secret.tfvars"
 
   # This is the secure command for decrypting the vault file in memory,
   # using the environment variable for the password.
@@ -55,6 +56,9 @@ tasks:
   init:
     desc: "Initializes the OpenTofu backend and downloads providers for the target stack."
     dir: "{{.STACK_DIR}}"
+    preconditions:
+      - sh: 'test -n "{{.STACK_NAME}}"'
+        msg: "Error: STACK_NAME is required. Usage: task tofu:<task> STACK_NAME=<stack_name>"
     cmds:
       - tofu init -upgrade
 
@@ -155,6 +159,9 @@ tasks:
       It will prompt you to set a new vault password.
       NOTE: This will fail if the file already exists.
     dir: "{{.STACK_DIR}}"
+    preconditions:
+      - sh: 'test -n "{{.STACK_NAME}}"'
+        msg: "Error: STACK_NAME is required. Usage: task tofu:<task> STACK_NAME=<stack_name>"
     cmds:
       - ansible-vault create {{.SECRET_FILE}}
 
@@ -162,6 +169,9 @@ tasks:
   secrets:edit:
     desc: "Securely edits the encrypted secrets file for the target stack."
     dir: "{{.STACK_DIR}}"
+    preconditions:
+      - sh: 'test -n "{{.STACK_NAME}}"'
+        msg: "Error: STACK_NAME is required. Usage: task tofu:<task> STACK_NAME=<stack_name>"
     cmds:
       - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
       - ansible-vault edit --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") {{.SECRET_FILE}}
@@ -170,6 +180,9 @@ tasks:
   secrets:view:
     desc: "Displays the decrypted content of the secrets file in the terminal."
     dir: "{{.STACK_DIR}}"
+    preconditions:
+      - sh: 'test -n "{{.STACK_NAME}}"'
+        msg: "Error: STACK_NAME is required. Usage: task tofu:<task> STACK_NAME=<stack_name>"
     cmds:
       - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
       - ansible-vault view --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") {{.SECRET_FILE}}
@@ -182,6 +195,9 @@ tasks:
       This is useful for recovery or if you accidentally decrypted a file.
       NOTE: Assumes the file exists and is not currently encrypted.
     dir: "{{.STACK_DIR}}"
+    preconditions:
+      - sh: 'test -n "{{.STACK_NAME}}"'
+        msg: "Error: STACK_NAME is required. Usage: task tofu:<task> STACK_NAME=<stack_name>"
     cmds:
       - ansible-vault encrypt {{.SECRET_FILE}}
 
@@ -193,6 +209,9 @@ tasks:
       WARNING: NEVER commit a decrypted file to Git.
       This is only for emergency debugging. Re-encrypt it immediately.
     dir: "{{.STACK_DIR}}"
+    preconditions:
+      - sh: 'test -n "{{.STACK_NAME}}"'
+        msg: "Error: STACK_NAME is required. Usage: task tofu:<task> STACK_NAME=<stack_name>"
     cmds:
       - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
       - ansible-vault decrypt --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") {{.SECRET_FILE}}
