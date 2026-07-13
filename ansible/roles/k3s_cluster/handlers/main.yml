@@ -1,7 +1,13 @@
 # handlers/main.yml
 ---
-- name: restart k3s
+- name: Restart K3s
   ansible.builtin.systemd:
     name: "{{ 'k3s-agent' if 'k_worker' in group_names else 'k3s' }}"
+    state: restarted
+    daemon_reload: true
+
+- name: Restart systemd-logind
+  ansible.builtin.systemd:
+    name: systemd-logind
     state: restarted
     daemon_reload: true

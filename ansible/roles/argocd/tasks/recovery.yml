@@ -13,8 +13,8 @@
   environment:
     KUBECONFIG: "{{ argocd_kubeconfig }}"
   when: inventory_hostname == argocd_bootstrap_node
-  register: cleanup_unknown
-  changed_when: "'deleted' in (cleanup_unknown.stdout | default(''))"
+  register: argocd_cleanup_unknown
+  changed_when: "'deleted' in (argocd_cleanup_unknown.stdout | default(''))"
   failed_when: false
 
 - name: Clean up ArgoCD pods with CrashLoopBackOff init containers
@@ -32,8 +32,8 @@
   environment:
     KUBECONFIG: "{{ argocd_kubeconfig }}"
   when: inventory_hostname == argocd_bootstrap_node
-  register: cleanup_crashloop
-  changed_when: "'deleted' in (cleanup_crashloop.stdout | default(''))"
+  register: argocd_cleanup_crashloop
+  changed_when: "'deleted' in (argocd_cleanup_crashloop.stdout | default(''))"
   failed_when: false
 
 - name: Wait for ArgoCD pods to stabilize after cleanup
@@ -45,5 +45,5 @@
     KUBECONFIG: "{{ argocd_kubeconfig }}"
   when:
     - inventory_hostname == argocd_bootstrap_node
-    - (cleanup_unknown.changed | default(false)) or (cleanup_crashloop.changed | default(false))
+    - (argocd_cleanup_unknown.changed | default(false)) or (argocd_cleanup_crashloop.changed | default(false))
   changed_when: false

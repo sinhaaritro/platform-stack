@@ -17,7 +17,7 @@
     owner: root
     group: root
     mode: "0644"
-  notify: restart k3s
+  notify: Restart K3s
 
 # 3. Ensure logind.conf.d directory exists
 - name: Ensure logind.conf.d directory exists
@@ -36,15 +36,9 @@
     owner: root
     group: root
     mode: "0644"
-  register: logind_config
-
-# 5. Restart logind to apply inhibitor settings
-- name: Restart systemd-logind
-  ansible.builtin.systemd:
-    name: systemd-logind
-    state: restarted
-    daemon_reload: true
-  when: logind_config.changed
+  # TODO: Remove register block when handler verification is completed
+  # register: k3s_cluster_logind_config
+  notify: Restart systemd-logind
 
 # 6. Deploy K3s persistent configuration (for existing clusters)
 - name: Deploy K3s persistent configuration
@@ -54,4 +48,4 @@
     owner: root
     group: root
     mode: "0644"
-  notify: restart k3s
+  notify: Restart K3s

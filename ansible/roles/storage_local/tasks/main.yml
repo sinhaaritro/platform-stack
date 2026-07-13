@@ -17,8 +17,8 @@
   ansible.builtin.command: kubectl apply -f /tmp/local-path-storage.yaml
   environment:
     KUBECONFIG: "{{ '/etc/rancher/k3s/k3s.yaml' if inventory_hostname in groups.get('k3s', []) else '/etc/kubernetes/admin.conf' }}"
-  register: apply_out
-  changed_when: "'created' in apply_out.stdout or 'configured' in apply_out.stdout"
+  register: storage_local_apply_out
+  changed_when: "'created' in storage_local_apply_out.stdout or 'configured' in storage_local_apply_out.stdout"
 
 - name: Patch StorageClass to be Default
   ansible.builtin.command: >
@@ -26,7 +26,7 @@
     -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
   environment:
     KUBECONFIG: "{{ '/etc/rancher/k3s/k3s.yaml' if inventory_hostname in groups.get('k3s', []) else '/etc/kubernetes/admin.conf' }}"
-  register: patch_out
-  changed_when: "'patched' in patch_out.stdout"
+  register: storage_local_patch_out
+  changed_when: "'patched' in storage_local_patch_out.stdout"
   # Don't fail if it's already default
   failed_when: false

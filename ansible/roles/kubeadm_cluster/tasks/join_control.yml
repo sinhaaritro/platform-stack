@@ -3,7 +3,7 @@
 - name: Check if node has already joined
   ansible.builtin.stat:
     path: /etc/kubernetes/admin.conf
-  register: admin_conf
+  register: kubeadm_cluster_admin_conf
 
 - name: Wait for Bootstrap Node API (6443)
   ansible.builtin.wait_for:
@@ -12,7 +12,7 @@
     timeout: 300
     state: started
   delegate_to: localhost
-  when: not admin_conf.stat.exists
+  when: not kubeadm_cluster_admin_conf.stat.exists
 
 - name: Generate Certificate Key and Token on Primary
   ansible.builtin.shell: |
@@ -21,20 +21,20 @@
   args:
     executable: /bin/bash
   delegate_to: "{{ kubeadm_bootstrap_node }}"
-  register: cert_key
+  register: kubeadm_cluster_cert_key
   changed_when: false
-  when: not admin_conf.stat.exists
+  when: not kubeadm_cluster_admin_conf.stat.exists
 
 - name: Generate Join Command on Primary
   ansible.builtin.command: kubeadm token create --print-join-command
   delegate_to: "{{ kubeadm_bootstrap_node }}"
-  register: join_cmd
+  register: kubeadm_cluster_join_cmd
   changed_when: false
-  when: not admin_conf.stat.exists
+  when: not kubeadm_cluster_admin_conf.stat.exists
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
 
 - name: Join Cluster as Control Plane
-  ansible.builtin.command: "{{ join_cmd.stdout }} --control-plane --certificate-key {{ cert_key.stdout }}"
-  when: not admin_conf.stat.exists
+  ansible.builtin.command: "{{ kubeadm_cluster_join_cmd.stdout }} --control-plane --certificate-key {{ kubeadm_cluster_cert_key.stdout }}"
+  when: not kubeadm_cluster_admin_conf.stat.exists
   changed_when: true

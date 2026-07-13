@@ -3,19 +3,22 @@
 # 1. Identify the Remote Master
 - name: "Identify Bootstrap Node: {{ target_cluster_group }}"
   ansible.builtin.set_fact:
-    remote_master: "{{ hostvars[groups[target_cluster_group][0]]['kubeadm_bootstrap_node'] if 'kubeadm' in group_names else hostvars[groups[target_cluster_group][0]]['k3s_bootstrap_node'] }}"
+    argocd_remote_master: >-
+      {{ hostvars[groups[target_cluster_group][0]]['kubeadm_bootstrap_node']
+      if 'kubeadm' in group_names
+      else hostvars[groups[target_cluster_group][0]]['k3s_bootstrap_node'] }}
 
 - name: "Identify API URL: {{ target_cluster_group }}"
   ansible.builtin.set_fact:
-    remote_api_url: "https://{{ target_cluster_group }}-api.example.com:6443"
-    remote_api_ip: "{{ hostvars[remote_master]['ansible_host'] }}"
+    argocd_remote_api_url: "https://{{ target_cluster_group }}-api.example.com:6443"
+    argocd_remote_api_ip: "{{ hostvars[argocd_remote_master]['ansible_host'] }}"
 
-- name: "Determine Remote Kubeconfig Path: {{ remote_master }}"
+- name: "Determine Remote Kubeconfig Path: {{ argocd_remote_master }}"
   ansible.builtin.set_fact:
-    cluster_kubeconfig: "{{ '/etc/rancher/k3s/k3s.yaml' if remote_master in groups.get('k3s', []) else '/etc/kubernetes/admin.conf' }}"
+    argocd_cluster_kubeconfig: "{{ '/etc/rancher/k3s/k3s.yaml' if argocd_remote_master in groups.get('k3s', []) else '/etc/kubernetes/admin.conf' }}"
 
 # 2. Execute on Remote Cluster (Create Access)
-- name: "Create ArgoCD Manager ServiceAccount: {{ remote_master }}"
+- name: "Create ArgoCD Manager ServiceAccount: {{ argocd_remote_master }}"
   ansible.builtin.shell: |
     set -o pipefail
     kubectl create sa argocd-manager -n kube-system --dry-run=client -o yaml | kubectl apply -f -
@@ -25,13 +28,13 @@
       --dry-run=client -o yaml | kubectl apply -f -
   args:
     executable: /bin/bash
-  delegate_to: "{{ remote_master }}"
+  delegate_to: "{{ argocd_remote_master }}"
   environment:
-    KUBECONFIG: "{{ cluster_kubeconfig }}"
-  register: sa_create
-  changed_when: "'created' in sa_create.stdout"
+    KUBECONFIG: "{{ argocd_cluster_kubeconfig }}"
+  register: argocd_sa_create
+  changed_when: "'created' in argocd_sa_create.stdout"
 
-- name: "Create Long-Lived Token Secret: {{ remote_master }}"
+- name: "Create Long-Lived Token Secret: {{ argocd_remote_master }}"
   ansible.builtin.shell: |
     set -o pipefail
     cat <<EOF | kubectl apply -f -
@@ -46,69 +49,69 @@
     EOF
   args:
     executable: /bin/bash
-  delegate_to: "{{ remote_master }}"
+  delegate_to: "{{ argocd_remote_master }}"
   environment:
-    KUBECONFIG: "{{ cluster_kubeconfig }}"
+    KUBECONFIG: "{{ argocd_cluster_kubeconfig }}"
   changed_when: false
 
 # NEW LOGIC: Get Raw JSON to preserve certificate formatting
-- name: "Fetch Service Account Secret (JSON): {{ remote_master }}"
+- name: "Fetch Service Account Secret (JSON): {{ argocd_remote_master }}"
   ansible.builtin.command: >
     kubectl get secret argocd-manager-token -n kube-system -o json
-  delegate_to: "{{ remote_master }}"
+  delegate_to: "{{ argocd_remote_master }}"
   environment:
-    KUBECONFIG: "{{ cluster_kubeconfig }}"
-  register: remote_secret_json
+    KUBECONFIG: "{{ argocd_cluster_kubeconfig }}"
+  register: argocd_remote_secret_json
   changed_when: false
 
 - name: Parse Credentials from JSON
   ansible.builtin.set_fact:
     # Decode token so we can put the raw string in the JSON config
-    remote_token: "{{ (remote_secret_json.stdout | from_json).data.token | b64decode }}"
+    argocd_remote_token: "{{ (argocd_remote_secret_json.stdout | from_json).data.token | b64decode }}"
     # Keep CA as Base64. Do NOT decode. The target secret needs it as Base64.
-    remote_ca_b64: "{{ (remote_secret_json.stdout | from_json).data['ca.crt'] }}"
+    argocd_remote_ca_b64: "{{ (argocd_remote_secret_json.stdout | from_json).data['ca.crt'] }}"
 
 # 3. Ensure TLS Certificate SANs (K3s Only)
-- name: "Check K3s API Server Cert SANs: {{ remote_master }}"
+- name: "Check K3s API Server Cert SANs: {{ argocd_remote_master }}"
   ansible.builtin.command: openssl x509 -in /var/lib/rancher/k3s/server/tls/serving-kube-apiserver.crt -noout -text
-  delegate_to: "{{ remote_master }}"
+  delegate_to: "{{ argocd_remote_master }}"
   become: true
-  register: k3s_cert_text
+  register: argocd_k3s_cert_text
   changed_when: false
   failed_when: false
-  when: remote_master in groups.get('k3s', [])
+  when: argocd_remote_master in groups.get('k3s', [])
 
-- name: "Add TLS SAN to K3s configuration: {{ remote_master }}"
+- name: "Add TLS SAN to K3s configuration: {{ argocd_remote_master }}"
   ansible.builtin.blockinfile:
     path: /etc/rancher/k3s/config.yaml
     marker: "# {mark} ANSIBLE MANAGED K3S TLS SAN"
     block: |
       tls-san:
         - "{{ target_cluster_group }}-api.example.com"
-  delegate_to: "{{ remote_master }}"
+  delegate_to: "{{ argocd_remote_master }}"
   become: true
-  register: k3s_config_update
+  register: argocd_k3s_config_update
   when:
-    - remote_master in groups.get('k3s', [])
-    - k3s_cert_text.rc == 0
-    - (target_cluster_group ~ '-api.example.com') not in k3s_cert_text.stdout
+    - argocd_remote_master in groups.get('k3s', [])
+    - argocd_k3s_cert_text.rc == 0
+    - (target_cluster_group ~ '-api.example.com') not in argocd_k3s_cert_text.stdout
 
-- name: "Restart K3s to regenerate certificates: {{ remote_master }}"
+- name: "Restart K3s to regenerate certificates: {{ argocd_remote_master }}"
   ansible.builtin.systemd:
     name: k3s
     state: restarted
     daemon_reload: true
-  delegate_to: "{{ remote_master }}"
+  delegate_to: "{{ argocd_remote_master }}"
   become: true
   when:
-    - remote_master in groups.get('k3s', [])
-    - k3s_config_update is changed
+    - argocd_remote_master in groups.get('k3s', [])
+    - argocd_k3s_config_update is changed
 
 # 4. Execute on Local Management Cluster (Register)
 - name: "Ensure DNS Resolution for Cluster: {{ target_cluster_group }}"
   ansible.builtin.lineinfile:
     path: /etc/hosts
-    line: "{{ remote_api_ip }} {{ target_cluster_group }}-api.example.com"
+    line: "{{ argocd_remote_api_ip }} {{ target_cluster_group }}-api.example.com"
     state: present
   become: true
 
@@ -123,8 +126,8 @@
   # This uses the LOCAL Kubeconfig because we are applying to ArgoCD hub
   environment:
     KUBECONFIG: "{{ argocd_kubeconfig }}"
-  register: secret_apply
-  changed_when: "'created' in secret_apply.stdout or 'configured' in secret_apply.stdout"
+  register: argocd_secret_apply
+  changed_when: "'created' in argocd_secret_apply.stdout or 'configured' in argocd_secret_apply.stdout"
 
 - name: "Cleanup Temp Secret: {{ target_cluster_group }}"
   ansible.builtin.file:

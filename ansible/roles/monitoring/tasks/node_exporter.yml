@@ -18,19 +18,19 @@
 - name: Check for existing binary
   ansible.builtin.stat:
     path: /usr/local/bin/node_exporter
-  register: node_exporter_bin
+  register: monitoring_node_exporter_bin
 
 - name: Verify existing version
   ansible.builtin.command: "/usr/local/bin/node_exporter --version"
-  register: node_exporter_version_check
+  register: monitoring_node_exporter_version_check
   changed_when: false
   failed_when: false
-  when: node_exporter_bin.stat.exists
+  when: monitoring_node_exporter_bin.stat.exists
 
 - name: Install Node Exporter Binary
   when: >
-    not node_exporter_bin.stat.exists or
-    (monitoring_node_exporter_version not in node_exporter_version_check.stdout | default(''))
+    not monitoring_node_exporter_bin.stat.exists or
+    (monitoring_node_exporter_version not in monitoring_node_exporter_version_check.stdout | default(''))
   vars:
     _ne_ver: "{{ monitoring_node_exporter_version }}"
     _ne_arch: "{{ monitoring_arch_map[ansible_architecture] }}"

@@ -17,7 +17,7 @@
 
 - name: Check if Kind cluster already exists
   ansible.builtin.command: kind get clusters
-  register: existing_clusters
+  register: kind_existing_clusters
   changed_when: false
   tags: [kind, cluster]
 
@@ -26,6 +26,6 @@
     kind create cluster
     --name {{ kind_cluster_name }}
     --config /etc/kubernetes/kind/config.yml
-  when: kind_cluster_name not in existing_clusters.stdout
+  when: kind_cluster_name not in kind_existing_clusters.stdout
   changed_when: true
   tags: [kind, cluster]

@@ -21,33 +21,33 @@
 # 4. Identify Role
 - name: Check if I am the Bootstrap Node
   ansible.builtin.set_fact:
-    is_bootstrap: "{{ inventory_hostname == kubeadm_bootstrap_node }}"
+    kubeadm_cluster_is_bootstrap: "{{ inventory_hostname == kubeadm_bootstrap_node }}"
 
 # 5. Execution
 - name: Initialize Primary Control Plane
   ansible.builtin.include_tasks: init.yml
   when:
     - "'k_control' in group_names"
-    - is_bootstrap
+    - kubeadm_cluster_is_bootstrap
 
 - name: Install CNI (Calico)
   ansible.builtin.include_tasks: cni.yml
   when:
     - "'k_control' in group_names"
-    - is_bootstrap
+    - kubeadm_cluster_is_bootstrap
 
 # Configure Taints (Scheduling)
 - name: Configure Taints
   ansible.builtin.include_tasks: taint.yml
   when:
     - "'k_control' in group_names"
-    - is_bootstrap
+    - kubeadm_cluster_is_bootstrap
 
 - name: Join Secondary Control Planes (HA)
   ansible.builtin.include_tasks: join_control.yml
   when:
     - "'k_control' in group_names"
-    - not is_bootstrap
+    - not kubeadm_cluster_is_bootstrap
 
 - name: Join Worker Nodes
   ansible.builtin.include_tasks: join_worker.yml

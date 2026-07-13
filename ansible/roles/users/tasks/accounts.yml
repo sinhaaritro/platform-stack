@@ -8,5 +8,5 @@
     state: present
     create_home: true
     append: true # Ensures we don't remove them from system groups not in our list
-  loop: "{{ active_users }}"
+  loop: "{{ users_active_users }}"
   tags: [users, accounts]

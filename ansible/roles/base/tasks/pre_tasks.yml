@@ -4,8 +4,8 @@
   ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
-  register: apt_status
-  until: apt_status is success
+  register: base_apt_status
+  until: base_apt_status is success
   retries: 10
   delay: 5
-  tags: [ base, apt ]
+  tags: [base, apt]

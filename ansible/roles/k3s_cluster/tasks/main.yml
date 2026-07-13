@@ -5,14 +5,14 @@
   ansible.builtin.stat:
     path: "{{ role_path }}/../../../kubernetes/clusters/{{ item }}"
   loop: "{{ group_names }}"
-  register: cluster_folder_stats
+  register: k3s_cluster_cluster_folder_stats
   delegate_to: localhost
   become: false
 
 - name: "Set k3s_cluster_name based on existing folder discovery"
   ansible.builtin.set_fact:
     k3s_cluster_name: "{{ item.item }}"
-  loop: "{{ cluster_folder_stats.results }}"
+  loop: "{{ k3s_cluster_cluster_folder_stats.results }}"
   when:
     - item.stat.exists
     - item.stat.isdir
@@ -56,26 +56,26 @@
 # 4. Identify Role
 - name: Check if I am the Bootstrap Node
   ansible.builtin.set_fact:
-    is_bootstrap: "{{ inventory_hostname == k3s_bootstrap_node }}"
+    k3s_cluster_is_bootstrap: "{{ inventory_hostname == k3s_bootstrap_node }}"
 
 # 5. Execution
 - name: Initialize Primary Control Plane
   ansible.builtin.include_tasks: init.yml
   when:
     - "'k_control' in group_names"
-    - is_bootstrap
+    - k3s_cluster_is_bootstrap
 
 - name: Inject Sealed Secrets Master Key
   ansible.builtin.include_tasks: inject-sealed-secrets-key.yml
   when:
     - "'k_control' in group_names"
-    - is_bootstrap
+    - k3s_cluster_is_bootstrap
 
 - name: Join Secondary Control Planes (HA)
   ansible.builtin.include_tasks: join_control.yml
   when:
     - "'k_control' in group_names"
-    - not is_bootstrap
+    - not k3s_cluster_is_bootstrap
 
 - name: Join Worker Nodes
   ansible.builtin.include_tasks: join_worker.yml
@@ -85,4 +85,4 @@
   ansible.builtin.include_tasks: sync-kubeconfig.yml
   when:
     - "'k_control' in group_names"
-    - is_bootstrap
+    - k3s_cluster_is_bootstrap

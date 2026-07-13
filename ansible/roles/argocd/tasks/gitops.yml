@@ -11,6 +11,6 @@
   ansible.builtin.command: kubectl apply -f /tmp/root-application.yaml
   environment:
     KUBECONFIG: "{{ argocd_kubeconfig }}"
-  register: gitops_apply
-  changed_when: "'created' in gitops_apply.stdout or 'configured' in gitops_apply.stdout"
+  register: argocd_gitops_apply
+  changed_when: "'created' in argocd_gitops_apply.stdout or 'configured' in argocd_gitops_apply.stdout"
   when: inventory_hostname == argocd_bootstrap_node

@@ -22,9 +22,9 @@
 - name: Verify iSCSI Daemon is Active (Guardrail)
   ansible.builtin.systemd:
     name: iscsid
-  register: iscsid_check
+  register: k3s_cluster_iscsid_check
   changed_when: false
-  failed_when: iscsid_check.status.ActiveState != 'active'
+  failed_when: k3s_cluster_iscsid_check.status.ActiveState != 'active'
 
 - name: Disable Multipathd (Conflicts with Longhorn)
   ansible.builtin.systemd:

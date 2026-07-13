@@ -1,12 +1,15 @@
 # tasks/firewall.yml
 ---
-- name: Set UFW default policies
+- name: Set UFW default incoming policy to deny
   community.general.ufw:
-    direction: "{{ item.direction }}"
-    policy: "{{ item.policy }}"
-  loop:
-    - { direction: "incoming", policy: "deny" }
-    - { direction: "outgoing", policy: "allow" }
+    direction: incoming
+    default: deny
+  tags: [security, ufw]
+
+- name: Set UFW default outgoing policy to allow
+  community.general.ufw:
+    direction: outgoing
+    default: allow
   tags: [security, ufw]
 
 - name: Allow SSH from anywhere (Permissive Mode)

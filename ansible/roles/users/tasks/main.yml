@@ -4,14 +4,14 @@
   ansible.builtin.set_fact:
     # We combine both lists. If users_tenant is defined in multiple groups,
     # Ansible's variable precedence handles the selection.
-    active_users: "{{ users_global + users_tenant }}"
+    users_active_users: "{{ users_global + users_tenant }}"
   tags: [users, always]
 
 - name: Ensure required OS groups exist
   ansible.builtin.group:
     name: "{{ item }}"
     state: present
-  loop: "{{ (active_users | map(attribute='groups') | flatten | unique) + users_mandatory_groups }}"
+  loop: "{{ (users_active_users | map(attribute='groups') | flatten | unique) + users_mandatory_groups }}"
   tags: [users, groups]
 
 - name: Handle user accounts
