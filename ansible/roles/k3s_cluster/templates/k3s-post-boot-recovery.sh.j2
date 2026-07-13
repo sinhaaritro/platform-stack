@@ -22,7 +22,7 @@ KUBECONFIG="/etc/rancher/k3s/k3s.yaml"
 export KUBECONFIG
 
 LOG_TAG="k3s-post-boot-recovery"
-MAX_WAIT={{ k3s_recovery_api_wait_seconds | default(120) }}
+MAX_WAIT={{ k3s_cluster_k3s_recovery_api_wait_seconds | default(120) }}
 
 log() {
   logger -t "$LOG_TAG" "$1"

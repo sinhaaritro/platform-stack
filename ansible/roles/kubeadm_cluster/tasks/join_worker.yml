@@ -8,7 +8,7 @@
 # SAFETY: Wait for the Master API to be reachable
 - name: Wait for Bootstrap Node API (6443)
   ansible.builtin.wait_for:
-    host: "{{ hostvars[kubeadm_bootstrap_node]['ansible_host'] }}"
+    host: "{{ hostvars[kubeadm_cluster_kubeadm_bootstrap_node]['ansible_host'] }}"
     port: 6443
     timeout: 300
     state: started
@@ -17,7 +17,7 @@
 
 - name: Generate Join Command on Primary Master
   ansible.builtin.command: kubeadm token create --print-join-command
-  delegate_to: "{{ kubeadm_bootstrap_node }}"
+  delegate_to: "{{ kubeadm_cluster_kubeadm_bootstrap_node }}"
   register: kubeadm_cluster_join_command_raw
   changed_when: false
   when: not kubeadm_cluster_kubelet_conf.stat.exists
@@ -32,7 +32,7 @@
 - name: Assign 'worker' label to node
   ansible.builtin.command: >
     kubectl label node {{ inventory_hostname }} node-role.kubernetes.io/worker=worker --overwrite
-  delegate_to: "{{ kubeadm_bootstrap_node }}"
+  delegate_to: "{{ kubeadm_cluster_kubeadm_bootstrap_node }}"
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
   # We run this even if already joined, to ensure labels are consistent.

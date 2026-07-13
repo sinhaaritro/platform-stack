@@ -16,12 +16,12 @@
 - name: Fail if Bootstrap Node is undefined
   ansible.builtin.fail:
     msg: "Variable 'kubeadm_bootstrap_node' is missing for host {{ inventory_hostname }}."
-  when: kubeadm_bootstrap_node | length == 0
+  when: kubeadm_cluster_kubeadm_bootstrap_node | length == 0
 
 # 4. Identify Role
 - name: Check if I am the Bootstrap Node
   ansible.builtin.set_fact:
-    kubeadm_cluster_is_bootstrap: "{{ inventory_hostname == kubeadm_bootstrap_node }}"
+    kubeadm_cluster_is_bootstrap: "{{ inventory_hostname == kubeadm_cluster_kubeadm_bootstrap_node }}"
 
 # 5. Execution
 - name: Initialize Primary Control Plane

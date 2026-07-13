@@ -5,5 +5,5 @@
 k8s_repo_version: "v1.31"
 
 # Paths
-k8s_keyring_dir: "/etc/apt/keyrings"
-k8s_keyring_file: "kubernetes-apt-keyring.asc"
+k8s_repo_k8s_keyring_dir: "{{ k8s_keyring_dir | default('/etc/apt/keyrings') }}"
+k8s_repo_k8s_keyring_file: "{{ k8s_keyring_file | default('kubernetes-apt-keyring.asc') }}"

@@ -1,3 +1,5 @@
-storage_mounts:
-  - { device: "/dev/sdb", path: "/data/storage", fstype: "ext4" }
-  - { device: "/dev/sdc", path: "/data/backups", fstype: "xfs" }
+storage_setup_storage_mounts: >-
+  {{ storage_mounts | default([
+    { 'device': '/dev/sdb', 'path': '/data/storage', 'fstype': 'ext4' },
+    { 'device': '/dev/sdc', 'path': '/data/backups', 'fstype': 'xfs' }
+  ]) }}

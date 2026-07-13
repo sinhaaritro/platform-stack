@@ -11,7 +11,7 @@
 
 - name: Download Calico Manifest
   ansible.builtin.get_url:
-    url: "{{ calico_manifest_url }}"
+    url: "{{ kubeadm_cluster_calico_manifest_url }}"
     dest: /tmp/calico.yaml
     mode: "0644"
   when: kubeadm_cluster_calico_check.rc != 0
@@ -22,7 +22,7 @@
   ansible.builtin.replace:
     path: /tmp/calico.yaml
     regexp: "192.168.0.0/16"
-    replace: "{{ kubeadm_pod_network_cidr }}"
+    replace: "{{ kubeadm_cluster_kubeadm_pod_network_cidr }}"
   when: kubeadm_cluster_calico_check.rc != 0
 
 - name: Apply Calico Manifest

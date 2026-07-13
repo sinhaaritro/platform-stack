@@ -7,7 +7,7 @@
 
 - name: Wait for Bootstrap Node API (6443)
   ansible.builtin.wait_for:
-    host: "{{ hostvars[kubeadm_bootstrap_node]['ansible_host'] }}"
+    host: "{{ hostvars[kubeadm_cluster_kubeadm_bootstrap_node]['ansible_host'] }}"
     port: 6443
     timeout: 300
     state: started
@@ -20,14 +20,14 @@
     kubeadm init phase upload-certs --upload-certs | tail -n 1
   args:
     executable: /bin/bash
-  delegate_to: "{{ kubeadm_bootstrap_node }}"
+  delegate_to: "{{ kubeadm_cluster_kubeadm_bootstrap_node }}"
   register: kubeadm_cluster_cert_key
   changed_when: false
   when: not kubeadm_cluster_admin_conf.stat.exists
 
 - name: Generate Join Command on Primary
   ansible.builtin.command: kubeadm token create --print-join-command
-  delegate_to: "{{ kubeadm_bootstrap_node }}"
+  delegate_to: "{{ kubeadm_cluster_kubeadm_bootstrap_node }}"
   register: kubeadm_cluster_join_cmd
   changed_when: false
   when: not kubeadm_cluster_admin_conf.stat.exists

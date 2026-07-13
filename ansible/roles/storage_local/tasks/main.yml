@@ -2,7 +2,7 @@
 ---
 - name: Download Local Path Provisioner Manifest
   ansible.builtin.get_url:
-    url: "{{ local_path_manifest_url }}"
+    url: "{{ storage_local_local_path_manifest_url }}"
     dest: /tmp/local-path-storage.yaml
     mode: "0644"
 
@@ -11,7 +11,7 @@
   ansible.builtin.replace:
     path: /tmp/local-path-storage.yaml
     regexp: "/opt/local-path-provisioner"
-    replace: "{{ local_path_base_dir }}"
+    replace: "{{ storage_local_local_path_base_dir }}"
 
 - name: Apply Local Path Provisioner
   ansible.builtin.command: kubectl apply -f /tmp/local-path-storage.yaml

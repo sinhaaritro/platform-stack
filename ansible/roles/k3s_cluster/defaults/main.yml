@@ -2,29 +2,27 @@
 ---
 # Networking
 k3s_cluster_cidr: "10.244.0.0/16"
-k3s_service_cidr: "10.96.0.0/12"
-k3s_control_plane_endpoint: "" # Set for HA
+k3s_cluster_k3s_service_cidr: "{{ k3s_service_cidr | default('10.96.0.0/12') }}"
+k3s_cluster_k3s_control_plane_endpoint: "{{ k3s_control_plane_endpoint | default('') }}"
 
 # Bootstrap Logic
-k3s_bootstrap_node: "" # MUST BE SET IN INVENTORY
+k3s_cluster_k3s_bootstrap_node: "{{ k3s_bootstrap_node | default('') }}"
 
 # Safety Switches
-allow_destructive_reset: false
+k3s_cluster_allow_destructive_reset: "{{ allow_destructive_reset | default(false) }}"
 
 # Graceful Node Shutdown
 # Total time kubelet delays shutdown to terminate pods
-k3s_shutdown_grace_period: "60s"
+k3s_cluster_k3s_shutdown_grace_period: "{{ k3s_shutdown_grace_period | default('60s') }}"
 # Of that total, how much is reserved for critical pods (e.g., CNI, storage)
-k3s_shutdown_grace_period_critical: "20s"
+k3s_cluster_k3s_shutdown_grace_period_critical: "{{ k3s_shutdown_grace_period_critical | default('20s') }}"
 # Numeric version for systemd InhibitDelayMaxSec (must match k3s_shutdown_grace_period)
-k3s_shutdown_grace_period_seconds: 60
+k3s_cluster_k3s_shutdown_grace_period_seconds: "{{ k3s_shutdown_grace_period_seconds | default(60) }}"
 
 # Post-Boot Recovery
 # How long the recovery script waits for K3s API before aborting
-k3s_recovery_api_wait_seconds: 120
+k3s_cluster_k3s_recovery_api_wait_seconds: "{{ k3s_recovery_api_wait_seconds | default(120) }}"
 
 # Sealed Secrets Master Key Management
-sealed_secrets_master_key_candidate_paths:
-  # Iterates through assigned Ansible groups (like 'ruth', 'arr')
-  # to dynamically locate the cluster's specific master key.
-  - "{{ playbook_dir }}/../kubernetes/clusters/{{ item }}/sealed-secrets/master.secret.yaml"
+k3s_cluster_sealed_secrets_master_key_candidate_paths: >-
+  {{ sealed_secrets_master_key_candidate_paths | default(['{{ playbook_dir }}/../kubernetes/clusters/{{ item }}/sealed-secrets/master.secret.yaml']) }}

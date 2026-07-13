@@ -51,12 +51,12 @@
 - name: Fail if Bootstrap Node is undefined
   ansible.builtin.fail:
     msg: "Variable 'k3s_bootstrap_node' is missing for host {{ inventory_hostname }}."
-  when: k3s_bootstrap_node | length == 0
+  when: k3s_cluster_k3s_bootstrap_node | length == 0
 
 # 4. Identify Role
 - name: Check if I am the Bootstrap Node
   ansible.builtin.set_fact:
-    k3s_cluster_is_bootstrap: "{{ inventory_hostname == k3s_bootstrap_node }}"
+    k3s_cluster_is_bootstrap: "{{ inventory_hostname == k3s_cluster_k3s_bootstrap_node }}"
 
 # 5. Execution
 - name: Initialize Primary Control Plane

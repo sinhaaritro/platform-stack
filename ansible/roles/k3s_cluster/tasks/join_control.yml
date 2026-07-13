@@ -7,12 +7,12 @@
 
 - name: Join K3s cluster as Secondary Control Plane
   ansible.builtin.shell: |
-    K3S_TOKEN={{ hostvars[k3s_bootstrap_node]['k3s_cluster_k3s_token'] }} \
+    K3S_TOKEN={{ hostvars[k3s_cluster_k3s_bootstrap_node]['k3s_cluster_k3s_token'] }} \
     /tmp/k3s-install.sh server \
-      --server https://{{ hostvars[k3s_bootstrap_node]['ansible_default_ipv4']['address'] }}:6443 \
+      --server https://{{ hostvars[k3s_cluster_k3s_bootstrap_node]['ansible_default_ipv4']['address'] }}:6443 \
       --disable=servicelb \
       --disable=traefik \
       --kubelet-arg="config=/etc/rancher/k3s/kubelet.config" \
-      --tls-san={{ k3s_control_plane_endpoint if k3s_control_plane_endpoint else ansible_default_ipv4.address }}
+      --tls-san={{ k3s_cluster_k3s_control_plane_endpoint if k3s_cluster_k3s_control_plane_endpoint else ansible_default_ipv4.address }}
   when: not k3s_cluster_k3s_conf.stat.exists
   changed_when: true

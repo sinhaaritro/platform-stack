@@ -4,7 +4,7 @@
   ansible.builtin.command: kubectl describe node {{ inventory_hostname }}
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
-  register: node_desc
+  register: kubeadm_node_desc
   changed_when: false
   delegate_to: "{{ inventory_hostname }}"
   when: "'k_control' in group_names"
@@ -16,7 +16,7 @@
     KUBECONFIG: /etc/kubernetes/admin.conf
   when:
     - kubeadm_allow_scheduling_on_cp | bool
-    - "'NoSchedule' in node_desc.stdout" # Only run if currently tainted
+    - "'NoSchedule' in kubeadm_node_desc.stdout" # Only run if currently tainted
   changed_when: true
 
 - name: Block Scheduling (Add Taint)
@@ -26,5 +26,5 @@
     KUBECONFIG: /etc/kubernetes/admin.conf
   when:
     - not kubeadm_allow_scheduling_on_cp | bool
-    - "'NoSchedule' not in node_desc.stdout" # Only run if currently NOT tainted
+    - "'NoSchedule' not in kubeadm_node_desc.stdout" # Only run if currently NOT tainted
   changed_when: true

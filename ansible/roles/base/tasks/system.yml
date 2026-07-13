@@ -2,7 +2,7 @@
 ---
 - name: Set system timezone
   community.general.timezone:
-    name: "{{ user_timezone }}"
+    name: "{{ base_user_timezone }}"
   tags: [base, timezone]
 
 - name: Enable NTP (Timesync)
@@ -20,7 +20,7 @@
 
 - name: Generate system locales
   community.general.locale_gen:
-    name: "{{ user_locale }}"
+    name: "{{ base_user_locale }}"
     state: present
   tags: [base, locale]
 

@@ -30,7 +30,7 @@
     iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
   when:
     - (kubeadm_cluster_conflict_downgrade or kubeadm_cluster_conflict_upgrade)
-    - allow_destructive_reset | bool
+    - kubeadm_cluster_allow_destructive_reset | bool
   changed_when: true
 
 # 4. Error Out (If Reset Needed but Not Allowed)
@@ -43,7 +43,7 @@
       To force this change (Data Loss!), set 'allow_destructive_reset: true' for this host.
   when:
     - (kubeadm_cluster_conflict_downgrade or kubeadm_cluster_conflict_upgrade)
-    - not allow_destructive_reset | bool
+    - not kubeadm_cluster_allow_destructive_reset | bool
 
 # 5. HA Validation (Refined for Multi-Cluster)
 # Logic: We calculate how many Control Planes exist specifically for THIS cluster (sharing the same bootstrap node).
@@ -53,16 +53,16 @@
       {{ groups['k_control']
       | map('extract', hostvars)
       | selectattr('kubeadm_bootstrap_node', 'defined')
-      | selectattr('kubeadm_bootstrap_node', 'equalto', kubeadm_bootstrap_node)
+      | selectattr('kubeadm_bootstrap_node', 'equalto', kubeadm_cluster_kubeadm_bootstrap_node)
       | list | length }}
   when: "'k_control' in group_names"
 
 - name: FAIL - HA requires Endpoint
   ansible.builtin.fail:
     msg: >-
-      Cluster '{{ kubeadm_bootstrap_node }}' has {{ kubeadm_cluster_my_cluster_cp_count }} Control Planes
+      Cluster '{{ kubeadm_cluster_kubeadm_bootstrap_node }}' has {{ kubeadm_cluster_my_cluster_cp_count }} Control Planes
       but 'kubeadm_control_plane_endpoint' is empty. Set a Load Balancer IP/DNS.
   when:
     - "'k_control' in group_names"
     - kubeadm_cluster_my_cluster_cp_count | int > 1
-    - kubeadm_control_plane_endpoint | length == 0
+    - kubeadm_cluster_kubeadm_control_plane_endpoint | length == 0

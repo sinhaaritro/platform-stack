@@ -8,11 +8,11 @@
 - name: Initialize Kubeadm (Primary)
   ansible.builtin.command: >
     kubeadm init
-    --pod-network-cidr={{ kubeadm_pod_network_cidr }}
-    --service-cidr={{ kubeadm_service_cidr }}
+    --pod-network-cidr={{ kubeadm_cluster_kubeadm_pod_network_cidr }}
+    --service-cidr={{ kubeadm_cluster_kubeadm_service_cidr }}
     --apiserver-advertise-address={{ ansible_default_ipv4.address }}
-    {{ '--control-plane-endpoint=' + kubeadm_control_plane_endpoint if kubeadm_control_plane_endpoint else '' }}
-    {{ '--upload-certs' if kubeadm_control_plane_endpoint else '' }}
+    {{ '--control-plane-endpoint=' + kubeadm_cluster_kubeadm_control_plane_endpoint if kubeadm_cluster_kubeadm_control_plane_endpoint else '' }}
+    {{ '--upload-certs' if kubeadm_cluster_kubeadm_control_plane_endpoint else '' }}
   register: kubeadm_cluster_init_output
   when: not kubeadm_cluster_k8s_admin_conf.stat.exists
   changed_when: true
