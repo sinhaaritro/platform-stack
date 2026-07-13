@@ -7,8 +7,9 @@ kubeadm_cluster_kubeadm_control_plane_endpoint: "{{ kubeadm_control_plane_endpoi
 
 # CNI
 kubeadm_cluster_calico_version: "{{ calico_version | default('v3.27.0') }}"
+_kubeadm_cluster_calico_version: "v{{ kubeadm_cluster_calico_version | regex_replace('^v', '') }}"
 kubeadm_cluster_calico_manifest_url: >-
-  {{ calico_manifest_url | default('https://raw.githubusercontent.com/projectcalico/calico/' + kubeadm_cluster_calico_version + '/manifests/calico.yaml') }}
+  {{ calico_manifest_url | default('https://raw.githubusercontent.com/projectcalico/calico/' + _kubeadm_cluster_calico_version + '/manifests/calico.yaml') }}
 
 # Bootstrap Logic
 kubeadm_cluster_kubeadm_bootstrap_node: "{{ kubeadm_bootstrap_node | default('') }}"

@@ -16,11 +16,11 @@
   # Logic: Run only if binary missing OR version mismatch
   when: >
     not kubectl_bin.stat.exists or
-    (kubectl_version not in kubectl_current_version.stdout)
+    (_kubectl_version not in kubectl_current_version.stdout)
   vars:
     _k_arch: "{{ kubectl_arch_mapping[ansible_architecture] }}"
-    _k_url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/{{ _k_arch }}/kubectl"
-    _k_sum_url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/{{ _k_arch }}/kubectl.sha256"
+    _k_url: "https://dl.k8s.io/release/{{ _kubectl_version }}/bin/linux/{{ _k_arch }}/kubectl"
+    _k_sum_url: "https://dl.k8s.io/release/{{ _kubectl_version }}/bin/linux/{{ _k_arch }}/kubectl.sha256"
   block:
     - name: Download kubectl checksum file
       ansible.builtin.get_url:

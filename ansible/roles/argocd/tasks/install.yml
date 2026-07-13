@@ -32,7 +32,7 @@
 - name: Deploy ArgoCD via Helm
   ansible.builtin.command: >
     helm upgrade --install argocd argo/argo-cd
-    --version {{ argocd_chart_version }}
+    --version {{ _argocd_chart_version }}
     --namespace {{ argocd_namespace }}
     -f /tmp/argocd-values.yaml
     --wait

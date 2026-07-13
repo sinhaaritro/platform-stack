@@ -34,6 +34,15 @@ resources = {
         "user_timezone" = "Etc/GMT"
         "user_locale"   = "en_US.UTF-8"
       }
+      "kind" = {
+        "kind_version" = "v0.26.0"
+      }
+      "helm" = {
+        "helm_version" = "v3.16.2"
+      }
+      "k8s_repo" = {
+        "k8s_repo_version" = "v1.31"
+      }
     }
 
     vm_config = {
@@ -70,9 +79,11 @@ resources = {
         "sealed_secrets_master_key_url" : "https://github.com/sinhaaritro/platform-stack.git"
         "sealed_secrets_master_key_path" : "kubernetes/clusters/hyperion/sealed-secrets/master.secret.yaml"
         "sealed_secrets_master_key_revision" : "HEAD"
+        "k3s_version" : ""
       },
       "k_management" = {
         "argocd_managed_fleets" : "quanta"
+        "argocd_chart_version" : "10.1.3"
       }
     }
 
@@ -153,6 +164,7 @@ resources = {
       },
       "k3s" = {
         k3s_bootstrap_node : "quanta-01"
+        "k3s_version" : ""
       }
     }
 
@@ -233,9 +245,11 @@ resources = {
         "sealed_secrets_master_key_url" : "https://github.com/sinhaaritro/platform-stack.git"
         "sealed_secrets_master_key_path" : "kubernetes/clusters/elysia/sealed-secrets/master.secret.yaml"
         "sealed_secrets_master_key_revision" : "HEAD"
+        "k3s_version" : ""
       },
       "argocd" = {
         "argocd_git_repo_path" : "kubernetes/bootstrap/elysia"
+        "argocd_chart_version" : "10.1.3"
       }
     }
 

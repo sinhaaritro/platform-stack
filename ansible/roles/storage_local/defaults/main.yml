@@ -2,10 +2,11 @@
 ---
 # Version of Rancher Local Path Provisioner
 storage_local_local_path_version: "{{ local_path_version | default('v0.0.30') }}"
+_storage_local_local_path_version: "v{{ storage_local_local_path_version | regex_replace('^v', '') }}"
 storage_local_local_path_manifest_url: >-
   {{ local_path_manifest_url |
   default('https://raw.githubusercontent.com/rancher/local-path-provisioner/' +
-  storage_local_local_path_version + '/deploy/local-path-storage.yaml') }}
+  _storage_local_local_path_version + '/deploy/local-path-storage.yaml') }}
 
 # The directory on the Node (Host OS) where data will be stored
 storage_local_local_path_base_dir: "{{ local_path_base_dir | default('/opt/local-path-provisioner') }}"

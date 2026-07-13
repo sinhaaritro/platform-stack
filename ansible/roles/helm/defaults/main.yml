@@ -2,6 +2,7 @@
 ---
 # Version to install (Must be exact version now, not 'latest')
 helm_version: "v3.16.2"
+_helm_version: "v{{ helm_version | regex_replace('^v', '') }}"
 
 # Architecture Mapping
 helm_arch_map:

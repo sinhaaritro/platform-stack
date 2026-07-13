@@ -3,6 +3,7 @@
 # Version to install (Pinned for stability)
 # You can override this in group_vars if needed
 kubectl_version: "v1.32.0"
+_kubectl_version: "v{{ kubectl_version | regex_replace('^v', '') }}"
 
 # Architecture mapping (Ansible -> Kubernetes naming)
 kubectl_arch_mapping:

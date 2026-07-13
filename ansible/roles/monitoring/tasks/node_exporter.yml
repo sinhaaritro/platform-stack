@@ -30,9 +30,9 @@
 - name: Install Node Exporter Binary
   when: >
     not monitoring_node_exporter_bin.stat.exists or
-    (monitoring_node_exporter_version not in monitoring_node_exporter_version_check.stdout | default(''))
+    (_monitoring_node_exporter_version not in monitoring_node_exporter_version_check.stdout | default(''))
   vars:
-    _ne_ver: "{{ monitoring_node_exporter_version }}"
+    _ne_ver: "{{ _monitoring_node_exporter_version }}"
     _ne_arch: "{{ monitoring_arch_map[ansible_architecture] }}"
     _ne_dist: "node_exporter-{{ _ne_ver }}.linux-{{ _ne_arch }}"
   block:

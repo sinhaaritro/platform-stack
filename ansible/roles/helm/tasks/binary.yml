@@ -16,11 +16,11 @@
   # Skip if the binary already exists at the correct version.
   when: >
     not helm_bin.stat.exists or
-    (helm_version not in helm_current_version.stdout | default(''))
+    (_helm_version not in helm_current_version.stdout | default(''))
   block:
     - name: Determine Helm download URL
       ansible.builtin.set_fact:
-        helm_url: "https://get.helm.sh/helm-{{ helm_version }}-linux-{{ helm_arch_map[ansible_architecture] }}.tar.gz"
+        helm_url: "https://get.helm.sh/helm-{{ _helm_version }}-linux-{{ helm_arch_map[ansible_architecture] }}.tar.gz"
 
     - name: Create temporary directory for Helm
       ansible.builtin.file:

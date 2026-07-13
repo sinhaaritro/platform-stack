@@ -5,6 +5,7 @@ kind_cluster_name: "dev-cluster"
 
 # Kind Binary Version
 kind_version: "v0.26.0"
+_kind_version: "v{{ kind_version | regex_replace('^v', '') }}"
 
 # Host Port Mapping (Exposed on the VM IP)
 # Override these in your inventory if needed (e.g., if Port 80 is busy)
