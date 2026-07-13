@@ -13,6 +13,8 @@
 # task tofu:apply:approve STACK_NAME=proxmox_atlas
 # ```
 
+enable_debug = false
+
 # Target Proxmox Environment
 target_node      = "atlas"
 target_datastore = "WD1TB"
@@ -25,7 +27,7 @@ resources = {
     enabled     = false
     type        = "vm"
     node_name   = "atlas"
-    description = "Kubernetes servers. Ubuntu 24.04."
+    description = "Kubernetes servers. Ubuntu 26.04."
     tags        = ["kind", "ansible", "ubuntu", "kind"]
     ansible_groups = {
       "timezone" = {
@@ -37,8 +39,8 @@ resources = {
     vm_config = {
       cpu_cores         = 2
       memory_size       = 2048
-      disk_datastore_id = "WD4TB"
-      os_version        = "24.04"
+      disk_datastore_id = "local-lvm"
+      os_version        = "26.04"
       disk_size         = 16
     }
 
@@ -47,8 +49,7 @@ resources = {
         vm_id           = 700
         cloud_init_user = "dev"
         vm_config = {
-          disk_datastore_id = "WD4TB"
-          ipv4_address      = "192.168.0.70/24"
+          ipv4_address = "192.168.0.70/24"
         }
       }
     }
@@ -57,7 +58,7 @@ resources = {
     enabled     = true
     type        = "vm"
     node_name   = "atlas"
-    description = "Kubernets servers. Ubuntu 24.04."
+    description = "Kubernets servers. Ubuntu 26.04."
     tags        = ["hyperion", "ansible", "ubuntu", "k3s", "k_management"]
     ansible_groups = {
       "timezone" = {
@@ -78,8 +79,8 @@ resources = {
     vm_config = {
       cpu_cores         = 4
       memory_size       = 8192
-      disk_datastore_id = "WD4TB"
-      os_version        = "24.04"
+      disk_datastore_id = "local-lvm"
+      os_version        = "26.04"
       disk_size         = 24
     }
 
@@ -143,7 +144,7 @@ resources = {
     enabled     = true
     type        = "vm"
     node_name   = "atlas"
-    description = "Kubernets servers. Ubuntu 24.04."
+    description = "Kubernets servers. Ubuntu 26.04."
     tags        = ["quanta", "ansible", "ubuntu", "k3s", "k_fleet_local", "k_quanta"]
     ansible_groups = {
       "timezone" = {
@@ -158,8 +159,8 @@ resources = {
     vm_config = {
       cpu_cores         = 2
       memory_size       = 4096
-      disk_datastore_id = "WD4TB"
-      os_version        = "24.04"
+      disk_datastore_id = "local-lvm"
+      os_version        = "26.04"
       disk_size         = 16
     }
 
@@ -220,7 +221,7 @@ resources = {
     enabled     = true
     type        = "vm"
     node_name   = "atlas"
-    description = "Kubernets servers. Ubuntu 24.04."
+    description = "Kubernets servers. Ubuntu 26.04."
     tags        = ["elysia", "ansible", "ubuntu", "k3s", "k_management"]
     ansible_groups = {
       "timezone" = {
@@ -241,8 +242,8 @@ resources = {
     vm_config = {
       cpu_cores         = 4
       memory_size       = 8192
-      disk_datastore_id = "WD4TB"
-      os_version        = "24.04"
+      disk_datastore_id = "local-lvm"
+      os_version        = "26.04"
       disk_size         = 24
     }
 
@@ -260,7 +261,7 @@ resources = {
             {
               interface    = "scsi1"
               datastore_id = "WD4TB"
-              size         = 150
+              size         = 10
               ssd          = true
             }
           ]
@@ -274,7 +275,7 @@ resources = {
     enabled     = true
     type        = "vm"
     node_name   = "atlas"
-    description = "Web servers. Ubuntu 24.04."
+    description = "Web servers. Ubuntu 26.04."
     tags        = ["server", "ansible"]
     ansible_groups = {
       "timezone" = {
@@ -286,8 +287,8 @@ resources = {
     vm_config = {
       cpu_cores         = 2
       memory_size       = 2048
-      disk_datastore_id = "WD4TB"
-      os_version        = "25.04"
+      disk_datastore_id = "local-lvm"
+      os_version        = "26.04"
       disk_size         = 16
     }
 
@@ -324,12 +325,12 @@ resources = {
     enabled         = false
     type            = "vm"
     node_name       = "atlas"
-    description     = "Primary database servers. Ubuntu 24.04."
+    description     = "Primary database servers. Ubuntu 26.04."
     tags            = ["db", "ansible"]
     cloud_init_user = "db_admins"
 
     vm_config = {
-      os_version = "25.04"
+      os_version = "26.04"
     }
 
     nodes = {
@@ -342,7 +343,7 @@ resources = {
       },
       "db-server-02" = {
         vm_id       = 1036
-        description = "Primary database servers, for postgress. Ubuntu 24.04."
+        description = "Primary database servers, for postgress. Ubuntu 26.04."
         tags        = ["postgres"]
         vm_config = {
           disk_size    = 16
@@ -356,7 +357,7 @@ resources = {
     enabled         = false
     type            = "lxc"
     node_name       = "atlas"
-    description     = "Primary database servers. Ubuntu 24.04."
+    description     = "Primary database servers. Ubuntu 26.04."
     tags            = ["db", "ansible"]
     cloud_init_user = "dev"
 
@@ -376,7 +377,7 @@ resources = {
       },
       "support-servers-02" = {
         vm_id       = 1034
-        description = "Primary database servers, for postgress. Ubuntu 24.04."
+        description = "Primary database servers, for postgress. Ubuntu 26.04."
         tags        = ["postgres"]
         lxc_config = {
           hostname     = "support-servers-02"
