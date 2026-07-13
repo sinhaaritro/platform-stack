@@ -5,6 +5,12 @@
     name: "{{ base_user_timezone }}"
   tags: [base, timezone]
 
+- name: Install systemd-timesyncd
+  ansible.builtin.apt:
+    name: systemd-timesyncd
+    state: present
+  tags: [base, time]
+
 - name: Enable NTP (Timesync)
   ansible.builtin.service:
     name: systemd-timesyncd

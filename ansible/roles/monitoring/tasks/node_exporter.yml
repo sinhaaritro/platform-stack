@@ -33,7 +33,7 @@
     (_monitoring_node_exporter_version not in monitoring_node_exporter_version_check.stdout | default(''))
   vars:
     _ne_ver: "{{ _monitoring_node_exporter_version }}"
-    _ne_arch: "{{ monitoring_arch_map[ansible_architecture] }}"
+    _ne_arch: "{{ monitoring_arch_map[ansible_facts['architecture']] }}"
     _ne_dist: "node_exporter-{{ _ne_ver }}.linux-{{ _ne_arch }}"
   block:
     - name: Download and Unarchive tarball

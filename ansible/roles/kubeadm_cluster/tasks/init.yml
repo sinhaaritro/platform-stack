@@ -10,7 +10,7 @@
     kubeadm init
     --pod-network-cidr={{ kubeadm_cluster_kubeadm_pod_network_cidr }}
     --service-cidr={{ kubeadm_cluster_kubeadm_service_cidr }}
-    --apiserver-advertise-address={{ ansible_default_ipv4.address }}
+    --apiserver-advertise-address={{ ansible_facts['default_ipv4']['address'] }}
     {{ '--control-plane-endpoint=' + kubeadm_cluster_kubeadm_control_plane_endpoint if kubeadm_cluster_kubeadm_control_plane_endpoint else '' }}
     {{ '--upload-certs' if kubeadm_cluster_kubeadm_control_plane_endpoint else '' }}
   register: kubeadm_cluster_init_output

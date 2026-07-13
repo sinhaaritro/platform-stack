@@ -7,13 +7,14 @@ base_user_timezone: "{{ user_timezone | default('UTC') }}"
 base_user_locale: "{{ user_locale | default('en_US.UTF-8') }}"
 
 # Essential utility packages
+# TODO: Split the package list. DEV Env needs all, Servers dont need all of these. Server in debug mode might need some.
 base_packages:
   - curl
   - wget
   - vim
   # - git
   - htop
-  - neofetch
+  - fastfetch
   - unzip
   - zip
   - tar
@@ -23,6 +24,6 @@ base_packages:
   - gnupg
   - lsb-release
   - software-properties-common
-  - net-tools   # valid for debugging network issues
-  - dnsutils    # contains dig/nslookup
+  - net-tools
+  - dnsutils
   - unattended-upgrades

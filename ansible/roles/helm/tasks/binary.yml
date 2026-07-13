@@ -20,7 +20,7 @@
   block:
     - name: Determine Helm download URL
       ansible.builtin.set_fact:
-        helm_url: "https://get.helm.sh/helm-{{ _helm_version }}-linux-{{ helm_arch_map[ansible_architecture] }}.tar.gz"
+        helm_url: "https://get.helm.sh/helm-{{ _helm_version }}-linux-{{ helm_arch_map[ansible_facts['architecture']] }}.tar.gz"
 
     - name: Create temporary directory for Helm
       ansible.builtin.file:
@@ -38,7 +38,7 @@
 
     - name: Move Helm binary to system path
       ansible.builtin.copy:
-        src: "/tmp/helm_install/linux-{{ helm_arch_map[ansible_architecture] }}/helm"
+        src: "/tmp/helm_install/linux-{{ helm_arch_map[ansible_facts['architecture']] }}/helm"
         dest: /usr/local/bin/helm
         mode: "0755"
         owner: root

@@ -4,7 +4,7 @@
 # but usually k3s versions are specific.
 # Here we can let it default to getting the latest stable from the install script.
 k3s_version: ""
-_k3s_version: "{{ 'v' ~ (k3s_version | regex_replace('^v', '')) if k3s_version else '' }}"
+_k3s_version: "{{ 'v' ~ (k3s_version | regex_replace('^v', '')) if k3s_version else 'v1.31.2+k3s1' }}"
 
 # Kernel Modules required for K8s Networking
 k3s_kernel_modules:

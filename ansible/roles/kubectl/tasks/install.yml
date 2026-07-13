@@ -18,7 +18,7 @@
     not kubectl_bin.stat.exists or
     (_kubectl_version not in kubectl_current_version.stdout)
   vars:
-    _k_arch: "{{ kubectl_arch_mapping[ansible_architecture] }}"
+    _k_arch: "{{ kubectl_arch_mapping[ansible_facts['architecture']] }}"
     _k_url: "https://dl.k8s.io/release/{{ _kubectl_version }}/bin/linux/{{ _k_arch }}/kubectl"
     _k_sum_url: "https://dl.k8s.io/release/{{ _kubectl_version }}/bin/linux/{{ _k_arch }}/kubectl.sha256"
   block:

@@ -28,8 +28,8 @@
     name: docker
     types: [deb]
     uris: https://download.docker.com/linux/ubuntu
-    suites: ["{{ ansible_distribution_release }}"]
+    suites: ["{{ ansible_facts['distribution_release'] }}"]
     components: [stable]
-    architectures: ["{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' }}"]
+    architectures: ["{{ 'amd64' if ansible_facts['architecture'] == 'x86_64' else 'arm64' }}"]
     signed_by: /etc/apt/keyrings/docker.asc
     state: present
