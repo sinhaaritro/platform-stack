@@ -218,7 +218,7 @@ resources = {
     }
   },
   "elysia" = {
-    enabled     = true
+    enabled     = false
     type        = "vm"
     node_name   = "atlas"
     description = "Kubernets servers. Ubuntu 26.04."
@@ -272,7 +272,7 @@ resources = {
 
 
   "web_server" = {
-    enabled     = true
+    enabled     = false
     type        = "vm"
     node_name   = "atlas"
     description = "Web servers. Ubuntu 26.04."
