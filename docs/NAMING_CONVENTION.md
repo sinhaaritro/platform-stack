@@ -49,8 +49,13 @@ Themes are not limited to ancient mythology. Names from anime, sci-fi, video gam
 | Codename      | Source / Universe | Description                    |
 | :------------ | :---------------- | :----------------------------- |
 | `asgard`      | Norse Mythology   | Main homelab location          |
-| `babylon`     | History           | AWS cloud environment          |
+| `babylon`     | History           | Oracle Cloud (OCI) environment |
 | `wano`        | One Piece         | Second homelab location        |
+| `kyoto`       | History / Japan   | AWS cloud environment          |
+| `pataliputra` | History / India   | Google Cloud (GCP) environment |
+| `athens`      | History / Greece  | Azure cloud environment        |
+| `alexandria`  | History / Egypt   | Cloudflare edge/DNS proxy      |
+| `samarkand`   | History / Silk Road| Netbird mesh VPN overlay network |
 | `coruscant`   | Star Wars         | Oracle Cloud environment       |
 | `olympus`     | Greek Mythology   | Primary cloud / management region |
 | `delphi`      | Greek Mythology   | Monitoring or staging location |
@@ -298,12 +303,12 @@ Themes are not limited to ancient mythology. Names from anime, sci-fi, video gam
 #### 9.1. Cloud VMs
 *Virtual machines running on AWS, Oracle, or other cloud providers.*
 -   Follows the same pattern as local VMs.
--   **Example:** `babylon-web-server-01`
+-   **Example:** `kyoto-web-server-01`
 
 #### 9.2. Cloud Storage
 *Storage buckets and volumes in the cloud (e.g., AWS S3, EBS).*
 -   **Pattern:** `{org/user}-{location}-{purpose}-storage`
--   **Example:** `homelab-babylon-backups-storage`
+-   **Example:** `homelab-kyoto-backups-storage`
 
 
 ---

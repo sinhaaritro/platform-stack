@@ -12,10 +12,10 @@
 
 terraform {
   backend "s3" {
-    bucket         = "homelab-babylon-tfstate"
+    bucket         = "homelab-kyoto-tfstate"
     key            = "cloud/aws_global.tfstate"
     region         = "us-east-1"
-    dynamodb_table = "homelab-babylon-tflocks"
+    dynamodb_table = "homelab-kyoto-tflocks"
     encrypt        = true
   }
 }

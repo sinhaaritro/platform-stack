@@ -1,23 +1,19 @@
 # -----------------------------------------------------------------------------
-# RESOURCE ORCHESTRATION - AWS GLOBAL RESOURCES
+# RESOURCE ORCHESTRATION - AWS GLOBAL RESOURCES (Japanese Theme: `kyoto`)
 # -----------------------------------------------------------------------------
-# This file dynamically creates S3 buckets, DynamoDB tables, and IAM users
+# This file dynamically creates S3 buckets, DynamoDB tables, and IAM resources
 # from data structures specified in tfvars files.
 # -----------------------------------------------------------------------------
 
-# ─── Step 1: Local Resources Parsing ──────────────────────────────────────────
+# ─── 1. S3 Buckets ──────────────────────────────────────────────────────────
 locals {
-  s3_buckets      = try(var.resources.s3_buckets, {})
-  dynamodb_tables = try(var.resources.dynamodb_tables, {})
-  iam_users       = try(var.resources.iam_users, {})
+  s3_buckets = try(var.resources.s3_buckets, {})
 }
 
-# ─── Step 2: S3 Bucket Orchestration ──────────────────────────────────────────
 resource "aws_s3_bucket" "buckets" {
   for_each      = local.s3_buckets
   bucket        = each.value.bucket_name
   force_destroy = try(each.value.force_destroy, false)
-
   tags = {
     Name       = each.value.bucket_name
     managed-by = "tofu"
@@ -25,11 +21,9 @@ resource "aws_s3_bucket" "buckets" {
   }
 }
 
-# Enable S3 Bucket Versioning dynamically where configured
 resource "aws_s3_bucket_versioning" "versioning" {
   for_each = {
-    for k, v in local.s3_buckets : k => v
-    if try(v.versioning, false)
+    for k, v in local.s3_buckets : k => v if try(v.versioning, false)
   }
   bucket = aws_s3_bucket.buckets[each.key].id
   versioning_configuration {
@@ -37,29 +31,29 @@ resource "aws_s3_bucket_versioning" "versioning" {
   }
 }
 
-# Block all public access for security-first infrastructure
 resource "aws_s3_bucket_public_access_block" "public_access" {
   for_each = local.s3_buckets
   bucket   = aws_s3_bucket.buckets[each.key].id
-
   block_public_acls       = try(each.value.block_public_access, true)
   block_public_policy     = try(each.value.block_public_access, true)
   ignore_public_acls      = try(each.value.block_public_access, true)
   restrict_public_buckets = try(each.value.block_public_access, true)
 }
 
-# ─── Step 3: DynamoDB Locking Tables Orchestration ────────────────────────────
+# ─── 2. DynamoDB Tables ──────────────────────────────────────────────────────
+locals {
+  dynamodb_tables = try(var.resources.dynamodb_tables, {})
+}
+
 resource "aws_dynamodb_table" "tables" {
   for_each     = local.dynamodb_tables
   name         = each.value.table_name
   billing_mode = try(each.value.billing_mode, "PAY_PER_REQUEST")
   hash_key     = try(each.value.hash_key, "LockID")
-
   attribute {
     name = try(each.value.hash_key, "LockID")
     type = "S"
   }
-
   tags = {
     Name       = each.value.table_name
     managed-by = "tofu"
@@ -67,28 +61,77 @@ resource "aws_dynamodb_table" "tables" {
   }
 }
 
-# ─── Step 4: IAM Infrastructure (Access Control) ──────────────────────────────
+# ─── 3. IAM Custom Policies ──────────────────────────────────────────────────
+locals {
+  iam_policies = try(var.resources.iam_policies, {})
+}
+
+resource "aws_iam_policy" "policies" {
+  for_each    = local.iam_policies
+  name        = each.value.policy_name
+  description = try(each.value.description, "")
+  policy      = jsonencode(each.value.policy_document)
+}
+
+# ─── 4. IAM Groups ───────────────────────────────────────────────────────────
+locals {
+  iam_groups = try(var.resources.iam_groups, {})
+}
+
+resource "aws_iam_group" "groups" {
+  for_each = local.iam_groups
+  name     = each.value.group_name
+}
+
+# Attach custom policies to IAM groups
+locals {
+  iam_group_policy_attachments = try(var.resources.iam_group_policy_attachments, {})
+}
+
+resource "aws_iam_group_policy_attachment" "group_policy_attachments" {
+  for_each   = local.iam_group_policy_attachments
+  group      = aws_iam_group.groups[each.value.group].name
+  policy_arn = aws_iam_policy.policies[each.value.policy_key].arn
+}
+
+# ─── 5. IAM Users & Memberships ──────────────────────────────────────────────
+locals {
+  iam_users = try(var.resources.iam_users, {})
+}
+
 resource "aws_iam_user" "users" {
   for_each = local.iam_users
   name     = each.value.username
-
   tags = {
     managed-by = "tofu"
     repo       = "https://github.com/sinhaaritro/platform-stack"
   }
 }
 
-# Policy attachment for programmatic access users
-resource "aws_iam_user_policy_attachment" "user_policies" {
-  for_each = {
-    for k, v in local.iam_users : k => v
-    if try(v.policy_arn, "") != ""
+# Add users to their respective groups
+locals {
+  # Build a flattened list of user-to-group associations
+  user_group_pair = flatten([
+    for user_key, user in local.iam_users : [
+      for group in try(user.groups, []) : {
+        user_key = user_key
+        user     = user.username
+        group    = group
+      }
+    ]
+  ])
+  user_group_map = {
+    for pair in local.user_group_pair : "${pair.user}-${pair.group}" => pair
   }
-  user       = aws_iam_user.users[each.key].name
-  policy_arn = each.value.policy_arn
 }
 
-# ─── Step 5: Resource Outputs ─────────────────────────────────────────────────
+resource "aws_iam_user_group_membership" "user_memberships" {
+  for_each = local.user_group_map
+  user     = aws_iam_user.users[each.value.user_key].name
+  groups   = [aws_iam_group.groups[each.value.group].name]
+}
+
+# ─── 6. Resource Outputs ─────────────────────────────────────────────────────
 output "s3_bucket_arn_map" {
   description = "A map of created S3 bucket ARNs keyed by their identifier."
   value = {
@@ -103,8 +146,22 @@ output "dynamodb_table_arn_map" {
   }
 }
 
+output "iam_group_arn_map" {
+  description = "A map of created IAM group ARNs keyed by their identifier."
+  value = {
+    for k, v in aws_iam_group.groups : k => v.arn
+  }
+}
+
+output "iam_policy_arn_map" {
+  description = "A map of created IAM policy ARNs keyed by their identifier."
+  value = {
+    for k, v in aws_iam_policy.policies : k => v.arn
+  }
+}
+
 output "iam_user_arn_map" {
-  description = "A map of created IAM user ARNs keyed by their username."
+  description = "A map of created IAM user ARNs keyed by their identifier."
   value = {
     for k, v in aws_iam_user.users : k => v.arn
   }
