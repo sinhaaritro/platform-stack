@@ -5,7 +5,7 @@ namespace: security
 helmCharts:
   - name: kyverno
     repo: https://kyverno.github.io/kyverno/
-    version: 3.6.2
+    version: 3.8.2
     releaseName: kyverno
     namespace: security
     includeCRDs: true
