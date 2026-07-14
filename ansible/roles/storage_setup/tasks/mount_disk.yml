@@ -4,10 +4,27 @@
     path: "{{ mount_item.device }}"
   register: storage_setup_device_stat
 
+- name: Get current filesystem type of device
+  ansible.builtin.command: "blkid -s TYPE -o value {{ mount_item.device }}"
+  register: storage_setup_current_fstype
+  failed_when: false
+  changed_when: false
+  when: storage_setup_device_stat.stat.exists
+
+- name: Unmount device if filesystem change is forced
+  ansible.posix.mount:
+    path: "{{ mount_item.path }}"
+    state: unmounted
+  when:
+    - storage_setup_device_stat.stat.exists
+    - mount_item.force | default(false) | bool
+    - storage_setup_current_fstype.stdout != (mount_item.fstype | default('ext4'))
+
 - name: Create filesystem on device
   community.general.filesystem:
     fstype: "{{ mount_item.fstype | default('ext4') }}"
     dev: "{{ mount_item.device }}"
+    force: "{{ mount_item.force | default(omit) }}"
   when: storage_setup_device_stat.stat.exists
 
 - name: Create mount point directory

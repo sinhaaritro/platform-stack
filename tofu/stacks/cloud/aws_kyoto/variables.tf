@@ -5,7 +5,19 @@
 variable "aws_region" {
   description = "The target AWS region to deploy resources into."
   type        = string
-  default     = "us-east-1"
+}
+
+# -----------------------------------------------------------------------------
+# AWS AUTHENTICATION CREDENTIALS
+# -----------------------------------------------------------------------------
+variable "aws_credentials" {
+  description = "AWS authentication credentials."
+  sensitive   = true
+  type = object({
+    name       = string
+    access_key = string
+    secret_key = string
+  })
 }
 
 # -----------------------------------------------------------------------------

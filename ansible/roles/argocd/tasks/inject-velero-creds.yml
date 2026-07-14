@@ -1,0 +1,45 @@
+# tasks/inject-velero-creds.yml
+---
+# TODO: Add the option to select the intentory file and the keys
+- name: "Warn if AWS credentials file is missing in inventory.d"
+  ansible.builtin.debug:
+    msg: "WARNING: aws_velero_access_key_id is not defined. Skipping Velero credentials injection. Please run OpenTofu aws_kyoto stack first."
+  when:
+    - aws_velero_access_key_id is not defined
+    - inventory_hostname == argocd_bootstrap_node
+
+- name: "Ensure Velero namespace exists"
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      kubectl create namespace backup --dry-run=client -o yaml | kubectl apply -f -
+  args:
+    executable: /bin/bash
+  environment:
+    KUBECONFIG: "{{ argocd_kubeconfig }}"
+  when:
+    - aws_velero_access_key_id is defined
+    - inventory_hostname == argocd_bootstrap_node
+  register: argocd_backup_ns
+  changed_when: "'created' in argocd_backup_ns.stdout or 'configured' in argocd_backup_ns.stdout"
+
+- name: "Create Velero S3 credentials secret"
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      kubectl create secret generic velero-aws-creds \
+        --namespace backup \
+        --from-literal=cloud="[default]
+      aws_access_key_id = {{ aws_velero_access_key_id }}
+      aws_secret_access_key = {{ aws_velero_secret_access_key }}" \
+        --dry-run=client -o yaml | kubectl apply -f -
+  args:
+    executable: /bin/bash
+  environment:
+    KUBECONFIG: "{{ argocd_kubeconfig }}"
+  when:
+    - aws_velero_access_key_id is defined
+    - inventory_hostname == argocd_bootstrap_node
+  register: argocd_velero_secret
+  changed_when: "'created' in argocd_velero_secret.stdout or 'configured' in argocd_velero_secret.stdout"
+  no_log: true

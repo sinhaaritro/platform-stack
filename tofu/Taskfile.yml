@@ -211,7 +211,8 @@ tasks:
       - sh: 'test -n "{{.STACK_NAME}}"'
         msg: "Error: STACK_NAME is required. Usage: task tofu:<task> STACK_NAME=<stack_name>"
     cmds:
-      - ansible-vault encrypt {{.SECRET_FILE}}
+      - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
+      - ansible-vault encrypt --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") {{.SECRET_FILE}}
 
   # --- Manually decrypt a secrets file ---
   secrets:decrypt:

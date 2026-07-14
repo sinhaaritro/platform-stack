@@ -1,36 +1,37 @@
 # -----------------------------------------------------------------------------
 # STACK CONFIGURATION - AWS GLOBAL RESOURCES (Japanese Theme: `kyoto`)
 # -----------------------------------------------------------------------------
-# Non-sensitive configuration file defining S3, DynamoDB, and IAM resources.
+# Non-sensitive configuration file defining resources.
 # -----------------------------------------------------------------------------
 
-aws_region   = "us-east-1"
+aws_region   = "ap-southeast-1" # Singapore Region
 enable_debug = true
 
 # Resource Definitions
 # Defines the map of resources to be managed in this AWS account.
 resources = {
   s3_buckets = {
-    "tfstate" = {
-      bucket_name         = "homelab-kyoto-tfstate"
-      versioning          = true
-      force_destroy       = false
-      block_public_access = true
-    }
     "backups" = {
-      bucket_name         = "homelab-kyoto-backups-storage"
-      versioning          = true
-      force_destroy       = false
-      block_public_access = true
+      bucket_name                        = "hyperion-velero-backups"
+      versioning                         = true
+      force_destroy                      = false
+      block_public_access                = true
+      noncurrent_version_expiration_days = 14
     }
-  }
-
-  dynamodb_tables = {
-    "tflocks" = {
-      table_name   = "homelab-kyoto-tflocks"
-      hash_key     = "LockID"
-      billing_mode = "PAY_PER_REQUEST"
+    "immich" = {
+      bucket_name                        = "hyperion-immich-file"
+      versioning                         = true
+      force_destroy                      = false
+      block_public_access                = true
+      noncurrent_version_expiration_days = 14
     }
+    # "homelab" = {
+    #   bucket_name                        = "aritro-homelab"
+    #   versioning                         = true
+    #   force_destroy                      = false
+    #   block_public_access                = true
+    #   noncurrent_version_expiration_days = 14
+    # }
   }
 
   # --- Managed IAM Groups ---
@@ -68,8 +69,10 @@ resources = {
               "s3:AbortMultipartUpload"
             ]
             Resource = [
-              "arn:aws:s3:::homelab-kyoto-backups-storage",
-              "arn:aws:s3:::homelab-kyoto-backups-storage/*"
+              "arn:aws:s3:::hyperion-velero-backups",
+              "arn:aws:s3:::hyperion-velero-backups/*",
+              "arn:aws:s3:::hyperion-immich-file",
+              "arn:aws:s3:::hyperion-immich-file/*"
             ]
           }
         ]

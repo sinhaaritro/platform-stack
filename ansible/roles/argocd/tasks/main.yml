@@ -1,5 +1,13 @@
 # tasks/main.yml
 ---
+- name: Wait for Kubernetes API server to become responsive
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: 6443
+    delay: 3
+    timeout: 180
+  when: inventory_hostname == argocd_bootstrap_node
+
 - name: Install System Dependencies
   ansible.builtin.include_tasks: dependencies.yml
 
@@ -11,6 +19,9 @@
 
 - name: Verify Readiness and Get Secrets
   ansible.builtin.include_tasks: security.yml
+
+- name: Inject Velero AWS Credentials from OpenTofu
+  ansible.builtin.include_tasks: inject-velero-creds.yml
 
 - name: Bootstrap GitOps (App of Apps)
   ansible.builtin.include_tasks: gitops.yml
