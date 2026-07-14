@@ -56,7 +56,7 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "5"
-                - app: redis
+                - app: valkey
                   namespace: storage
                   serverSideApply: "true"
                   replace: "false"

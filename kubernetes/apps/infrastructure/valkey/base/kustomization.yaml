@@ -3,9 +3,9 @@ kind: Kustomization
 namespace: storage
 
 helmCharts:
-  - name: redis
-    repo: https://kubelauncher.github.io/charts
+  - name: valkey
+    repo: oci://registry-1.docker.io/cloudpirates
+    version: 0.24.1
     releaseName: redis
     namespace: storage
-    version: 0.2.14
     valuesFile: values.yaml

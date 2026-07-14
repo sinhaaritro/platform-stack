@@ -4,18 +4,18 @@ kind: Component
 patches:
   - target:
       kind: StatefulSet
-      name: redis
+      name: redis-valkey
       namespace: storage
     patch: |-
       apiVersion: apps/v1
       kind: StatefulSet
       metadata:
-        name: redis
+        name: redis-valkey
       spec:
         template:
           spec:
             containers:
-              - name: redis
+              - name: valkey
                 resources:
                   limits:
                     cpu: 200m

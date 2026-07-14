@@ -1,0 +1,13 @@
+architecture: standalone
+auth:
+  enabled: true
+  existingSecret: redis-secret
+  existingSecretPasswordKey: password
+
+persistence:
+  enabled: false
+
+config:
+  save: ""
+  extraConfig:
+    - "appendonly no"
