@@ -1,11 +1,12 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: security
+# TODO: Look at Metrics and Traffic Exposure parameters
 
 helmCharts:
   - name: sealed-secrets
     repo: https://bitnami.github.io/sealed-secrets
-    version: 2.18.0
+    version: 2.19.1
     releaseName: sealed-secrets
     namespace: security
     includeCRDs: true
