@@ -12,5 +12,6 @@ components:
   - ../../../apps/infrastructure/seaweedfs/components/filer-client-service
   - ../../../apps/infrastructure/seaweedfs/components/admin
   - ../../../apps/infrastructure/seaweedfs/components/ingress
+  - ./components/ingress
 
   # - ../../../apps/infrastructure/seaweedfs/components/maintenance # Uncomment to scale down statefulsets

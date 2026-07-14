@@ -1,0 +1,94 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: Ingress
+      name: seaweedfs-master
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: seaweedfs.hyperion.aritrosinha.dpdns.org
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: seaweedfs.hyperion.aritrosinha.dpdns.org
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: letsencrypt-prod-aritrosinha
+  - target:
+      kind: Ingress
+      name: seaweedfs-filer
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: filer.seaweedfs.hyperion.aritrosinha.dpdns.org
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: filer.seaweedfs.hyperion.aritrosinha.dpdns.org
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: letsencrypt-prod-aritrosinha
+      - op: replace
+        path: /metadata/annotations/link.argocd.argoproj.io~1external-link
+        value: https://filer.seaweedfs.hyperion.aritrosinha.dpdns.org/
+  - target:
+      kind: Ingress
+      name: seaweedfs-s3
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: s3.seaweedfs.hyperion.aritrosinha.dpdns.org
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: s3.seaweedfs.hyperion.aritrosinha.dpdns.org
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: letsencrypt-prod-aritrosinha
+  - target:
+      kind: Ingress
+      name: seaweedfs-admin
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: admin.seaweedfs.hyperion.aritrosinha.dpdns.org
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: admin.seaweedfs.hyperion.aritrosinha.dpdns.org
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: letsencrypt-prod-aritrosinha
+      - op: replace
+        path: /metadata/annotations/link.argocd.argoproj.io~1external-link
+        value: https://admin.seaweedfs.hyperion.aritrosinha.dpdns.org/
+  - target:
+      kind: Ingress
+      name: seaweedfs-webdav
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: webdav.seaweedfs.hyperion.aritrosinha.dpdns.org
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: webdav.seaweedfs.hyperion.aritrosinha.dpdns.org
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: letsencrypt-prod-aritrosinha
+  - target:
+      kind: Ingress
+      name: seaweedfs-volume
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: volume.seaweedfs.hyperion.aritrosinha.dpdns.org
+      - op: replace
+        path: /spec/rules/1/host
+        value: "*.volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: volume.seaweedfs.hyperion.aritrosinha.dpdns.org
+      - op: replace
+        path: /spec/tls/0/hosts/1
+        value: "*.volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: letsencrypt-prod-aritrosinha

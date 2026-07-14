@@ -4,16 +4,16 @@ metadata:
   name: seaweedfs-master
   namespace: storage
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - seaweedfs.hyperion.aritrosinha.dpdns.org
+        - seaweedfs.placeholder.local
       secretName: seaweedfs-master-tls
   rules:
-    - host: seaweedfs.hyperion.aritrosinha.dpdns.org
+    - host: seaweedfs.placeholder.local
       http:
         paths:
           - path: /
@@ -30,17 +30,17 @@ metadata:
   name: seaweedfs-filer
   namespace: storage
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-    link.argocd.argoproj.io/external-link: "https://filer.seaweedfs.hyperion.aritrosinha.dpdns.org/"
+    link.argocd.argoproj.io/external-link: "https://filer.seaweedfs.placeholder.local/"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - filer.seaweedfs.hyperion.aritrosinha.dpdns.org
+        - filer.seaweedfs.placeholder.local
       secretName: seaweedfs-filer-tls
   rules:
-    - host: filer.seaweedfs.hyperion.aritrosinha.dpdns.org
+    - host: filer.seaweedfs.placeholder.local
       http:
         paths:
           - path: /
@@ -57,16 +57,16 @@ metadata:
   name: seaweedfs-s3
   namespace: storage
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - s3.seaweedfs.hyperion.aritrosinha.dpdns.org
+        - s3.seaweedfs.placeholder.local
       secretName: seaweedfs-s3-tls
   rules:
-    - host: s3.seaweedfs.hyperion.aritrosinha.dpdns.org
+    - host: s3.seaweedfs.placeholder.local
       http:
         paths:
           - path: /
@@ -83,17 +83,17 @@ metadata:
   name: seaweedfs-admin
   namespace: storage
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-    link.argocd.argoproj.io/external-link: "https://admin.seaweedfs.hyperion.aritrosinha.dpdns.org/"
+    link.argocd.argoproj.io/external-link: "https://admin.seaweedfs.placeholder.local/"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - admin.seaweedfs.hyperion.aritrosinha.dpdns.org
+        - admin.seaweedfs.placeholder.local
       secretName: seaweedfs-admin-tls
   rules:
-    - host: admin.seaweedfs.hyperion.aritrosinha.dpdns.org
+    - host: admin.seaweedfs.placeholder.local
       http:
         paths:
           - path: /
@@ -110,16 +110,16 @@ metadata:
   name: seaweedfs-webdav
   namespace: storage
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - webdav.seaweedfs.hyperion.aritrosinha.dpdns.org
+        - webdav.seaweedfs.placeholder.local
       secretName: seaweedfs-webdav-tls
   rules:
-    - host: webdav.seaweedfs.hyperion.aritrosinha.dpdns.org
+    - host: webdav.seaweedfs.placeholder.local
       http:
         paths:
           - path: /
@@ -136,17 +136,17 @@ metadata:
   name: seaweedfs-volume
   namespace: storage
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - volume.seaweedfs.hyperion.aritrosinha.dpdns.org
-        - "*.volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
+        - volume.seaweedfs.placeholder.local
+        - "*.volume.seaweedfs.placeholder.local"
       secretName: seaweedfs-volume-tls
   rules:
-    - host: volume.seaweedfs.hyperion.aritrosinha.dpdns.org
+    - host: volume.seaweedfs.placeholder.local
       http:
         paths:
           - path: /
@@ -156,7 +156,7 @@ spec:
                 name: seaweedfs-volume
                 port:
                   number: 8080
-    - host: "*.volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
+    - host: "*.volume.seaweedfs.placeholder.local"
       http:
         paths:
           - path: /

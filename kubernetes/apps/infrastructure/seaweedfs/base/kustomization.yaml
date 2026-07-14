@@ -2,10 +2,11 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: storage
 
+# TODO: Fix the layout so that we can make it more dynamic
 helmCharts:
   - name: seaweedfs
     repo: https://seaweedfs.github.io/seaweedfs/helm
+    version: 4.39.0
     releaseName: seaweedfs
     namespace: storage
-    version: 4.0.409
     valuesFile: values.yaml
