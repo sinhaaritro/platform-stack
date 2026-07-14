@@ -3,4 +3,4 @@ kind: Kustomization
 
 resources:
   - coredns.yaml
-  - kube-proxy.yaml
+  # - kube-proxy.yaml
