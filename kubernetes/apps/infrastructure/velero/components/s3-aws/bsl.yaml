@@ -6,9 +6,9 @@ metadata:
 spec:
   provider: aws
   objectStorage:
-    bucket: aritro-homelab-velero-backups
+    bucket: hyperion-velero-backups
   config:
-    region: ap-south-1
+    region: ap-southeast-1
   credential:
     name: velero-aws-creds
     key: cloud

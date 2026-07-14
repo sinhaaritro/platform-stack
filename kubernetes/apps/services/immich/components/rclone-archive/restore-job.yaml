@@ -15,7 +15,7 @@ spec:
             - -c
             - |
               echo "Restoring Immich Library from AWS S3 (nas_backup/immich) to PVC..."
-              rclone copy aws:aritro-homelab-velero-backups/nas_backup/immich /data --transfers 4 --checkers 8 --verbose
+              rclone copy aws:hyperion-velero-backups/nas_backup/immich /data --transfers 4 --checkers 8 --verbose
               echo "Restore complete. Fixing permissions..."
               chown -R 1000:1000 /data
           env:
@@ -24,7 +24,7 @@ spec:
             - name: RCLONE_CONFIG_AWS_PROVIDER
               value: AWS
             - name: RCLONE_CONFIG_AWS_REGION
-              value: ap-south-1
+              value: ap-southeast-1
             - name: RCLONE_CONFIG_AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
