@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: Ingress
+      name: longhorn-frontend
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: longhorn.elysia.example.com
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: longhorn.elysia.example.com
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: letsencrypt-prod
+      - op: replace
+        path: /metadata/annotations/link.argocd.argoproj.io~1external-link
+        value: https://longhorn.elysia.example.com/

@@ -4,17 +4,17 @@ metadata:
   name: longhorn-frontend
   namespace: longhorn-system
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-    link.argocd.argoproj.io/external-link: "https://longhorn.hyperion.aritrosinha.dpdns.org/"
+    link.argocd.argoproj.io/external-link: "https://longhorn.placeholder.local/"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - longhorn.hyperion.aritrosinha.dpdns.org
+        - longhorn.placeholder.local
       secretName: longhorn-tls
   rules:
-    - host: longhorn.hyperion.aritrosinha.dpdns.org
+    - host: longhorn.placeholder.local
       http:
         paths:
           - path: /
