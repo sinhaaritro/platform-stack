@@ -4,16 +4,16 @@ metadata:
   name: couchdb
   namespace: storage
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - couchdb.hyperion.aritrosinha.dpdns.org
+        - couchdb.placeholder.local
       secretName: couchdb-tls
   rules:
-    - host: couchdb.hyperion.aritrosinha.dpdns.org
+    - host: couchdb.placeholder.local
       http:
         paths:
           - path: /
