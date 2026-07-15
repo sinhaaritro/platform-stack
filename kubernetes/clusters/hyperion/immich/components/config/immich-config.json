@@ -175,7 +175,7 @@
     "clientSecret": "{{ .IMMICH_OAUTH_CLIENT_SECRET }}",
     "defaultStorageQuota": null,
     "enabled": true,
-    "issuerUrl": "https://authentik.placeholder.local/application/o/immich/.well-known/openid-configuration",
+    "issuerUrl": "https://authentik.hyperion.aritrosinha.dpdns.org/application/o/immich/.well-known/openid-configuration",
     "mobileOverrideEnabled": false,
     "mobileRedirectUri": "",
     "profileSigningAlgorithm": "none",

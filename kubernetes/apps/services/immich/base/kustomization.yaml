@@ -5,7 +5,7 @@ namespace: personal
 helmCharts:
   - name: immich
     repo: https://immich-app.github.io/immich-charts
+    version: 0.13.1
     releaseName: immich
     namespace: personal
-    version: 0.10.3
     valuesFile: values.yaml

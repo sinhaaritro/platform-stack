@@ -4,7 +4,7 @@ metadata:
   name: immich-server
   namespace: personal
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
   labels:
@@ -13,10 +13,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - immich.hyperion.aritrosinha.dpdns.org
+        - immich.placeholder.local
       secretName: immich-tls
   rules:
-    - host: immich.hyperion.aritrosinha.dpdns.org
+    - host: immich.placeholder.local
       http:
         paths:
           - path: /
