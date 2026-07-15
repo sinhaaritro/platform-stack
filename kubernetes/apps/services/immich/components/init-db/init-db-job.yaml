@@ -12,14 +12,14 @@ spec:
     spec:
       containers:
         - name: init-db
-          image: postgres:14-alpine
+          image: postgres:18-alpine
           command:
             - /bin/sh
             - -c
             - |
               echo "Secrets injected successfully! Proceeding..."
 
-              PG_HOST="postgresql-14.storage.svc.cluster.local"
+              PG_HOST="postgresql-18.storage.svc.cluster.local"
 
               # 1. Wait until PostgreSQL is actually reachable
               echo "Waiting for PostgreSQL at $PG_HOST..."
@@ -29,7 +29,7 @@ spec:
               done
               echo "PostgreSQL is ready."
 
-              # 2. Use the credentials provided by the Secrets (Now guaranteed to exist by ArgoCD)
+              # 2. Use the credentials provided by the Secrets (Guaranteed to exist by ArgoCD)
               export PGPASSWORD=$ADMIN_PASSWORD
 
               # Create user if it does not exist
@@ -41,15 +41,14 @@ spec:
                 || psql -h "$PG_HOST" -U postgres -c "CREATE DATABASE \"$DB_NAME\" OWNER \"$DB_USER\";"
 
               # Apply required extensions as superuser
-              psql -h "$PG_HOST" -U postgres -d "$DB_NAME" -c "CREATE EXTENSION IF NOT EXISTS vectors;"
-              psql -h "$PG_HOST" -U postgres -d "$DB_NAME" -c "GRANT ALL PRIVILEGES ON SCHEMA vectors TO \"$DB_USER\";"
-              psql -h "$PG_HOST" -U postgres -d "$DB_NAME" -c "CREATE EXTENSION IF NOT EXISTS cube;"
-              psql -h "$PG_HOST" -U postgres -d "$DB_NAME" -c "CREATE EXTENSION IF NOT EXISTS earthdistance;"
+              psql -h "$PG_HOST" -U postgres -d "$DB_NAME" -c "CREATE EXTENSION IF NOT EXISTS vector CASCADE;"
+              psql -h "$PG_HOST" -U postgres -d "$DB_NAME" -c "CREATE EXTENSION IF NOT EXISTS vchord CASCADE;"
+              psql -h "$PG_HOST" -U postgres -d "$DB_NAME" -c "CREATE EXTENSION IF NOT EXISTS earthdistance CASCADE;"
           env:
             - name: ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-admin
+                  name: postgres-18-admin
                   key: POSTGRES_PASSWORD
                   # optional: true
             - name: DB_USER

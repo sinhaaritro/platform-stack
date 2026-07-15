@@ -13,6 +13,11 @@ spec:
             serverSideApply: "true"
             replace: "false"
             wave: "6"
+          - app: postgresql-18
+            namespace: storage
+            serverSideApply: "true"
+            replace: "false"
+            wave: "6"
           - app: couchdb
             namespace: storage
             serverSideApply: "true"
