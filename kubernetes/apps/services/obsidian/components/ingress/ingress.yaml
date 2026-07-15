@@ -4,13 +4,13 @@ metadata:
   name: obsidian
   namespace: personal
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-    link.argocd.argoproj.io/external-link: "https://obsidian.hyperion.aritrosinha.dpdns.org/"
+    link.argocd.argoproj.io/external-link: "https://obsidian.placeholder.local/"
 spec:
   rules:
-    - host: obsidian.hyperion.aritrosinha.dpdns.org
+    - host: obsidian.placeholder.local
       http:
         paths:
           - path: /
@@ -22,5 +22,5 @@ spec:
                   name: http
   tls:
     - hosts:
-        - obsidian.hyperion.aritrosinha.dpdns.org
+        - obsidian.placeholder.local
       secretName: obsidian-tls

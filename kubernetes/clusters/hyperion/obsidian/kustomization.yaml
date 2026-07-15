@@ -8,9 +8,10 @@ resources:
   - ../../../apps/services/obsidian/base
 
 components:
-  - ../../../apps/services/obsidian/components/secrets
+  - ./components/secrets
   - ../../../apps/services/obsidian/components/ingress
-  - ../../../apps/services/obsidian/components/dns-fix
+  - ./components/ingress
+  - ./components/dns-fix
   - ../../../apps/services/obsidian/components/storage
   - ../../../apps/services/obsidian/components/auth-authentik
   # - ../../../apps/services/obsidian/components/maintenance
