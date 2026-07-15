@@ -20,7 +20,7 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: pg-dump
-              image: postgres:14-alpine
+              image: postgres:18-alpine
               command:
                 - /bin/sh
                 - -c
@@ -31,7 +31,7 @@ spec:
                   echo "Backup complete."
               env:
                 - name: DB_HOSTNAME
-                  value: "postgresql-14.storage.svc.cluster.local"
+                  value: "postgresql-18.storage.svc.cluster.local"
               envFrom:
                 - secretRef:
                     name: authentik-db-credentials

@@ -18,7 +18,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: init-db
-          image: postgres:14-alpine
+          image: postgres:18-alpine
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -29,7 +29,7 @@ spec:
             - -c
             - |
               export PGPASSWORD=$ADMIN_PASSWORD
-              PG_HOST="postgresql-14.storage.svc.cluster.local"
+              PG_HOST="postgresql-18.storage.svc.cluster.local"
 
               # Wait until PostgreSQL is ready (max 5 minutes)
               echo "Waiting for PostgreSQL at $PG_HOST..."
@@ -59,7 +59,7 @@ spec:
             - name: ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-admin
+                  name: postgres-18-admin
                   key: POSTGRES_PASSWORD
             - name: DB_USER
               valueFrom:

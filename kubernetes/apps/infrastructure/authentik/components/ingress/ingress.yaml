@@ -4,16 +4,16 @@ metadata:
   name: authentik-server
   namespace: security
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - authentik.hyperion.aritrosinha.dpdns.org
+        - authentik.placeholder.local
       secretName: authentik-tls
   rules:
-    - host: authentik.hyperion.aritrosinha.dpdns.org
+    - host: authentik.placeholder.local
       http:
         paths:
           - path: /
