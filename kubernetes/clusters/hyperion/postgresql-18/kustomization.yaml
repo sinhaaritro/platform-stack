@@ -6,6 +6,7 @@ resources:
   - ../../../apps/infrastructure/postgresql-18/base
 
 components:
+  - ../../../apps/infrastructure/postgresql-18/components/secrets
   - ./components/secrets
   - ../../../apps/infrastructure/postgresql-18/components/storage
   - ../../../apps/infrastructure/postgresql-18/components/resource-limits
