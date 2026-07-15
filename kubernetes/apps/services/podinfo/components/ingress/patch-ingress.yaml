@@ -5,7 +5,7 @@ metadata:
   namespace: podinfo
 spec:
   rules:
-    - host: podinfo.hyperion.example.com
+    - host: podinfo.placeholder.local
       http:
         paths:
           - path: /
