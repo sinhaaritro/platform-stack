@@ -8,6 +8,7 @@ spec:
   generators:
     - list:
         elements:
+          # TODO: Remove postgresql-14
           - app: postgresql-14
             namespace: storage
             serverSideApply: "true"
