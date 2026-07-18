@@ -13,4 +13,5 @@ components:
   - ../../../apps/infrastructure/loki/components/storage-retention
   - ../../../apps/infrastructure/loki/components/storage-pvc
   - ../../../apps/infrastructure/loki/components/ingress
+  - ./components/ingress
   # - ../../../apps/infrastructure/loki/components/maintenance

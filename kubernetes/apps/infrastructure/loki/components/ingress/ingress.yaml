@@ -4,16 +4,16 @@ metadata:
   name: loki
   namespace: logging
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - loki.hyperion.aritrosinha.dpdns.org
+        - loki.placeholder.local
       secretName: loki-tls
   rules:
-    - host: loki.hyperion.aritrosinha.dpdns.org
+    - host: loki.placeholder.local
       http:
         paths:
           - path: /
