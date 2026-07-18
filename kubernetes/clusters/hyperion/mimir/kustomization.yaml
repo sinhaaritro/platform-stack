@@ -9,4 +9,5 @@ components:
   - ../../../apps/infrastructure/mimir/components/single-zone
   - ../../../apps/infrastructure/mimir/components/resource-limits
   - ../../../apps/infrastructure/mimir/components/ingress
+  - ./components/ingress
   # - ../../../apps/infrastructure/mimir/components/maintenance
