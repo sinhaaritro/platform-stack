@@ -13,5 +13,6 @@ components:
   - ../../../apps/infrastructure/grafana/components/datasource-alertmanager
   - ../../../apps/infrastructure/grafana/components/resource-limits
   - ../../../apps/infrastructure/grafana/components/ingress
+  - ./components/ingress
   # - ../../../apps/infrastructure/grafana/components/maintenance
 

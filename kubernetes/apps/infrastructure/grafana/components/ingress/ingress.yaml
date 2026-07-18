@@ -4,16 +4,16 @@ metadata:
   name: grafana
   namespace: monitoring
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - grafana.hyperion.aritrosinha.dpdns.org
+        - grafana.placeholder.local
       secretName: grafana-tls
   rules:
-    - host: grafana.hyperion.aritrosinha.dpdns.org
+    - host: grafana.placeholder.local
       http:
         paths:
           - path: /
