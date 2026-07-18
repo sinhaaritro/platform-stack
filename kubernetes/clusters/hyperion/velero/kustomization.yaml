@@ -8,10 +8,10 @@ resources:
 
 components:
   - ../../../apps/infrastructure/velero/components/s3-seaweedfs
-  - ../../../apps/infrastructure/velero/components/s3-aws
-  - ../../../apps/infrastructure/velero/components/encryption-kopia
+  - ./components/s3-aws
+  - ./components/encryption-kopia
   - ../../../apps/infrastructure/velero/components/metrics
-  - ../../../apps/infrastructure/velero/components/schedules/ssl-cert
-  - ../../../apps/infrastructure/velero/components/schedules/obsidian
-  - ../../../apps/infrastructure/velero/components/schedules/immich
-  - ../../../apps/infrastructure/velero/components/schedules/authentik
+  - ./components/schedules/ssl-cert
+  - ./components/schedules/obsidian
+  - ./components/schedules/immich
+  - ./components/schedules/authentik
