@@ -10,3 +10,4 @@ components:
   - ../../../apps/infrastructure/alloy/components/resource-limits
   - ../../../apps/infrastructure/alloy/components/replica-count
   - ../../../apps/infrastructure/alloy/components/ingress
+  - ./components/ingress
