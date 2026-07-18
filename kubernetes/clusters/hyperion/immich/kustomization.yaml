@@ -15,5 +15,5 @@ components:
   - ../../../apps/services/immich/components/config
   - ./components/config
   - ../../../apps/services/immich/components/backup-hooks
-  - ../../../apps/services/immich/components/rclone-archive
+  - ./components/rclone-archive
   # - ../../../apps/services/immich/components/maintenance
