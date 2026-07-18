@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+namespace: monitoring
+
+patches:
+  - patch: |
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-prod-aritrosinha"
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: "alertmanager.hyperion.aritrosinha.dpdns.org"
+      - op: replace
+        path: /spec/rules/0/host
+        value: "alertmanager.hyperion.aritrosinha.dpdns.org"
+    target:
+      kind: Ingress
+      name: alertmanager

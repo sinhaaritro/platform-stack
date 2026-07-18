@@ -4,6 +4,7 @@ resources:
   - ../../../apps/infrastructure/alertmanager/base
 components:
   - ../../../apps/infrastructure/alertmanager/components/ingress
+  - ./components/ingress
   - ../../../apps/infrastructure/alertmanager/components/resources
   - ../../../apps/infrastructure/alertmanager/components/persistence
   - ../../../apps/infrastructure/alertmanager/components/resource-limits
