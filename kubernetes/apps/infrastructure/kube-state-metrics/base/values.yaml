@@ -1,9 +1,8 @@
-resourcesPreset: "micro"
+prometheusScrape: true
 
 service:
+  port: 8080
   type: ClusterIP
-  ports:
-    http: 8080
 
 rbac:
   create: true
