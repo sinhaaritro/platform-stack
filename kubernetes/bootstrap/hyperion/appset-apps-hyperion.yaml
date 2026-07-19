@@ -9,41 +9,41 @@ spec:
     - list:
         elements:
           # TODO: Remove postgresql-14
-          - app: postgresql-14
-            namespace: storage
-            serverSideApply: "true"
-            replace: "false"
-            wave: "6"
-          - app: postgresql-18
-            namespace: storage
-            serverSideApply: "true"
-            replace: "false"
-            wave: "6"
-          - app: couchdb
-            namespace: storage
-            serverSideApply: "true"
-            replace: "false"
-            wave: "6"
-          - app: loki
-            namespace: logging
-            serverSideApply: "false"
-            replace: "false"
-            wave: "7"
-          - app: authentik
-            namespace: security
-            serverSideApply: "true"
-            replace: "false"
-            wave: "7"
-          - app: immich
-            namespace: personal
-            serverSideApply: "true"
-            replace: "false"
-            wave: "8"
-          - app: obsidian
-            namespace: personal
-            serverSideApply: "true"
-            replace: "false"
-            wave: "8"
+          # - app: postgresql-14
+          #   namespace: storage
+          #   serverSideApply: "true"
+          #   replace: "false"
+          #   wave: "6"
+          # - app: postgresql-18
+          #   namespace: storage
+          #   serverSideApply: "true"
+          #   replace: "false"
+          #   wave: "6"
+          # - app: couchdb
+          #   namespace: storage
+          #   serverSideApply: "true"
+          #   replace: "false"
+          #   wave: "6"
+          # - app: loki
+          #   namespace: logging
+          #   serverSideApply: "false"
+          #   replace: "false"
+          #   wave: "7"
+          # - app: authentik
+          #   namespace: security
+          #   serverSideApply: "true"
+          #   replace: "false"
+          #   wave: "7"
+          # - app: immich
+          #   namespace: personal
+          #   serverSideApply: "true"
+          #   replace: "false"
+          #   wave: "8"
+          # - app: obsidian
+          #   namespace: personal
+          #   serverSideApply: "true"
+          #   replace: "false"
+          #   wave: "8"
           - app: podinfo
             namespace: podinfo
             serverSideApply: "true"
