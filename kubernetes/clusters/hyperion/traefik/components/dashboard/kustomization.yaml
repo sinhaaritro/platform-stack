@@ -21,6 +21,9 @@ patches:
       - op: replace
         path: /spec/commonName
         value: traefik.hyperion.example.com
+      - op: replace
+        path: /spec/issuerRef/name
+        value: letsencrypt-prod-aritrosinha
   - target:
       kind: IngressRoute
       name: traefik-dashboard
