@@ -94,6 +94,22 @@ patches:
             scrape_interval = "15s"
           }
 
+          discovery.relabel "kube_state_metrics" {
+            targets = discovery.kubernetes.nodes.targets
+            rule {
+              source_labels = ["__meta_kubernetes_service_name"]
+              regex = ".*kube-state-metrics.*"
+              action = "keep"
+            }
+          }
+
+          prometheus.scrape "kube_state_metrics" {
+            job_name   = "kube-state-metrics"
+            targets    = discovery.relabel.kube_state_metrics.output
+            forward_to = [prometheus.remote_write.mimir.receiver]
+            scrape_interval = "15s"
+          }
+
           prometheus.scrape "seaweedfs" {
             job_name   = "seaweedfs"
             targets    = discovery.relabel.seaweedfs.output

@@ -1,0 +1,16 @@
+resourcesPreset: "micro"
+
+service:
+  type: ClusterIP
+  ports:
+    http: 8080
+
+rbac:
+  create: true
+
+serviceAccount:
+  create: true
+
+prometheus:
+  monitor:
+    enabled: false
