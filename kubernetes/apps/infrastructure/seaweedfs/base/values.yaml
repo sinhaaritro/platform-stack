@@ -88,7 +88,7 @@ volume:
 
   initContainers: |
     - name: seaweedfs-vol-fix-idx
-      image: "{{ .Values.global.imageName }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+      image: "{{ template "seaweedfs.volume.image" $ }}"
       imagePullPolicy: IfNotPresent
       command: ["/bin/sh", "-c"]
       args: ["weed fix /data; if ls /data/*.idx  >/dev/null 2>&1; then mv /data/*.idx /idx/ ; fi; "]
