@@ -12,7 +12,7 @@ data:
         type: prometheus
         uid: prometheus
         access: proxy
-        url: http://mimir-nginx.monitoring.svc:80/prometheus
+        url: http://mimir-gateway.monitoring.svc:80/prometheus
         jsonData:
           httpHeaderName1: "X-Scope-OrgID"
           timeInterval: "15s"
