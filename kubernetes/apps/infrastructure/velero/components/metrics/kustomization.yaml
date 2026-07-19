@@ -1,3 +1,8 @@
+# Historically, older versions of the Velero Helm chart did not create a Kubernetes Service for metrics by default.
+# The custom metrics component was created to add service.yaml, a ServiceMonitor (for Prometheus Operator), and deployment annotations.
+# However, the current Velero Helm chart creates the velero Service on port 8085 out of the box, making velero-metrics redundant.
+# So this is not needed
+
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 
