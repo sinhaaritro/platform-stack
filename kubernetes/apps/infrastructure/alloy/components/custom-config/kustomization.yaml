@@ -101,16 +101,19 @@ patches:
             scrape_interval = "15s"
           }
 
-          // Metrics: Discovery & Scrape (Velero)
-          discovery.static "velero" {
-            targets = [
-              {"__address__" = "velero.backup.svc:8085"},
-            ]
+          // Metrics: Discovery (Velero)
+          discovery.relabel "velero" {
+            targets = discovery.kubernetes.nodes.targets
+            rule {
+              source_labels = ["__meta_kubernetes_service_name"]
+              regex = "velero.*"
+              action = "keep"
+            }
           }
 
           prometheus.scrape "velero" {
             job_name   = "velero"
-            targets    = discovery.static.velero.output
+            targets    = discovery.relabel.velero.output
             forward_to = [prometheus.remote_write.mimir.receiver]
             scrape_interval = "30s"
             metrics_path    = "/metrics"
