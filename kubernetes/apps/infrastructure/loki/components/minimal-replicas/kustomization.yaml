@@ -42,13 +42,4 @@ patches:
         name: loki-gateway
       spec:
         replicas: 1
-  - target:
-      kind: Deployment
-      name: loki-canary
-    patch: |
-      apiVersion: apps/v1
-      kind: Deployment
-      metadata:
-        name: loki-canary
-      spec:
-        replicas: 1
+

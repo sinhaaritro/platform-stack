@@ -14,7 +14,7 @@ patches:
         template:
           spec:
             containers:
-              - name: loki
+              - name: read
                 resources:
                   requests:
                     cpu: 100m
@@ -34,7 +34,7 @@ patches:
         template:
           spec:
             containers:
-              - name: loki
+              - name: write
                 resources:
                   requests:
                     cpu: 100m
@@ -54,7 +54,7 @@ patches:
         template:
           spec:
             containers:
-              - name: loki
+              - name: backend
                 resources:
                   requests:
                     cpu: 50m
@@ -114,7 +114,7 @@ patches:
         template:
           spec:
             containers:
-              - name: loki-canary
+              - name: canary
                 resources:
                   requests:
                     cpu: 10m

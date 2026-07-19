@@ -52,6 +52,8 @@ write:
     - -config.expand-env=true
   persistence:
     enabled: true
+    accessModes:
+      - ReadWriteOnce
     size: 10Gi
     storageClass: longhorn
   resources:
@@ -70,6 +72,8 @@ read:
     - -config.expand-env=true
   persistence:
     enabled: true
+    accessModes:
+      - ReadWriteOnce
     size: 10Gi
     storageClass: longhorn
   resources:
@@ -88,6 +92,8 @@ backend:
     - -config.expand-env=true
   persistence:
     enabled: true
+    accessModes:
+      - ReadWriteOnce
     size: 10Gi
     storageClass: longhorn
   resources:

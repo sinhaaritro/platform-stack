@@ -14,7 +14,7 @@ patches:
         template:
           spec:
             containers:
-              - name: loki
+              - name: read
                 env:
                   - name: S3_ENDPOINT
                     value: "http://seaweedfs-s3.storage.svc:8333"
@@ -42,7 +42,7 @@ patches:
         template:
           spec:
             containers:
-              - name: loki
+              - name: write
                 env:
                   - name: S3_ENDPOINT
                     value: "http://seaweedfs-s3.storage.svc:8333"
@@ -70,7 +70,7 @@ patches:
         template:
           spec:
             containers:
-              - name: loki
+              - name: backend
                 env:
                   - name: S3_ENDPOINT
                     value: "http://seaweedfs-s3.storage.svc:8333"
@@ -87,18 +87,18 @@ patches:
                   - name: S3_SECRET_KEY
                     value: "loki"
   - target:
-      kind: Deployment
+      kind: DaemonSet
       name: loki-canary
     patch: |
       apiVersion: apps/v1
-      kind: Deployment
+      kind: DaemonSet
       metadata:
         name: loki-canary
       spec:
         template:
           spec:
             containers:
-              - name: loki
+              - name: canary
                 env:
                   - name: S3_ENDPOINT
                     value: "http://seaweedfs-s3.storage.svc:8333"

@@ -6,6 +6,7 @@ resources:
   - ../../../apps/infrastructure/loki/base
 
 components:
+  - ../../../apps/infrastructure/loki/components/enable-backend
   - ../../../apps/infrastructure/loki/components/minimal-replicas
   - ../../../apps/infrastructure/loki/components/resource-limits
   - ../../../apps/infrastructure/loki/components/storage-s3
