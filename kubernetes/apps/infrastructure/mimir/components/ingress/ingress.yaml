@@ -20,6 +20,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: mimir-nginx
+                name: mimir-gateway
                 port:
                   number: 80
