@@ -1,9 +1,26 @@
 # tasks/join_worker.yml
 ---
-- name: Check if Worker is already joined
+- name: Check if Worker is registered on Control Plane
+  ansible.builtin.command: k3s kubectl get node {{ inventory_hostname }}
+  register: k3s_cluster_k3s_worker_registered
+  delegate_to: "{{ k3s_cluster_k3s_bootstrap_node }}"
+  failed_when: false
+  changed_when: false
+
+- name: Check if local node password exists
   ansible.builtin.stat:
     path: /etc/rancher/node/password
   register: k3s_cluster_k3s_worker_joined
+
+- name: Reset worker node state if password exists but node is not registered
+  ansible.builtin.shell: |
+    if [ -f /usr/local/bin/k3s-agent-uninstall.sh ]; then
+      /usr/local/bin/k3s-agent-uninstall.sh
+    fi
+  when:
+    - k3s_cluster_k3s_worker_registered.rc != 0
+    - k3s_cluster_k3s_worker_joined.stat.exists
+  changed_when: true
 
 - name: Join K3s cluster as Worker (Agent)
   ansible.builtin.shell: |
@@ -12,5 +29,5 @@
     /tmp/k3s-install.sh agent
   environment:
     INSTALL_K3S_VERSION: "{{ _k3s_cluster_k3s_version }}"
-  when: not k3s_cluster_k3s_worker_joined.stat.exists
+  when: k3s_cluster_k3s_worker_registered.rc != 0
   changed_when: true
