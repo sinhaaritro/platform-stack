@@ -104,31 +104,6 @@ spec:
                 port:
                   number: 23646
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: seaweedfs-webdav
-  namespace: storage
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-spec:
-  ingressClassName: traefik
-  tls:
-    - hosts:
-        - webdav.seaweedfs.placeholder.local
-      secretName: seaweedfs-webdav-tls
-  rules:
-    - host: webdav.seaweedfs.placeholder.local
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: seaweedfs-webdav
-                port:
-                  number: 7333
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
