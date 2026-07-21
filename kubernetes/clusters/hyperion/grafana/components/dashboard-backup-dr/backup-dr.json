@@ -611,7 +611,7 @@
                         "name": "prometheus"
                       },
                       "spec": {
-                        "expr": "sum by (schedule) (rate(velero_backup_duration_seconds_sum{schedule!=\"\"}[24h])) / sum by (schedule) (rate(velero_backup_duration_seconds_count{schedule!=\"\"}[24h]))",
+                        "expr": "max by (schedule) (max_over_time(velero_backup_duration_seconds_sum{schedule!=\"\"}[24h]) / (max_over_time(velero_backup_duration_seconds_count{schedule!=\"\"}[24h]) > 0))",
                         "legendFormat": "{{schedule}}"
                       }
                     },
