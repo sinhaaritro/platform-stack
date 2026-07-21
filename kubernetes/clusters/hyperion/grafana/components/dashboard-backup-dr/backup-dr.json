@@ -1244,7 +1244,18 @@
                   }
                 }
               ],
-              "transformations": [],
+              "transformations": [
+                {
+                  "kind": "Transformation",
+                  "group": "joinByField",
+                  "spec": {
+                    "options": {
+                      "byField": "schedule",
+                      "mode": "outer"
+                    }
+                  }
+                }
+              ],
               "queryOptions": {}
             }
           },
@@ -1254,6 +1265,7 @@
             "version": "13.1.0",
             "spec": {
               "options": {
+                "xField": "schedule",
                 "legend": {
                   "calcs": [],
                   "displayMode": "list",
@@ -1483,6 +1495,10 @@
                       {
                         "id": "custom.drawStyle",
                         "value": "bars"
+                      },
+                      {
+                        "id": "max",
+                        "value": 5
                       }
                     ]
                   }
