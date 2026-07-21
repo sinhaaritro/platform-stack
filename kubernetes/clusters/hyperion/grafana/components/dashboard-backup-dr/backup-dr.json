@@ -315,10 +315,24 @@
               ],
               "transformations": [
                 {
+                  "id": "organize",
+                  "options": {
+                    "excludeByName": {
+                      "Time": true,
+                      "time": true,
+                      "instance": true,
+                      "job": true,
+                      "__name__": true
+                    },
+                    "indexByName": {},
+                    "renameByName": {}
+                  }
+                },
+                {
                   "id": "joinByField",
                   "options": {
                     "byField": "schedule",
-                    "mode": "outerTabular"
+                    "mode": "outer"
                   }
                 },
                 {
@@ -326,16 +340,7 @@
                   "options": {
                     "excludeByName": {
                       "Time": true,
-                      "Time 1": true,
-                      "Time 2": true,
-                      "Time 3": true,
-                      "Time 4": true,
-                      "Time A": true,
-                      "Time B": true,
-                      "Time C": true,
-                      "Time D": true,
-                      "instance": true,
-                      "job": true
+                      "time": true
                     },
                     "indexByName": {},
                     "renameByName": {
@@ -343,7 +348,15 @@
                       "Value #A": "Last Status",
                       "Value #B": "Last Run",
                       "Value #C": "Duration",
-                      "Value #D": "Items Backed Up"
+                      "Value #D": "Items Backed Up",
+                      "Value 1": "Last Status",
+                      "Value 2": "Last Run",
+                      "Value 3": "Duration",
+                      "Value 4": "Items Backed Up",
+                      "Value A": "Last Status",
+                      "Value B": "Last Run",
+                      "Value C": "Duration",
+                      "Value D": "Items Backed Up"
                     }
                   }
                 }
