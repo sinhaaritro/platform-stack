@@ -848,7 +848,7 @@
                         "name": "prometheus"
                       },
                       "spec": {
-                        "expr": "max by (schedule) (velero_backup_tarball_size_bytes{schedule!=\"\"})",
+                        "expr": "max by (schedule) (max_over_time(velero_backup_tarball_size_bytes{schedule!=\"\"}[24h]))",
                         "legendFormat": "{{schedule}}"
                       }
                     },
@@ -909,7 +909,7 @@
                     "barAlignment": 0,
                     "barWidthFactor": 0.6,
                     "drawStyle": "line",
-                    "fillOpacity": 10,
+                    "fillOpacity": 0,
                     "gradientMode": "scheme",
                     "hideFrom": {
                       "legend": false,
