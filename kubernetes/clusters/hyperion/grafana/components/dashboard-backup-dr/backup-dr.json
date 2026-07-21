@@ -239,7 +239,7 @@
                         "name": "prometheus"
                       },
                       "spec": {
-                        "expr": "velero_backup_last_status",
+                        "expr": "max by (schedule) (velero_backup_last_status{schedule!=\"\"})",
                         "legendFormat": "Last Status",
                         "instant": true,
                         "format": "table"
@@ -260,7 +260,7 @@
                         "name": "prometheus"
                       },
                       "spec": {
-                        "expr": "velero_backup_last_successful_timestamp * 1000",
+                        "expr": "max by (schedule) (velero_backup_last_successful_timestamp{schedule!=\"\"}) * 1000",
                         "legendFormat": "Last Run",
                         "instant": true,
                         "format": "table"
@@ -281,7 +281,7 @@
                         "name": "prometheus"
                       },
                       "spec": {
-                        "expr": "velero_backup_duration_seconds_sum / velero_backup_duration_seconds_count",
+                        "expr": "max by (schedule) (velero_backup_duration_seconds_sum{schedule!=\"\"}) / max by (schedule) (velero_backup_duration_seconds_count{schedule!=\"\"})",
                         "legendFormat": "Duration",
                         "instant": true,
                         "format": "table"
@@ -302,7 +302,7 @@
                         "name": "prometheus"
                       },
                       "spec": {
-                        "expr": "velero_backup_items_total",
+                        "expr": "max by (schedule) (velero_backup_items_total{schedule!=\"\"})",
                         "legendFormat": "Items Backed Up",
                         "instant": true,
                         "format": "table"
@@ -340,10 +340,10 @@
                     "indexByName": {},
                     "renameByName": {
                       "schedule": "Schedule",
-                      "Last Status": "Last Status",
-                      "Last Run": "Last Run",
-                      "Duration": "Duration",
-                      "Items Backed Up": "Items Backed Up"
+                      "Value #A": "Last Status",
+                      "Value #B": "Last Run",
+                      "Value #C": "Duration",
+                      "Value #D": "Items Backed Up"
                     }
                   }
                 }
