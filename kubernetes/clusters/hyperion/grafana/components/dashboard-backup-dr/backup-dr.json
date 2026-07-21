@@ -239,7 +239,7 @@
                         "name": "prometheus"
                       },
                       "spec": {
-                        "expr": "(max by (schedule) (velero_backup_last_status{schedule!=\"\"})) and (max by (schedule) (velero_backup_attempt_total{schedule!=\"\"}) > 0)",
+                        "expr": "((max by (schedule) (velero_backup_last_status{schedule!=\"\"}) and (max by (schedule) (velero_backup_attempt_total{schedule!=\"\"}) > 0)) or ((max by (schedule) (velero_backup_attempt_total{schedule!=\"\"}) == 0) - 1))",
                         "legendFormat": "Last Status",
                         "instant": true,
                         "format": "table"
@@ -438,6 +438,10 @@
                           {
                             "type": "value",
                             "options": {
+                              "-1": {
+                                "color": "gray",
+                                "text": "Never Run"
+                              },
                               "0": {
                                 "color": "red",
                                 "text": "Failed"
@@ -626,7 +630,7 @@
                         "name": "prometheus"
                       },
                       "spec": {
-                        "expr": "(max by (schedule) (velero_backup_last_status{schedule!=\"\"})) and (max by (schedule) (velero_backup_attempt_total{schedule!=\"\"}) > 0)",
+                        "expr": "((max by (schedule) (velero_backup_last_status{schedule!=\"\"}) and (max by (schedule) (velero_backup_attempt_total{schedule!=\"\"}) > 0)) or ((max by (schedule) (velero_backup_attempt_total{schedule!=\"\"}) == 0) - 1))",
                         "legendFormat": "{{schedule}}"
                       }
                     },
@@ -677,6 +681,10 @@
                     {
                       "type": "value",
                       "options": {
+                        "-1": {
+                          "color": "gray",
+                          "text": "Never Run"
+                        },
                         "0": {
                           "color": "red",
                           "text": "Failed"
@@ -684,16 +692,6 @@
                         "1": {
                           "color": "green",
                           "text": "Success"
-                        }
-                      }
-                    },
-                    {
-                      "type": "special",
-                      "options": {
-                        "match": "null",
-                        "result": {
-                          "color": "gray",
-                          "text": "No Data"
                         }
                       }
                     }
