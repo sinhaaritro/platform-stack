@@ -6,7 +6,7 @@ spec:
   instanceSelector:
     matchLabels:
       dashboards: "hyperion"
-  folderTitle: "SRE & Operations"
+  folderTitle: "SRE / Operations"
   configMapRef:
     name: grafana-dashboard-backup-dr
     key: backup-dr.json

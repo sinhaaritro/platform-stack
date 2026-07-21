@@ -71,6 +71,11 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "7"
+                - app: grafana-operator
+                  namespace: monitoring
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "7"
                 - app: grafana
                   namespace: monitoring
                   serverSideApply: "true"
