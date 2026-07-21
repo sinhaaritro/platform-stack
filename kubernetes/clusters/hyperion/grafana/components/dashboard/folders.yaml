@@ -1,21 +1,10 @@
-apiVersion: grafana.integreatly.org/v1beta1
-kind: GrafanaFolder
-metadata:
-  annotations:
-    argocd.argoproj.io/tracking-id: hyperion-grafana:grafana.integreatly.org/GrafanaFolder:monitoring/sre-operations
-  name: sre-operations
-  namespace: monitoring
-spec:
-  instanceSelector:
-    matchLabels:
-      dashboards: hyperion
-  title: "SRE / Operations"
 ---
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaFolder
 metadata:
   annotations:
-    argocd.argoproj.io/tracking-id: hyperion-grafana:grafana.integreatly.org/GrafanaFolder:monitoring/portal
+    argocd.argoproj.io/tracking-id: >-
+      hyperion-grafana:grafana.integreatly.org/GrafanaFolder:monitoring/portal
   name: portal
   namespace: monitoring
 spec:
@@ -28,7 +17,8 @@ apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaFolder
 metadata:
   annotations:
-    argocd.argoproj.io/tracking-id: hyperion-grafana:grafana.integreatly.org/GrafanaFolder:monitoring/executive
+    argocd.argoproj.io/tracking-id: >-
+      hyperion-grafana:grafana.integreatly.org/GrafanaFolder:monitoring/executive
   name: executive
   namespace: monitoring
 spec:
@@ -41,7 +31,8 @@ apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaFolder
 metadata:
   annotations:
-    argocd.argoproj.io/tracking-id: hyperion-grafana:grafana.integreatly.org/GrafanaFolder:monitoring/developer
+    argocd.argoproj.io/tracking-id: >-
+      hyperion-grafana:grafana.integreatly.org/GrafanaFolder:monitoring/developer
   name: developer
   namespace: monitoring
 spec:
@@ -54,7 +45,8 @@ apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaFolder
 metadata:
   annotations:
-    argocd.argoproj.io/tracking-id: hyperion-grafana:grafana.integreatly.org/GrafanaFolder:monitoring/dba
+    argocd.argoproj.io/tracking-id: >-
+      hyperion-grafana:grafana.integreatly.org/GrafanaFolder:monitoring/dba
   name: dba
   namespace: monitoring
 spec:
