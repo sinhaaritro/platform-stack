@@ -10,3 +10,4 @@ components:
 
 resources:
   - folders.yaml
+  - grafana-instance.yaml
