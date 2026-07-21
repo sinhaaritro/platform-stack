@@ -320,6 +320,32 @@
                   "spec": {
                     "options": {}
                   }
+                },
+                {
+                  "kind": "Transformation",
+                  "group": "organize",
+                  "spec": {
+                    "excludeByName": {
+                      "Time": true,
+                      "time": true
+                    },
+                    "indexByName": {},
+                    "renameByName": {
+                      "schedule": "Schedule",
+                      "Value #A": "Last Status",
+                      "Value #B": "Last Run",
+                      "Value #C": "Duration",
+                      "Value #D": "Items Backed Up",
+                      "Value 1": "Last Status",
+                      "Value 2": "Last Run",
+                      "Value 3": "Duration",
+                      "Value 4": "Items Backed Up",
+                      "Value A": "Last Status",
+                      "Value B": "Last Run",
+                      "Value C": "Duration",
+                      "Value D": "Items Backed Up"
+                    }
+                  }
                 }
               ],
               "queryOptions": {}
@@ -468,7 +494,7 @@
                     "properties": [
                       {
                         "id": "unit",
-                        "value": "s"
+                        "value": "dtdurations"
                       }
                     ]
                   }
