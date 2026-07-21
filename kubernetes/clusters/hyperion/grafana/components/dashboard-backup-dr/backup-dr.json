@@ -241,7 +241,8 @@
                       "spec": {
                         "expr": "velero_backup_last_status",
                         "legendFormat": "Last Status",
-                        "instant": true
+                        "instant": true,
+                        "format": "table"
                       }
                     },
                     "refId": "A",
@@ -261,7 +262,8 @@
                       "spec": {
                         "expr": "velero_backup_last_successful_timestamp * 1000",
                         "legendFormat": "Last Run",
-                        "instant": true
+                        "instant": true,
+                        "format": "table"
                       }
                     },
                     "refId": "B",
@@ -281,7 +283,8 @@
                       "spec": {
                         "expr": "velero_backup_duration_seconds_sum / velero_backup_duration_seconds_count",
                         "legendFormat": "Duration",
-                        "instant": true
+                        "instant": true,
+                        "format": "table"
                       }
                     },
                     "refId": "C",
@@ -301,7 +304,8 @@
                       "spec": {
                         "expr": "velero_backup_items_total",
                         "legendFormat": "Items Backed Up",
-                        "instant": true
+                        "instant": true,
+                        "format": "table"
                       }
                     },
                     "refId": "D",
