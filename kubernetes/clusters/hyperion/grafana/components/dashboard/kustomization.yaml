@@ -8,4 +8,4 @@ resources:
   # - executive/executive.yaml
   # - developer/developer.yaml
   # - dba/dba.yaml
-  - folder.yaml
+  - folders.yaml
