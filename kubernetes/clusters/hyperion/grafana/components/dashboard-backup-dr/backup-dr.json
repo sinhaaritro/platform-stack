@@ -315,8 +315,11 @@
               ],
               "transformations": [
                 {
-                  "id": "merge",
-                  "options": {}
+                  "kind": "Transformation",
+                  "group": "merge",
+                  "spec": {
+                    "options": {}
+                  }
                 }
               ],
               "queryOptions": {}
