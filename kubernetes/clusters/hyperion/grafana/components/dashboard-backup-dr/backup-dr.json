@@ -240,15 +240,110 @@
                       },
                       "spec": {
                         "expr": "velero_backup_last_status",
-                        "legendFormat": "{{schedule}}"
+                        "legendFormat": "Last Status",
+                        "instant": true
                       }
                     },
                     "refId": "A",
                     "hidden": false
                   }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "expr": "velero_backup_last_successful_timestamp * 1000",
+                        "legendFormat": "Last Run",
+                        "instant": true
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "expr": "velero_backup_duration_seconds_sum / velero_backup_duration_seconds_count",
+                        "legendFormat": "Duration",
+                        "instant": true
+                      }
+                    },
+                    "refId": "C",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "expr": "velero_backup_items_total",
+                        "legendFormat": "Items Backed Up",
+                        "instant": true
+                      }
+                    },
+                    "refId": "D",
+                    "hidden": false
+                  }
                 }
               ],
-              "transformations": [],
+              "transformations": [
+                {
+                  "id": "joinByField",
+                  "options": {
+                    "byField": "schedule",
+                    "mode": "outer"
+                  }
+                },
+                {
+                  "id": "organize",
+                  "options": {
+                    "excludeByName": {
+                      "Time": true,
+                      "Time 1": true,
+                      "Time 2": true,
+                      "Time 3": true,
+                      "Time 4": true,
+                      "Time A": true,
+                      "Time B": true,
+                      "Time C": true,
+                      "Time D": true,
+                      "instance": true,
+                      "job": true
+                    },
+                    "indexByName": {},
+                    "renameByName": {
+                      "schedule": "Schedule",
+                      "Last Status": "Last Status",
+                      "Last Run": "Last Run",
+                      "Duration": "Duration",
+                      "Items Backed Up": "Items Backed Up"
+                    }
+                  }
+                }
+              ],
               "queryOptions": {}
             }
           },
@@ -334,6 +429,40 @@
                             }
                           ]
                         }
+                      },
+                      {
+                        "id": "mappings",
+                        "value": [
+                          {
+                            "type": "value",
+                            "options": {
+                              "1": {
+                                "color": "blue",
+                                "text": "New"
+                              },
+                              "2": {
+                                "color": "yellow",
+                                "text": "InProgress"
+                              },
+                              "3": {
+                                "color": "orange",
+                                "text": "Uploading"
+                              },
+                              "4": {
+                                "color": "green",
+                                "text": "Completed"
+                              },
+                              "6": {
+                                "color": "red",
+                                "text": "Failed"
+                              },
+                              "7": {
+                                "color": "dark-red",
+                                "text": "PartiallyFailed"
+                              }
+                            }
+                          }
+                        ]
                       }
                     ]
                   },
@@ -346,6 +475,22 @@
                       {
                         "id": "custom.width",
                         "value": 150
+                      },
+                      {
+                        "id": "unit",
+                        "value": "dateTimeAsSystem"
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Duration"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "s"
                       }
                     ]
                   }
