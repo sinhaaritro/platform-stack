@@ -2376,7 +2376,7 @@
                         "name": "loki"
                       },
                       "spec": {
-                        "expr": "{namespace=\"backup\", container=\"velero\"} | logfmt | level = \"error\" | line_format \"{{.msg}}\""
+                        "expr": "{namespace=\"backup\", container=\"velero\"} | logfmt | level = \"error\" | line_format \"{{.time}} | {{.msg}}\""
                       }
                     },
                     "refId": "A",
