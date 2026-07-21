@@ -608,6 +608,105 @@
           }
         }
       },
+      "panel-42": {
+        "kind": "Panel",
+        "spec": {
+          "id": 42,
+          "title": "Backup History Timeline (State)",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "expr": "(velero_backup_last_status{schedule!=\"\"} * on(schedule) (velero_backup_attempt_total{schedule!=\"\"} > 0)) or ((velero_backup_attempt_total{schedule!=\"\"} == 0) + 2)",
+                        "legendFormat": "{{schedule}}"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "state-timeline",
+            "version": "13.1.0",
+            "spec": {
+              "options": {
+                "showValues": false,
+                "mergeValues": true,
+                "rowHeight": 0.9,
+                "alignValue": "left",
+                "tooltip": {
+                  "mode": "single",
+                  "sort": "none"
+                },
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "mappings": [
+                    {
+                      "type": "value",
+                      "options": {
+                        "0": {
+                          "color": "red",
+                          "text": "Failed"
+                        },
+                        "1": {
+                          "color": "green",
+                          "text": "Completed"
+                        },
+                        "2": {
+                          "color": "gray",
+                          "text": "Never Run"
+                        }
+                      }
+                    }
+                  ],
+                  "custom": {
+                    "lineWidth": 0,
+                    "fillOpacity": 70
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
       "panel-26": {
         "kind": "Panel",
         "spec": {
@@ -2732,6 +2831,19 @@
                       "spec": {
                         "x": 0,
                         "y": 16,
+                        "width": 24,
+                        "height": 8,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-42"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 24,
                         "width": 12,
                         "height": 8,
                         "element": {
@@ -2744,7 +2856,7 @@
                       "kind": "GridLayoutItem",
                       "spec": {
                         "x": 12,
-                        "y": 16,
+                        "y": 24,
                         "width": 12,
                         "height": 8,
                         "element": {
