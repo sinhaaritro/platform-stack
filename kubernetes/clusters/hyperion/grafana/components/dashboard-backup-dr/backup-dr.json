@@ -1216,7 +1216,9 @@
                       "spec": {
                         "expr": "max by (schedule) (max_over_time(velero_backup_items_total{schedule!=\"\"}[24h]))",
                         "legendFormat": "Items",
-                        "instant": true
+                        "instant": true,
+                        "range": false,
+                        "format": "table"
                       }
                     },
                     "refId": "A",
@@ -1236,7 +1238,9 @@
                       "spec": {
                         "expr": "max by (schedule) (max_over_time(velero_backup_items_errors{schedule!=\"\"}[24h]))",
                         "legendFormat": "Errors",
-                        "instant": true
+                        "instant": true,
+                        "range": false,
+                        "format": "table"
                       }
                     },
                     "refId": "B",
