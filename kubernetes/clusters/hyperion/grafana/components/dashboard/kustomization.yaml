@@ -9,3 +9,11 @@ resources:
   # - developer/developer.yaml
   # - dba/dba.yaml
   - folders.yaml
+
+configMapGenerator:
+  - name: grafana-dashboard-backup-dr
+    namespace: monitoring
+    files:
+      - sre-operations/backup-dr.json
+    options:
+      disableNameSuffixHash: true

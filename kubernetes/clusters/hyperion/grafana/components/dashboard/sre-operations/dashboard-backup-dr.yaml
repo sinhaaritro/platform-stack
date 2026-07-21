@@ -10,7 +10,7 @@ spec:
   configMapRef:
     key: backup-dr.json
     name: grafana-dashboard-backup-dr
-  folderTitle: SRE / Operations
+  folder: SRE / Operations
   instanceSelector:
     matchLabels:
       dashboards: hyperion
