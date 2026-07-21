@@ -1,5 +1,14 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 
-resources:
-  - dashboard-backup-dr.yaml
+configMapGenerator:
+  - name: grafana-dashboard-backup-dr
+    namespace: monitoring
+    files:
+      - backup-dr.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: "SRE / Operations"
