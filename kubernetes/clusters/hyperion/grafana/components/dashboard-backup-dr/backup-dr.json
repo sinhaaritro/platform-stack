@@ -239,7 +239,7 @@
                         "name": "prometheus"
                       },
                       "spec": {
-                        "expr": "max by (schedule) (velero_backup_last_status{schedule!=\"\"})",
+                        "expr": "(max by (schedule) (velero_backup_last_status{schedule!=\"\"})) and (max by (schedule) (velero_backup_attempt_total{schedule!=\"\"}) > 0)",
                         "legendFormat": "Last Status",
                         "instant": true,
                         "format": "table"
@@ -626,7 +626,7 @@
                         "name": "prometheus"
                       },
                       "spec": {
-                        "expr": "max by (schedule) (velero_backup_last_status{schedule!=\"\"})",
+                        "expr": "(max by (schedule) (velero_backup_last_status{schedule!=\"\"})) and (max by (schedule) (velero_backup_attempt_total{schedule!=\"\"}) > 0)",
                         "legendFormat": "{{schedule}}"
                       }
                     },
