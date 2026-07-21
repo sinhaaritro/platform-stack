@@ -2359,7 +2359,7 @@
         "spec": {
           "id": 39,
           "title": "Velero Error Log Stream",
-          "description": "",
+          "description": "Real-time error stream from the Velero controller pod. An empty panel is the healthy/desired state, indicating zero active failures.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2401,7 +2401,7 @@
                 "showControls": false,
                 "showFieldSelector": false,
                 "showLevel": true,
-                "showTime": false,
+                "showTime": true,
                 "sortOrder": "Descending",
                 "timestampResolution": "ms",
                 "unwrappedColumns": false,
@@ -2507,7 +2507,7 @@
         "spec": {
           "id": 40,
           "title": "Node Agent Log Stream",
-          "description": "",
+          "description": "Real-time stream of file-level errors (S3/Kopia locks, filesystem permissions) from the DaemonSet node-agent pods. An empty panel is the healthy/desired state, indicating zero active failures.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2524,7 +2524,7 @@
                         "name": "loki"
                       },
                       "spec": {
-                        "expr": "{namespace=\"backup\", container=\"node-agent\"} | logfmt | level = \"error\" | line_format \"{{.msg}}\""
+                        "expr": "{namespace=\"backup\", pod=~\"node-agent.*\"} | logfmt | level = \"error\" | line_format \"{{.time}} | {{.msg}}\""
                       }
                     },
                     "refId": "A",
@@ -2549,7 +2549,7 @@
                 "showControls": false,
                 "showFieldSelector": false,
                 "showLevel": true,
-                "showTime": false,
+                "showTime": true,
                 "sortOrder": "Descending",
                 "timestampResolution": "ms",
                 "unwrappedColumns": false,
