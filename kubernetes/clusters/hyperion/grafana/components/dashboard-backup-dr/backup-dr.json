@@ -630,7 +630,7 @@
                         "name": "prometheus"
                       },
                       "spec": {
-                        "expr": "(velero_backup_last_status{schedule!=\"\"} * on(schedule) (velero_backup_attempt_total{schedule!=\"\"} > 0)) or ((velero_backup_attempt_total{schedule!=\"\"} == 0) + 2)",
+                        "expr": "(max by (schedule) (velero_backup_last_status{schedule!=\"\"}) * on(schedule) (max by (schedule) (velero_backup_attempt_total{schedule!=\"\"}) > 0)) or ((max by (schedule) (velero_backup_attempt_total{schedule!=\"\"}) == 0) + 2)",
                         "legendFormat": "{{schedule}}"
                       }
                     },
@@ -669,13 +669,13 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       }
                     ]
                   },
                   "color": {
-                    "mode": "thresholds"
+                    "mode": "fixed"
                   },
                   "mappings": [
                     {
@@ -687,7 +687,7 @@
                         },
                         "1": {
                           "color": "green",
-                          "text": "Completed"
+                          "text": "Success"
                         },
                         "2": {
                           "color": "gray",
