@@ -438,29 +438,13 @@
                           {
                             "type": "value",
                             "options": {
-                              "1": {
-                                "color": "blue",
-                                "text": "New"
-                              },
-                              "2": {
-                                "color": "yellow",
-                                "text": "InProgress"
-                              },
-                              "3": {
-                                "color": "orange",
-                                "text": "Uploading"
-                              },
-                              "4": {
-                                "color": "green",
-                                "text": "Completed"
-                              },
-                              "6": {
+                              "0": {
                                 "color": "red",
                                 "text": "Failed"
                               },
-                              "7": {
-                                "color": "dark-red",
-                                "text": "PartiallyFailed"
+                              "1": {
+                                "color": "green",
+                                "text": "Completed"
                               }
                             }
                           }

@@ -238,6 +238,9 @@ The dashboard is organized into **6 rows** (collapsible). An operator opens the 
 | **Backup Duration Trend** | Time series (lines, per schedule) | `velero_backup_duration_seconds{schedule=~".+"}` | Performance degradation tracking. If `daily-security` normally takes 2min but now takes 20min, your storage backend is degraded. Also useful for scheduling: avoid overlap between the 21:00 and 21:30 schedules. |
 | **Backup Size Trend** | Time series (lines, per schedule) | `velero_backup_items_total{schedule=~".+"}` | Capacity planning. "Immich metadata backups are growing 15% monthly. At this rate, I need to increase S3 budget by Q3." |
 
+> [NOTE]
+> For Schedule Status Table, to have non binary values then we will need to modify kube-state-metric to scrape values. But the last failed backup can be found at Failed Backups (7d), Backup SLA %, Backup History Timeline, Items Backed Up vs Errors, Velero Error Log Stream, Firing Alerts Table panel. So we decided to keep it simple here. The question is does this pass the crieteria and target of this whole group, dashboard. And make sense in removing the info from the monitoring feature prospective?
+
 ---
 
 #### Row 3: Backup Storage Health
