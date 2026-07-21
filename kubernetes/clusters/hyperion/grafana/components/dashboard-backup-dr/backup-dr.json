@@ -2255,7 +2255,7 @@
                         "name": "prometheus"
                       },
                       "spec": {
-                        "expr": "kube_pod_container_status_restarts_total{namespace=\"backup\"}",
+                        "expr": "sum by (pod) (increase(kube_pod_container_status_restarts_total{namespace=\"backup\", pod=~\"(velero|node-agent).*\"}[1h]))",
                         "legendFormat": "{{pod}}"
                       }
                     },
@@ -2294,6 +2294,8 @@
               },
               "fieldConfig": {
                 "defaults": {
+                  "decimals": 0,
+                  "min": 0,
                   "unit": "short",
                   "thresholds": {
                     "mode": "absolute",
@@ -2303,7 +2305,7 @@
                         "color": "green"
                       },
                       {
-                        "value": 80,
+                        "value": 1,
                         "color": "red"
                       }
                     ]
@@ -2320,7 +2322,7 @@
                     "barAlignment": 0,
                     "barWidthFactor": 0.6,
                     "drawStyle": "line",
-                    "fillOpacity": 10,
+                    "fillOpacity": 0,
                     "gradientMode": "scheme",
                     "hideFrom": {
                       "legend": false,
@@ -2336,7 +2338,7 @@
                     },
                     "showPoints": "auto",
                     "showValues": false,
-                    "spanNulls": false,
+                    "spanNulls": true,
                     "stacking": {
                       "group": "A",
                       "mode": "none"
