@@ -1,19 +1,12 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 
-resources:
-  - sre-operations/sre-operations.yaml
-  - sre-operations/dashboard-backup-dr.yaml
-  # - portal/portal.yaml
-  # - executive/executive.yaml
-  # - developer/developer.yaml
-  # - dba/dba.yaml
-  - folders.yaml
+components:
+  - sre-operations
+  # - portal
+  # - executive
+  # - developer
+  # - dba
 
-configMapGenerator:
-  - name: grafana-dashboard-backup-dr
-    namespace: monitoring
-    files:
-      - sre-operations/backup-dr.json
-    options:
-      disableNameSuffixHash: true
+resources:
+  - folders.yaml
