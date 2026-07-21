@@ -2,33 +2,53 @@ apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaFolder
 metadata:
   name: sre-operations
+  namespace: monitoring
 spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "hyperion"
   title: "SRE / Operations"
 ---
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaFolder
 metadata:
   name: portal
+  namespace: monitoring
 spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "hyperion"
   title: "Portal"
 ---
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaFolder
 metadata:
   name: executive
+  namespace: monitoring
 spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "hyperion"
   title: "Executive"
 ---
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaFolder
 metadata:
   name: developer
+  namespace: monitoring
 spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "hyperion"
   title: "Developer"
 ---
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaFolder
 metadata:
   name: dba
+  namespace: monitoring
 spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "hyperion"
   title: "DBA"
