@@ -1460,16 +1460,72 @@
                         "name": "prometheus"
                       },
                       "spec": {
-                        "expr": "velero_restore_success_total + velero_restore_failed_total",
-                        "legendFormat": "{{restore}}"
+                        "expr": "max by (schedule) (velero_restore_success_total{schedule!=\"\"})",
+                        "legendFormat": "Successful Restores",
+                        "instant": true,
+                        "format": "table"
                       }
                     },
                     "refId": "A",
                     "hidden": false
                   }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "expr": "max by (schedule) (velero_restore_failed_total{schedule!=\"\"})",
+                        "legendFormat": "Failed Restores",
+                        "instant": true,
+                        "format": "table"
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
                 }
               ],
-              "transformations": [],
+              "transformations": [
+                {
+                  "kind": "Transformation",
+                  "group": "merge",
+                  "spec": {
+                    "options": {}
+                  }
+                },
+                {
+                  "kind": "Transformation",
+                  "group": "organize",
+                  "spec": {
+                    "options": {
+                      "excludeByName": {
+                        "Time": true,
+                        "time": true
+                      },
+                      "includeByName": {},
+                      "indexByName": {},
+                      "orderBy": [],
+                      "orderByMode": "auto",
+                      "renameByName": {
+                        "schedule": "Schedule",
+                        "Value #A": "Successful Restores",
+                        "Value #B": "Failed Restores",
+                        "Value 1": "Successful Restores",
+                        "Value 2": "Failed Restores",
+                        "Value A": "Successful Restores",
+                        "Value B": "Failed Restores"
+                      }
+                    }
+                  }
+                }
+              ],
               "queryOptions": {}
             }
           },
@@ -1489,10 +1545,6 @@
                     "steps": [
                       {
                         "value": 0,
-                        "color": "red"
-                      },
-                      {
-                        "value": 1,
                         "color": "green"
                       }
                     ]
@@ -1515,7 +1567,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Restore"
+                      "options": "Schedule"
                     },
                     "properties": [
                       {
@@ -1527,13 +1579,59 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Status"
+                      "options": "Successful Restores"
                     },
                     "properties": [
                       {
                         "id": "custom.cellOptions",
                         "value": {
                           "type": "color-text"
+                        }
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "blue",
+                              "value": 0
+                            },
+                            {
+                              "color": "green",
+                              "value": 1
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Failed Restores"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-text"
+                        }
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green",
+                              "value": 0
+                            },
+                            {
+                              "color": "red",
+                              "value": 1
+                            }
+                          ]
                         }
                       }
                     ]
