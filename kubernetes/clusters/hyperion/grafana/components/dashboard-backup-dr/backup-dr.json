@@ -318,7 +318,7 @@
                   "id": "joinByField",
                   "options": {
                     "byField": "schedule",
-                    "mode": "outer"
+                    "mode": "outerTabular"
                   }
                 },
                 {
