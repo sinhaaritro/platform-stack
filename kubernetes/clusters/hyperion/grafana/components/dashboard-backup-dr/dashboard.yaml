@@ -1,0 +1,12 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: dashboard-backup-dr
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "hyperion"
+  folderTitle: "SRE & Operations"
+  configMapRef:
+    name: grafana-dashboard-backup-dr
+    key: backup-dr.json

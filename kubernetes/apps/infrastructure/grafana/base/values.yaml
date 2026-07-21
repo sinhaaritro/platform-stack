@@ -16,6 +16,3 @@ sidecar:
   dashboards:
     enabled: true
     label: grafana_dashboard
-    folderAnnotation: grafana_folder
-    provider:
-      foldersFromFilesStructure: true
