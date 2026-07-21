@@ -315,6 +315,10 @@
               ],
               "transformations": [
                 {
+                  "id": "merge",
+                  "options": {}
+                },
+                {
                   "id": "organize",
                   "options": {
                     "excludeByName": {
@@ -323,24 +327,6 @@
                       "instance": true,
                       "job": true,
                       "__name__": true
-                    },
-                    "indexByName": {},
-                    "renameByName": {}
-                  }
-                },
-                {
-                  "id": "joinByField",
-                  "options": {
-                    "byField": "schedule",
-                    "mode": "outer"
-                  }
-                },
-                {
-                  "id": "organize",
-                  "options": {
-                    "excludeByName": {
-                      "Time": true,
-                      "time": true
                     },
                     "indexByName": {},
                     "renameByName": {
