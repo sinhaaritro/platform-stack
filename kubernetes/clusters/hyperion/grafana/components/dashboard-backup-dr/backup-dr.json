@@ -4,19 +4,23 @@
   "metadata": {
     "name": "grafana-sre-backup-dr",
     "namespace": "default",
-    "uid": "53bba58d-0c35-49ec-a9c9-b863d8baddce",
-    "resourceVersion": "1784605434748010",
-    "generation": 3,
-    "creationTimestamp": "2026-07-21T03:36:10Z",
+    "uid": "fd2dfc58-1da7-4636-b4fe-df1a10c93123",
+    "resourceVersion": "1784641104062001",
+    "generation": 33,
+    "creationTimestamp": "2026-07-20T05:24:53Z",
     "labels": {
-      "grafana.app/deprecatedInternalID": "3250648974798848"
+      "grafana.app/deprecatedInternalID": "2915620936683520"
     },
     "annotations": {
-      "grafana.app/createdBy": "user:efsnelc2e2lmod",
-      "grafana.app/folder": "",
-      "grafana.app/saved-from-ui": "Grafana v13.1.0 (b309c9bb3b)",
-      "grafana.app/updatedBy": "user:efsnelc2e2lmod",
-      "grafana.app/updatedTimestamp": "2026-07-21T03:43:54Z"
+      "grafana.app/createdBy": "access-policy:service",
+      "grafana.app/managedBy": "classic-file-provisioning",
+      "grafana.app/managerId": "sidecarProvider",
+      "grafana.app/sourceChecksum": "0ad8d36a4ca5dc64aa81f9f0bea4b4da",
+      "grafana.app/sourcePath": "/tmp/dashboards/backup-dr.json",
+      "grafana.app/sourceTimestamp": "1784641104000",
+      "grafana.app/updatedBy": "access-policy:service",
+      "grafana.app/updatedTimestamp": "2026-07-21T13:38:24Z",
+      "grafana.app/folder": ""
     }
   },
   "spec": {
@@ -24,17 +28,17 @@
       {
         "kind": "AnnotationQuery",
         "spec": {
-          "query": {
-            "kind": "DataQuery",
-            "group": "grafana",
-            "version": "v0",
-            "spec": {}
-          },
+          "builtIn": true,
           "enable": true,
           "hide": true,
           "iconColor": "rgba(0, 211, 255, 1)",
           "name": "Annotations & Alerts",
-          "builtIn": true
+          "query": {
+            "group": "grafana",
+            "kind": "DataQuery",
+            "spec": {},
+            "version": "v0"
+          }
         }
       }
     ],
@@ -45,10 +49,6 @@
       "panel-1": {
         "kind": "Panel",
         "spec": {
-          "id": 1,
-          "title": "Backup SLA %",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -56,32 +56,63 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "sum(velero_backup_success_total) / sum(velero_backup_success_total + velero_backup_failure_total + velero_backup_partial_failure_total) * 100",
                         "legendFormat": "SLA %"
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 1,
+          "links": [],
+          "title": "Backup SLA %",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "stat",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "max": 100,
+                  "min": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "red",
+                        "value": 0
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 95
+                      },
+                      {
+                        "color": "green",
+                        "value": 99
+                      }
+                    ]
+                  },
+                  "unit": "percent"
+                },
+                "overrides": []
+              },
               "options": {
                 "colorMode": "value",
                 "graphMode": "area",
@@ -98,46 +129,15 @@
                 "showPercentChange": false,
                 "textMode": "auto",
                 "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "percent",
-                  "min": 0,
-                  "max": 100,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "red"
-                      },
-                      {
-                        "value": 95,
-                        "color": "yellow"
-                      },
-                      {
-                        "value": 99,
-                        "color": "green"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  }
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-2": {
         "kind": "Panel",
         "spec": {
-          "id": 2,
-          "title": "Failed Backups (7d)",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -145,32 +145,60 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "sum(increase(velero_backup_failure_total[7d]))",
                         "legendFormat": "Failures"
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 2,
+          "links": [],
+          "title": "Failed Backups (7d)",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "stat",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 1
+                      },
+                      {
+                        "color": "red",
+                        "value": 3
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
               "options": {
                 "colorMode": "value",
                 "graphMode": "area",
@@ -187,43 +215,15 @@
                 "showPercentChange": false,
                 "textMode": "auto",
                 "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 1,
-                        "color": "yellow"
-                      },
-                      {
-                        "value": 3,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  }
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-24": {
         "kind": "Panel",
         "spec": {
-          "id": 24,
-          "title": "Schedule Status Table",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -231,92 +231,93 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "((max by (schedule) (velero_backup_last_status{schedule!=\"\"}) and (max by (schedule) (velero_backup_attempt_total{schedule!=\"\"}) > 0)) or ((max by (schedule) (velero_backup_attempt_total{schedule!=\"\"}) == 0) - 1))",
-                        "legendFormat": "Last Status",
+                        "format": "table",
                         "instant": true,
-                        "format": "table"
-                      }
+                        "legendFormat": "Last Status"
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "max by (schedule) (velero_backup_last_successful_timestamp{schedule!=\"\"}) * 1000",
-                        "legendFormat": "Last Run",
+                        "format": "table",
                         "instant": true,
-                        "format": "table"
-                      }
+                        "legendFormat": "Last Run"
+                      },
+                      "version": "v0"
                     },
-                    "refId": "B",
-                    "hidden": false
+                    "refId": "B"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "max by (schedule) (velero_backup_duration_seconds_sum{schedule!=\"\"}) / max by (schedule) (velero_backup_duration_seconds_count{schedule!=\"\"})",
-                        "legendFormat": "Duration",
+                        "format": "table",
                         "instant": true,
-                        "format": "table"
-                      }
+                        "legendFormat": "Duration"
+                      },
+                      "version": "v0"
                     },
-                    "refId": "C",
-                    "hidden": false
+                    "refId": "C"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "max by (schedule) (velero_backup_items_total{schedule!=\"\"})",
-                        "legendFormat": "Items Backed Up",
+                        "format": "table",
                         "instant": true,
-                        "format": "table"
-                      }
+                        "legendFormat": "Items Backed Up"
+                      },
+                      "version": "v0"
                     },
-                    "refId": "D",
-                    "hidden": false
+                    "refId": "D"
                   }
                 }
               ],
+              "queryOptions": {},
               "transformations": [
                 {
-                  "kind": "Transformation",
                   "group": "merge",
+                  "kind": "Transformation",
                   "spec": {
                     "options": {}
                   }
@@ -345,38 +346,19 @@
                     }
                   }
                 }
-              ],
-              "queryOptions": {}
+              ]
             }
           },
+          "description": "",
+          "id": 24,
+          "links": [],
+          "title": "Schedule Status Table",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "table",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "cellHeight": "sm",
-                "showHeader": true
-              },
               "fieldConfig": {
                 "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "red"
-                      },
-                      {
-                        "value": 1,
-                        "color": "yellow"
-                      },
-                      {
-                        "value": 4,
-                        "color": "green"
-                      }
-                    ]
-                  },
                   "color": {
                     "mode": "thresholds"
                   },
@@ -389,6 +371,23 @@
                       "reducers": []
                     },
                     "inspect": false
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "red",
+                        "value": 0
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 1
+                      },
+                      {
+                        "color": "green",
+                        "value": 4
+                      }
+                    ]
                   }
                 },
                 "overrides": [
@@ -436,12 +435,7 @@
                         "id": "mappings",
                         "value": [
                           {
-                            "type": "value",
                             "options": {
-                              "-1": {
-                                "color": "gray",
-                                "text": "Never Run"
-                              },
                               "0": {
                                 "color": "red",
                                 "text": "Failed"
@@ -449,8 +443,13 @@
                               "1": {
                                 "color": "green",
                                 "text": "Completed"
+                              },
+                              "-1": {
+                                "color": "gray",
+                                "text": "Never Run"
                               }
-                            }
+                            },
+                            "type": "value"
                           }
                         ]
                       }
@@ -485,117 +484,19 @@
                     ]
                   }
                 ]
-              }
-            }
-          }
-        }
-      },
-      "panel-42": {
-        "kind": "Panel",
-        "spec": {
-          "id": 42,
-          "title": "Backup History Timeline",
-          "description": "",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "prometheus"
-                      },
-                      "spec": {
-                        "expr": "((max by (schedule) (velero_backup_last_status{schedule!=\"\"}) and (max by (schedule) (velero_backup_attempt_total{schedule!=\"\"}) > 0)) or ((max by (schedule) (velero_backup_attempt_total{schedule!=\"\"}) == 0) - 1))",
-                        "legendFormat": "{{schedule}}"
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "state-timeline",
-            "version": "13.1.0",
-            "spec": {
-              "options": {
-                "showValues": false,
-                "mergeValues": true,
-                "rowHeight": 0.9,
-                "alignValue": "left",
-                "tooltip": {
-                  "mode": "single",
-                  "sort": "none"
-                },
-                "legend": {
-                  "showLegend": true,
-                  "displayMode": "list",
-                  "placement": "bottom"
-                }
               },
-              "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "color": "green",
-                        "value": null
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "fixed"
-                  },
-                  "mappings": [
-                    {
-                      "type": "value",
-                      "options": {
-                        "-1": {
-                          "color": "gray",
-                          "text": "Never Run"
-                        },
-                        "0": {
-                          "color": "red",
-                          "text": "Failed"
-                        },
-                        "1": {
-                          "color": "green",
-                          "text": "Success"
-                        }
-                      }
-                    }
-                  ],
-                  "custom": {
-                    "lineWidth": 0,
-                    "fillOpacity": 70
-                  }
-                },
-                "overrides": []
+              "options": {
+                "cellHeight": "sm",
+                "showHeader": true
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-26": {
         "kind": "Panel",
         "spec": {
-          "id": 26,
-          "title": "Backup Duration Trend",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -603,182 +504,37 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "max by (schedule) (max_over_time(velero_backup_duration_seconds_sum{schedule!=\"\"}[24h]) / (max_over_time(velero_backup_duration_seconds_count{schedule!=\"\"}[24h]) > 0))",
                         "legendFormat": "{{schedule}}"
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "13.1.0",
-            "spec": {
-              "options": {
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "enableFacetedFilter": false,
-                  "overflow": "ellipsis",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "s",
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisBorderShow": false,
-                    "axisCenteredZero": false,
-                    "axisColorMode": "text",
-                    "axisLabel": "",
-                    "axisPlacement": "auto",
-                    "barAlignment": 0,
-                    "barWidthFactor": 0.6,
-                    "drawStyle": "line",
-                    "fillOpacity": 0,
-                    "gradientMode": "scheme",
-                    "hideFrom": {
-                      "legend": false,
-                      "tooltip": false,
-                      "viz": false
-                    },
-                    "insertNulls": false,
-                    "lineInterpolation": "linear",
-                    "lineWidth": 2,
-                    "pointSize": 5,
-                    "scaleDistribution": {
-                      "type": "linear"
-                    },
-                    "showPoints": "auto",
-                    "showValues": false,
-                    "spanNulls": true,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "thresholdsStyle": {
-                      "mode": "off"
-                    }
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "panel-43": {
-        "kind": "Panel",
-        "spec": {
-          "id": 43,
-          "title": "Backup Size Trend",
           "description": "",
+          "id": 26,
           "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "prometheus"
-                      },
-                      "spec": {
-                        "expr": "max by (schedule) (max_over_time(velero_backup_tarball_size_bytes{schedule!=\"\"}[24h]))",
-                        "legendFormat": "{{schedule}}"
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
+          "title": "Backup Duration Trend",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "enableFacetedFilter": false,
-                  "overflow": "ellipsis",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
               "fieldConfig": {
                 "defaults": {
-                  "unit": "bytes",
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      }
-                    ]
-                  },
                   "color": {
                     "mode": "palette-classic"
                   },
@@ -815,21 +571,51 @@
                     "thresholdsStyle": {
                       "mode": "off"
                     }
-                  }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "unit": "s"
                 },
                 "overrides": []
+              },
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "enableFacetedFilter": false,
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-28": {
         "kind": "Panel",
         "spec": {
-          "id": 28,
-          "title": "BSL Availability",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -837,32 +623,56 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "velero_backup_location_status_gauge",
                         "legendFormat": "{{backup_location_name}}"
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 28,
+          "links": [],
+          "title": "BSL Availability",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "stat",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "red",
+                        "value": 0
+                      },
+                      {
+                        "color": "green",
+                        "value": 1
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
               "options": {
                 "colorMode": "value",
                 "graphMode": "area",
@@ -879,39 +689,15 @@
                 "showPercentChange": false,
                 "textMode": "auto",
                 "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "red"
-                      },
-                      {
-                        "value": 1,
-                        "color": "green"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  }
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-29": {
         "kind": "Panel",
         "spec": {
-          "id": 29,
-          "title": "BSL Location Status",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -919,32 +705,56 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "velero_backup_location_status_gauge",
                         "legendFormat": "{{backup_location_name}}"
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 29,
+          "links": [],
+          "title": "BSL Location Status",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "stat",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "red",
+                        "value": 0
+                      },
+                      {
+                        "color": "green",
+                        "value": 1
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
               "options": {
                 "colorMode": "value",
                 "graphMode": "area",
@@ -961,39 +771,15 @@
                 "showPercentChange": false,
                 "textMode": "auto",
                 "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "red"
-                      },
-                      {
-                        "value": 1,
-                        "color": "green"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  }
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-3": {
         "kind": "Panel",
         "spec": {
-          "id": 3,
-          "title": "Backups in Last 24h",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -1001,32 +787,60 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "sum(increase(velero_backup_attempt_total[24h]))",
                         "legendFormat": "Count"
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 3,
+          "links": [],
+          "title": "Backups in Last 24h",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "stat",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "red",
+                        "value": 0
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 1
+                      },
+                      {
+                        "color": "green",
+                        "value": 3
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
               "options": {
                 "colorMode": "value",
                 "graphMode": "area",
@@ -1043,43 +857,15 @@
                 "showPercentChange": false,
                 "textMode": "auto",
                 "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "red"
-                      },
-                      {
-                        "value": 1,
-                        "color": "yellow"
-                      },
-                      {
-                        "value": 3,
-                        "color": "green"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  }
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-30": {
         "kind": "Panel",
         "spec": {
-          "id": 30,
-          "title": "Backup Storage Used (S3)",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -1087,67 +873,37 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "velero_backup_storage_used_bytes",
                         "legendFormat": "{{schedule}}"
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 30,
+          "links": [],
+          "title": "Backup Storage Used (S3)",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "enableFacetedFilter": false,
-                  "overflow": "ellipsis",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
               "fieldConfig": {
                 "defaults": {
-                  "unit": "decbytes",
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
                   "color": {
                     "mode": "palette-classic"
                   },
@@ -1184,104 +940,29 @@
                     "thresholdsStyle": {
                       "mode": "off"
                     }
-                  }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "unit": "decbytes"
                 },
                 "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "panel-31": {
-        "kind": "Panel",
-        "spec": {
-          "id": 31,
-          "title": "Items Backed Up vs Errors (Bar Chart)",
-          "description": "",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "prometheus"
-                      },
-                      "spec": {
-                        "expr": "max by (schedule) (max_over_time(velero_backup_items_total{schedule!=\"\"}[24h]))",
-                        "legendFormat": "Items",
-                        "instant": true,
-                        "range": false,
-                        "format": "table"
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "prometheus"
-                      },
-                      "spec": {
-                        "expr": "max by (schedule) (max_over_time(velero_backup_items_errors{schedule!=\"\"}[24h]))",
-                        "legendFormat": "Errors",
-                        "instant": true,
-                        "range": false,
-                        "format": "table"
-                      }
-                    },
-                    "refId": "B",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [
-                {
-                  "kind": "Transformation",
-                  "group": "joinByField",
-                  "spec": {
-                    "options": {
-                      "byField": "schedule",
-                      "mode": "outer"
-                    }
-                  }
-                },
-                {
-                  "kind": "Transformation",
-                  "group": "organize",
-                  "spec": {
-                    "options": {
-                      "renameByName": {
-                        "Value #A": "Items",
-                        "Value #B": "Errors"
-                      }
-                    }
-                  }
-                }
-              ],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "barchart",
-            "version": "13.1.0",
-            "spec": {
+              },
               "options": {
-                "xField": "schedule",
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
                 "legend": {
                   "calcs": [],
                   "displayMode": "list",
@@ -1295,20 +976,133 @@
                   "mode": "single",
                   "sort": "none"
                 }
-              },
+              }
+            },
+            "version": "13.1.0"
+          }
+        }
+      },
+      "panel-31": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "expr": "max by (schedule) (max_over_time(velero_backup_items_total{schedule!=\"\"}[24h]))",
+                        "format": "table",
+                        "instant": true,
+                        "legendFormat": "Items",
+                        "range": false
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "A"
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "expr": "max by (schedule) (max_over_time(velero_backup_items_errors{schedule!=\"\"}[24h]))",
+                        "format": "table",
+                        "instant": true,
+                        "legendFormat": "Errors",
+                        "range": false
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "B"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": [
+                {
+                  "group": "joinByField",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "byField": "schedule",
+                      "mode": "outer"
+                    }
+                  }
+                },
+                {
+                  "group": "organize",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "renameByName": {
+                        "Value #A": "Items",
+                        "Value #B": "Errors"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "description": "",
+          "id": 31,
+          "links": [],
+          "title": "Items Backed Up vs Errors (Bar Chart)",
+          "vizConfig": {
+            "group": "barchart",
+            "kind": "VizConfig",
+            "spec": {
               "fieldConfig": {
                 "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "fillOpacity": 80,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineWidth": 1,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
-                        "color": "green"
+                        "color": "green",
+                        "value": 0
                       }
                     ]
-                  },
-                  "color": {
-                    "mode": "palette-classic"
                   }
                 },
                 "overrides": [
@@ -1343,75 +1137,12 @@
                     ]
                   }
                 ]
-              }
-            }
-          }
-        }
-      },
-      "panel-44": {
-        "kind": "Panel",
-        "spec": {
-          "id": 44,
-          "title": "Items Backed Up vs Errors (Timeline Dual-Axis)",
-          "description": "",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "prometheus"
-                      },
-                      "spec": {
-                        "expr": "max by (schedule) (max_over_time(velero_backup_items_total{schedule!=\"\"}[24h]))",
-                        "legendFormat": "{{schedule}} - Items"
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "prometheus"
-                      },
-                      "spec": {
-                        "expr": "max by (schedule) (max_over_time(velero_backup_items_errors{schedule!=\"\"}[24h]))",
-                        "legendFormat": "{{schedule}} - Errors"
-                      }
-                    },
-                    "refId": "B",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "13.1.0",
-            "spec": {
+              },
               "options": {
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
                 "legend": {
                   "calcs": [],
                   "displayMode": "list",
@@ -1420,117 +1151,26 @@
                   "placement": "bottom",
                   "showLegend": true
                 },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
                 "tooltip": {
                   "hideZeros": false,
                   "mode": "single",
                   "sort": "none"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisBorderShow": false,
-                    "axisCenteredZero": false,
-                    "axisColorMode": "text",
-                    "axisLabel": "",
-                    "axisPlacement": "auto",
-                    "barAlignment": 0,
-                    "barWidthFactor": 0.6,
-                    "drawStyle": "line",
-                    "fillOpacity": 0,
-                    "gradientMode": "scheme",
-                    "hideFrom": {
-                      "legend": false,
-                      "tooltip": false,
-                      "viz": false
-                    },
-                    "insertNulls": false,
-                    "lineInterpolation": "linear",
-                    "lineWidth": 2,
-                    "pointSize": 5,
-                    "scaleDistribution": {
-                      "type": "linear"
-                    },
-                    "showPoints": "auto",
-                    "showValues": false,
-                    "spanNulls": true,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "thresholdsStyle": {
-                      "mode": "off"
-                    }
-                  }
                 },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byRegexp",
-                      "options": "/.*Items.*/"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "fixedColor": "green",
-                          "mode": "fixed"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byRegexp",
-                      "options": "/.*Errors.*/"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "fixedColor": "red",
-                          "mode": "fixed"
-                        }
-                      },
-                      {
-                        "id": "custom.axisPlacement",
-                        "value": "right"
-                      },
-                      {
-                        "id": "custom.drawStyle",
-                        "value": "bars"
-                      },
-                      {
-                        "id": "max",
-                        "value": 5
-                      }
-                    ]
-                  }
-                ]
+                "xField": "schedule",
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-32": {
         "kind": "Panel",
         "spec": {
-          "id": 32,
-          "title": "Last Successful Restore",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -1538,32 +1178,61 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "(time() - max(velero_restore_last_successful_timestamp)) / 3600",
                         "legendFormat": "Hours Ago"
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 32,
+          "links": [],
+          "title": "Last Successful Restore",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "stat",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "red",
+                        "value": 0
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 3600
+                      },
+                      {
+                        "color": "green",
+                        "value": 60
+                      }
+                    ]
+                  },
+                  "unit": "s"
+                },
+                "overrides": []
+              },
               "options": {
                 "colorMode": "value",
                 "graphMode": "area",
@@ -1580,44 +1249,15 @@
                 "showPercentChange": false,
                 "textMode": "auto",
                 "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "s",
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "red"
-                      },
-                      {
-                        "value": 3600,
-                        "color": "yellow"
-                      },
-                      {
-                        "value": 60,
-                        "color": "green"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  }
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-33": {
         "kind": "Panel",
         "spec": {
-          "id": 33,
-          "title": "Restore History",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -1625,57 +1265,58 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "max by (schedule) (velero_restore_success_total{schedule!=\"\"})",
-                        "legendFormat": "Successful Restores",
+                        "format": "table",
                         "instant": true,
-                        "format": "table"
-                      }
+                        "legendFormat": "Successful Restores"
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "max by (schedule) (velero_restore_failed_total{schedule!=\"\"})",
-                        "legendFormat": "Failed Restores",
+                        "format": "table",
                         "instant": true,
-                        "format": "table"
-                      }
+                        "legendFormat": "Failed Restores"
+                      },
+                      "version": "v0"
                     },
-                    "refId": "B",
-                    "hidden": false
+                    "refId": "B"
                   }
                 }
               ],
+              "queryOptions": {},
               "transformations": [
                 {
-                  "kind": "Transformation",
                   "group": "merge",
+                  "kind": "Transformation",
                   "spec": {
                     "options": {}
                   }
                 },
                 {
-                  "kind": "Transformation",
                   "group": "organize",
+                  "kind": "Transformation",
                   "spec": {
                     "options": {
                       "excludeByName": {
@@ -1687,41 +1328,30 @@
                       "orderBy": [],
                       "orderByMode": "auto",
                       "renameByName": {
-                        "schedule": "Schedule",
                         "Value #A": "Successful Restores",
                         "Value #B": "Failed Restores",
                         "Value 1": "Successful Restores",
                         "Value 2": "Failed Restores",
                         "Value A": "Successful Restores",
-                        "Value B": "Failed Restores"
+                        "Value B": "Failed Restores",
+                        "schedule": "Schedule"
                       }
                     }
                   }
                 }
-              ],
-              "queryOptions": {}
+              ]
             }
           },
+          "description": "",
+          "id": 33,
+          "links": [],
+          "title": "Restore History",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "table",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "cellHeight": "sm",
-                "showHeader": true
-              },
               "fieldConfig": {
                 "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      }
-                    ]
-                  },
                   "color": {
                     "mode": "thresholds"
                   },
@@ -1734,6 +1364,15 @@
                       "reducers": []
                     },
                     "inspect": false
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      }
+                    ]
                   }
                 },
                 "overrides": [
@@ -1810,18 +1449,19 @@
                     ]
                   }
                 ]
+              },
+              "options": {
+                "cellHeight": "sm",
+                "showHeader": true
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-34": {
         "kind": "Panel",
         "spec": {
-          "id": 34,
-          "title": "Restore Duration",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -1829,67 +1469,37 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "velero_restore_duration_seconds",
                         "legendFormat": "{{restore}}"
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 34,
+          "links": [],
+          "title": "Restore Duration",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "enableFacetedFilter": false,
-                  "overflow": "ellipsis",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
               "fieldConfig": {
                 "defaults": {
-                  "unit": "s",
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
                   "color": {
                     "mode": "palette-classic"
                   },
@@ -1926,21 +1536,51 @@
                     "thresholdsStyle": {
                       "mode": "off"
                     }
-                  }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "unit": "s"
                 },
                 "overrides": []
+              },
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "enableFacetedFilter": false,
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-35": {
         "kind": "Panel",
         "spec": {
-          "id": 35,
-          "title": "Restore Warnings & Errors",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -1948,70 +1588,56 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "velero_restore_items_errors",
                         "legendFormat": "{{restore}} - Errors"
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "velero_restore_items_warnings",
                         "legendFormat": "{{restore}} - Warnings"
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "B",
-                    "hidden": false
+                    "refId": "B"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 35,
+          "links": [],
+          "title": "Restore Warnings & Errors",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "table",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "cellHeight": "sm",
-                "showHeader": true
-              },
               "fieldConfig": {
                 "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "red"
-                      },
-                      {
-                        "value": 1,
-                        "color": "green"
-                      }
-                    ]
-                  },
                   "color": {
                     "mode": "thresholds"
                   },
@@ -2024,6 +1650,19 @@
                       "reducers": []
                     },
                     "inspect": false
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "red",
+                        "value": 0
+                      },
+                      {
+                        "color": "green",
+                        "value": 1
+                      }
+                    ]
                   }
                 },
                 "overrides": [
@@ -2064,18 +1703,19 @@
                     ]
                   }
                 ]
+              },
+              "options": {
+                "cellHeight": "sm",
+                "showHeader": true
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-36": {
         "kind": "Panel",
         "spec": {
-          "id": 36,
-          "title": "Velero Server Status",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -2083,32 +1723,56 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "up{job=\"velero\"}",
                         "legendFormat": "Up"
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 36,
+          "links": [],
+          "title": "Velero Server Status",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "stat",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "red",
+                        "value": 0
+                      },
+                      {
+                        "color": "green",
+                        "value": 1
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
               "options": {
                 "colorMode": "value",
                 "graphMode": "area",
@@ -2125,39 +1789,15 @@
                 "showPercentChange": false,
                 "textMode": "auto",
                 "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "red"
-                      },
-                      {
-                        "value": 1,
-                        "color": "green"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  }
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-37": {
         "kind": "Panel",
         "spec": {
-          "id": 37,
-          "title": "Node Agent Status",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -2165,32 +1805,56 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "count(kube_pod_status_phase{namespace=\"backup\", pod=~\"node-agent.*\"} == 1)",
                         "legendFormat": "Running"
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 37,
+          "links": [],
+          "title": "Node Agent Status",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "stat",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "red",
+                        "value": 0
+                      },
+                      {
+                        "color": "green",
+                        "value": 1
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
               "options": {
                 "colorMode": "value",
                 "graphMode": "area",
@@ -2207,39 +1871,15 @@
                 "showPercentChange": false,
                 "textMode": "auto",
                 "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "red"
-                      },
-                      {
-                        "value": 1,
-                        "color": "green"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  }
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-38": {
         "kind": "Panel",
         "spec": {
-          "id": 38,
-          "title": "Velero Pod Restarts",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -2247,69 +1887,37 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "sum by (pod) (increase(kube_pod_container_status_restarts_total{namespace=\"backup\", pod=~\"(velero|node-agent).*\"}[1h]))",
                         "legendFormat": "{{pod}}"
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 38,
+          "links": [],
+          "title": "Velero Pod Restarts",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "enableFacetedFilter": false,
-                  "overflow": "ellipsis",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
               "fieldConfig": {
                 "defaults": {
-                  "decimals": 0,
-                  "min": 0,
-                  "unit": "short",
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 1,
-                        "color": "red"
-                      }
-                    ]
-                  },
                   "color": {
                     "mode": "palette-classic"
                   },
@@ -2346,21 +1954,53 @@
                     "thresholdsStyle": {
                       "mode": "off"
                     }
-                  }
+                  },
+                  "decimals": 0,
+                  "min": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 1
+                      }
+                    ]
+                  },
+                  "unit": "short"
                 },
                 "overrides": []
+              },
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "enableFacetedFilter": false,
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-39": {
         "kind": "Panel",
         "spec": {
-          "id": 39,
-          "title": "Velero Error Log Stream",
-          "description": "Real-time error stream from the Velero controller pod. An empty panel is the healthy/desired state, indicating zero active failures.",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -2368,31 +2008,38 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "loki",
-                      "version": "v0",
                       "datasource": {
                         "name": "loki"
                       },
+                      "group": "loki",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "{namespace=\"backup\", container=\"velero\"} | logfmt | level = \"error\" | line_format \"{{.time}} | {{.msg}}\""
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "Real-time error stream from the Velero controller pod. An empty panel is the healthy/desired state, indicating zero active failures.",
+          "id": 39,
+          "links": [],
+          "title": "Velero Error Log Stream",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "logs",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+              },
               "options": {
                 "dedupStrategy": "none",
                 "enableInfiniteScrolling": false,
@@ -2406,22 +2053,15 @@
                 "timestampResolution": "ms",
                 "unwrappedColumns": false,
                 "wrapLogMessage": true
-              },
-              "fieldConfig": {
-                "defaults": {},
-                "overrides": []
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-4": {
         "kind": "Panel",
         "spec": {
-          "id": 4,
-          "title": "Oldest Successful Backup",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -2429,32 +2069,61 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "(time() - max(velero_backup_last_successful_timestamp)) / 3600",
                         "legendFormat": "Hours Ago"
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 4,
+          "links": [],
+          "title": "Oldest Successful Backup",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "stat",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "red",
+                        "value": 0
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 26
+                      },
+                      {
+                        "color": "green",
+                        "value": 48
+                      }
+                    ]
+                  },
+                  "unit": "h"
+                },
+                "overrides": []
+              },
               "options": {
                 "colorMode": "value",
                 "graphMode": "area",
@@ -2471,44 +2140,15 @@
                 "showPercentChange": false,
                 "textMode": "auto",
                 "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "h",
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "red"
-                      },
-                      {
-                        "value": 26,
-                        "color": "yellow"
-                      },
-                      {
-                        "value": 48,
-                        "color": "green"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  }
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-40": {
         "kind": "Panel",
         "spec": {
-          "id": 40,
-          "title": "Node Agent Log Stream",
-          "description": "Real-time stream of file-level errors (S3/Kopia locks, filesystem permissions) from the DaemonSet node-agent pods. An empty panel is the healthy/desired state, indicating zero active failures.",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -2516,31 +2156,38 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "loki",
-                      "version": "v0",
                       "datasource": {
                         "name": "loki"
                       },
+                      "group": "loki",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "{namespace=\"backup\", pod=~\"node-agent.*\"} | logfmt | level = \"error\" | line_format \"{{.time}} | {{.msg}}\""
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "Real-time stream of file-level errors (S3/Kopia locks, filesystem permissions) from the DaemonSet node-agent pods. An empty panel is the healthy/desired state, indicating zero active failures.",
+          "id": 40,
+          "links": [],
+          "title": "Node Agent Log Stream",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "logs",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+              },
               "options": {
                 "dedupStrategy": "none",
                 "enableInfiniteScrolling": false,
@@ -2554,22 +2201,15 @@
                 "timestampResolution": "ms",
                 "unwrappedColumns": false,
                 "wrapLogMessage": true
-              },
-              "fieldConfig": {
-                "defaults": {},
-                "overrides": []
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-41": {
         "kind": "Panel",
         "spec": {
-          "id": 41,
-          "title": "Active Backup Alerts",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -2577,13 +2217,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "grafana",
-                      "version": "v0",
                       "datasource": {
                         "name": "alertmanager"
                       },
+                      "group": "grafana",
+                      "kind": "DataQuery",
                       "spec": {
                         "queries": [
                           {
@@ -2599,51 +2239,27 @@
                             "refId": "A"
                           }
                         ]
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 41,
+          "links": [],
+          "title": "Active Backup Alerts",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "table",
-            "version": "13.1.0",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "cellHeight": "sm",
-                "showHeader": true,
-                "sortBy": [
-                  {
-                    "desc": true,
-                    "displayName": "startsAt"
-                  }
-                ]
-              },
               "fieldConfig": {
                 "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "red"
-                      },
-                      {
-                        "value": 1,
-                        "color": "yellow"
-                      },
-                      {
-                        "value": 2,
-                        "color": "green"
-                      }
-                    ]
-                  },
                   "color": {
                     "mode": "thresholds"
                   },
@@ -2656,6 +2272,23 @@
                       "reducers": []
                     },
                     "inspect": false
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "red",
+                        "value": 0
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 1
+                      },
+                      {
+                        "color": "green",
+                        "value": 2
+                      }
+                    ]
                   }
                 },
                 "overrides": [
@@ -2698,18 +2331,25 @@
                     ]
                   }
                 ]
+              },
+              "options": {
+                "cellHeight": "sm",
+                "showHeader": true,
+                "sortBy": [
+                  {
+                    "desc": true,
+                    "displayName": "startsAt"
+                  }
+                ]
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
-      "panel-5": {
+      "panel-42": {
         "kind": "Panel",
         "spec": {
-          "id": 5,
-          "title": "Active Backup Now",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -2717,32 +2357,461 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
-                        "expr": "count(velero_backup_last_status{phase=\"InProgress\"}) > 0",
-                        "legendFormat": "Running"
-                      }
+                        "expr": "((max by (schedule) (velero_backup_last_status{schedule!=\"\"}) and (max by (schedule) (velero_backup_attempt_total{schedule!=\"\"}) > 0)) or ((max by (schedule) (velero_backup_attempt_total{schedule!=\"\"}) == 0) - 1))",
+                        "legendFormat": "{{schedule}}"
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 42,
+          "links": [],
+          "title": "Backup History Timeline",
           "vizConfig": {
+            "group": "state-timeline",
             "kind": "VizConfig",
-            "group": "stat",
-            "version": "13.1.0",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "fixed"
+                  },
+                  "custom": {
+                    "axisPlacement": "auto",
+                    "fillOpacity": 70,
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineWidth": 0,
+                    "spanNulls": false
+                  },
+                  "mappings": [
+                    {
+                      "options": {
+                        "0": {
+                          "color": "red",
+                          "text": "Failed"
+                        },
+                        "1": {
+                          "color": "green",
+                          "text": "Success"
+                        },
+                        "-1": {
+                          "color": "gray",
+                          "text": "Never Run"
+                        }
+                      },
+                      "type": "value"
+                    }
+                  ],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "alignValue": "left",
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "displayMode": "list",
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "mergeValues": true,
+                "rowHeight": 0.9,
+                "showValue": "auto",
+                "showValues": false,
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              }
+            },
+            "version": "13.1.0"
+          }
+        }
+      },
+      "panel-43": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "expr": "max by (schedule) (max_over_time(velero_backup_tarball_size_bytes{schedule!=\"\"}[24h]))",
+                        "legendFormat": "{{schedule}}"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "A"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": []
+            }
+          },
+          "description": "",
+          "id": 43,
+          "links": [],
+          "title": "Backup Size Trend",
+          "vizConfig": {
+            "group": "timeseries",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 0,
+                    "gradientMode": "scheme",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineWidth": 2,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "showValues": false,
+                    "spanNulls": true,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "unit": "bytes"
+                },
+                "overrides": []
+              },
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "enableFacetedFilter": false,
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              }
+            },
+            "version": "13.1.0"
+          }
+        }
+      },
+      "panel-44": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "expr": "max by (schedule) (max_over_time(velero_backup_items_total{schedule!=\"\"}[24h]))",
+                        "legendFormat": "{{schedule}} - Items"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "A"
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "expr": "max by (schedule) (max_over_time(velero_backup_items_errors{schedule!=\"\"}[24h]))",
+                        "legendFormat": "{{schedule}} - Errors"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "B"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": []
+            }
+          },
+          "description": "",
+          "id": 44,
+          "links": [],
+          "title": "Items Backed Up vs Errors (Timeline Dual-Axis)",
+          "vizConfig": {
+            "group": "timeseries",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 0,
+                    "gradientMode": "scheme",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineWidth": 2,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "showValues": false,
+                    "spanNulls": true,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      }
+                    ]
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byRegexp",
+                      "options": "/.*Items.*/"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "green",
+                          "mode": "fixed"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byRegexp",
+                      "options": "/.*Errors.*/"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "red",
+                          "mode": "fixed"
+                        }
+                      },
+                      {
+                        "id": "custom.axisPlacement",
+                        "value": "right"
+                      },
+                      {
+                        "id": "custom.drawStyle",
+                        "value": "bars"
+                      },
+                      {
+                        "id": "max",
+                        "value": 5
+                      }
+                    ]
+                  }
+                ]
+              },
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "enableFacetedFilter": false,
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              }
+            },
+            "version": "13.1.0"
+          }
+        }
+      },
+      "panel-5": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "expr": "count(velero_backup_last_status{phase=\"InProgress\"}) > 0",
+                        "legendFormat": "Running"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "A"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": []
+            }
+          },
+          "description": "",
+          "id": 5,
+          "links": [],
+          "title": "Active Backup Now",
+          "vizConfig": {
+            "group": "stat",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "yellow",
+                        "value": 0
+                      },
+                      {
+                        "color": "blue",
+                        "value": 0
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
               "options": {
                 "colorMode": "value",
                 "graphMode": "area",
@@ -2759,29 +2828,9 @@
                 "showPercentChange": false,
                 "textMode": "auto",
                 "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "yellow"
-                      },
-                      {
-                        "value": 0,
-                        "color": "blue"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  }
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       }
@@ -2793,7 +2842,6 @@
           {
             "kind": "TabsLayoutTab",
             "spec": {
-              "title": "Health at a Glance",
               "layout": {
                 "kind": "GridLayout",
                 "spec": {
@@ -2801,77 +2849,77 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 0,
-                        "y": 0,
-                        "width": 12,
-                        "height": 11,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-1"
-                        }
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 0,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 12,
-                        "y": 0,
-                        "width": 12,
-                        "height": 11,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-4"
-                        }
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 12,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 0,
-                        "y": 11,
-                        "width": 6,
-                        "height": 7,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-2"
-                        }
+                        },
+                        "height": 7,
+                        "width": 6,
+                        "x": 0,
+                        "y": 11
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 6,
-                        "y": 11,
-                        "width": 6,
-                        "height": 7,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-3"
-                        }
+                        },
+                        "height": 7,
+                        "width": 6,
+                        "x": 6,
+                        "y": 11
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 12,
-                        "y": 11,
-                        "width": 12,
-                        "height": 7,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-5"
-                        }
+                        },
+                        "height": 7,
+                        "width": 12,
+                        "x": 12,
+                        "y": 11
                       }
                     }
                   ]
                 }
-              }
+              },
+              "title": "Health at a Glance"
             }
           },
           {
             "kind": "TabsLayoutTab",
             "spec": {
-              "title": "Per-Schedule Status",
               "layout": {
                 "kind": "GridLayout",
                 "spec": {
@@ -2879,64 +2927,64 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 0,
-                        "y": 0,
-                        "width": 24,
-                        "height": 8,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-24"
-                        }
+                        },
+                        "height": 8,
+                        "width": 24,
+                        "x": 0,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 0,
-                        "y": 8,
-                        "width": 24,
-                        "height": 8,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-42"
-                        }
+                        },
+                        "height": 8,
+                        "width": 24,
+                        "x": 0,
+                        "y": 8
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 0,
-                        "y": 16,
-                        "width": 12,
-                        "height": 8,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-26"
-                        }
+                        },
+                        "height": 8,
+                        "width": 12,
+                        "x": 0,
+                        "y": 16
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 12,
-                        "y": 16,
-                        "width": 12,
-                        "height": 8,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-43"
-                        }
+                        },
+                        "height": 8,
+                        "width": 12,
+                        "x": 12,
+                        "y": 16
                       }
                     }
                   ]
                 }
-              }
+              },
+              "title": "Per-Schedule Status"
             }
           },
           {
             "kind": "TabsLayoutTab",
             "spec": {
-              "title": "Backup Storage Health",
               "layout": {
                 "kind": "GridLayout",
                 "spec": {
@@ -2944,77 +2992,77 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 0,
-                        "y": 0,
-                        "width": 12,
-                        "height": 4,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-28"
-                        }
+                        },
+                        "height": 4,
+                        "width": 12,
+                        "x": 0,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 12,
-                        "y": 0,
-                        "width": 12,
-                        "height": 8,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-30"
-                        }
+                        },
+                        "height": 8,
+                        "width": 12,
+                        "x": 12,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 0,
-                        "y": 4,
-                        "width": 12,
-                        "height": 4,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-29"
-                        }
+                        },
+                        "height": 4,
+                        "width": 12,
+                        "x": 0,
+                        "y": 4
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 0,
-                        "y": 8,
-                        "width": 24,
-                        "height": 10,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-31"
-                        }
+                        },
+                        "height": 10,
+                        "width": 24,
+                        "x": 0,
+                        "y": 8
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 0,
-                        "y": 18,
-                        "width": 24,
-                        "height": 10,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-44"
-                        }
+                        },
+                        "height": 10,
+                        "width": 24,
+                        "x": 0,
+                        "y": 18
                       }
                     }
                   ]
                 }
-              }
+              },
+              "title": "Backup Storage Health"
             }
           },
           {
             "kind": "TabsLayoutTab",
             "spec": {
-              "title": "Restore Readiness",
               "layout": {
                 "kind": "GridLayout",
                 "spec": {
@@ -3022,64 +3070,64 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 0,
-                        "y": 0,
-                        "width": 24,
-                        "height": 6,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-32"
-                        }
-                      }
-                    },
-                    {
-                      "kind": "GridLayoutItem",
-                      "spec": {
-                        "x": 0,
-                        "y": 6,
-                        "width": 24,
-                        "height": 11,
-                        "element": {
-                          "kind": "ElementReference",
-                          "name": "panel-33"
-                        }
-                      }
-                    },
-                    {
-                      "kind": "GridLayoutItem",
-                      "spec": {
-                        "x": 0,
-                        "y": 17,
+                        },
+                        "height": 5,
                         "width": 12,
-                        "height": 10,
-                        "element": {
-                          "kind": "ElementReference",
-                          "name": "panel-34"
-                        }
+                        "x": 0,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 12,
-                        "y": 17,
-                        "width": 12,
-                        "height": 10,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-35"
-                        }
+                        },
+                        "height": 26,
+                        "width": 12,
+                        "x": 12,
+                        "y": 0
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-33"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 0,
+                        "y": 5
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-34"
+                        },
+                        "height": 10,
+                        "width": 12,
+                        "x": 0,
+                        "y": 16
                       }
                     }
                   ]
                 }
-              }
+              },
+              "title": "Restore Readiness"
             }
           },
           {
             "kind": "TabsLayoutTab",
             "spec": {
-              "title": "Velero Operational Health",
               "layout": {
                 "kind": "GridLayout",
                 "spec": {
@@ -3087,77 +3135,77 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 0,
-                        "y": 0,
-                        "width": 12,
-                        "height": 7,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-36"
-                        }
-                      }
-                    },
-                    {
-                      "kind": "GridLayoutItem",
-                      "spec": {
-                        "x": 12,
-                        "y": 0,
-                        "width": 12,
-                        "height": 14,
-                        "element": {
-                          "kind": "ElementReference",
-                          "name": "panel-38"
-                        }
-                      }
-                    },
-                    {
-                      "kind": "GridLayoutItem",
-                      "spec": {
-                        "x": 0,
-                        "y": 7,
-                        "width": 12,
+                        },
                         "height": 7,
+                        "width": 6,
+                        "x": 0,
+                        "y": 0
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-37"
-                        }
+                        },
+                        "height": 7,
+                        "width": 6,
+                        "x": 6,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 0,
-                        "y": 14,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-38"
+                        },
+                        "height": 14,
                         "width": 12,
-                        "height": 8,
+                        "x": 12,
+                        "y": 0
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-39"
-                        }
+                        },
+                        "height": 21,
+                        "width": 12,
+                        "x": 0,
+                        "y": 7
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 12,
-                        "y": 14,
-                        "width": 12,
-                        "height": 8,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-40"
-                        }
+                        },
+                        "height": 14,
+                        "width": 12,
+                        "x": 12,
+                        "y": 14
                       }
                     }
                   ]
                 }
-              }
+              },
+              "title": "Velero Operational Health"
             }
           },
           {
             "kind": "TabsLayoutTab",
             "spec": {
-              "title": "Active Alerts",
               "layout": {
                 "kind": "GridLayout",
                 "spec": {
@@ -3165,19 +3213,20 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 0,
-                        "y": 0,
-                        "width": 24,
-                        "height": 25,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-41"
-                        }
+                        },
+                        "height": 25,
+                        "width": 24,
+                        "x": 0,
+                        "y": 0
                       }
                     }
                   ]
                 }
-              }
+              },
+              "title": "Active Alerts"
             }
           }
         ]
@@ -3192,9 +3241,6 @@
       "dr"
     ],
     "timeSettings": {
-      "timezone": "browser",
-      "from": "now-24h",
-      "to": "now",
       "autoRefresh": "",
       "autoRefreshIntervals": [
         "5s",
@@ -3208,8 +3254,11 @@
         "2h",
         "1d"
       ],
+      "fiscalYearStartMonth": 0,
+      "from": "now-24h",
       "hideTimepicker": false,
-      "fiscalYearStartMonth": 0
+      "timezone": "browser",
+      "to": "now"
     },
     "title": "Backup & DR",
     "variables": []
