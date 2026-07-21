@@ -315,10 +315,6 @@
               ],
               "transformations": [
                 {
-                  "id": "merge",
-                  "options": {}
-                },
-                {
                   "id": "organize",
                   "options": {
                     "excludeByName": {
@@ -345,6 +341,10 @@
                       "Value D": "Items Backed Up"
                     }
                   }
+                },
+                {
+                  "id": "merge",
+                  "options": {}
                 }
               ],
               "queryOptions": {}
