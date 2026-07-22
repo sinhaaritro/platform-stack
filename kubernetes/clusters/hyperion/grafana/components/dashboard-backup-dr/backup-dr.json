@@ -4,13 +4,7 @@
   "metadata": {
     "name": "grafana-sre-backup-dr",
     "namespace": "default",
-    "uid": "fd2dfc58-1da7-4636-b4fe-df1a10c93123",
-    "resourceVersion": "1784641104062001",
-    "generation": 33,
-    "creationTimestamp": "2026-07-20T05:24:53Z",
-    "labels": {
-      "grafana.app/deprecatedInternalID": "2915620936683520"
-    },
+    "uid": "grafana-sre-backup-dr",
     "annotations": {
       "grafana.app/createdBy": "access-policy:service",
       "grafana.app/managedBy": "classic-file-provisioning",
