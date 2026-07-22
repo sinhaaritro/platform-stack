@@ -9,11 +9,6 @@
       "grafana.app/createdBy": "access-policy:service",
       "grafana.app/managedBy": "classic-file-provisioning",
       "grafana.app/managerId": "sidecarProvider",
-      "grafana.app/sourceChecksum": "0ad8d36a4ca5dc64aa81f9f0bea4b4da",
-      "grafana.app/sourcePath": "/tmp/dashboards/backup-dr.json",
-      "grafana.app/sourceTimestamp": "1784641104000",
-      "grafana.app/updatedBy": "access-policy:service",
-      "grafana.app/updatedTimestamp": "2026-07-21T13:38:24Z",
       "grafana.app/folder": ""
     }
   },
