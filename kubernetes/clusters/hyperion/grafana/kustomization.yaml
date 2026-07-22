@@ -9,12 +9,11 @@ components:
   - ../../../apps/infrastructure/grafana/components/storage-longhorn
   - ../../../apps/infrastructure/grafana/components/datasource-loki
   - ../../../apps/infrastructure/grafana/components/datasource-mimir
-  - ../../../apps/infrastructure/grafana/components/dashboards
   - ../../../apps/infrastructure/grafana/components/datasource-alertmanager
+  - ../../../apps/infrastructure/grafana/components/dashboards
   - ../../../apps/infrastructure/grafana/components/resource-limits
   - ../../../apps/infrastructure/grafana/components/ingress
   - ./components/ingress
   - ./components/dashboard-backup-dr
   - ./components/dashboard-external-infra
   # - ../../../apps/infrastructure/grafana/components/maintenance
-
