@@ -1,4 +1,4 @@
-#### S6 — External Infrastructure (Panel Breakdown)
+#### S6 — External Infrastructure
 
 > **Purpose:** Visibility into everything *outside* Kubernetes that the platform depends on. These are the foundations (Proxmox hypervisor), the network perimeter (Cloudflare, AdGuard, Netbird), and the offsite backup target (AWS S3).
 

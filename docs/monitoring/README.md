@@ -1,8 +1,8 @@
 # Unified Enterprise Monitoring Platform
 
-> **One platform. Multiple viewpoints. Build Backup & DR first.**
+> **One platform. Multiple viewpoints.**
 
-This is a single, unified Grafana deployment organized into **persona-based folders**. Each folder contains dashboards tailored to a specific stakeholder. Backup & Disaster Recovery is **Module 1** — the first thing we build and ship.
+This is a single, unified Grafana deployment organized into **persona-based folders**. This is a entrprise grade solution to monioring, catering to all different stakeholders that may be involved in the running and management of the platform. Each folder will contain dashboards tailored to that specific persona.
 
 ---
 

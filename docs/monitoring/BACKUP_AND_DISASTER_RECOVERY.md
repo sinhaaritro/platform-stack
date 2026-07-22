@@ -1,4 +1,4 @@
-## Backup & Disaster Recovery (Dashboard S1)
+## S1 - Backup & Disaster Recovery
 
 > **Purpose:** Comprehensive visibility into Velero backup execution, storage target health, schedule compliance, and recovery point validation.
 
