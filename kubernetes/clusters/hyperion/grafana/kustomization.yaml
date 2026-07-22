@@ -15,5 +15,6 @@ components:
   - ../../../apps/infrastructure/grafana/components/ingress
   - ./components/ingress
   - ./components/dashboard-backup-dr
+  - ./components/dashboard-external-infra
   # - ../../../apps/infrastructure/grafana/components/maintenance
 
