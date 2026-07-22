@@ -12,4 +12,3 @@ configMapGenerator:
         grafana_dashboard: "1"
       annotations:
         grafana_folder: "SRE / Operations"
-
