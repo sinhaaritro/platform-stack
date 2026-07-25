@@ -34,12 +34,40 @@
     "cursorSync": "Off",
     "description": "Kubernetes Cluster & Node Health Dashboard (USE Method)",
     "editable": true,
+    "links": [],
+    "liveNow": false,
+    "preload": false,
     "refresh": "30s",
+    "tags": [
+      "sre",
+      "s2",
+      "cluster",
+      "nodes"
+    ],
     "time": {
       "from": "now-6h",
       "to": "now"
     },
-    "tags": ["sre", "s2", "cluster", "nodes"],
+    "timeSettings": {
+      "autoRefresh": "30s",
+      "autoRefreshIntervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ],
+      "fiscalYearStartMonth": 0,
+      "from": "now-6h",
+      "hideTimepicker": false,
+      "timezone": "browser",
+      "to": "now"
+    },
     "title": "Cluster & Node Health",
     "elements": {
       "panel-1": {
@@ -116,7 +144,9 @@
                 "orientation": "auto",
                 "percentChangeColorMode": "standard",
                 "reduceOptions": {
-                  "calcs": ["lastNotNull"],
+                  "calcs": [
+                    "lastNotNull"
+                  ],
                   "fields": "",
                   "values": false
                 },
@@ -200,7 +230,9 @@
                 "orientation": "auto",
                 "percentChangeColorMode": "standard",
                 "reduceOptions": {
-                  "calcs": ["lastNotNull"],
+                  "calcs": [
+                    "lastNotNull"
+                  ],
                   "fields": "",
                   "values": false
                 },
@@ -432,7 +464,9 @@
                 "orientation": "auto",
                 "percentChangeColorMode": "standard",
                 "reduceOptions": {
-                  "calcs": ["lastNotNull"],
+                  "calcs": [
+                    "lastNotNull"
+                  ],
                   "fields": "",
                   "values": false
                 },
@@ -692,9 +726,18 @@
                         "value": {
                           "mode": "absolute",
                           "steps": [
-                            { "color": "green", "value": 0 },
-                            { "color": "yellow", "value": 70 },
-                            { "color": "red", "value": 85 }
+                            {
+                              "color": "green",
+                              "value": 0
+                            },
+                            {
+                              "color": "yellow",
+                              "value": 70
+                            },
+                            {
+                              "color": "red",
+                              "value": 85
+                            }
                           ]
                         }
                       }
@@ -717,9 +760,18 @@
                         "value": {
                           "mode": "absolute",
                           "steps": [
-                            { "color": "green", "value": 0 },
-                            { "color": "yellow", "value": 70 },
-                            { "color": "red", "value": 85 }
+                            {
+                              "color": "green",
+                              "value": 0
+                            },
+                            {
+                              "color": "yellow",
+                              "value": 70
+                            },
+                            {
+                              "color": "red",
+                              "value": 85
+                            }
                           ]
                         }
                       }
@@ -742,9 +794,18 @@
                         "value": {
                           "mode": "absolute",
                           "steps": [
-                            { "color": "green", "value": 0 },
-                            { "color": "yellow", "value": 70 },
-                            { "color": "red", "value": 90 }
+                            {
+                              "color": "green",
+                              "value": 0
+                            },
+                            {
+                              "color": "yellow",
+                              "value": 70
+                            },
+                            {
+                              "color": "red",
+                              "value": 90
+                            }
                           ]
                         }
                       }
@@ -756,7 +817,10 @@
                 "cellHeight": "sm",
                 "showHeader": true,
                 "sortBy": [
-                  { "desc": true, "displayName": "CPU %" }
+                  {
+                    "desc": true,
+                    "displayName": "CPU %"
+                  }
                 ]
               }
             },
@@ -864,9 +928,18 @@
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
-                      { "color": "green", "value": 0 },
-                      { "color": "yellow", "value": 70 },
-                      { "color": "red", "value": 85 }
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 70
+                      },
+                      {
+                        "color": "red",
+                        "value": 85
+                      }
                     ]
                   },
                   "unit": "percent"
@@ -994,9 +1067,18 @@
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
-                      { "color": "red", "value": 0 },
-                      { "color": "yellow", "value": 20 },
-                      { "color": "green", "value": 30 }
+                      {
+                        "color": "red",
+                        "value": 0
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 20
+                      },
+                      {
+                        "color": "green",
+                        "value": 30
+                      }
                     ]
                   },
                   "unit": "percent"
@@ -1293,7 +1375,13 @@
                       "options": "/Load1/"
                     },
                     "properties": [
-                      { "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "red",
+                          "mode": "fixed"
+                        }
+                      }
                     ]
                   },
                   {
@@ -1302,7 +1390,13 @@
                       "options": "/Load5/"
                     },
                     "properties": [
-                      { "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "yellow",
+                          "mode": "fixed"
+                        }
+                      }
                     ]
                   },
                   {
@@ -1311,7 +1405,13 @@
                       "options": "/Load15/"
                     },
                     "properties": [
-                      { "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "green",
+                          "mode": "fixed"
+                        }
+                      }
                     ]
                   }
                 ]
@@ -1387,7 +1487,10 @@
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
-                      { "color": "green", "value": 0 }
+                      {
+                        "color": "green",
+                        "value": 0
+                      }
                     ]
                   }
                 },
@@ -1450,7 +1553,10 @@
                       "includeByName": {},
                       "indexByName": {},
                       "orderBy": [
-                        { "desc": true, "displayName": "Restarts" }
+                        {
+                          "desc": true,
+                          "displayName": "Restarts"
+                        }
                       ],
                       "orderByMode": "auto",
                       "renameByName": {
@@ -1490,9 +1596,18 @@
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
-                      { "color": "green", "value": 0 },
-                      { "color": "yellow", "value": 3 },
-                      { "color": "red", "value": 10 }
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 3
+                      },
+                      {
+                        "color": "red",
+                        "value": 10
+                      }
                     ]
                   }
                 },
@@ -1503,7 +1618,10 @@
                       "options": "Namespace"
                     },
                     "properties": [
-                      { "id": "custom.width", "value": 150 }
+                      {
+                        "id": "custom.width",
+                        "value": 150
+                      }
                     ]
                   },
                   {
@@ -1512,7 +1630,10 @@
                       "options": "Pod"
                     },
                     "properties": [
-                      { "id": "custom.width", "value": 250 }
+                      {
+                        "id": "custom.width",
+                        "value": 250
+                      }
                     ]
                   }
                 ]
@@ -1521,7 +1642,10 @@
                 "cellHeight": "sm",
                 "showHeader": true,
                 "sortBy": [
-                  { "desc": true, "displayName": "Restarts" }
+                  {
+                    "desc": true,
+                    "displayName": "Restarts"
+                  }
                 ]
               }
             },
@@ -1581,7 +1705,13 @@
                       "options": "Running"
                     },
                     "properties": [
-                      { "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "green",
+                          "mode": "fixed"
+                        }
+                      }
                     ]
                   },
                   {
@@ -1590,7 +1720,13 @@
                       "options": "Pending"
                     },
                     "properties": [
-                      { "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "yellow",
+                          "mode": "fixed"
+                        }
+                      }
                     ]
                   },
                   {
@@ -1599,7 +1735,13 @@
                       "options": "Failed"
                     },
                     "properties": [
-                      { "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "red",
+                          "mode": "fixed"
+                        }
+                      }
                     ]
                   },
                   {
@@ -1608,7 +1750,13 @@
                       "options": "Unknown"
                     },
                     "properties": [
-                      { "id": "color", "value": { "fixedColor": "purple", "mode": "fixed" } }
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "purple",
+                          "mode": "fixed"
+                        }
+                      }
                     ]
                   }
                 ]
@@ -1621,7 +1769,9 @@
                 },
                 "pieType": "donut",
                 "reduceOptions": {
-                  "calcs": ["lastNotNull"],
+                  "calcs": [
+                    "lastNotNull"
+                  ],
                   "fields": "",
                   "values": true
                 },
@@ -1722,15 +1872,23 @@
                     "properties": [
                       {
                         "id": "custom.cellOptions",
-                        "value": { "type": "color-text" }
+                        "value": {
+                          "type": "color-text"
+                        }
                       },
                       {
                         "id": "thresholds",
                         "value": {
                           "mode": "absolute",
                           "steps": [
-                            { "color": "red", "value": 0 },
-                            { "color": "yellow", "value": 1 }
+                            {
+                              "color": "red",
+                              "value": 0
+                            },
+                            {
+                              "color": "yellow",
+                              "value": 1
+                            }
                           ]
                         }
                       }
@@ -1794,8 +1952,14 @@
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
-                      { "color": "red", "value": 0 },
-                      { "color": "green", "value": 1 }
+                      {
+                        "color": "red",
+                        "value": 0
+                      },
+                      {
+                        "color": "green",
+                        "value": 1
+                      }
                     ]
                   }
                 },
@@ -1808,7 +1972,9 @@
                 "orientation": "auto",
                 "percentChangeColorMode": "standard",
                 "reduceOptions": {
-                  "calcs": ["lastNotNull"],
+                  "calcs": [
+                    "lastNotNull"
+                  ],
                   "fields": "",
                   "values": false
                 },
@@ -2054,7 +2220,10 @@
                     "properties": [
                       {
                         "id": "color",
-                        "value": { "fixedColor": "red", "mode": "fixed" }
+                        "value": {
+                          "fixedColor": "red",
+                          "mode": "fixed"
+                        }
                       }
                     ]
                   }
@@ -2133,9 +2302,18 @@
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
-                      { "color": "green", "value": 0 },
-                      { "color": "yellow", "value": 70 },
-                      { "color": "red", "value": 90 }
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 70
+                      },
+                      {
+                        "color": "red",
+                        "value": 90
+                      }
                     ]
                   },
                   "unit": "percent"
@@ -2220,8 +2398,14 @@
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
-                      { "color": "red", "value": 0 },
-                      { "color": "yellow", "value": 1 }
+                      {
+                        "color": "red",
+                        "value": 0
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 1
+                      }
                     ]
                   }
                 },
@@ -2232,7 +2416,10 @@
                       "options": "alertname"
                     },
                     "properties": [
-                      { "id": "custom.width", "value": 250 }
+                      {
+                        "id": "custom.width",
+                        "value": 250
+                      }
                     ]
                   },
                   {
@@ -2243,7 +2430,9 @@
                     "properties": [
                       {
                         "id": "custom.cellOptions",
-                        "value": { "type": "color-text" }
+                        "value": {
+                          "type": "color-text"
+                        }
                       }
                     ]
                   },
@@ -2253,7 +2442,10 @@
                       "options": "status"
                     },
                     "properties": [
-                      { "id": "custom.width", "value": 100 }
+                      {
+                        "id": "custom.width",
+                        "value": 100
+                      }
                     ]
                   }
                 ]
@@ -2262,7 +2454,10 @@
                 "cellHeight": "sm",
                 "showHeader": true,
                 "sortBy": [
-                  { "desc": true, "displayName": "startsAt" }
+                  {
+                    "desc": true,
+                    "displayName": "startsAt"
+                  }
                 ]
               }
             },
@@ -2285,36 +2480,66 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-1" },
-                        "height": 11, "width": 12, "x": 0, "y": 0
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-1"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 0,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-2" },
-                        "height": 11, "width": 12, "x": 12, "y": 0
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-2"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 12,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-3" },
-                        "height": 14, "width": 12, "x": 0, "y": 11
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-3"
+                        },
+                        "height": 14,
+                        "width": 12,
+                        "x": 0,
+                        "y": 11
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-4" },
-                        "height": 14, "width": 12, "x": 12, "y": 11
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-4"
+                        },
+                        "height": 14,
+                        "width": 12,
+                        "x": 12,
+                        "y": 11
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-5" },
-                        "height": 7, "width": 24, "x": 0, "y": 25
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-5"
+                        },
+                        "height": 7,
+                        "width": 24,
+                        "x": 0,
+                        "y": 25
                       }
                     }
                   ]
@@ -2333,36 +2558,66 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-6" },
-                        "height": 12, "width": 24, "x": 0, "y": 0
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-6"
+                        },
+                        "height": 12,
+                        "width": 24,
+                        "x": 0,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-7" },
-                        "height": 12, "width": 12, "x": 0, "y": 12
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-7"
+                        },
+                        "height": 12,
+                        "width": 12,
+                        "x": 0,
+                        "y": 12
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-8" },
-                        "height": 12, "width": 12, "x": 12, "y": 12
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-8"
+                        },
+                        "height": 12,
+                        "width": 12,
+                        "x": 12,
+                        "y": 12
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-9" },
-                        "height": 12, "width": 12, "x": 0, "y": 24
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-9"
+                        },
+                        "height": 12,
+                        "width": 12,
+                        "x": 0,
+                        "y": 24
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-10" },
-                        "height": 12, "width": 12, "x": 12, "y": 24
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-10"
+                        },
+                        "height": 12,
+                        "width": 12,
+                        "x": 12,
+                        "y": 24
                       }
                     }
                   ]
@@ -2381,29 +2636,53 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-11" },
-                        "height": 10, "width": 12, "x": 0, "y": 0
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-11"
+                        },
+                        "height": 10,
+                        "width": 12,
+                        "x": 0,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-12" },
-                        "height": 14, "width": 12, "x": 12, "y": 0
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-12"
+                        },
+                        "height": 14,
+                        "width": 12,
+                        "x": 12,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-13" },
-                        "height": 12, "width": 12, "x": 0, "y": 10
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-13"
+                        },
+                        "height": 12,
+                        "width": 12,
+                        "x": 0,
+                        "y": 10
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-14" },
-                        "height": 12, "width": 12, "x": 12, "y": 10
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-14"
+                        },
+                        "height": 12,
+                        "width": 12,
+                        "x": 12,
+                        "y": 10
                       }
                     }
                   ]
@@ -2422,29 +2701,53 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-15" },
-                        "height": 7, "width": 6, "x": 0, "y": 0
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-15"
+                        },
+                        "height": 7,
+                        "width": 6,
+                        "x": 0,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-16" },
-                        "height": 14, "width": 12, "x": 6, "y": 0
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-16"
+                        },
+                        "height": 14,
+                        "width": 12,
+                        "x": 6,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-17" },
-                        "height": 14, "width": 12, "x": 18, "y": 0
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-17"
+                        },
+                        "height": 14,
+                        "width": 12,
+                        "x": 18,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-18" },
-                        "height": 7, "width": 24, "x": 0, "y": 14
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-18"
+                        },
+                        "height": 7,
+                        "width": 24,
+                        "x": 0,
+                        "y": 14
                       }
                     }
                   ]
@@ -2463,8 +2766,14 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "element": { "kind": "ElementReference", "name": "panel-19" },
-                        "height": 25, "width": 24, "x": 0, "y": 0
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-19"
+                        },
+                        "height": 25,
+                        "width": 24,
+                        "x": 0,
+                        "y": 0
                       }
                     }
                   ]
@@ -2476,7 +2785,6 @@
         ]
       }
     },
-    "title": "Cluster & Node Health",
     "timepicker": {},
     "timezone": "browser",
     "uid": "sre-cluster-health",
