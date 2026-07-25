@@ -122,4 +122,10 @@ Organized into **5 tabs**, one per monitoring component plus an alerts tab.
 
 ---
 
-**← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)** | **Previous: [S4 — Storage](STORAGE.md)**
+## Related Dashboards & Links
+
+| Target | Type | Description |
+|--------|------|-------------|
+| S1, S2, S3, S4, S6 | Internal (dashboard) | All operational dashboards depend on Mimir/Loki/Alloy health monitored here. |
+
+**← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)** | **Previous: [S4 — Storage](S4-storage.md)**

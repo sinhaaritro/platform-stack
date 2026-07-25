@@ -121,4 +121,11 @@ Organized into **4 tabs**. Unlike the SRE dashboards which follow the "glance �
 
 ---
 
-**← Back to [Dashboard Catalog](../README.md#-dba-2-dashboards)** | **Previous: [B1 — PostgreSQL](POSTGRESQL.md)**
+## Related Dashboards & Links
+
+| Target | Type | Description |
+|--------|------|-------------|
+| [B1 — PostgreSQL](../../dba/B1-postgresql.md) | Internal (dashboard) | Both databases share the same Longhorn storage layer. |
+| [S4 — Storage](../../sre/S4-storage.md) | Internal (dashboard) | SeaweedFS buckets for Valkey and CouchDB tracked here. |
+
+**← Back to [Dashboard Catalog](../README.md#-dba-2-dashboards)** | **Previous: [B1 — PostgreSQL](B1-postgresql.md)**

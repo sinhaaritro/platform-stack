@@ -126,4 +126,11 @@ Organized into **5 tabs**. The Grafana variable `$instance` (dropdown: `pg14-aut
 
 ---
 
-**← Back to [Dashboard Catalog](../README.md#-dba-2-dashboards)** | **Next: [B2 — Cache & Document Stores](CACHE_AND_DOCUMENT_STORES.md)**
+## Related Dashboards & Links
+
+| Target | Type | Description |
+|--------|------|-------------|
+| [S4 — Storage](../../sre/S4-storage.md) | Internal (dashboard) | PVC capacity and Longhorn volume data for PG databases tracked here. |
+| [B2 — Cache & Document Stores](../../dba/B2-cache-and-document-stores.md) | Internal (dashboard) | Both databases share the same Longhorn storage layer monitored in B2. |
+
+**← Back to [Dashboard Catalog](../README.md#-dba-2-dashboards)** | **Next: [B2 — Cache & Document Stores](B2-cache-and-document-stores.md)**

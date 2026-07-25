@@ -129,4 +129,11 @@ Organized into **5 tabs**. Unlike SRE dashboards which drill down from a summary
 
 ---
 
-**← Back to [Dashboard Catalog](../README.md#-developer-3-dashboards)** | **Previous: [D1 — Application Health](APPLICATION_HEALTH.md)** | **Next: [D2 — Log Explorer](LOG_EXPLORER.md)**
+## Related Dashboards & Links
+
+| Target | Type | Description |
+|--------|------|-------------|
+| [D1 — Application Health](../../developer/D1-application-health.md) | Internal (dashboard) | App error logs may surface security-relevant events (auth failures, injection attempts). |
+| [S3 — Networking & Ingress](../../sre/S3-networking.md) | Internal (dashboard) | TLS/certificate health from cert-manager impacts Authentik OIDC connectivity. |
+
+**← Back to [Dashboard Catalog](../README.md#-developer-3-dashboards)** | **Previous: [D1 — Application Health](D1-application-health.md)** | **Next: [D2 — Log Explorer](D2-log-explorer.md)**

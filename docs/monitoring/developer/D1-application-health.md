@@ -103,4 +103,11 @@ Organized into **4 tabs**. The Grafana variable `$app` (dropdown: `immich`, `obs
 
 ---
 
-**← Back to [Dashboard Catalog](../README.md#-developer-3-dashboards)** | **Next: [D2 — Log Explorer](LOG_EXPLORER.md)**
+## Related Dashboards & Links
+
+| Target | Type | Description |
+|--------|------|-------------|
+| [S3 — Networking & Ingress](../../sre/S3-networking.md) | Internal (dashboard) | Per-app error rate and latency reuse Traefik metrics from S3. |
+| [S4 — Storage](../../sre/S4-storage.md) | Internal (dashboard) | PVC usage per app tracked via Longhorn data from S4. |
+
+**← Back to [Dashboard Catalog](../README.md#-developer-3-dashboards)** | **Next: [D2 — Log Explorer](D2-log-explorer.md)**

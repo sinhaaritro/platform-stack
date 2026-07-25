@@ -128,4 +128,12 @@ The dashboard is organized into **6 tabs** (collapsible). An operator opens the 
 
 ---
 
+## Related Dashboards & Links
+
+| Target | Type | Description |
+|--------|------|-------------|
+| [S6 — External Infrastructure](S6-external-infrastructure.md) | Internal (dashboard) | The AWS S3 target that Velero backs up to. See external infrastructure health. |
+| [E1 — Platform Overview](../executive/E1-platform-overview.md) | Internal (dashboard) | High-level platform view including backup SLA context. |
+| AWS S3 Console | External (placeholder) | Direct access to the Velero backup bucket in AWS. URL: `https://s3.console.aws.amazon.com/s3/buckets?region=us-east-1` |
+
 **← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)** | **Next: [S2 — Cluster & Node Health](CLUSTER_AND_NODE_HEALTH.md)**

@@ -90,4 +90,13 @@ Single-screen, no tabs. Panels organized by resource type, each with a current v
 
 ---
 
-**← Back to [Dashboard Catalog](../README.md#-executive-2-dashboards)** | **Previous: [E1 — Platform Overview](PLATFORM_OVERVIEW.md)**
+## Related Dashboards & Links
+
+| Target | Type | Description |
+|--------|------|-------------|
+| [E1 — Platform Overview](../executive/E1-platform-overview.md) | Internal (dashboard) | E1 rollups data from S2, B1, B2 which E2 also aggregates. |
+| [S1 — Backup & DR](../../sre/S1-backup-and-disaster-recovery.md) | Internal (dashboard) | AWS S3 backup storage growth tracked here in Section 1. |
+| [S4 — Storage](../../sre/S4-storage.md) | Internal (dashboard) | Longhorn + SeaweedFS growth trends aggregated from S4. |
+| [B1 — PostgreSQL](../../dba/B1-postgresql.md) | Internal (dashboard) | Database size trends aggregated from B1. |
+
+**← Back to [Dashboard Catalog](../README.md#-executive-2-dashboards)** | **Previous: [E1 — Platform Overview](E1-platform-overview.md)**

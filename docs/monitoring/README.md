@@ -143,6 +143,50 @@ Each Grafana folder maps to a **persona**. Access control is handled via **Authe
 
 ---
 
+## Cross-Dashboard Links
+
+Each dashboard JSON includes links to related dashboards (internal) and external tools. Internal links use Grafana's `folder-filename` UID format. External links are placeholders until URLs are confirmed.
+
+### S1 — Backup & Disaster Recovery
+
+| Target | Type | Description |
+|--------|------|-------------|
+| [S6 — External Infrastructure](sre/S6-external-infrastructure.md) | Internal (dashboard) | AWS S3 target that Velero backs up to. |
+| [E1 — Platform Overview](executive/E1-platform-overview.md) | Internal (dashboard) | High-level platform view including backup SLA context. |
+| AWS S3 Console | External (placeholder) | Velero backup bucket in AWS. URL: `https://s3.console.aws.amazon.com/s3/buckets?region=us-east-1` |
+
+### S6 — External Infrastructure
+
+| Target | Type | Description |
+|--------|------|-------------|
+| [S1 — Backup & DR](sre/S1-backup-and-disaster-recovery.md) | Internal (dashboard) | Velero backups target the AWS S3 bucket monitored here. |
+| [E1 — Platform Overview](executive/E1-platform-overview.md) | Internal (dashboard) | High-level platform view including external dependency status. |
+| [S4 — Storage](sre/S4-storage.md) | Internal (dashboard) | Longhorn volumes backing Kubernetes workloads on Proxmox nodes. |
+| Proxmox Web | External (placeholder) | Proxmox VE cluster UI. URL: `https://proxmox.example.com` |
+| Cloudflare Dashboard | External (placeholder) | Tunnel, DNS, and WAF metrics. URL: `https://dash.cloudflare.com` |
+| Netbird Dashboard | External (placeholder) | Mesh VPN peer connectivity. URL: `https://app.netbird.io` |
+
+### Other Dashboards (links to be added)
+
+| Dashboard | Links Planned |
+|-----------|--------------|
+| E1 — Platform Overview | S1, S2, S6, E2 |
+| S2 — Cluster & Node Health | E1, S4, B1, B2 |
+| S3 — Networking & Ingress | D1, D3 |
+| S4 — Storage | S6, B1, B2 |
+| S5 — Monitoring Self-Health | All operational dashboards |
+| P1 — Home — Public | E1 |
+| P2 — Home — Trusted | E1, D1 |
+| P3 — Home — Admin | E1, D1, D3 |
+| D1 — Application Health | S3, S4 |
+| D2 — Log Explorer | D3, S5 |
+| D3 — Security & Auth | D1, S3 |
+| B1 — PostgreSQL | S4, B2 |
+| B2 — Cache & Document Stores | B1, S4 |
+| E2 — Capacity & Trends | E1, S2, S4, B1, B2 |
+
+---
+
 ## Build Phases
 
 We build Phase 1 first, then expand. Each module is a self-contained Grafana dashboard JSON delivered as a Kustomize ConfigMap.

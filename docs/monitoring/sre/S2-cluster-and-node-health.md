@@ -120,4 +120,13 @@ Organized into **5 tabs**, following the same "glance first, drill down after" p
 
 ---
 
-**← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)** | **Previous: [S1 — Backup & DR](BACKUP_AND_DISASTER_RECOVERY.md)** | **Next: [E1 — Platform Overview](../executive/PLATFORM_OVERVIEW.md)**
+## Related Dashboards & Links
+
+| Target | Type | Description |
+|--------|------|-------------|
+| [E1 — Platform Overview](../executive/E1-platform-overview.md) | Internal (dashboard) | Cluster CPU/Memory gauges and Active Alerts count are reused here. |
+| [S4 — Storage](../sre/S4-storage.md) | Internal (dashboard) | Per-node disk space panel references Longhorn/SeaweedFS data from S4. |
+| [B1 — PostgreSQL](../../dba/B1-postgresql.md) | Internal (dashboard) | Application workloads running on these nodes depend on PG14/PG18. |
+| [B2 — Cache & Document Stores](../../dba/B2-cache-and-document-stores.md) | Internal (dashboard) | Valkey cache performance impacts application response times on these nodes. |
+
+**← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)** | **Previous: [S1 — Backup & DR](S1-backup-and-disaster-recovery.md)** | **Next: [E1 — Platform Overview](../executive/E1-platform-overview.md)**

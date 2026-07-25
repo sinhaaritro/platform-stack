@@ -74,4 +74,15 @@ Unlike other SRE dashboards, S6 uses **rows** rather than tabs — each row is a
 
 ---
 
-**← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)** | **Previous: [S4 — Storage](STORAGE.md)**
+## Related Dashboards & Links
+
+| Target | Type | Description |
+|--------|------|-------------|
+| [S1 — Backup & DR](S1-backup-and-disaster-recovery.md) | Internal (dashboard) | Velero backups target the AWS S3 bucket monitored here. |
+| [E1 — Platform Overview](../executive/E1-platform-overview.md) | Internal (dashboard) | High-level platform view including external dependency status. |
+| [S4 — Storage](S4-storage.md) | Internal (dashboard) | Longhorn volumes that back Kubernetes workloads on Proxmox nodes. |
+| Proxmox Web | External (placeholder) | Direct access to Proxmox VE cluster UI. URL: `https://proxmox.example.com` |
+| Cloudflare Dashboard | External (placeholder) | Cloudflare API dashboard for tunnel, DNS, and WAF metrics. URL: `https://dash.cloudflare.com` |
+| Netbird Dashboard | External (placeholder) | Netbird mesh VPN dashboard for peer connectivity. URL: `https://app.netbird.io` |
+
+**← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)** | **Previous: [S4 — Storage](S4-storage.md)**

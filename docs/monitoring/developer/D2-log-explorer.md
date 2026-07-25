@@ -75,4 +75,11 @@ D2 is **not tabbed** — it uses a single continuous layout optimized for intera
 
 ---
 
-**← Back to [Dashboard Catalog](../README.md#-developer-3-dashboards)** | **Previous: [D1 — Application Health](APPLICATION_HEALTH.md)**
+## Related Dashboards & Links
+
+| Target | Type | Description |
+|--------|------|-------------|
+| [D3 — Security & Auth](../../developer/D3-security-auth.md) | Internal (dashboard) | Permission denied/auth failure log patterns overlap with D3 security events. |
+| [S5 — Monitoring Self-Health](../../sre/S5-monitoring-self-health.md) | Internal (dashboard) | Loki ingestion errors monitored here affect log availability in D2. |
+
+**← Back to [Dashboard Catalog](../README.md#-developer-3-dashboards)** | **Previous: [D1 — Application Health](D1-application-health.md)**

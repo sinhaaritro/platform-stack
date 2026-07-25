@@ -2829,7 +2829,47 @@
         ]
       }
     },
-    "links": [],
+    "links": [
+      {
+        "title": "S1 \u2014 Backup & DR",
+        "type": "dashboard",
+        "uri": "d/sre-s1-backup-and-disaster-recovery",
+        "icon": "link"
+      },
+      {
+        "title": "E1 \u2014 Platform Overview",
+        "type": "dashboard",
+        "uri": "d/executive-e1-platform-overview",
+        "icon": "link"
+      },
+      {
+        "title": "S4 \u2014 Storage",
+        "type": "dashboard",
+        "uri": "d/sre-s4-storage",
+        "icon": "link"
+      },
+      {
+        "title": "Proxmox Web",
+        "type": "link",
+        "url": "https://proxmox.local:8006",
+        "icon": "link",
+        "targetBlank": true
+      },
+      {
+        "title": "Cloudflare Dashboard",
+        "type": "link",
+        "url": "https://dash.cloudflare.com/PLACEHOLDER-ACCOUNT-ID",
+        "icon": "link",
+        "targetBlank": true
+      },
+      {
+        "title": "Netbird Dashboard",
+        "type": "link",
+        "url": "https://netbird.PLACEHOLDER.example.com",
+        "icon": "link",
+        "targetBlank": true
+      }
+    ],
     "liveNow": false,
     "preload": false,
     "tags": [

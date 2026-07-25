@@ -3221,7 +3221,27 @@
         ]
       }
     },
-    "links": [],
+    "links": [
+      {
+        "title": "S6 \u2014 External Infrastructure",
+        "type": "dashboard",
+        "uri": "d/sre-s6-external-infrastructure",
+        "icon": "link"
+      },
+      {
+        "title": "E1 \u2014 Platform Overview",
+        "type": "dashboard",
+        "uri": "d/executive-e1-platform-overview",
+        "icon": "link"
+      },
+      {
+        "title": "AWS S3 Console",
+        "type": "link",
+        "url": "https://s3.console.aws.amazon.com/s3/buckets/PLACEHOLDER-BUCKET-NAME",
+        "icon": "link",
+        "targetBlank": true
+      }
+    ],
     "liveNow": false,
     "preload": false,
     "tags": [

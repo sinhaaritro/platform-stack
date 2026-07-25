@@ -93,37 +93,43 @@ kubernetes/apps/infrastructure/grafana/components/dashboards/
 ├── dashboard-seaweedfs.yaml          # (existing — currently empty {})
 │
 │── # Phase 1
-├── dashboard-backup-dr.yaml          # S1 — Backup & Disaster Recovery
+├── S1-backup-and-disaster-recovery.yaml  # S1 — Backup & DR
+│   └── sre/
+│       └── S1-backup-and-disaster-recovery.json
 │
 │── # Phase 2
-├── dashboard-cluster-health.yaml     # S2 — Cluster & Node Health
-├── dashboard-platform-overview.yaml  # E1 — Platform Overview
+├── S2-cluster-and-node-health.yaml     # S2 — Cluster & Node Health
+├── E1-platform-overview.yaml           # E1 — Platform Overview
 │
 │── # Phase 3
-├── dashboard-storage.yaml            # S4 — Storage (replaces empty seaweedfs)
-├── dashboard-networking.yaml         # S3 — Networking & Ingress
+├── S4-storage.yaml                     # S4 — Storage
+├── S3-networking.yaml                  # S3 — Networking & Ingress
 │
 │── # Phase 4
-├── dashboard-postgresql.yaml         # B1 — PostgreSQL
-├── dashboard-cache-docstores.yaml    # B2 — Cache & Document Stores
+├── B1-postgresql.yaml                  # B1 — PostgreSQL
+├── B2-cache-and-document-stores.yaml   # B2 — Cache & Document Stores
 │
 │── # Phase 5
-├── dashboard-app-health.yaml         # D1 — Application Health
-├── dashboard-security-auth.yaml      # D3 — Security & Auth
+├── D1-application-health.yaml          # D1 — Application Health
+├── D3-security-auth.yaml               # D3 — Security & Auth
 │
 │── # Phase 6
-├── dashboard-log-explorer.yaml       # D2 — Log Explorer
-├── dashboard-monitoring-health.yaml  # S5 — Monitoring Self-Health
-├── dashboard-capacity-trends.yaml    # E2 — Capacity & Trends
+├── D2-log-explorer.yaml                # D2 — Log Explorer
+├── S5-monitoring-self-health.yaml      # S5 — Monitoring Self-Health
+├── E2-capacity-and-trends.yaml         # E2 — Capacity & Trends
 │
 │── # Phase 7
-├── dashboard-external-infra.yaml     # S6 — External Infrastructure
+├── S6-external-infrastructure.yaml     # S6 — External Infrastructure
+│   └── sre/
+│       └── S6-external-infrastructure.json
 │
 │── # Phase 8
-├── dashboard-portal-admin.yaml       # P3 — Home — Admin
-├── dashboard-portal-trusted.yaml     # P2 — Home — Trusted
-└── dashboard-portal-public.yaml      # P1 — Home — Public
+├── P3-home-admin.yaml                  # P3 — Home — Admin
+├── P2-home-trusted.yaml                # P2 — Home — Trusted
+└── P1-home-public.yaml                 # P1 — Home — Public
 ```
+
+> **Note:** Each dashboard's JSON file lives in a persona subdirectory matching its folder annotation (e.g., SRE dashboards under `sre/`, Executive under `executive/`, DBA under `dba/`). The ConfigMap references the file by path.
 
 ---
 
@@ -140,7 +146,7 @@ All dashboard JSON files follow these conventions:
 | **time range** | Default to `now-6h` for operational, `now-30d` for trends |
 | **templating** | Use Grafana variables for node, namespace, pod filters where applicable |
 | **annotations** | Include Alertmanager annotations layer for overlaying alert events on graphs |
-| **links** | Cross-link to related dashboards (e.g., S2 links to E1 for executive view) |
+| **links** | Cross-link to related dashboards using `folder-filename` UID format (e.g., `sre-s6-external-infrastructure`) with internal dashboard links first, then external URL placeholders |
 
 ---
 

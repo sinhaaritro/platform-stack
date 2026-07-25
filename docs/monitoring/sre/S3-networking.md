@@ -133,4 +133,11 @@ Organized into **5 tabs**, same "glance first, drill down after" pattern as S1/S
 
 ---
 
-**← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)** | **Previous: [S2 — Cluster & Node Health](CLUSTER_AND_NODE_HEALTH.md)** | **Next: [S4 — Storage](STORAGE.md)**
+## Related Dashboards & Links
+
+| Target | Type | Description |
+|--------|------|-------------|
+| [D1 — Application Health](../../developer/D1-application-health.md) | Internal (dashboard) | Per-app error rate and latency panels reuse Traefik metrics from S3. |
+| [D3 — Security & Auth](../../developer/D3-security-auth.md) | Internal (dashboard) | Authentik OIDC token issuance depends on cert-manager TLS health from S3. |
+
+**← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)** | **Previous: [S2 — Cluster & Node Health](S2-cluster-and-node-health.md)** | **Next: [S4 — Storage](S4-storage.md)**
