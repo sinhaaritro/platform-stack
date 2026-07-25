@@ -45,3 +45,25 @@ configMapGenerator:
         grafana_dashboard: "1"
       annotations:
         grafana_folder: "Executive"
+
+  - name: grafana-dashboard-networking
+    namespace: monitoring
+    files:
+      - sre/S3-networking.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: "SRE / Operations"
+
+  - name: grafana-dashboard-capacity-trends
+    namespace: monitoring
+    files:
+      - executive/E2-capacity-and-trends.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: "Executive"
