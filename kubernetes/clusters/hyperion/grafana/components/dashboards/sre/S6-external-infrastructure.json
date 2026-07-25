@@ -2857,26 +2857,6 @@
       "timezone": "browser",
       "to": "now"
     },
-    "title": "External Infrastructure",
-    "variables": [
-      {
-        "name": "__unbound",
-        "type": "textbox",
-        "hide": 2,
-        "skipUrlSync": true,
-        "current": {
-          "text": "",
-          "value": ""
-        },
-        "options": [
-          {
-            "text": "",
-            "value": "",
-            "selected": true
-          }
-        ],
-        "query": ""
-      }
-    ]
+    "title": "External Infrastructure"
   }
 }
