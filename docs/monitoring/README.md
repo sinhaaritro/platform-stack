@@ -96,8 +96,8 @@ Each Grafana folder maps to a **persona**. Access control is handled via **Authe
 
 | # | Dashboard | Purpose | Key Panels | Detail Doc |
 |---|-----------|---------|------------|------------|
-| E1 | **Platform Overview** | Single pane of glass for the entire platform | Service status map (all components), node count, total pods, cluster CPU/memory/disk gauges, active alerts count, certificate expiry countdown, backup SLA %, ingress request sparkline | [PLATFORM_OVERVIEW.md](executive/PLATFORM_OVERVIEW.md) |
-| E2 | **Capacity & Trends** | Growth tracking and budget forecasting | Storage growth (Longhorn + SeaweedFS) over 30/90d, database size trends, backup storage consumption, pod count trend, resource utilization trends with linear projection | [CAPACITY_AND_TRENDS.md](executive/CAPACITY_AND_TRENDS.md) |
+| E1 | **Platform Overview** | Single pane of glass for the entire platform | Service status map (all components), node count, total pods, cluster CPU/memory/disk gauges, active alerts count, certificate expiry countdown, backup SLA %, ingress request sparkline | [E1-platform-overview.md](executive/E1-platform-overview.md) |
+| E2 | **Capacity & Trends** | Growth tracking and budget forecasting | Storage growth (Longhorn + SeaweedFS) over 30/90d, database size trends, backup storage consumption, pod count trend, resource utilization trends with linear projection | [E2-capacity-and-trends.md](executive/E2-capacity-and-trends.md) |
 
 ---
 
@@ -108,12 +108,12 @@ Each Grafana folder maps to a **persona**. Access control is handled via **Authe
 
 | # | Dashboard | Purpose | Key Panels | Detail Doc |
 |---|-----------|---------|------------|------------|
-| S1 | **🔥 Backup & Disaster Recovery** | Full Velero visibility | Backup SLA %, failed backups (7d), schedule status & history, BSL/S3 storage health, restore test status, Velero error log stream | [BACKUP_AND_DISASTER_RECOVERY.md](sre/BACKUP_AND_DISASTER_RECOVERY.md) |
-| S2 | **Cluster & Node Health** | Kubernetes node + pod health (USE method) | Per-node CPU/memory/disk/network, pod distribution, pod restarts, system load, OOM kills, kubelet health | [CLUSTER_AND_NODE_HEALTH.md](sre/CLUSTER_AND_NODE_HEALTH.md) |
-| S3 | **Networking & Ingress** | Traefik, cert-manager, MetalLB, external-dns | Request rate/error rate/latency (RED), TLS cert expiry, certificate ready status, MetalLB pool usage, DNS sync status, Cloudflare tunnel health | [NETWORKING.md](sre/NETWORKING.md) |
-| S4 | **Storage** | Longhorn volumes + SeaweedFS object store | Volume health/capacity/IOPS/throughput, node disk space, replica count, SeaweedFS master/volume/filer status, bucket sizes, S3 request rate | [STORAGE.md](sre/STORAGE.md) |
-| S5 | **Monitoring Self-Health** | "Who watches the watchmen?" | Mimir ingestion rate/active series/query latency, Loki ingestion/errors, Alloy scrape target count/failures, Alertmanager notification rate/failures | [MONITORING_SELF_HEALTH.md](sre/MONITORING_SELF_HEALTH.md) |
-| S6 | **External Infrastructure** | Proxmox, AWS, Cloudflare, AdGuard, Netbird | Proxmox node/VM metrics, AWS S3 storage & cost, Cloudflare tunnels & threats, AdGuard DNS stats, Netbird peer status | [EXTERNAL_INFRASTRUCTURE.md](sre/EXTERNAL_INFRASTRUCTURE.md) |
+| S1 | **🔥 Backup & Disaster Recovery** | Full Velero visibility | Backup SLA %, failed backups (7d), schedule status & history, BSL/S3 storage health, restore test status, Velero error log stream | [S1-backup-and-disaster-recovery.md](sre/S1-backup-and-disaster-recovery.md) |
+| S2 | **Cluster & Node Health** | Kubernetes node + pod health (USE method) | Per-node CPU/memory/disk/network, pod distribution, pod restarts, system load, OOM kills, kubelet health | [S2-cluster-and-node-health.md](sre/S2-cluster-and-node-health.md) |
+| S3 | **Networking & Ingress** | Traefik, cert-manager, MetalLB, external-dns | Request rate/error rate/latency (RED), TLS cert expiry, certificate ready status, MetalLB pool usage, DNS sync status, Cloudflare tunnel health | [S3-networking.md](sre/S3-networking.md) |
+| S4 | **Storage** | Longhorn volumes + SeaweedFS object store | Volume health/capacity/IOPS/throughput, node disk space, replica count, SeaweedFS master/volume/filer status, bucket sizes, S3 request rate | [S4-storage.md](sre/S4-storage.md) |
+| S5 | **Monitoring Self-Health** | "Who watches the watchmen?" | Mimir ingestion rate/active series/query latency, Loki ingestion/errors, Alloy scrape target count/failures, Alertmanager notification rate/failures | [S5-monitoring-self-health.md](sre/S5-monitoring-self-health.md) |
+| S6 | **External Infrastructure** | Proxmox, AWS, Cloudflare, AdGuard, Netbird | Proxmox node/VM metrics, AWS S3 storage & cost, Cloudflare tunnels & threats, AdGuard DNS stats, Netbird peer status | [S6-external-infrastructure.md](sre/S6-external-infrastructure.md) |
 
 ---
 
@@ -124,9 +124,9 @@ Each Grafana folder maps to a **persona**. Access control is handled via **Authe
 
 | # | Dashboard | Purpose | Key Panels | Detail Doc |
 |---|-----------|---------|------------|------------|
-| D1 | **Application Health** | Per-app status for Immich, Obsidian, Copyparty, Podinfo | Pod status per app, API response time (via Traefik), error rate (5xx + app logs), storage usage per app PVC, restart history | [APPLICATION_HEALTH.md](developer/APPLICATION_HEALTH.md) |
-| D2 | **Log Explorer** | Centralized log search across all namespaces | Loki log panels with namespace/pod/container filters, error rate by namespace, log volume heatmap, pre-built queries for common patterns | [LOG_EXPLORER.md](developer/LOG_EXPLORER.md) |
-| D3 | **Security & Auth** | Authentik, Kyverno, sealed-secrets, external-secrets | Login rate/failed logins, active sessions, Kyverno policy violations, sealed-secrets controller health, external-secrets sync status | [SECURITY_AND_AUTH.md](developer/SECURITY_AND_AUTH.md) |
+| D1 | **Application Health** | Per-app status for Immich, Obsidian, Copyparty, Podinfo | Pod status per app, API response time (via Traefik), error rate (5xx + app logs), storage usage per app PVC, restart history | [D1-application-health.md](developer/D1-application-health.md) |
+| D2 | **Log Explorer** | Centralized log search across all namespaces | Loki log panels with namespace/pod/container filters, error rate by namespace, log volume heatmap, pre-built queries for common patterns | [D2-log-explorer.md](developer/D2-log-explorer.md) |
+| D3 | **Security & Auth** | Authentik, Kyverno, sealed-secrets, external-secrets | Login rate/failed logins, active sessions, Kyverno policy violations, sealed-secrets controller health, external-secrets sync status | [D3-security-auth.md](developer/D3-security-auth.md) |
 
 ---
 
@@ -138,8 +138,8 @@ Each Grafana folder maps to a **persona**. Access control is handled via **Authe
 
 | # | Dashboard | Purpose | Key Panels | Detail Doc |
 |---|-----------|---------|------------|------------|
-| B1 | **PostgreSQL** | PG14 + PG18 health (Authentik, Immich DBs) | Connections (active/idle), TPS, cache hit ratio, database sizes, deadlocks, replication lag, slow query log panel | [POSTGRESQL.md](dba/POSTGRESQL.md) |
-| B2 | **Cache & Document Stores** | Valkey (primary) + Redis (legacy, until removed) + CouchDB | Valkey: connected clients, memory usage, hit rate, evictions, commands/sec, latency. CouchDB: HTTP request rate, doc count, request latency. Redis: basic up/down + connection count (sunset indicator) | [CACHE_AND_DOCUMENT_STORES.md](dba/CACHE_AND_DOCUMENT_STORES.md) |
+| B1 | **PostgreSQL** | PG14 + PG18 health (Authentik, Immich DBs) | Connections (active/idle), TPS, cache hit ratio, database sizes, deadlocks, replication lag, slow query log panel | [B1-postgresql.md](dba/B1-postgresql.md) |
+| B2 | **Cache & Document Stores** | Valkey (primary) + Redis (legacy, until removed) + CouchDB | Valkey: connected clients, memory usage, hit rate, evictions, commands/sec, latency. CouchDB: HTTP request rate, doc count, request latency. Redis: basic up/down + connection count (sunset indicator) | [B2-cache-and-document-stores.md](dba/B2-cache-and-document-stores.md) |
 
 ---
 
@@ -174,19 +174,19 @@ We build Phase 1 first, then expand. Each module is a self-contained Grafana das
 |------|---------|
 | [README.md](README.md) | This file — vision, architecture, dashboard catalog, build phases |
 | [GRAFANA_IMPLEMENTATION.md](GRAFANA_IMPLEMENTATION.md) | Generic Grafana implementation: sidecar pattern, ConfigMap structure, Kustomize layout, folder annotations |
-| [sre/BACKUP_AND_DISASTER_RECOVERY.md](sre/BACKUP_AND_DISASTER_RECOVERY.md) | **S1** — Detailed panel-by-panel documentation, organized by tabs |
-| [sre/CLUSTER_AND_NODE_HEALTH.md](sre/CLUSTER_AND_NODE_HEALTH.md) | **S2** — Detailed panel-by-panel documentation, organized by tabs |
-| [executive/PLATFORM_OVERVIEW.md](executive/PLATFORM_OVERVIEW.md) | **E1** — Detailed panel-by-panel documentation (single-screen, no tabs) |
-| [sre/NETWORKING.md](sre/NETWORKING.md) | **S3** — Detailed panel-by-panel documentation, organized by tabs |
-| [sre/STORAGE.md](sre/STORAGE.md) | **S4** — Detailed panel-by-panel documentation, organized by tabs |
-| [sre/EXTERNAL_INFRASTRUCTURE.md](sre/EXTERNAL_INFRASTRUCTURE.md) | **S6** — Detailed panel-by-panel documentation, organized by rows |
-| [dba/POSTGRESQL.md](dba/POSTGRESQL.md) | **B1** — Detailed panel-by-panel documentation, organized by tabs |
-| [dba/CACHE_AND_DOCUMENT_STORES.md](dba/CACHE_AND_DOCUMENT_STORES.md) | **B2** — Detailed panel-by-panel documentation, organized by tabs |
-| [developer/APPLICATION_HEALTH.md](developer/APPLICATION_HEALTH.md) | **D1** — Detailed panel-by-panel documentation, organized by tabs |
-| [developer/SECURITY_AND_AUTH.md](developer/SECURITY_AND_AUTH.md) | **D3** — Detailed panel-by-panel documentation, organized by tabs |
-| [developer/LOG_EXPLORER.md](developer/LOG_EXPLORER.md) | **D2** — Detailed panel-by-panel documentation (single-screen sections) |
-| [sre/MONITORING_SELF_HEALTH.md](sre/MONITORING_SELF_HEALTH.md) | **S5** — Detailed panel-by-panel documentation, organized by tabs |
-| [executive/CAPACITY_AND_TRENDS.md](executive/CAPACITY_AND_TRENDS.md) | **E2** — Detailed panel-by-panel documentation (single-screen sections) |
+| [sre/S1-backup-and-disaster-recovery.md](sre/S1-backup-and-disaster-recovery.md) | **S1** — Detailed panel-by-panel documentation, organized by tabs |
+| [sre/S2-cluster-and-node-health.md](sre/S2-cluster-and-node-health.md) | **S2** — Detailed panel-by-panel documentation, organized by tabs |
+| [executive/E1-platform-overview.md](executive/E1-platform-overview.md) | **E1** — Detailed panel-by-panel documentation (single-screen, no tabs) |
+| [sre/S3-networking.md](sre/S3-networking.md) | **S3** — Detailed panel-by-panel documentation, organized by tabs |
+| [sre/S4-storage.md](sre/S4-storage.md) | **S4** — Detailed panel-by-panel documentation, organized by tabs |
+| [sre/S6-external-infrastructure.md](sre/S6-external-infrastructure.md) | **S6** — Detailed panel-by-panel documentation, organized by rows |
+| [dba/B1-postgresql.md](dba/B1-postgresql.md) | **B1** — Detailed panel-by-panel documentation, organized by tabs |
+| [dba/B2-cache-and-document-stores.md](dba/B2-cache-and-document-stores.md) | **B2** — Detailed panel-by-panel documentation, organized by tabs |
+| [developer/D1-application-health.md](developer/D1-application-health.md) | **D1** — Detailed panel-by-panel documentation, organized by tabs |
+| [developer/D3-security-auth.md](developer/D3-security-auth.md) | **D3** — Detailed panel-by-panel documentation, organized by tabs |
+| [developer/D2-log-explorer.md](developer/D2-log-explorer.md) | **D2** — Detailed panel-by-panel documentation (single-screen sections) |
+| [sre/S5-monitoring-self-health.md](sre/S5-monitoring-self-health.md) | **S5** — Detailed panel-by-panel documentation, organized by tabs |
+| [executive/E2-capacity-and-trends.md](executive/E2-capacity-and-trends.md) | **E2** — Detailed panel-by-panel documentation (single-screen sections) |
 
 ---
 

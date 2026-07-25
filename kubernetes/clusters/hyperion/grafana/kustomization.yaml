@@ -14,6 +14,5 @@ components:
   - ../../../apps/infrastructure/grafana/components/resource-limits
   - ../../../apps/infrastructure/grafana/components/ingress
   - ./components/ingress
-  - ./components/dashboard-backup-dr
-  - ./components/dashboard-external-infra
+  - ./components/dashboards
   # - ../../../apps/infrastructure/grafana/components/maintenance

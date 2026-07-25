@@ -3225,12 +3225,13 @@
     "liveNow": false,
     "preload": false,
     "tags": [
-      "velero",
+      "sre",
+      "s1",
       "backup",
       "dr"
     ],
     "timeSettings": {
-      "autoRefresh": "",
+      "autoRefresh": "30s",
       "autoRefreshIntervals": [
         "5s",
         "10s",
@@ -3249,7 +3250,14 @@
       "timezone": "browser",
       "to": "now"
     },
-    "title": "Backup & DR",
-    "variables": []
+    "title": "Backup & Disaster Recovery",
+    "variables": [
+      {
+        "name": "__unbound",
+        "type": "textbox",
+        "hide": 2,
+        "skipUrlSync": true
+      }
+    ]
   }
 }

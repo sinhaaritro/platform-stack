@@ -2833,6 +2833,7 @@
     "liveNow": false,
     "preload": false,
     "tags": [
+      "sre",
       "external-infra",
       "s6"
     ],
@@ -2856,7 +2857,14 @@
       "timezone": "browser",
       "to": "now"
     },
-    "title": "External Infrastructure (S6)",
-    "variables": []
+    "title": "External Infrastructure",
+    "variables": [
+      {
+        "name": "__unbound",
+        "type": "textbox",
+        "hide": 2,
+        "skipUrlSync": true
+      }
+    ]
   }
 }
