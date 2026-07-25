@@ -10,8 +10,15 @@
 *   [ ] ...
 
 ## Feature Ideas
+*   [ ] **Add Dashboards** — Get monitoring dsahboards up and running.
 *   [ ] **Authentik SSO for Obsidian Web** — Add forward auth proxy via Authentik since linuxserver/obsidian has no OAuth. Required before exposing via Cloudflare Tunnel. Implement using Authentik blueprints-as-code.
-*   [ ] **Migrate remaining apps to Let's Encrypt** — Move Immich, SeaweedFS, Loki, Mimir, Longhorn, and Traefik dashboard to the new wildcard cert system under `*.ruth.aritrosinha.dpdns.org`.
+*   [ ] **New 30day backup schedule for SSL cert** — Get new backup shedule for SSL cert.
+*   [ ] **Add Cloudflare** — Add in opentofu to control the dns, nameservers to cloudflare.
+*   [ ] **LXC** — Add the adguard as LXC from opentofu.
+*   [ ] **Ansible role for dev vms** — Get new roles, for working vm like flutter, react
+*   [ ] **Ansible Visualization** — Get the new ansible role visualization
+*   [ ] **Opentofu Visualization** — Get the new opentofu infra visualization.
+*   [ ] **Kubernets Visualization** — Get the new kubernetes cluster visualization.
 *   [ ] ...
 
 ## Bugs
