@@ -2,7 +2,7 @@
 
 > **One platform. Multiple viewpoints.**
 
-This is a single, unified Grafana deployment organized into **persona-based folders**. This is a entrprise grade solution to monioring, catering to all different stakeholders that may be involved in the running and management of the platform. Each folder will contain dashboards tailored to that specific persona.
+This is a single, unified Grafana deployment organized into **persona-based folders**. An enterprise-grade solution to monitoring, catering to all stakeholders involved in running and managing the platform. Each folder contains dashboards tailored to that specific persona.
 
 ---
 
@@ -59,9 +59,13 @@ This is a single, unified Grafana deployment organized into **persona-based fold
 
 ---
 
-## Grafana Folder & Dashboard Catalog
+## Dashboard Catalog
 
-Each Grafana folder maps to a **persona**. Each dashboard is a ConfigMap with the `grafana_dashboard: "1"` label (matching your existing sidecar pattern). Access control is handled via **Authentik → Grafana RBAC** — different Authentik groups see different folders.
+Each Grafana folder maps to a **persona**. Access control is handled via **Authentik → Grafana RBAC** — different Authentik groups see different folders.
+
+> For implementation details (ConfigMap pattern, sidecar configuration, Kustomize structure), see [GRAFANA_IMPLEMENTATION.md](GRAFANA_IMPLEMENTATION.md).
+
+---
 
 ### 📁 Portal (3 dashboards)
 
@@ -70,7 +74,7 @@ Each Grafana folder maps to a **persona**. Each dashboard is a ConfigMap with th
 > **Refresh:** 5 min. Static links + live status indicators.
 
 | # | Dashboard | Audience | Content |
-|---|-----------|----------|--------|
+|---|-----------|----------|---------|
 | P1 | **Home — Public** | Generic end users (family, friends) | App links only: Immich, Obsidian, Copyparty. Clean card layout with app icons, descriptions, and direct URLs. Status indicators (🟢/🔴) showing if each app is reachable. No admin links, no metrics. |
 | P2 | **Home — Trusted** | Close/known users (household, power users) | Everything in P1 **plus**: Weather widget (via JSON API datasource or iframe), smart home status panel (lights on/off, fan speed — via Home Assistant API or MQTT metrics), room-by-room IoT status, quick actions links. |
 | P3 | **Home — Admin** | You (platform admin) | Everything in P2 **plus**: Links to all Grafana dashboards (Executive, SRE, Developer, DBA), cluster health summary strip (node count, CPU, alerts), recent alert feed, backup SLA %, quick-links to Traefik dashboard, Longhorn UI, Grafana Explore. This is your personal command center. |
@@ -90,10 +94,10 @@ Each Grafana folder maps to a **persona**. Each dashboard is a ConfigMap with th
 > **Audience:** You (platform owner), stakeholders who want a 10-second health check.
 > **Refresh:** 1 min. No knobs to turn, no query builders. Pure status.
 
-| # | Dashboard | Purpose | Key Panels |
-|---|-----------|---------|------------|
-| E1 | **Platform Overview** | Single pane of glass for the entire platform | Service status map (all components), node count, total pods, cluster CPU/memory/disk gauges, active alerts count, certificate expiry countdown, backup SLA %, ingress request sparkline |
-| E2 | **Capacity & Trends** | Growth tracking and budget forecasting | Storage growth (Longhorn + SeaweedFS) over 30/90d, database size trends, backup storage consumption, pod count trend, resource utilization trends with linear projection |
+| # | Dashboard | Purpose | Key Panels | Detail Doc |
+|---|-----------|---------|------------|------------|
+| E1 | **Platform Overview** | Single pane of glass for the entire platform | Service status map (all components), node count, total pods, cluster CPU/memory/disk gauges, active alerts count, certificate expiry countdown, backup SLA %, ingress request sparkline | [PLATFORM_OVERVIEW.md](executive/PLATFORM_OVERVIEW.md) |
+| E2 | **Capacity & Trends** | Growth tracking and budget forecasting | Storage growth (Longhorn + SeaweedFS) over 30/90d, database size trends, backup storage consumption, pod count trend, resource utilization trends with linear projection | [CAPACITY_AND_TRENDS.md](executive/CAPACITY_AND_TRENDS.md) |
 
 ---
 
@@ -102,14 +106,14 @@ Each Grafana folder maps to a **persona**. Each dashboard is a ConfigMap with th
 > **Audience:** You wearing the ops hat. On-call. Troubleshooting. Infrastructure.
 > **Refresh:** 30s. Interactive. Drill-down capable.
 
-| # | Dashboard | Purpose | Key Panels |
-|---|-----------|---------|------------|
-| S1 | [**🔥 Backup & Disaster Recovery**](BACKUP_AND_DISASTER_RECOVERY.md) | Full Velero visibility. | Backup SLA %, failed backups (7d), schedule status & history, BSL/S3 storage health, restore test status, Velero error log stream *(see [BACKUP_AND_DISASTER_RECOVERY.md](BACKUP_AND_DISASTER_RECOVERY.md))* |
-| S2 | **Cluster & Node Health** | Kubernetes node + pod health (USE method) | Per-node CPU/memory/disk/network, pod distribution, pod restarts, system load, OOM kills, kubelet health |
-| S3 | **Networking & Ingress** | Traefik, cert-manager, MetalLB, external-dns | Request rate/error rate/latency (RED), TLS cert expiry, certificate ready status, MetalLB pool usage, DNS sync status, Cloudflare tunnel health |
-| S4 | **Storage** | Longhorn volumes + SeaweedFS object store | Volume health/capacity/IOPS/throughput, node disk space, replica count, SeaweedFS master/volume/filer status, bucket sizes, S3 request rate |
-| S5 | **Monitoring Self-Health** | "Who watches the watchmen?" | Mimir ingestion rate/active series/query latency, Loki ingestion/errors, Alloy scrape target count/failures, Alertmanager notification rate/failures |
-| S6 | [**External Infrastructure**](EXTERNAL_INFRASTRUCTURE.md) | Proxmox, AWS, Cloudflare, AdGuard, Netbird | Proxmox node/VM metrics, AWS S3 storage & cost, Cloudflare tunnels & threats, AdGuard DNS stats, Netbird peer status *(see [EXTERNAL_INFRASTRUCTURE.md](EXTERNAL_INFRASTRUCTURE.md))* |
+| # | Dashboard | Purpose | Key Panels | Detail Doc |
+|---|-----------|---------|------------|------------|
+| S1 | **🔥 Backup & Disaster Recovery** | Full Velero visibility | Backup SLA %, failed backups (7d), schedule status & history, BSL/S3 storage health, restore test status, Velero error log stream | [BACKUP_AND_DISASTER_RECOVERY.md](sre/BACKUP_AND_DISASTER_RECOVERY.md) |
+| S2 | **Cluster & Node Health** | Kubernetes node + pod health (USE method) | Per-node CPU/memory/disk/network, pod distribution, pod restarts, system load, OOM kills, kubelet health | [CLUSTER_AND_NODE_HEALTH.md](sre/CLUSTER_AND_NODE_HEALTH.md) |
+| S3 | **Networking & Ingress** | Traefik, cert-manager, MetalLB, external-dns | Request rate/error rate/latency (RED), TLS cert expiry, certificate ready status, MetalLB pool usage, DNS sync status, Cloudflare tunnel health | [NETWORKING.md](sre/NETWORKING.md) |
+| S4 | **Storage** | Longhorn volumes + SeaweedFS object store | Volume health/capacity/IOPS/throughput, node disk space, replica count, SeaweedFS master/volume/filer status, bucket sizes, S3 request rate | [STORAGE.md](sre/STORAGE.md) |
+| S5 | **Monitoring Self-Health** | "Who watches the watchmen?" | Mimir ingestion rate/active series/query latency, Loki ingestion/errors, Alloy scrape target count/failures, Alertmanager notification rate/failures | [MONITORING_SELF_HEALTH.md](sre/MONITORING_SELF_HEALTH.md) |
+| S6 | **External Infrastructure** | Proxmox, AWS, Cloudflare, AdGuard, Netbird | Proxmox node/VM metrics, AWS S3 storage & cost, Cloudflare tunnels & threats, AdGuard DNS stats, Netbird peer status | [EXTERNAL_INFRASTRUCTURE.md](sre/EXTERNAL_INFRASTRUCTURE.md) |
 
 ---
 
@@ -118,11 +122,11 @@ Each Grafana folder maps to a **persona**. Each dashboard is a ConfigMap with th
 > **Audience:** You wearing the developer hat. Application behavior. Logs. Debugging.
 > **Refresh:** 30s. Log search. Error investigation.
 
-| # | Dashboard | Purpose | Key Panels |
-|---|-----------|---------|------------|
-| D1 | **Application Health** | Per-app status for Immich, Obsidian, Copyparty, Podinfo | Pod status per app, API response time (via Traefik), error rate (5xx + app logs), storage usage per app PVC, restart history |
-| D2 | **Log Explorer** | Centralized log search across all namespaces | Loki log panels with namespace/pod/container filters, error rate by namespace, log volume heatmap, pre-built queries for common patterns |
-| D3 | **Security & Auth** | Authentik, Kyverno, sealed-secrets, external-secrets | Login rate/failed logins, active sessions, Kyverno policy violations, sealed-secrets controller health, external-secrets sync status |
+| # | Dashboard | Purpose | Key Panels | Detail Doc |
+|---|-----------|---------|------------|------------|
+| D1 | **Application Health** | Per-app status for Immich, Obsidian, Copyparty, Podinfo | Pod status per app, API response time (via Traefik), error rate (5xx + app logs), storage usage per app PVC, restart history | [APPLICATION_HEALTH.md](developer/APPLICATION_HEALTH.md) |
+| D2 | **Log Explorer** | Centralized log search across all namespaces | Loki log panels with namespace/pod/container filters, error rate by namespace, log volume heatmap, pre-built queries for common patterns | [LOG_EXPLORER.md](developer/LOG_EXPLORER.md) |
+| D3 | **Security & Auth** | Authentik, Kyverno, sealed-secrets, external-secrets | Login rate/failed logins, active sessions, Kyverno policy violations, sealed-secrets controller health, external-secrets sync status | [SECURITY_AND_AUTH.md](developer/SECURITY_AND_AUTH.md) |
 
 ---
 
@@ -132,20 +136,20 @@ Each Grafana folder maps to a **persona**. Each dashboard is a ConfigMap with th
 > **Refresh:** 15s. Deep metrics.
 > **Note:** Valkey is replacing Redis (ot-container-kit). Redis remains temporarily for hidden dependencies but will be removed once the full system is functional. The dashboard tracks Valkey as the primary cache layer.
 
-| # | Dashboard | Purpose | Key Panels |
-|---|-----------|---------|------------|
-| B1 | **PostgreSQL** | PG14 + PG18 health (Authentik, Immich DBs) | Connections (active/idle), TPS, cache hit ratio, database sizes, deadlocks, replication lag, slow query log panel |
-| B2 | **Cache & Document Stores** | Valkey (primary) + Redis (legacy, until removed) + CouchDB | Valkey: connected clients, memory usage, hit rate, evictions, commands/sec, latency. CouchDB: HTTP request rate, doc count, request latency. Redis: basic up/down + connection count (sunset indicator) |
+| # | Dashboard | Purpose | Key Panels | Detail Doc |
+|---|-----------|---------|------------|------------|
+| B1 | **PostgreSQL** | PG14 + PG18 health (Authentik, Immich DBs) | Connections (active/idle), TPS, cache hit ratio, database sizes, deadlocks, replication lag, slow query log panel | [POSTGRESQL.md](dba/POSTGRESQL.md) |
+| B2 | **Cache & Document Stores** | Valkey (primary) + Redis (legacy, until removed) + CouchDB | Valkey: connected clients, memory usage, hit rate, evictions, commands/sec, latency. CouchDB: HTTP request rate, doc count, request latency. Redis: basic up/down + connection count (sunset indicator) | [CACHE_AND_DOCUMENT_STORES.md](dba/CACHE_AND_DOCUMENT_STORES.md) |
 
 ---
 
-## Complete Build Order
+## Build Phases
 
-We build Module 1 first, then expand. Each module is a self-contained Grafana dashboard JSON delivered as a Kustomize ConfigMap.
+We build Phase 1 first, then expand. Each module is a self-contained Grafana dashboard JSON delivered as a Kustomize ConfigMap.
 
 | Phase | Module | Dashboard ID | Priority | Dependencies |
 |-------|--------|-------------|----------|-------------|
-| **Phase 1** | 🔥 **Backup & DR** | S1 | **NOW** | Add Velero scrape to Alloy, add alert rules to Mimir Ruler, stub Alertmanager receivers |
+| **Phase 1** | Backup & DR | S1 | NOW | Add Velero scrape to Alloy, add alert rules to Mimir Ruler, stub Alertmanager receivers |
 | **Phase 2** | Cluster & Node Health | S2 | High | Node Exporter data already flowing ✅ |
 | | Platform Overview | E1 | High | Depends on S1 + S2 data being available |
 | **Phase 3** | Storage | S4 | High | Add Longhorn metrics to Alloy, fix empty SeaweedFS dashboard |
@@ -164,52 +168,25 @@ We build Module 1 first, then expand. Each module is a self-contained Grafana da
 
 ---
 
-## Grafana Folder Structure (Kustomize)
+## Documentation Index
 
-Each dashboard is a ConfigMap in the `monitoring` namespace. The Grafana sidecar picks them up via the `grafana_dashboard: "1"` label. Folder assignment is done via an annotation.
-
-```
-kubernetes/apps/infrastructure/grafana/components/dashboards/
-├── kustomization.yaml                # Lists all dashboard ConfigMaps
-├── dashboard-node-exporter.yaml      # (existing)
-├── dashboard-loki.yaml               # (existing)
-├── dashboard-seaweedfs.yaml          # (existing — currently empty {})
-├── dashboard-backup-dr.yaml          # Phase 1 (S1)
-├── dashboard-cluster-health.yaml     # Phase 2 (S2)
-├── dashboard-platform-overview.yaml  # Phase 2 (E1)
-├── dashboard-storage.yaml            # Phase 3 (S4)
-├── dashboard-networking.yaml         # Phase 3 (S3)
-├── dashboard-postgresql.yaml         # Phase 4 (B1)
-├── dashboard-cache-docstores.yaml    # Phase 4 (B2)
-├── dashboard-app-health.yaml         # Phase 5 (D1)
-├── dashboard-security-auth.yaml      # Phase 5 (D3)
-├── dashboard-log-explorer.yaml       # Phase 6 (D2)
-├── dashboard-monitoring-health.yaml  # Phase 6 (S5)
-├── dashboard-capacity-trends.yaml    # Phase 6 (E2)
-├── dashboard-external-infra.yaml     # Phase 7 (S6)
-├── dashboard-portal-admin.yaml       # Phase 8 (P3)
-├── dashboard-portal-trusted.yaml     # Phase 8 (P2)
-└── dashboard-portal-public.yaml      # Phase 8 (P1)
-```
-
-Each ConfigMap uses the folder annotation to organize within Grafana:
-
-```yaml
-apiVersion: kustomize.config.k8s.io/v1alpha1
-kind: Component
-
-configMapGenerator:
-  - name: grafana-dashboard-backup-dr
-    namespace: monitoring
-    files:
-      - backup-dr.json # ← File containing the JSON
-    options:
-      disableNameSuffixHash: true
-      labels:
-        grafana_dashboard: "1"
-      annotations:
-        grafana_folder: "SRE / Operations" # ← Grafana folder assignment
-```
+| File | Content |
+|------|---------|
+| [README.md](README.md) | This file — vision, architecture, dashboard catalog, build phases |
+| [GRAFANA_IMPLEMENTATION.md](GRAFANA_IMPLEMENTATION.md) | Generic Grafana implementation: sidecar pattern, ConfigMap structure, Kustomize layout, folder annotations |
+| [sre/BACKUP_AND_DISASTER_RECOVERY.md](sre/BACKUP_AND_DISASTER_RECOVERY.md) | **S1** — Detailed panel-by-panel documentation, organized by tabs |
+| [sre/CLUSTER_AND_NODE_HEALTH.md](sre/CLUSTER_AND_NODE_HEALTH.md) | **S2** — Detailed panel-by-panel documentation, organized by tabs |
+| [executive/PLATFORM_OVERVIEW.md](executive/PLATFORM_OVERVIEW.md) | **E1** — Detailed panel-by-panel documentation (single-screen, no tabs) |
+| [sre/NETWORKING.md](sre/NETWORKING.md) | **S3** — Detailed panel-by-panel documentation, organized by tabs |
+| [sre/STORAGE.md](sre/STORAGE.md) | **S4** — Detailed panel-by-panel documentation, organized by tabs |
+| [sre/EXTERNAL_INFRASTRUCTURE.md](sre/EXTERNAL_INFRASTRUCTURE.md) | **S6** — Detailed panel-by-panel documentation, organized by rows |
+| [dba/POSTGRESQL.md](dba/POSTGRESQL.md) | **B1** — Detailed panel-by-panel documentation, organized by tabs |
+| [dba/CACHE_AND_DOCUMENT_STORES.md](dba/CACHE_AND_DOCUMENT_STORES.md) | **B2** — Detailed panel-by-panel documentation, organized by tabs |
+| [developer/APPLICATION_HEALTH.md](developer/APPLICATION_HEALTH.md) | **D1** — Detailed panel-by-panel documentation, organized by tabs |
+| [developer/SECURITY_AND_AUTH.md](developer/SECURITY_AND_AUTH.md) | **D3** — Detailed panel-by-panel documentation, organized by tabs |
+| [developer/LOG_EXPLORER.md](developer/LOG_EXPLORER.md) | **D2** — Detailed panel-by-panel documentation (single-screen sections) |
+| [sre/MONITORING_SELF_HEALTH.md](sre/MONITORING_SELF_HEALTH.md) | **S5** — Detailed panel-by-panel documentation, organized by tabs |
+| [executive/CAPACITY_AND_TRENDS.md](executive/CAPACITY_AND_TRENDS.md) | **E2** — Detailed panel-by-panel documentation (single-screen sections) |
 
 ---
 

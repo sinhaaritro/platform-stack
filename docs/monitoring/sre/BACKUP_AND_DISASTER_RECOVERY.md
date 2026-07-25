@@ -1,8 +1,19 @@
-## S1 - Backup & Disaster Recovery
+# S1 — Backup & Disaster Recovery
+
+| | |
+|---|---|
+| **Folder** | SRE / Operations |
+| **Dashboard ID** | S1 |
+| **Refresh** | 30s |
+| **Audience** | You wearing the ops hat — on-call, troubleshooting, DR validation |
 
 > **Purpose:** Comprehensive visibility into Velero backup execution, storage target health, schedule compliance, and recovery point validation.
 
-### Data Flow for Velero Metrics
+**← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)**
+
+---
+
+## Data Flow
 
 ```
 Velero Server (port 8085, /metrics)
@@ -17,13 +28,15 @@ Velero Server (port 8085, /metrics)
 > [!WARNING]
 > **Blocker:** Your Alloy `custom-config` component does NOT currently scrape Velero. The ServiceMonitor exists but Alloy doesn't consume ServiceMonitors — it uses `discovery.relabel` + `prometheus.scrape`. We need to add a Velero scrape block to the Alloy config before any Velero dashboard will show data.
 
-### Dashboard Layout: S1 — Backup & Disaster Recovery
+---
+
+## Dashboard Layout
 
 The dashboard is organized into **6 tabs** (collapsible). An operator opens the dashboard and sees Tab 1 immediately — "are backups healthy?" If the answer is no, they expand tabs below to diagnose.
 
 ---
 
-#### Tab 1: Health at a Glance
+### Tab 1: Health at a Glance
 
 > **Design:** 5 stat panels in a horizontal strip. Green/yellow/red thresholds. No scrolling needed.
 
@@ -37,7 +50,7 @@ The dashboard is organized into **6 tabs** (collapsible). An operator opens the 
 
 ---
 
-#### Tab 2: Per-Schedule Status
+### Tab 2: Per-Schedule Status
 
 > **Design:** Table + timeline. The table shows the current state of each schedule. The timeline shows historical pass/fail.
 
@@ -48,12 +61,12 @@ The dashboard is organized into **6 tabs** (collapsible). An operator opens the 
 | **Backup Duration Trend** | Time series (lines, per schedule) | `velero_backup_duration_seconds{schedule=~".+"}` | Performance degradation tracking. If `daily-security` normally takes 2min but now takes 20min, your storage backend is degraded. Also useful for scheduling: avoid overlap between the 21:00 and 21:30 schedules. |
 | **Backup Size Trend** | Time series (lines, per schedule) | `velero_backup_items_total{schedule=~".+"}` | Capacity planning. "Immich metadata backups are growing 15% monthly. At this rate, I need to increase S3 budget by Q3." |
 
-> [NOTE]
-> For Schedule Status Table, to have non binary values then we will need to modify kube-state-metric to scrape values. But the last failed backup can be found at Failed Backups (7d), Backup SLA %, Backup History Timeline, Items Backed Up vs Errors, Velero Error Log Stream, Firing Alerts Table panel. So we decided to keep it simple here. The question is does this pass the crieteria and target of this whole group, dashboard. And make sense in removing the info from the monitoring feature prospective?
+> [!NOTE]
+> For Schedule Status Table, to have non-binary values then we will need to modify kube-state-metric to scrape values. But the last failed backup can be found at Failed Backups (7d), Backup SLA %, Backup History Timeline, Items Backed Up vs Errors, Velero Error Log Stream, Firing Alerts Table panel. So we decided to keep it simple here. The question is does this pass the criteria and target of this whole group, dashboard. And make sense in removing the info from the monitoring feature perspective?
 
 ---
 
-#### Tab 3: Backup Storage Health
+### Tab 3: Backup Storage Health
 
 > **Design:** Focuses on the BSL (Backup Storage Location) — the S3 targets. If storage is broken, ALL backups fail.
 
@@ -66,9 +79,9 @@ The dashboard is organized into **6 tabs** (collapsible). An operator opens the 
 
 ---
 
-#### Tab 4: Restore Readiness
+### Tab 4: Restore Readiness
 
-> **Design:** Enterprise DR isn't just "do backups run?" — it's "can we actually recover?" This Tab answers the second question.
+> **Design:** Enterprise DR isn't just "do backups run?" — it's "can we actually recover?" This tab answers the second question.
 
 | Panel | Type | Query | Rationale |
 |-------|------|-------|-----------|
@@ -79,7 +92,7 @@ The dashboard is organized into **6 tabs** (collapsible). An operator opens the 
 
 ---
 
-#### Tab 5: Velero Operational Health
+### Tab 5: Velero Operational Health
 
 > **Design:** Monitor the backup engine itself. If Velero is unhealthy, all panels above become meaningless.
 
@@ -87,13 +100,13 @@ The dashboard is organized into **6 tabs** (collapsible). An operator opens the 
 |-------|------|-------|-----------|
 | **Velero Server Status** | Stat (up/down) | `up{job="velero"}` | Is the Velero controller pod running and serving metrics? Down = no backups, no restores, no validation. |
 | **Node Agent Status** | Multi-stat (per node) | `kube_pod_status_phase{namespace="backup", pod=~"node-agent.*"}` | Node agents run on each K8s node and handle file-level backups (`defaultVolumesToFsBackup: true`). Your obsidian, security, and immich schedules use this. If a node agent is down on the node where the PVC lives, that PVC's backup silently fails. |
-| **Velero Error Log Stream** | Logs panel | Loki: `{namespace="backup", container="velero"} \|= "level=error" or \|= "error"` | Real-time error stream. This is where you'd see the actual root cause of your failed backups — e.g., "AccessDenied", "connection refused", "context deadline exceeded". |
-| **Node Agent Log Stream** | Logs panel | Loki: `{namespace="backup", container="node-agent"} \|= "error"` | File-level backup errors. Kopia encryption issues, filesystem permission errors, etc. |
+| **Velero Error Log Stream** | Logs panel | Loki: `{namespace="backup", container="velero"} |= "level=error" or |= "error"` | Real-time error stream. This is where you'd see the actual root cause of your failed backups — e.g., "AccessDenied", "connection refused", "context deadline exceeded". |
+| **Node Agent Log Stream** | Logs panel | Loki: `{namespace="backup", container="node-agent"} |= "error"` | File-level backup errors. Kopia encryption issues, filesystem permission errors, etc. |
 | **Velero Pod Restarts** | Time series | `kube_pod_container_status_restarts_total{namespace="backup"}` | CrashLooping Velero = intermittent backup success. If restart count is climbing, the controller has a stability issue. |
 
 ---
 
-#### Tab 6: Active Alerts
+### Tab 6: Active Alerts
 
 > **Design:** Shows all currently firing backup-related alerts. Backed by Mimir Ruler → Alertmanager.
 
@@ -101,7 +114,7 @@ The dashboard is organized into **6 tabs** (collapsible). An operator opens the 
 |-------|------|--------|-----------|
 | **Firing Alerts Table** | Table | Alertmanager datasource, filtered to `namespace="backup"` or `alertgroup="velero"` | Single pane for all active backup issues. Color-coded by severity (critical/warning/info). |
 
-##### Alert Rules to Configure (Mimir Ruler)
+#### Alert Rules (Mimir Ruler)
 
 | Alert Name | PromQL Condition | For | Severity | Description |
 |------------|-----------------|-----|----------|-------------|
@@ -114,3 +127,5 @@ The dashboard is organized into **6 tabs** (collapsible). An operator opens the 
 | `VeleroServerDown` | `up{job="velero"} == 0` | 2m | **Critical** | Velero server is down. All backup/restore operations are halted. |
 
 ---
+
+**← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)** | **Next: [S2 — Cluster & Node Health](CLUSTER_AND_NODE_HEALTH.md)**

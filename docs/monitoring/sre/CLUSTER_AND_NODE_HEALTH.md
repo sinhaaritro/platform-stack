@@ -1,10 +1,19 @@
-## S2 — Cluster & Node Health
+# S2 — Cluster & Node Health
 
-**Folder:** SRE / Operations
-**Refresh:** 30s
-**Audience:** You wearing the ops hat — on-call, troubleshooting, capacity watch.
+| | |
+|---|---|
+| **Folder** | SRE / Operations |
+| **Dashboard ID** | S2 |
+| **Refresh** | 30s |
+| **Audience** | You wearing the ops hat — on-call, troubleshooting, capacity watch |
 
-### Data Flow for Node/Pod Metrics
+> **Purpose:** Kubernetes node and pod health using the USE method (Utilization, Saturation, Errors). Covers fleet-level CPU/memory/disk/network, pod distribution and restarts, OOM kills, and kubelet health — everything between "the hardware" and "the application."
+
+**← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)**
+
+---
+
+## Data Flow
 
 ```
 node-exporter (DaemonSet, port 9100/metrics)   ← already scraped ✅
@@ -27,13 +36,15 @@ kubelet /metrics/cadvisor (per-node, :10250)   ← NEEDS TO BE ADDED
 >
 > Without these two, S2 can still ship with node-level panels fully populated, but pod-level panels will be empty. Recommend adding both scrape blocks as the first task of this phase — same pattern as the Velero blocker in Phase 1.
 
-### Dashboard Layout: S2 — Cluster & Node Health
+---
+
+## Dashboard Layout
 
 Organized into **5 tabs**, following the same "glance first, drill down after" pattern as S1.
 
 ---
 
-#### Tab 1: Fleet Health at a Glance
+### Tab 1: Fleet Health at a Glance
 
 > **Design:** Stat strip, identical philosophy to S1 Tab 1 — an operator should know if the cluster is fine within 5 seconds.
 
@@ -47,7 +58,7 @@ Organized into **5 tabs**, following the same "glance first, drill down after" p
 
 ---
 
-#### Tab 2: Per-Node Deep Dive
+### Tab 2: Per-Node Deep Dive
 
 > **Design:** A table for at-a-glance comparison across nodes, plus time series for trend-spotting on any single node.
 
@@ -55,13 +66,13 @@ Organized into **5 tabs**, following the same "glance first, drill down after" p
 |-------|------|-------|-----------|
 | **Node Summary Table** | Table | `kube_node_info` joined with `node_load1`, CPU %, memory %, disk % per node (via `$__cell` transforms or multi-query table panel) — columns: Node, Ready, CPU %, Mem %, Disk %, Load1, Pod Count, Kernel Version | The "which node is the problem child" view. Sortable by any column — instantly spot the one node running hot. |
 | **Per-Node CPU/Memory** | Time series (one line per node) | `rate(node_cpu_seconds_total{mode!="idle"}[5m])` and `node_memory_MemAvailable_bytes` grouped by `instance` | Trend over time per node — useful to correlate a node's degradation with when a specific workload landed on it. |
-| **Per-Node Disk Space** | Time series (one line per node) | `node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"}` per node/mount | Disk exhaustion is one of the most common causes of node NotReady. Watch this alongside Longhorn/SeaweedFS panels in S4 (Phase 3). |
+| **Per-Node Disk Space** | Time series (one line per node) | `node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"}` per node/mount | Disk exhaustion is one of the most common causes of node NotReady. Watch this alongside Longhorn/SeaweedFS panels in [S4 — Storage](STORAGE.md) (Phase 3). |
 | **Per-Node Network I/O** | Time series (rx/tx per node) | `rate(node_network_receive_bytes_total[5m])`, `rate(node_network_transmit_bytes_total[5m])` | Spot a node saturating its NIC — common cause of intermittent pod-to-pod timeouts that look like application bugs. |
 | **System Load (1/5/15m)** | Time series (per node) | `node_load1`, `node_load5`, `node_load15` | Classic Linux health signal; a load average consistently above core count means the node is CPU-saturated even if the CPU % gauge looks moderate (I/O wait counts too). |
 
 ---
 
-#### Tab 3: Pod Health & Distribution
+### Tab 3: Pod Health & Distribution
 
 > **Design:** Depends on the kube-state-metrics blocker above. This tab answers "are workloads landing evenly and staying up?"
 
@@ -74,7 +85,7 @@ Organized into **5 tabs**, following the same "glance first, drill down after" p
 
 ---
 
-#### Tab 4: Kubelet & System Health
+### Tab 4: Kubelet & System Health
 
 > **Design:** "Is the container runtime and node agent itself healthy?" — one level below pods.
 
@@ -87,7 +98,7 @@ Organized into **5 tabs**, following the same "glance first, drill down after" p
 
 ---
 
-#### Tab 5: Active Alerts
+### Tab 5: Active Alerts
 
 > **Design:** Same pattern as S1 Tab 6 — a single table of currently firing cluster/node alerts, backed by Mimir Ruler → Alertmanager.
 
@@ -95,10 +106,10 @@ Organized into **5 tabs**, following the same "glance first, drill down after" p
 |-------|------|--------|-----------|
 | **Firing Alerts Table** | Table | Alertmanager datasource, filtered to `alertgroup="cluster"` or `alertgroup="node"` | Single pane for active infrastructure issues, color-coded by severity. |
 
-##### Alert Rules to Configure (Mimir Ruler)
+#### Alert Rules (Mimir Ruler)
 
 | Alert Name | PromQL Condition | For | Severity | Description |
-|------------|-------------------|-----|----------|-------------|
+|------------|------------------|-----|----------|-------------|
 | `NodeNotReady` | `kube_node_status_condition{condition="Ready", status="true"} == 0` | 5m | **Critical** | A node has dropped out of Ready state. Workloads scheduled there may be unreachable. |
 | `NodeHighCPU` | `100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85` | 10m | **Warning** | Sustained high CPU on a single node — right-size or rebalance workloads. |
 | `NodeHighMemory` | `(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 0.85` | 10m | **Warning** | Sustained high memory pressure — risk of OOM kills or node instability. |
@@ -108,3 +119,5 @@ Organized into **5 tabs**, following the same "glance first, drill down after" p
 | `KubeletDown` | `up{job="kubelet"} == 0` | 2m | **Critical** | Kubelet on a node is unreachable — node health reporting has stopped. |
 
 ---
+
+**← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)** | **Previous: [S1 — Backup & DR](BACKUP_AND_DISASTER_RECOVERY.md)** | **Next: [E1 — Platform Overview](../executive/PLATFORM_OVERVIEW.md)**

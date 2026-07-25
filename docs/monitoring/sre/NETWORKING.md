@@ -1,14 +1,19 @@
-## Networking & Ingress (Dashboard S3)
+# S3 — Networking & Ingress
 
-**Folder:** SRE / Operations
-**Refresh:** 30s
-**Audience:** You wearing the ops hat — ingress troubleshooting, certificate management, DNS/tunnel health.
+| | |
+|---|---|
+| **Folder** | SRE / Operations |
+| **Dashboard ID** | S3 |
+| **Refresh** | 30s |
+| **Audience** | You wearing the ops hat — ingress troubleshooting, certificate management, DNS/tunnel health |
 
-> **Purpose:** Comprehensive visibility into everything between "a request leaves the internet" and "a request reaches a pod" — Traefik (ingress), cert-manager (TLS), MetalLB (L2/BGP load balancing), and external-dns/Cloudflare tunnel (DNS + edge). This is also the dashboard that backfills the two placeholder panels left on the Executive Platform Overview (E1): certificate expiry countdown and the ingress request sparkline.
+> **Purpose:** Comprehensive visibility into everything between "a request leaves the internet" and "a request reaches a pod" — Traefik (ingress), cert-manager (TLS), MetalLB (L2/BGP load balancing), and external-dns/Cloudflare tunnel (DNS + edge). This dashboard also backfills the two placeholder panels on [E1 — Platform Overview](../executive/PLATFORM_OVERVIEW.md): certificate expiry countdown and the ingress request sparkline.
+
+**← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)**
 
 ---
 
-### Data Flow for Networking Metrics
+## Data Flow
 
 ```
 Traefik (port 9100/metrics, or 8080 depending on chart)
@@ -29,7 +34,7 @@ external-dns (port 7979/metrics)
   │
 Cloudflare Tunnel (cloudflared, port 2000/metrics)
   │
-  ├──→ Alloy prometheus.scrape "cloudflared"    ← NEEDS TO BE ADDED (may land here or under S6/External Infra — see note below)
+  ├──→ Alloy prometheus.scrape "cloudflared"    ← NEEDS TO BE ADDED
   │      │
   │      └──→ Mimir (prometheus.remote_write)
   │
@@ -40,17 +45,17 @@ Cloudflare Tunnel (cloudflared, port 2000/metrics)
 > **Blocker:** None of the five components above are currently scraped by Alloy. This is the largest single batch of new scrape blocks in the plan so far — five separate targets need to be added to `custom-config` before any panel on this dashboard shows data. Recommend doing this as one PR (all five scrape blocks together) since they share the same Alloy config file and testing pass.
 
 > [!NOTE]
-> **Cloudflare Tunnel placement:** `cloudflared` metrics could arguably live on S6 (External Infrastructure, Phase 7) since Cloudflare is an external service. This plan keeps tunnel *health* (is it connected, latency, error rate) on S3 because it's part of the request path for every ingress request today — but moves Cloudflare *account-level* data (threats blocked, analytics, cost) to S6 in Phase 7, where it belongs alongside the rest of the external-service dashboards. Worth confirming this split matches your mental model before building.
+> **Cloudflare Tunnel placement:** `cloudflared` metrics could arguably live on [S6 — External Infrastructure](EXTERNAL_INFRASTRUCTURE.md) since Cloudflare is an external service. This plan keeps tunnel *health* (is it connected, latency, error rate) on S3 because it's part of the request path for every ingress request today — but moves Cloudflare *account-level* data (threats blocked, analytics, cost) to S6, where it belongs alongside the rest of the external-service dashboards. Worth confirming this split matches your mental model before building.
 
 ---
 
-### Dashboard Layout: S3 — Networking & Ingress
+## Dashboard Layout
 
 Organized into **5 tabs**, same "glance first, drill down after" pattern as S1/S2/S4.
 
 ---
 
-#### Tab 1: Health at a Glance
+### Tab 1: Health at a Glance
 
 > **Design:** Stat strip. An operator should know if ingress, TLS, or DNS is broken within 5 seconds — before users start reporting "the site is down."
 
@@ -64,7 +69,7 @@ Organized into **5 tabs**, same "glance first, drill down after" pattern as S1/S
 
 ---
 
-#### Tab 2: Traefik Ingress Traffic (RED Method)
+### Tab 2: Traefik Ingress Traffic (RED Method)
 
 > **Design:** Rate, Errors, Duration — the standard method for request-driven services, per Traefik router/service.
 
@@ -74,13 +79,13 @@ Organized into **5 tabs**, same "glance first, drill down after" pattern as S1/S
 | **Error Rate (per service, 4xx/5xx split)** | Time series (stacked) | `sum(rate(traefik_service_requests_total{code=~"4.."}[5m])) by (service)` and same for `5..` | Separates client errors (4xx — often just bad requests or expired links) from server errors (5xx — your problem) per backend service. |
 | **Request Latency (p50/p95/p99)** | Time series | `histogram_quantile(0.95, sum(rate(traefik_service_request_duration_seconds_bucket[5m])) by (le, service))` (repeat for p50, p99) | Latency percentiles catch slow backends before they time out entirely — p99 in particular surfaces the "some requests are fine, some hang" pattern that averages hide. |
 | **Open Connections** | Time series | `traefik_entrypoint_open_connections` | High or climbing connection counts with flat request rate usually indicates slow or hung backends holding connections open rather than a traffic increase. |
-| **Traefik Access Log Errors** | Logs panel | Loki: `{namespace="traefik", container="traefik"} \|= "level=error"` | Root-cause stream for router/middleware misconfigurations that don't necessarily show up as a clean metric (e.g., bad TLS SNI routing, middleware chain errors). |
+| **Traefik Access Log Errors** | Logs panel | Loki: `{namespace="traefik", container="traefik"} |= "level=error"` | Root-cause stream for router/middleware misconfigurations that don't necessarily show up as a clean metric (e.g., bad TLS SNI routing, middleware chain errors). |
 
 ---
 
-#### Tab 3: TLS & Certificates (cert-manager)
+### Tab 3: TLS & Certificates (cert-manager)
 
-> **Design:** This tab directly backfills the "Certificate Expiry Countdown" placeholder panel on E1 once built.
+> **Design:** This tab directly backfills the "Certificate Expiry Countdown" placeholder panel on [E1](../executive/PLATFORM_OVERVIEW.md) once built.
 
 | Panel | Type | Query | Rationale |
 |-------|------|-------|-----------|
@@ -91,7 +96,7 @@ Organized into **5 tabs**, same "glance first, drill down after" pattern as S1/S
 
 ---
 
-#### Tab 4: MetalLB & DNS/Tunnel
+### Tab 4: MetalLB & DNS/Tunnel
 
 > **Design:** The layer below Traefik — how traffic physically reaches the cluster at all.
 
@@ -105,7 +110,7 @@ Organized into **5 tabs**, same "glance first, drill down after" pattern as S1/S
 
 ---
 
-#### Tab 5: Active Alerts
+### Tab 5: Active Alerts
 
 > **Design:** Same pattern as S1/S2/S4 — a single table of currently firing networking alerts, backed by Mimir Ruler → Alertmanager.
 
@@ -113,10 +118,10 @@ Organized into **5 tabs**, same "glance first, drill down after" pattern as S1/S
 |-------|------|--------|-----------|
 | **Firing Alerts Table** | Table | Alertmanager datasource, filtered to `alertgroup="networking"` (covers Traefik, cert-manager, MetalLB, DNS, tunnel) | Single pane for active networking issues, color-coded by severity. |
 
-##### Alert Rules to Configure (Mimir Ruler)
+#### Alert Rules (Mimir Ruler)
 
 | Alert Name | PromQL Condition | For | Severity | Description |
-|------------|-------------------|-----|----------|-------------|
+|------------|------------------|-----|----------|-------------|
 | `TraefikHighErrorRate` | `sum(rate(traefik_service_requests_total{code=~"5.."}[5m])) / sum(rate(traefik_service_requests_total[5m])) > 0.05` | 5m | **Critical** | More than 5% of ingress requests are server errors — a backend is unhealthy. |
 | `TraefikHighLatency` | `histogram_quantile(0.95, sum(rate(traefik_service_request_duration_seconds_bucket[5m])) by (le)) > 2` | 10m | **Warning** | p95 request latency over 2s cluster-wide — investigate slow backends. |
 | `CertificateExpiringSoon` | `certmanager_certificate_expiration_timestamp_seconds - time() < 7 * 86400` | 1h | **Critical** | A certificate expires within 7 days and has not yet renewed — manual intervention likely needed. |
@@ -128,13 +133,4 @@ Organized into **5 tabs**, same "glance first, drill down after" pattern as S1/S
 
 ---
 
-### Phase 3 Task Checklist (Networking & Ingress)
-
-1. Add scrape blocks to Alloy `custom-config` for all five targets: `traefik`, `cert-manager`, `metallb`, `external-dns`, `cloudflared` — recommend as one combined PR since they touch the same config file.
-2. Confirm Traefik access logs are being shipped to Loki with the labels needed for the Tab 2 log panel (namespace/container at minimum).
-3. Build **S3 — Networking & Ingress** dashboard JSON (5 tabs as above), deliver as `dashboard-networking.yaml` ConfigMap, folder annotation `grafana_folder: "SRE / Operations"`.
-4. Add the 8 networking alert rules to Mimir Ruler, routed through the existing stub Alertmanager receivers from Phase 1.
-5. Verify Firing Alerts Table on S3 Tab 5 correctly surfaces the new alert rules (test with a synthetic cert-manager renewal failure or a Traefik 5xx injection).
-6. Backfill the two E1 (Platform Overview) placeholder panels — Certificate Expiry Countdown and Ingress Request Sparkline — with the real queries from Tab 1/Tab 3 above, removing the "Pending Phase 3" markers.
-7. Update `kustomization.yaml` in `kubernetes/apps/infrastructure/grafana/components/dashboards/` to include the new ConfigMap.
-8. Confirm with stakeholder whether Cloudflare Tunnel *health* metrics should indeed stay here (as planned) versus moving entirely to S6 in Phase 7 — see design note above.
+**← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)** | **Previous: [S2 — Cluster & Node Health](CLUSTER_AND_NODE_HEALTH.md)** | **Next: [S4 — Storage](STORAGE.md)**

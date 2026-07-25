@@ -1,14 +1,19 @@
-## Storage (Dashboard S4)
+# S4 — Storage
 
-**Folder:** SRE / Operations
-**Refresh:** 30s
-**Audience:** You wearing the ops hat — capacity planning, volume troubleshooting, object store health.
+| | |
+|---|---|
+| **Folder** | SRE / Operations |
+| **Dashboard ID** | S4 |
+| **Refresh** | 30s |
+| **Audience** | You wearing the ops hat — capacity planning, volume troubleshooting, object store health |
 
-> **Purpose:** Comprehensive visibility into the two storage layers everything else depends on — Longhorn (block storage for PVCs) and SeaweedFS (S3-compatible object storage backing Mimir, Loki, and Velero). If either is degraded, backups, metrics ingestion, and stateful application data are all at risk — this dashboard exists to catch that before S1/S2/S5 start showing symptoms without an obvious cause.
+> **Purpose:** Comprehensive visibility into the two storage layers everything else depends on — Longhorn (block storage for PVCs) and SeaweedFS (S3-compatible object storage backing Mimir, Loki, and Velero). If either is degraded, backups, metrics ingestion, and stateful application data are all at risk — this dashboard exists to catch that before [S1](BACKUP_AND_DISASTER_RECOVERY.md)/[S2](CLUSTER_AND_NODE_HEALTH.md)/S5 start showing symptoms without an obvious cause.
+
+**← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)**
 
 ---
 
-### Data Flow for Storage Metrics
+## Data Flow
 
 ```
 Longhorn Manager (port 9500, /metrics)
@@ -27,19 +32,19 @@ SeaweedFS (master :9333/metrics, volume :8080/metrics, filer :8888/metrics)
 ```
 
 > [!WARNING]
-> **Blocker 1:** Alloy's `custom-config` does not currently scrape Longhorn Manager's `/metrics` endpoint. Longhorn exposes volume, replica, and node-level metrics natively in Prometheus format (no exporter needed) — this is purely a missing scrape block, same pattern as the Velero blocker in Phase 1.
+> **Blocker 1:** Alloy's `custom-config` does not currently scrape Longhorn Manager's `/metrics` endpoint. Longhorn exposes volume, replica, and node-level metrics natively in Prometheus format (no exporter needed) — this is purely a missing scrape block, same pattern as the Velero blocker in S1.
 >
-> **Blocker 2:** SeaweedFS *is* being scraped already, but `dashboard-seaweedfs.yaml` currently renders an empty `{}` dashboard — the ConfigMap exists as a placeholder from earlier setup but was never built out. This phase replaces that empty dashboard with the real S4 content (folded into Tab 4 below) rather than leaving two separate storage dashboards.
+> **Blocker 2:** SeaweedFS *is* being scraped already, but `dashboard-seaweedfs.yaml` currently renders an empty `{}` dashboard — the ConfigMap exists as a placeholder from earlier setup but was never built out. This dashboard replaces that empty dashboard with the real S4 content (folded into Tab 4 below) rather than leaving two separate storage dashboards.
 
 ---
 
-### Dashboard Layout: S4 — Storage
+## Dashboard Layout
 
 Organized into **6 tabs**, same "glance first, drill down after" pattern as S1/S2.
 
 ---
 
-#### Tab 1: Health at a Glance
+### Tab 1: Health at a Glance
 
 > **Design:** Stat strip. An operator should know if either storage layer is degraded within 5 seconds — before opening Longhorn UI or the SeaweedFS filer console.
 
@@ -53,7 +58,7 @@ Organized into **6 tabs**, same "glance first, drill down after" pattern as S1/S
 
 ---
 
-#### Tab 2: Longhorn Volume Deep Dive
+### Tab 2: Longhorn Volume Deep Dive
 
 > **Design:** Per-volume detail — which PVC, which app, and its current state.
 
@@ -66,7 +71,7 @@ Organized into **6 tabs**, same "glance first, drill down after" pattern as S1/S
 
 ---
 
-#### Tab 3: Longhorn Node & Replica Health
+### Tab 3: Longhorn Node & Replica Health
 
 > **Design:** One layer below individual volumes — is the underlying Longhorn infrastructure (nodes, replicas, engines) sound?
 
@@ -76,13 +81,13 @@ Organized into **6 tabs**, same "glance first, drill down after" pattern as S1/S
 | **Node Storage Capacity** | Bar gauge (per node) | `longhorn_node_storage_capacity_bytes`, `longhorn_node_storage_available_bytes` | Per-node breakdown behind the Tab 1 "Disk Space Free" gauge — tells you *which* node is running low, since Longhorn schedules replicas per-node. |
 | **Scheduled vs Actual Replicas** | Table | `longhorn_node_storage_scheduled_bytes` vs `longhorn_node_storage_available_bytes` | Longhorn's own over-scheduling can create a situation where the manager thinks there's room for a replica that the node can't actually serve — this panel exposes that gap before a rebuild fails. |
 | **Instance Manager Health** | Multi-stat (per node) | `up{job="longhorn", component="instance-manager"}` | Instance managers are the per-node processes that actually run replica engines — if one crashes, every replica on that node goes offline simultaneously. |
-| **Longhorn Manager Log Stream** | Logs panel | Loki: `{namespace="longhorn-system", container="longhorn-manager"} \|= "level=error"` | Root-cause stream for volume attach/detach failures, replica scheduling failures, and engine crashes. |
+| **Longhorn Manager Log Stream** | Logs panel | Loki: `{namespace="longhorn-system", container="longhorn-manager"} |= "level=error"` | Root-cause stream for volume attach/detach failures, replica scheduling failures, and engine crashes. |
 
 ---
 
-#### Tab 4: SeaweedFS Object Store
+### Tab 4: SeaweedFS Object Store
 
-> **Design:** This tab replaces the currently-empty `dashboard-seaweedfs.yaml`. SeaweedFS backs three critical buckets: `mimir-tsdb`, `loki-chunks`, `mimir-alertmanager` — plus the Velero backup bucket referenced in S1 Tab 3.
+> **Design:** This tab replaces the currently-empty `dashboard-seaweedfs.yaml`. SeaweedFS backs three critical buckets: `mimir-tsdb`, `loki-chunks`, `mimir-alertmanager` — plus the Velero backup bucket referenced in [S1 Tab 3](BACKUP_AND_DISASTER_RECOVERY.md#tab-3-backup-storage-health).
 
 | Panel | Type | Query | Rationale |
 |-------|------|-------|-----------|
@@ -94,9 +99,9 @@ Organized into **6 tabs**, same "glance first, drill down after" pattern as S1/S
 
 ---
 
-#### Tab 5: Capacity & Growth
+### Tab 5: Capacity & Growth
 
-> **Design:** Trend lines rather than point-in-time status — feeds directly into the platform-wide Capacity & Trends dashboard (E2, Phase 6).
+> **Design:** Trend lines rather than point-in-time status — feeds directly into the platform-wide Capacity & Trends dashboard (E2).
 
 | Panel | Type | Query | Rationale |
 |-------|------|-------|-----------|
@@ -107,7 +112,7 @@ Organized into **6 tabs**, same "glance first, drill down after" pattern as S1/S
 
 ---
 
-#### Tab 6: Active Alerts
+### Tab 6: Active Alerts
 
 > **Design:** Same pattern as S1/S2 — a single table of currently firing storage alerts, backed by Mimir Ruler → Alertmanager.
 
@@ -115,10 +120,10 @@ Organized into **6 tabs**, same "glance first, drill down after" pattern as S1/S
 |-------|------|--------|-----------|
 | **Firing Alerts Table** | Table | Alertmanager datasource, filtered to `alertgroup="storage"` (covers both Longhorn and SeaweedFS) | Single pane for active storage issues, color-coded by severity. |
 
-##### Alert Rules to Configure (Mimir Ruler)
+#### Alert Rules (Mimir Ruler)
 
 | Alert Name | PromQL Condition | For | Severity | Description |
-|------------|-------------------|-----|----------|-------------|
+|------------|------------------|-----|----------|-------------|
 | `LonghornVolumeDegraded` | `longhorn_volume_robustness{robustness="degraded"} == 1` | 5m | **Warning** | A volume is running with reduced redundancy — one replica down. Investigate before a second failure causes data loss risk. |
 | `LonghornVolumeFaulted` | `longhorn_volume_robustness{robustness="faulted"} == 1` | 0m | **Critical** | A volume has no healthy replica. Immediate data-loss risk on that PVC. |
 | `LonghornNodeDiskLow` | `longhorn_node_storage_available_bytes / longhorn_node_storage_capacity_bytes < 0.10` | 10m | **Critical** | A Longhorn node is under 10% free disk — new replica scheduling will start failing soon. |
@@ -129,12 +134,4 @@ Organized into **6 tabs**, same "glance first, drill down after" pattern as S1/S
 
 ---
 
-### Phase 3 Task Checklist (Storage)
-
-1. Add `longhorn` scrape block to Alloy `custom-config`, pointed at Longhorn Manager's `/metrics` (port 9500).
-2. Confirm existing SeaweedFS scrape block covers all three components (master, volume, filer) — add any missing target.
-3. Build **S4 — Storage** dashboard JSON (6 tabs as above), replacing the current empty `dashboard-seaweedfs.yaml` content and delivering as `dashboard-storage.yaml` ConfigMap, folder annotation `grafana_folder: "SRE / Operations"`.
-4. Retire or repoint `dashboard-seaweedfs.yaml` so SeaweedFS content lives only in S4 Tab 4 — avoid having two competing storage dashboards.
-5. Add the 7 storage alert rules to Mimir Ruler, routed through the existing stub Alertmanager receivers from Phase 1.
-6. Verify Firing Alerts Table on S4 Tab 6 correctly surfaces the new alert rules (test with a synthetic Longhorn replica removal or a filer restart).
-7. Update `kustomization.yaml` in `kubernetes/apps/infrastructure/grafana/components/dashboards/` to include the new ConfigMap and remove the empty placeholder reference if it was tracked separately.
+**← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)** | **Previous: [S3 — Networking](NETWORKING.md)** | **Next: [S6 — External Infrastructure](EXTERNAL_INFRASTRUCTURE.md)**
