@@ -574,7 +574,14 @@
       "panel-8": {
         "kind": "Panel",
         "spec": {
-          "data": null,
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [],
+              "queryOptions": {},
+              "transformations": []
+            }
+          },
           "description": "Reserved slot — wired up once cert-manager scrape lands (see S3 — Networking).",
           "id": 8,
           "links": [],
@@ -670,7 +677,14 @@
       "panel-10": {
         "kind": "Panel",
         "spec": {
-          "data": null,
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [],
+              "queryOptions": {},
+              "transformations": []
+            }
+          },
           "description": "Reserved slot — wired up once Traefik scrape lands (see S3 — Networking).",
           "id": 10,
           "links": [],
