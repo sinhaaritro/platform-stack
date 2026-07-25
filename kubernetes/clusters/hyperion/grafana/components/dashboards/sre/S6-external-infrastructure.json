@@ -2863,7 +2863,19 @@
         "name": "__unbound",
         "type": "textbox",
         "hide": 2,
-        "skipUrlSync": true
+        "skipUrlSync": true,
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "options": [
+          {
+            "text": "",
+            "value": "",
+            "selected": true
+          }
+        ],
+        "query": ""
       }
     ]
   }
