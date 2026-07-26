@@ -385,7 +385,6 @@ resources = {
         vm_id = 1033
         tags  = ["mongo"]
         lxc_config = {
-          hostname     = "support-servers-01"
           ipv4_address = "192.168.0.33/24"
         }
       },
@@ -394,7 +393,6 @@ resources = {
         description = "Primary database servers, for postgress. Ubuntu 26.04."
         tags        = ["postgres"]
         lxc_config = {
-          hostname     = "support-servers-02"
           disk_size    = 16
           ipv4_address = "192.168.0.34/24"
         }
@@ -414,9 +412,9 @@ resources = {
 
     lxc_config = {
       template_datastore_id       = "WD1TB"
-      template_url                = "https://mirrors.edge.kernel.org/alpine/v3.24/releases/x86_64/alpine-minirootfs-3.24.1-x86_64.tar.gz"
-      template_checksum           = null
-      template_checksum_algorithm = null
+      template_url                = "http://download.proxmox.com/images/system/alpine-3.24-default_20260714_amd64.tar.xz"
+      template_checksum           = "9877b74de4c4878b70450502618f7b02952e792afdbc91f146f6cba507432dae516674d0bb3a306484d58edc722ff63db1ed3c4e5b0954fb2a2773ec8d8f33bd"
+      template_checksum_algorithm = "sha512"
       os_type                     = "alpine"
       cpu_cores                   = 1
       memory_size                 = 256
@@ -425,10 +423,9 @@ resources = {
     }
 
     nodes = {
-      "adguard-01" = {
-        vm_id = 9999
+      "aegis.olympus.strawslabs.com" = {
+        vm_id = 1020
         lxc_config = {
-          hostname     = "adguard-01"
           ipv4_address = "192.168.0.20/24"
         }
       }
