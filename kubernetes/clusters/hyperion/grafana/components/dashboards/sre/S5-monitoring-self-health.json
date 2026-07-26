@@ -32,7 +32,7 @@
       }
     ],
     "cursorSync": "Off",
-    "description": "Monitoring Self-Health Dashboard \u2014 Mimir, Loki, and Alloy health monitoring",
+    "description": "Monitoring Self-Health Dashboard — Mimir, Loki, and Alloy health monitoring",
     "editable": true,
     "links": [],
     "liveNow": false,
@@ -1528,39 +1528,251 @@
       "spec": {
         "tabs": [
           {
-            "title": "Mimir Health",
-            "elements": [
-              "panel-1",
-              "panel-2",
-              "panel-3",
-              "panel-4",
-              "panel-5"
-            ]
+            "kind": "TabsLayoutTab",
+            "spec": {
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-1"
+                        },
+                        "height": 11,
+                        "width": 24,
+                        "x": 0,
+                        "y": 0
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-2"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 0,
+                        "y": 11
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-3"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 12,
+                        "y": 11
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-4"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 0,
+                        "y": 22
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-5"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 12,
+                        "y": 22
+                      }
+                    }
+                  ]
+                }
+              },
+              "title": "Mimir Health"
+            }
           },
           {
-            "title": "Loki Health",
-            "elements": [
-              "panel-6",
-              "panel-7",
-              "panel-8",
-              "panel-9"
-            ]
+            "kind": "TabsLayoutTab",
+            "spec": {
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-6"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 0,
+                        "y": 0
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-7"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 12,
+                        "y": 0
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-8"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 0,
+                        "y": 11
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-9"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 12,
+                        "y": 11
+                      }
+                    }
+                  ]
+                }
+              },
+              "title": "Loki Health"
+            }
           },
           {
-            "title": "Alloy Health",
-            "elements": [
-              "panel-10",
-              "panel-11",
-              "panel-12"
-            ]
+            "kind": "TabsLayoutTab",
+            "spec": {
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-10"
+                        },
+                        "height": 11,
+                        "width": 24,
+                        "x": 0,
+                        "y": 0
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-11"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 0,
+                        "y": 11
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-12"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 12,
+                        "y": 11
+                      }
+                    }
+                  ]
+                }
+              },
+              "title": "Alloy Health"
+            }
           },
           {
-            "title": "Alerting Health",
-            "elements": [
-              "panel-13",
-              "panel-14",
-              "panel-15"
-            ]
+            "kind": "TabsLayoutTab",
+            "spec": {
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-13"
+                        },
+                        "height": 11,
+                        "width": 24,
+                        "x": 0,
+                        "y": 0
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-14"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 0,
+                        "y": 11
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-15"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 12,
+                        "y": 11
+                      }
+                    }
+                  ]
+                }
+              },
+              "title": "Alerting Health"
+            }
           }
         ]
       }
