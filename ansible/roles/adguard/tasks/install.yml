@@ -1,0 +1,60 @@
+---
+# tasks/install.yml - Install dependencies and download AdGuard Home binary
+
+- name: Install dependencies
+  ansible.builtin.package:
+    name:
+      - curl
+      - ca-certificates
+      - tar
+    state: present
+
+- name: Determine target architecture
+  ansible.builtin.set_fact:
+    adguard_arch: "{{ adguard_arch_map[ansible_facts['architecture']] | default('amd64') }}"
+
+- name: Fetch latest release info from GitHub API
+  when: adguard_version == 'latest'
+  block:
+    - name: Download latest release metadata
+      ansible.builtin.get_url:
+        url: "https://api.github.com/repos/AdguardTeam/AdGuardHome/releases/latest"
+        dest: /tmp/adguard_home_release.json
+        mode: "0644"
+
+    - name: Extract download URL from release metadata
+      ansible.builtin.set_fact:
+        adguard_download_url: >-
+          {{ (lookup('file', '/tmp/adguard_home_release.json') | from_json).assets
+             | selectattr('name', 'match', 'AdGuardHome_linux_' ~ adguard_arch ~ '\.tar\.gz$')
+             | map(attribute='browser_download_url')
+             | first }}
+
+- name: Set download URL for pinned release
+  when: adguard_version != 'latest'
+  ansible.builtin.set_fact:
+    adguard_download_url: "https://github.com/AdguardTeam/AdGuardHome/releases/download/{{ adguard_version }}/AdGuardHome_linux_{{ adguard_arch }}.tar.gz"
+
+- name: Download AdGuard Home tarball
+  ansible.builtin.get_url:
+    url: "{{ adguard_download_url }}"
+    dest: "/tmp/AdGuardHome_linux_{{ adguard_arch }}.tar.gz"
+    mode: "0644"
+
+- name: Extract AdGuard Home
+  ansible.builtin.unarchive:
+    src: "/tmp/AdGuardHome_linux_{{ adguard_arch }}.tar.gz"
+    dest: /opt/
+    remote_src: true
+
+- name: Ensure AdGuard Home install directory exists
+  ansible.builtin.file:
+    path: "{{ adguard_install_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Move extracted files to install directory
+  ansible.builtin.command:
+    cmd: "mv /opt/AdGuardHome/* {{ adguard_install_dir }}/"
+  args:
+    creates: "{{ adguard_install_dir }}/AdGuardHome"

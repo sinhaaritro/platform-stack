@@ -1,0 +1,22 @@
+---
+# tasks/service.yml - System-agnostic service registration and lifecycle management
+
+- name: Determine service file path for creates guard
+  ansible.builtin.set_fact:
+    adguard_service_creates: >-
+      {{ '/etc/init.d/AdGuardHome' if (ansible_facts['service_mgr'] | default('') == 'openrc'
+         or ansible_facts['os_family'] | default('') == 'Alpine')
+         else '/etc/systemd/system/AdGuardHome.service' }}
+
+
+- name: Install AdGuard Home service
+  ansible.builtin.command:
+    cmd: "{{ adguard_install_dir }}/AdGuardHome -s install"
+  args:
+    creates: "{{ adguard_service_creates }}"
+
+- name: Enable and start AdGuard Home service
+  ansible.builtin.service:
+    name: AdGuardHome
+    enabled: true
+    state: started

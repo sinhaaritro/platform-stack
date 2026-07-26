@@ -127,9 +127,10 @@ locals {
       template_url          = try(coalesce(item.node_override.lxc_config.template_url, item.app_group.lxc_config.template_url), null)
       template_file_id = (
         try(coalesce(item.node_override.lxc_config.template_url, item.app_group.lxc_config.template_url), null) != null
-        ? "${coalesce(item.node_override.lxc_config.template_datastore_id, item.app_group.lxc_config.template_datastore_id, var.target_datastore)}:vztmpl/${basename(try(coalesce(item.node_override.lxc_config.template_url, item.app_group.lxc_config.template_url), null))}"
+        ? "${coalesce(item.node_override.lxc_config.template_datastore_id, item.app_group.lxc_config.template_datastore_id, var.target_datastore)}:vztmpl/ssh-${basename(try(coalesce(item.node_override.lxc_config.template_url, item.app_group.lxc_config.template_url), null))}"
         : null
       )
+
       template_checksum           = try(coalesce(item.node_override.lxc_config.template_checksum, item.app_group.lxc_config.template_checksum), null)
       template_checksum_algorithm = try(coalesce(item.node_override.lxc_config.template_checksum_algorithm, item.app_group.lxc_config.template_checksum_algorithm), null)
 
@@ -142,6 +143,13 @@ locals {
       ipv4_address = item.node_override.lxc_config.ipv4_address
       ipv4_gateway = coalesce(item.node_override.lxc_config.ipv4_gateway, item.app_group.lxc_config.ipv4_gateway, "192.168.0.1")
 
+      user_account_username = (
+        (var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")] != null &&
+          var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].username != null &&
+        trimspace(var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].username) != "") ?
+        var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].username :
+        "dev"
+      )
       user_account_password = (
         (var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")] != null &&
           var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].password != null &&
@@ -149,6 +157,7 @@ locals {
         var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].password :
         "ERROR: 'password' not found for LXC '${item.node_key}'. Check secret '${coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")}' in 'user_credentials'." [999]
       )
+
       user_account_keys = (
         (var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")] != null &&
           var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].ssh_public_keys != null &&

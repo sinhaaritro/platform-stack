@@ -1,0 +1,7 @@
+---
+# handlers/main.yml - Handlers for AdGuard Home role
+
+- name: Restart AdGuard Home
+  ansible.builtin.service:
+    name: AdGuardHome
+    state: restarted

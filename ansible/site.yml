@@ -111,8 +111,19 @@
   become: true
   roles:
     - role: argocd
+
 # ==============================================================================
-# PLAY 5: WEB LAYER
+# PLAY 5: DNS LAYER — AdGuard Home
+# Target: AdGuard Home LXC (adguard group)
+# ==============================================================================
+- name: Configure AdGuard Home DNS
+  hosts: adguard
+  tags: adguard
+  become: true
+  roles:
+    - role: adguard
+# ==============================================================================
+# PLAY 6: WEB LAYER
 # Target: Web Server
 # ==============================================================================
 # - name: Configure Web Server

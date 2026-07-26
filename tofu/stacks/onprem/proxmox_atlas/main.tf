@@ -69,16 +69,70 @@ locals {
   }
 }
 
-resource "proxmox_download_file" "lxc_template" {
+resource "null_resource" "lxc_template_customizer" {
   for_each = local.lxc_templates_to_download
 
-  content_type       = "vztmpl"
-  datastore_id       = each.value.template_datastore_id
-  node_name          = each.value.node_name
-  url                = each.value.template_url
-  checksum           = each.value.template_checksum
-  checksum_algorithm = each.value.template_checksum_algorithm
+  triggers = {
+    url        = each.value.template_url
+    file_state = fileexists("/var/tmp/tofu-artifacts/ssh-${basename(each.value.template_url)}") ? "exists" : "missing-${timestamp()}"
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      CACHE_DIR="/var/tmp/tofu-artifacts"
+      mkdir -p "$CACHE_DIR"
+      URL="${each.value.template_url}"
+      FILENAME=$(basename "$URL")
+      CUSTOM_FILENAME="ssh-$FILENAME"
+      TARGET_PATH="$CACHE_DIR/$CUSTOM_FILENAME"
+
+      if [ ! -f "$TARGET_PATH" ]; then
+        WORK_DIR=$(mktemp -d)
+        curl -fsSL "$URL" -o "$WORK_DIR/base.tar.xz"
+        mkdir -p "$WORK_DIR/rootfs"
+        tar -xf "$WORK_DIR/base.tar.xz" -C "$WORK_DIR/rootfs/"
+        sudo cp /etc/resolv.conf "$WORK_DIR/rootfs/etc/resolv.conf" 2>/dev/null || true
+        
+        sudo mount --bind /dev "$WORK_DIR/rootfs/dev"
+        sudo mount --bind /proc "$WORK_DIR/rootfs/proc"
+
+        if [ -f "$WORK_DIR/rootfs/sbin/apk" ]; then
+          sudo chroot "$WORK_DIR/rootfs" /bin/sh -c "apk add --no-cache openssh sudo python3 && ssh-keygen -A"
+          sudo mkdir -p "$WORK_DIR/rootfs/var/empty" "$WORK_DIR/rootfs/root/.ansible/tmp"
+          sudo chown root:root "$WORK_DIR/rootfs/var/empty" "$WORK_DIR/rootfs/root/.ansible/tmp"
+          sudo chmod 755 "$WORK_DIR/rootfs/var/empty"
+          sudo chmod 700 "$WORK_DIR/rootfs/root/.ansible/tmp"
+          sudo sh -c "echo 'rc_sys=\"lxc\"' >> '$WORK_DIR/rootfs/etc/rc.conf'"
+          sudo sh -c "echo 'PermitRootLogin yes' >> '$WORK_DIR/rootfs/etc/ssh/sshd_config'"
+          sudo sh -c "echo 'PasswordAuthentication yes' >> '$WORK_DIR/rootfs/etc/ssh/sshd_config'"
+          sudo ln -sf /etc/init.d/sshd "$WORK_DIR/rootfs/etc/runlevels/default/sshd"
+        elif [ -f "$WORK_DIR/rootfs/usr/bin/apt-get" ]; then
+          sudo chroot "$WORK_DIR/rootfs" /bin/sh -c "apt-get update && apt-get install -y openssh-server sudo && systemctl enable ssh"
+        fi
+
+        sudo umount "$WORK_DIR/rootfs/proc" 2>/dev/null || true
+        sudo umount "$WORK_DIR/rootfs/dev" 2>/dev/null || true
+
+        (cd "$WORK_DIR/rootfs" && sudo tar -cf - . | xz -9 -T0 > "$TARGET_PATH")
+        sudo rm -rf "$WORK_DIR"
+      fi
+    EOT
+  }
 }
+
+resource "proxmox_virtual_environment_file" "lxc_template" {
+  for_each   = local.lxc_templates_to_download
+  depends_on = [null_resource.lxc_template_customizer]
+
+  content_type = "vztmpl"
+  datastore_id = each.value.template_datastore_id
+  node_name    = each.value.node_name
+
+  source_file {
+    path = "/var/tmp/tofu-artifacts/ssh-${basename(each.value.template_url)}"
+  }
+}
+
 
 # ─── Step 4: Create Virtual Machines (VMs) ───────────────────────────────────
 # This block iterates over our final, flattened map of VMs and calls the
@@ -147,7 +201,8 @@ module "proxmox_lxc" {
   source   = "../../../modules/proxmox_lxc"
   for_each = module.normalizer.final_lxc_list
 
-  depends_on = [proxmox_download_file.lxc_template, proxmox_virtual_environment_file.image_upload]
+  depends_on = [proxmox_virtual_environment_file.lxc_template, proxmox_virtual_environment_file.image_upload]
+
 
   # Main info
   vm_id          = each.value.vm_id
@@ -167,7 +222,7 @@ module "proxmox_lxc" {
   keyctl  = each.value.keyctl
 
   # --- OS Template ---
-  template_file_id = each.value.template_file_id
+  template_file_id = try(proxmox_virtual_environment_file.lxc_template[each.key].id, each.value.template_file_id)
   os_type          = each.value.os_type
 
   # Hardware
@@ -186,8 +241,10 @@ module "proxmox_lxc" {
   hostname              = each.value.name
   ipv4_address          = each.value.ipv4_address
   ipv4_gateway          = each.value.ipv4_gateway
+  user_account_username = each.value.user_account_username
   user_account_password = each.value.user_account_password
   user_account_keys     = each.value.user_account_keys
+
 
   # DNS
   dns_servers = ["8.8.8.8"]
@@ -213,6 +270,7 @@ locals {
       {
         ipv4_address          = try([for addr in flatten(module.proxmox_lxc[name].lxc_details.ipv4_addresses) : addr if addr != "127.0.0.1"][0], "IP_PENDING")
         user_account_username = "root"
+        ansible_password      = lxc.user_account_password
       }
     )]
   )

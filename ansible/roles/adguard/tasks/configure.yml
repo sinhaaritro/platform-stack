@@ -1,0 +1,9 @@
+---
+# tasks/configure.yml - Seed AdGuard Home configuration
+
+- name: Seed AdGuard Home configuration
+  ansible.builtin.copy:
+    src: AdGuardHome.yaml
+    dest: "{{ adguard_install_dir }}/AdGuardHome.yaml"
+    mode: "0644"
+  notify: Restart AdGuard Home

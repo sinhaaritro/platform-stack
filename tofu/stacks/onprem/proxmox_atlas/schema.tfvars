@@ -408,7 +408,7 @@ resources = {
     tags            = ["ansible", "adguard", "dns", "lxc"]
     ansible_groups  = {}
     on_boot         = true
-    cloud_init_user = "dev"
+    cloud_init_user = "adguard"
 
     lxc_config = {
       template_datastore_id       = "WD1TB"

@@ -1,0 +1,11 @@
+---
+# tasks/main.yml - AdGuard Home installation tasks
+
+- name: Install dependencies and download AdGuard Home binary
+  ansible.builtin.include_tasks: install.yml
+
+- name: Configure AdGuard Home
+  ansible.builtin.include_tasks: configure.yml
+
+- name: Manage AdGuard Home service lifecycle
+  ansible.builtin.include_tasks: service.yml

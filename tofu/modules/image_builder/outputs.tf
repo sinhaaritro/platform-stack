@@ -20,14 +20,14 @@ output "debug_info" {
       "default_os_type" = var.default_os_type
     }
     "STEP_1_GATHER_INFO" = {
-      "detected_os_requests"        = var.requested_images
-      "os_registry_resolutions"     = local.os_images
+      "detected_os_requests"          = var.requested_images
+      "os_registry_resolutions"       = local.os_images
       "files_detected_on_destination" = var.existing_images
     }
     "STEP_2_DECISION_MAKING" = {
       "upstream_manifest_hashes"   = local.image_state
       "computed_image_definitions" = local.final_image_defs
-      "build_necessity_decisions"  = {
+      "build_necessity_decisions" = {
         for k, v in local.build_decisions : k => (v == 1 ? "Build & Customization Required" : "Already Present on Destination or Cache (No Build)")
       }
     }

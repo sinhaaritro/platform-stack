@@ -56,8 +56,9 @@ resource "local_file" "ansible_inventory" {
           for host in hostnames :
           host => merge(
             {
-              ansible_host = try(local.host_index[host].ipv4_address, "IP_PENDING")
-              ansible_user = try(local.host_index[host].user_account_username, "root")
+              ansible_host     = try(local.host_index[host].ipv4_address, "IP_PENDING")
+              ansible_user     = try(local.host_index[host].user_account_username, "root")
+              ansible_password = try(local.host_index[host].ansible_password, null)
             },
             # Merge in the variables for this specific group from the host's definition
             try(local.host_index[host].ansible_groups[group_name], {})

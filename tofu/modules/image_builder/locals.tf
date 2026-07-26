@@ -6,13 +6,13 @@ locals {
   # OS Registry containing configuration variables and pattern formats for building target URLs.
   os_registry = {
     ubuntu = {
-      base_url          = "https://cloud-images.ubuntu.com/releases/server"
-      filename_pattern  = "ubuntu-%s-server-cloudimg-amd64.img"
-      checksum_url      = "https://cloud-images.ubuntu.com/releases/server/%s/release/SHA256SUMS"
-      checksum_regex    = "(?m)^([a-f0-9]{64})\\s+\\*?%s$"
-      agent_package     = "qemu-guest-agent"
-      dependencies      = ["liburing2", "ubuntu-virt", "ubuntu-helper-virt-hwe"]
-      customize_script  = "customize_ubuntu.sh.tftpl"
+      base_url         = "https://cloud-images.ubuntu.com/releases/server"
+      filename_pattern = "ubuntu-%s-server-cloudimg-amd64.img"
+      checksum_url     = "https://cloud-images.ubuntu.com/releases/server/%s/release/SHA256SUMS"
+      checksum_regex   = "(?m)^([a-f0-9]{64})\\s+\\*?%s$"
+      agent_package    = "qemu-guest-agent"
+      dependencies     = ["liburing2", "ubuntu-virt", "ubuntu-helper-virt-hwe"]
+      customize_script = "customize_ubuntu.sh.tftpl"
     }
   }
 

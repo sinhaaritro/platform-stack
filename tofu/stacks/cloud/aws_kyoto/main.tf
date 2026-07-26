@@ -32,8 +32,8 @@ resource "aws_s3_bucket_versioning" "versioning" {
 }
 
 resource "aws_s3_bucket_public_access_block" "public_access" {
-  for_each = local.s3_buckets
-  bucket   = aws_s3_bucket.buckets[each.key].id
+  for_each                = local.s3_buckets
+  bucket                  = aws_s3_bucket.buckets[each.key].id
   block_public_acls       = try(each.value.block_public_access, true)
   block_public_policy     = try(each.value.block_public_access, true)
   ignore_public_acls      = try(each.value.block_public_access, true)

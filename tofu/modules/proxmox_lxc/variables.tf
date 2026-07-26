@@ -132,6 +132,12 @@ variable "ipv4_gateway" {
   type        = string
 }
 
+variable "user_account_username" {
+  description = "The username for the non-root user account in the container."
+  type        = string
+  default     = "dev"
+}
+
 variable "user_account_password" {
   description = "The root password for the container."
   type        = string
@@ -139,10 +145,11 @@ variable "user_account_password" {
 }
 
 variable "user_account_keys" {
-  description = "A list of public SSH keys for the root user."
+  description = "A list of public SSH keys for the user account."
   type        = list(string)
   sensitive   = true
 }
+
 
 variable "ansible_groups" {
   description = "Map of Ansible groups and vars to add this host to. Structure: { group_name = { var_name = val } }"
