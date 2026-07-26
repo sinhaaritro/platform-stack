@@ -401,4 +401,36 @@ resources = {
       },
     }
   },
+
+  "adguard" = {
+    enabled         = true
+    type            = "lxc"
+    node_name       = "atlas"
+    description     = "AdGuard Home DNS server. Alpine."
+    tags            = ["adguard", "dns", "lxc"]
+    on_boot         = true
+    cloud_init_user = "dev"
+
+    lxc_config = {
+      template_datastore_id       = "WD1TB"
+      template_url                = "https://mirrors.edge.kernel.org/alpine/v3.24/releases/x86_64/alpine-minirootfs-3.24.1-x86_64.tar.gz"
+      template_checksum           = null
+      template_checksum_algorithm = null
+      os_type                     = "alpine"
+      cpu_cores                   = 1
+      memory_size                 = 256
+      disk_size                   = 1
+      unprivileged                = true
+    }
+
+    nodes = {
+      "adguard-01" = {
+        vm_id = 9999
+        lxc_config = {
+          hostname     = "adguard-01"
+          ipv4_address = "192.168.0.20/24"
+        }
+      }
+    }
+  },
 }

@@ -121,8 +121,19 @@ locals {
       memory_size = coalesce(item.node_override.lxc_config.memory_size, item.app_group.lxc_config.memory_size)
 
       disk_datastore_id = coalesce(item.node_override.lxc_config.disk_datastore_id, item.app_group.lxc_config.disk_datastore_id, var.target_datastore)
-      template_file_id  = coalesce(item.node_override.lxc_config.template_file_id, item.app_group.lxc_config.template_file_id)
-      os_type           = coalesce(item.node_override.lxc_config.os_type, item.app_group.lxc_config.os_type)
+
+      # Reconstruct template_file_id from components (if template_url is provided)
+      template_datastore_id = coalesce(item.node_override.lxc_config.template_datastore_id, item.app_group.lxc_config.template_datastore_id, var.target_datastore)
+      template_url          = try(coalesce(item.node_override.lxc_config.template_url, item.app_group.lxc_config.template_url), null)
+      template_file_id = (
+        try(coalesce(item.node_override.lxc_config.template_url, item.app_group.lxc_config.template_url), null) != null
+        ? "${coalesce(item.node_override.lxc_config.template_datastore_id, item.app_group.lxc_config.template_datastore_id, var.target_datastore)}:vztmpl/${basename(try(coalesce(item.node_override.lxc_config.template_url, item.app_group.lxc_config.template_url), null))}"
+        : null
+      )
+      template_checksum           = try(coalesce(item.node_override.lxc_config.template_checksum, item.app_group.lxc_config.template_checksum), null)
+      template_checksum_algorithm = try(coalesce(item.node_override.lxc_config.template_checksum_algorithm, item.app_group.lxc_config.template_checksum_algorithm), null)
+
+      os_type = try(coalesce(item.node_override.lxc_config.os_type, item.app_group.lxc_config.os_type), null)
       disk_size         = coalesce(item.node_override.lxc_config.disk_size, item.app_group.lxc_config.disk_size)
 
       vlan_bridge = coalesce(item.node_override.lxc_config.vlan_bridge, item.app_group.lxc_config.vlan_bridge)

@@ -60,6 +60,26 @@ resource "proxmox_virtual_environment_file" "image_upload" {
   }
 }
 
+# ─── Download LXC Templates (if template_url is provided) ─────────────────────
+locals {
+  lxc_templates_to_download = {
+    for name, lxc in module.normalizer.final_lxc_list :
+    name => lxc
+    if lxc.template_url != null
+  }
+}
+
+resource "proxmox_download_file" "lxc_template" {
+  for_each = local.lxc_templates_to_download
+
+  content_type       = "vztmpl"
+  datastore_id       = each.value.template_datastore_id
+  node_name          = each.value.node_name
+  url                = each.value.template_url
+  checksum           = each.value.template_checksum
+  checksum_algorithm = each.value.template_checksum_algorithm
+}
+
 # ─── Step 4: Create Virtual Machines (VMs) ───────────────────────────────────
 # This block iterates over our final, flattened map of VMs and calls the
 # proxmox_vm module passing in its resolved configuration.
@@ -119,6 +139,7 @@ module "proxmox_vms" {
   dns_servers = ["8.8.8.8"]
 }
 
+
 # ─── Step 5: Create Containers (LXC) ─────────────────────────────────────────
 # This block iterates over our final, flattened map of LXCs and calls the
 # proxmox_lxc module passing in its resolved configuration.
@@ -126,7 +147,7 @@ module "module_lxc" {
   source   = "../../../modules/proxmox_lxc"
   for_each = module.normalizer.final_lxc_list
 
-  depends_on = [proxmox_virtual_environment_file.image_upload]
+  depends_on = [proxmox_download_file.lxc_template, proxmox_virtual_environment_file.image_upload]
 
   # Main info
   vm_id       = each.value.vm_id
@@ -173,12 +194,32 @@ module "module_lxc" {
 
 # ─── Step 6: Generate Ansible Inventory ───────────────────────────────────────
 # Instantiates the shared ansible_inventory module to write the dynamic hosts
-# inventory file for this stack.
+# inventory file for this stack. Includes both VMs and LXCs in a unified list.
+
+locals {
+  # Create a unified list of all hosts (VMs + LXCs) for the inventory module.
+  # Each host object contains all necessary fields regardless of type.
+  unified_host_list = concat(
+    [for name, vm in module.normalizer.final_vm_list : merge(
+      vm,
+      {
+        ipv4_address          = try([for addr in flatten(module.proxmox_vms[name].vm_details.ipv4_addresses) : addr if addr != "127.0.0.1"][0], "IP_PENDING")
+        user_account_username = vm.user_account_username
+      }
+    )],
+    [for name, lxc in module.normalizer.final_lxc_list : merge(
+      lxc,
+      {
+        ipv4_address          = try(lxc.lxc_config.ipv4_address, "IP_PENDING")
+        user_account_username = "root"
+      }
+    )]
+  )
+}
 module "inventory" {
   source        = "../../../modules/ansible_inventory"
   stack_name    = "proxmox_atlas"
-  vm_list       = module.normalizer.final_vm_list
-  vm_outputs    = { for k, v in module.proxmox_vms : k => v.vm_details }
+  host_list     = local.unified_host_list
   inventory_dir = "${path.root}/../../../../ansible/inventory.d"
 }
 
