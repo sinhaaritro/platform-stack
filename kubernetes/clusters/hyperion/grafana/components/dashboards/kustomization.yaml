@@ -133,3 +133,14 @@ configMapGenerator:
         grafana_dashboard: "1"
       annotations:
         grafana_folder: "SRE / Operations"
+
+  - name: grafana-dashboard-storage
+    namespace: monitoring
+    files:
+      - sre/S4-storage.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: "SRE / Operations"
