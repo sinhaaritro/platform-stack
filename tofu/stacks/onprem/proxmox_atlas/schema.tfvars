@@ -407,7 +407,8 @@ resources = {
     type            = "lxc"
     node_name       = "atlas"
     description     = "AdGuard Home DNS server. Alpine."
-    tags            = ["adguard", "dns", "lxc"]
+    tags            = ["ansible", "adguard", "dns", "lxc"]
+    ansible_groups  = {}
     on_boot         = true
     cloud_init_user = "dev"
 

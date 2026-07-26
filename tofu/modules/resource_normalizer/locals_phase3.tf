@@ -133,8 +133,8 @@ locals {
       template_checksum           = try(coalesce(item.node_override.lxc_config.template_checksum, item.app_group.lxc_config.template_checksum), null)
       template_checksum_algorithm = try(coalesce(item.node_override.lxc_config.template_checksum_algorithm, item.app_group.lxc_config.template_checksum_algorithm), null)
 
-      os_type = try(coalesce(item.node_override.lxc_config.os_type, item.app_group.lxc_config.os_type), null)
-      disk_size         = coalesce(item.node_override.lxc_config.disk_size, item.app_group.lxc_config.disk_size)
+      os_type   = try(coalesce(item.node_override.lxc_config.os_type, item.app_group.lxc_config.os_type), null)
+      disk_size = coalesce(item.node_override.lxc_config.disk_size, item.app_group.lxc_config.disk_size)
 
       vlan_bridge = coalesce(item.node_override.lxc_config.vlan_bridge, item.app_group.lxc_config.vlan_bridge)
       vlan_id     = coalesce(item.node_override.lxc_config.vlan_id, item.app_group.lxc_config.vlan_id)
@@ -156,6 +156,18 @@ locals {
         var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].ssh_public_keys :
         "ERROR: 'ssh_public_keys' not found for LXC '${item.node_key}'. Check secret '${coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")}' in 'user_credentials'." [999]
       )
+
+      # ansible_groups: merge cluster-level and node-level groups for LXC.
+      ansible_groups = {
+        for group_name in distinct(concat(
+          keys(coalesce(item.app_group.ansible_groups, {})),
+          keys(coalesce(item.node_override.ansible_groups, {}))
+        )) :
+        group_name => merge(
+          try(item.app_group.ansible_groups[group_name], {}),
+          try(item.node_override.ansible_groups[group_name], {})
+        )
+      }
     }
     if coalesce(item.node_override.enabled, item.app_group.enabled) && item.app_group.type == "lxc"
   }
@@ -168,6 +180,6 @@ locals {
         os_type    = vm.os_type
         os_version = vm.os_version
       }...
-    } : key => val[0]  # Deduplicate — take first occurrence
+    } : key => val[0] # Deduplicate — take first occurrence
   }
 }

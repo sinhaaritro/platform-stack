@@ -144,6 +144,12 @@ variable "user_account_keys" {
   sensitive   = true
 }
 
+variable "ansible_groups" {
+  description = "Map of Ansible groups and vars to add this host to. Structure: { group_name = { var_name = val } }"
+  type        = map(map(string))
+  default     = {}
+}
+
 variable "dns_servers" {
   description = "A list of DNS servers for the LXC container."
   type        = list(string)

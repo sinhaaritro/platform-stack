@@ -143,20 +143,21 @@ module "proxmox_vms" {
 # ─── Step 5: Create Containers (LXC) ─────────────────────────────────────────
 # This block iterates over our final, flattened map of LXCs and calls the
 # proxmox_lxc module passing in its resolved configuration.
-module "module_lxc" {
+module "proxmox_lxc" {
   source   = "../../../modules/proxmox_lxc"
   for_each = module.normalizer.final_lxc_list
 
   depends_on = [proxmox_download_file.lxc_template, proxmox_virtual_environment_file.image_upload]
 
   # Main info
-  vm_id       = each.value.vm_id
-  app_key     = each.value.app_key
-  node_name   = each.value.node_name
-  description = each.value.description
-  tags        = each.value.tags
-  on_boot     = each.value.on_boot
-  started     = each.value.started
+  vm_id          = each.value.vm_id
+  app_key        = each.value.app_key
+  node_name      = each.value.node_name
+  description    = each.value.description
+  tags           = each.value.tags
+  on_boot        = each.value.on_boot
+  started        = each.value.started
+  ansible_groups = each.value.ansible_groups
 
   unprivileged = each.value.unprivileged
 
@@ -210,7 +211,7 @@ locals {
     [for name, lxc in module.normalizer.final_lxc_list : merge(
       lxc,
       {
-        ipv4_address          = try(lxc.lxc_config.ipv4_address, "IP_PENDING")
+        ipv4_address          = try([for addr in flatten(module.proxmox_lxc[name].lxc_details.ipv4_addresses) : addr if addr != "127.0.0.1"][0], "IP_PENDING")
         user_account_username = "root"
       }
     )]
@@ -256,7 +257,7 @@ output "created_vms" {
 output "created_lxcs" {
   description = "A map of all LXC containers created by this stack, keyed by their names."
   value = {
-    for lxc_name, lxc_instance in module.module_lxc :
+    for lxc_name, lxc_instance in module.proxmox_lxc :
     lxc_name => {
       id        = lxc_instance.lxc_details.id
       name      = lxc_name
