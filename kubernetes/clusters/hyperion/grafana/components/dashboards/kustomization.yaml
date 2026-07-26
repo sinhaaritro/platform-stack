@@ -67,3 +67,69 @@ configMapGenerator:
         grafana_dashboard: "1"
       annotations:
         grafana_folder: "Executive"
+
+  - name: grafana-dashboard-application-health
+    namespace: monitoring
+    files:
+      - developer/D1-application-health.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: "Developer"
+
+  - name: grafana-dashboard-cache-doc-stores
+    namespace: monitoring
+    files:
+      - dba/B2-cache-and-document-stores.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: "DBA"
+
+  - name: grafana-dashboard-postgresql
+    namespace: monitoring
+    files:
+      - dba/B1-postgresql.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: "DBA"
+
+  - name: grafana-dashboard-security-auth
+    namespace: monitoring
+    files:
+      - developer/D3-security-auth.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: "Developer"
+
+  - name: grafana-dashboard-log-explorer
+    namespace: monitoring
+    files:
+      - developer/D2-log-explorer.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: "Developer"
+
+  - name: grafana-dashboard-monitoring-self-health
+    namespace: monitoring
+    files:
+      - sre/S5-monitoring-self-health.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: "SRE / Operations"
