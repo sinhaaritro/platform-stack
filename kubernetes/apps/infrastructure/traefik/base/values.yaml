@@ -1,3 +1,11 @@
 ingressRoute:
   dashboard:
     enabled: false
+
+metrics:
+  prometheus:
+    service:
+      enabled: true
+      ports:
+        metrics:
+          port: 9100

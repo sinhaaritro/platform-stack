@@ -10,7 +10,6 @@
 *   [ ] ...
 
 ## Feature Ideas
-*   [ ] **Add Dashboards** — Get monitoring dsahboards up and running.
 *   [ ] **Authentik SSO for Obsidian Web** — Add forward auth proxy via Authentik since linuxserver/obsidian has no OAuth. Required before exposing via Cloudflare Tunnel. Implement using Authentik blueprints-as-code.
 *   [ ] **New 30day backup schedule for SSL cert** — Get new backup shedule for SSL cert.
 *   [ ] **Add Cloudflare** — Add in opentofu to control the dns, nameservers to cloudflare.

@@ -11,4 +11,4 @@ helmCharts:
     valuesFile: values.yaml
 
 resources:
-  - ../components/cloudflare/secret.yaml
+  - servicemonitor.yaml

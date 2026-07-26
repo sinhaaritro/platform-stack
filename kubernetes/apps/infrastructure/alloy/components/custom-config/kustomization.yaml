@@ -70,23 +70,7 @@ patches:
             }
           }
 
-          // Metrics: Discovery (SeaweedFS)
-          discovery.relabel "seaweedfs" {
-            targets = discovery.kubernetes.nodes.targets
-            rule {
-              source_labels = ["__meta_kubernetes_service_name"]
-              regex = "seaweedfs-(master|volume|filer|s3)"
-              action = "keep"
-            }
-            rule {
-              target_label = "__address__"
-              replacement  = "${1}:9327"
-              source_labels = ["__address__"]
-              regex = "([^:]+)(?::\\d+)?"
-            }
-          }
-
-          // Metrics: Scrape
+          // Metrics: Scrape (Node Exporter)
           prometheus.scrape "node_exporter" {
             job_name   = "node-exporter"
             targets    = discovery.relabel.node_exporter.output
@@ -94,6 +78,7 @@ patches:
             scrape_interval = "15s"
           }
 
+          // Metrics: Discovery (Kube State Metrics)
           discovery.relabel "kube_state_metrics" {
             targets = discovery.kubernetes.nodes.targets
             rule {
@@ -103,6 +88,7 @@ patches:
             }
           }
 
+          // Metrics: Scrape (Kube State Metrics)
           prometheus.scrape "kube_state_metrics" {
             job_name   = "kube-state-metrics"
             targets    = discovery.relabel.kube_state_metrics.output
@@ -110,9 +96,118 @@ patches:
             scrape_interval = "15s"
           }
 
+          // Metrics: Scrape (SeaweedFS)
           prometheus.scrape "seaweedfs" {
             job_name   = "seaweedfs"
-            targets    = discovery.relabel.seaweedfs.output
+            targets    = discovery.relabel.seaweedfs_svc.output
+            forward_to = [prometheus.remote_write.mimir.receiver]
+            scrape_interval = "15s"
+          }
+
+          // Metrics: Discovery (Traefik)
+          discovery.kubernetes "traefik_services" {
+            role = "service"
+          }
+
+          discovery.relabel "traefik" {
+            targets = discovery.kubernetes.traefik_services.targets
+            rule {
+              source_labels = ["__meta_kubernetes_namespace"]
+              action = "keep"
+              regex = "networking"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_service_name"]
+              regex = "traefik.*"
+              action = "keep"
+            }
+          }
+
+          // Metrics: Scrape (Traefik)
+          prometheus.scrape "traefik" {
+            job_name   = "traefik"
+            targets    = discovery.relabel.traefik.output
+            forward_to = [prometheus.remote_write.mimir.receiver]
+            scrape_interval = "15s"
+          }
+
+          // Metrics: Discovery (cert-manager)
+          discovery.kubernetes "cert_manager_services" {
+            role = "service"
+          }
+
+          discovery.relabel "cert_manager" {
+            targets = discovery.kubernetes.cert_manager_services.targets
+            rule {
+              source_labels = ["__meta_kubernetes_namespace"]
+              action = "keep"
+              regex = "networking"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_service_name"]
+              regex = "cert-manager$"
+              action = "keep"
+            }
+          }
+
+          // Metrics: Scrape (cert-manager)
+          prometheus.scrape "cert_manager" {
+            job_name   = "cert-manager"
+            targets    = discovery.relabel.cert_manager.output
+            forward_to = [prometheus.remote_write.mimir.receiver]
+            scrape_interval = "15s"
+          }
+
+          // Metrics: Discovery (MetalLB)
+          discovery.kubernetes "metallb_services" {
+            role = "service"
+          }
+
+          discovery.relabel "metallb" {
+            targets = discovery.kubernetes.metallb_services.targets
+            rule {
+              source_labels = ["__meta_kubernetes_namespace"]
+              action = "keep"
+              regex = "networking"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_service_name"]
+              regex = "metallb-.*"
+              action = "keep"
+            }
+          }
+
+          // Metrics: Scrape (MetalLB)
+          prometheus.scrape "metallb" {
+            job_name   = "metallb"
+            targets    = discovery.relabel.metallb.output
+            forward_to = [prometheus.remote_write.mimir.receiver]
+            scrape_interval = "15s"
+          }
+
+          // Metrics: Discovery (external-dns)
+          discovery.kubernetes "external_dns_services" {
+            role = "service"
+          }
+
+          discovery.relabel "external_dns" {
+            targets = discovery.kubernetes.external_dns_services.targets
+            rule {
+              source_labels = ["__meta_kubernetes_namespace"]
+              action = "keep"
+              regex = "external-dns"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_service_name"]
+              regex = "external-dns$"
+              action = "keep"
+            }
+          }
+
+          // Metrics: Scrape (external-dns)
+          prometheus.scrape "external_dns" {
+            job_name   = "external-dns"
+            targets    = discovery.relabel.external_dns.output
             forward_to = [prometheus.remote_write.mimir.receiver]
             scrape_interval = "15s"
           }
@@ -127,6 +222,7 @@ patches:
             }
           }
 
+          // Metrics: Scrape (Velero)
           prometheus.scrape "velero" {
             job_name   = "velero"
             targets    = discovery.relabel.velero.output

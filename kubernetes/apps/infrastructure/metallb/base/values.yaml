@@ -1,0 +1,5 @@
+prometheus:
+  serviceAccount: metallb
+  namespace: networking
+  serviceMonitor:
+    enabled: true

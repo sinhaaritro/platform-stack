@@ -9,6 +9,7 @@ helmCharts:
     releaseName: metallb
     namespace: networking
     includeCRDs: true
+    valuesFile: values.yaml
 
 resources:
   - pool.yaml
