@@ -5,28 +5,20 @@
 locals {
   # --- STEP 6.A: Create a Flattened List of All Host-to-Group Mappings ---
   # This is the first phase of the render. It creates a simple list of objects,
-  # where each object represents one VM belonging to one group. We create a
-  # mapping for every tag the VM has. This logic only uses data known at
+  # where each object represents one host belonging to one group. We create a
+  # mapping for every tag the host has. This logic only uses data known at
   # 'plan' time (names and tags).
   host_group_mappings = flatten([
-    # Loop through each of our final, fully resolved VM objects...
-    for vm in var.vm_list : [
-      # 1. Create a single list containing all possible group names for this VM.
-      #    - The VM's tags (e.g., "web", "ubuntu")
-      #    - The VM's application key (e.g., "web_server")
-      #    - The VM's Proxmox node name (e.g., "moo-moo")
-      # 2. Use 'distinct()' to ensure there are no duplicate group names.
+    for host in var.host_list : [
       for group_name in distinct(concat(
-        try(vm.tags, []),
-        [try(vm.app_key, null)],
-        [try(vm.node_name, null)],
-        [try(vm.type, null)],
-        keys(try(vm.ansible_groups, {}))
+        try(host.tags, []),
+        [try(host.app_key, null)],
+        [try(host.node_name, null)],
+        [try(host.type, null)],
+        keys(try(host.ansible_groups, {}))
         )) : {
-
-        # 3. Create the simple mapping object for each group.
         group = replace(group_name, "-", "_")
-        host  = vm.name
+        host  = host.name
       } if group_name != null
     ]
   ])
@@ -39,6 +31,9 @@ locals {
     for mapping in local.host_group_mappings :
     mapping.group => mapping.host...
   }
+
+  # Index host_list by name for quick lookup during inventory generation
+  host_index = { for host in var.host_list : host.name => host }
 }
 
 # --- STEP 6.C: Create the Ansible Inventory File Directly ---
@@ -47,7 +42,7 @@ resource "local_file" "ansible_inventory" {
   content = templatefile("${path.module}/templates/ansible_inventory.yml.tftpl", {
 
     # This is the second phase of the render. This expression is evaluated
-    # during the 'apply' phase, after the VMs have been created.
+    # during the 'apply' phase, after the hosts have been created.
     inventory_data = {
       for group_name, hostnames in local.inventory_groups_with_hosts :
       group_name => {
@@ -61,11 +56,11 @@ resource "local_file" "ansible_inventory" {
           for host in hostnames :
           host => merge(
             {
-              ansible_host = try([for addr in flatten(var.vm_outputs[host].ipv4_addresses) : addr if addr != "127.0.0.1"][0], "IP_PENDING")
-              ansible_user = var.vm_list[host].user_account_username
+              ansible_host = try(local.host_index[host].ipv4_address, "IP_PENDING")
+              ansible_user = try(local.host_index[host].user_account_username, "root")
             },
             # Merge in the variables for this specific group from the host's definition
-            try(var.vm_list[host].ansible_groups[group_name], {})
+            try(local.host_index[host].ansible_groups[group_name], {})
           )
         }
       }

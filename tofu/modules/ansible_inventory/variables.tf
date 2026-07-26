@@ -7,13 +7,8 @@ variable "stack_name" {
   type        = string
 }
 
-variable "vm_list" {
-  description = "The normalized map of enabled VMs from the resource normalizer module."
-  type        = any
-}
-
-variable "vm_outputs" {
-  description = "The computed outputs from the VM creation module (containing IP addresses), keyed by VM name."
+variable "host_list" {
+  description = "A unified list of all hosts (VMs and LXCs) with their configuration. Each host object must contain: name, tags, app_key, node_name, type, ansible_groups, ipv4_address, user_account_username."
   type        = any
 }
 
