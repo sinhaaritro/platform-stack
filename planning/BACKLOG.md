@@ -13,7 +13,7 @@
 *   [ ] **Authentik SSO for Obsidian Web** — Add forward auth proxy via Authentik since linuxserver/obsidian has no OAuth. Required before exposing via Cloudflare Tunnel. Implement using Authentik blueprints-as-code.
 *   [ ] **New 30day backup schedule for SSL cert** — Get new backup shedule for SSL cert.
 *   [ ] **Add Cloudflare** — Add in opentofu to control the dns, nameservers to cloudflare.
-*   [ ] **LXC** — Add the adguard as LXC from opentofu.
+*   [ ] **LXC** — Add the adguard as LXC from netbird.
 *   [ ] **Ansible role for dev vms** — Get new roles, for working vm like flutter, react
 *   [ ] **Ansible Visualization** — Get the new ansible role visualization
 *   [ ] **Opentofu Visualization** — Get the new opentofu infra visualization.
