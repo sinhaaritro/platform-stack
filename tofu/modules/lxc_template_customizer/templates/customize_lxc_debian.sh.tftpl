@@ -1,0 +1,37 @@
+#!/bin/bash
+# -----------------------------------------------------------------------------
+# DEBIAN / UBUNTU LXC TEMPLATE CUSTOMIZATION SCRIPT
+# -----------------------------------------------------------------------------
+set -e
+
+CACHE_DIR="${cache_dir}"
+mkdir -p "$CACHE_DIR"
+URL="${template_url}"
+TARGET_PATH="$CACHE_DIR/${target_filename}"
+
+if [ ! -f "$TARGET_PATH" ]; then
+  WORK_DIR=$(mktemp -d)
+  curl -fsSL "$URL" -o "$WORK_DIR/base.archive"
+  mkdir -p "$WORK_DIR/rootfs"
+  tar -xf "$WORK_DIR/base.archive" -C "$WORK_DIR/rootfs/"
+  sudo cp /etc/resolv.conf "$WORK_DIR/rootfs/etc/resolv.conf" 2>/dev/null || true
+  
+  sudo mount --bind /dev "$WORK_DIR/rootfs/dev"
+  sudo mount --bind /proc "$WORK_DIR/rootfs/proc"
+
+  sudo chroot "$WORK_DIR/rootfs" /bin/sh -c "DEBIAN_FRONTEND=noninteractive apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y openssh-server sudo python3 && ssh-keygen -A"
+  sudo mkdir -p "$WORK_DIR/rootfs/run/sshd" "$WORK_DIR/rootfs/root/.ansible/tmp"
+  sudo chown root:root "$WORK_DIR/rootfs/run/sshd" "$WORK_DIR/rootfs/root/.ansible/tmp"
+  sudo chmod 755 "$WORK_DIR/rootfs/run/sshd"
+  sudo chmod 700 "$WORK_DIR/rootfs/root/.ansible/tmp"
+  sudo sh -c "echo 'PermitRootLogin yes' >> '$WORK_DIR/rootfs/etc/ssh/sshd_config'"
+  sudo sh -c "echo 'PasswordAuthentication yes' >> '$WORK_DIR/rootfs/etc/ssh/sshd_config'"
+  sudo chroot "$WORK_DIR/rootfs" /bin/sh -c "systemctl enable ssh 2>/dev/null || update-rc.d ssh enable 2>/dev/null || true"
+  sudo chroot "$WORK_DIR/rootfs" /bin/sh -c "apt-get clean && rm -rf /var/lib/apt/lists/*"
+
+  sudo umount "$WORK_DIR/rootfs/proc" 2>/dev/null || true
+  sudo umount "$WORK_DIR/rootfs/dev" 2>/dev/null || true
+
+  (cd "$WORK_DIR/rootfs" && sudo tar -cf - . | xz -9 -T0 > "$TARGET_PATH")
+  sudo rm -rf "$WORK_DIR"
+fi

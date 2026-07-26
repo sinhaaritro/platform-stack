@@ -16,8 +16,8 @@ This system is a direct implementation of our core principles, realized through 
 *   **Declarative, Data-Driven Configuration:** The resources for each stack are defined in `.tfvars` files. The core OpenTofu logic is generic and simply consumes this data, making it easy to add or modify resources without changing the underlying code.
 *   **Native Tooling:** All `tofu` commands are run as native executables on a central Control Machine. This simplifies the workflow, enhances performance, and allows for seamless integration with development tools.
 *   **Secure Secret Management (Ansible Vault):** Plain-text secrets are never committed to Git. We use Ansible Vault to encrypt sensitive data. For each stack, we maintain two files:
-    *   `vms.tfvars` (or similar): Contains non-secret configuration and is committed to Git directly.
-    *   `secrets.tfvars`: Contains all sensitive data and is encrypted with Ansible Vault before being committed. We use **Process Substitution** to decrypt secrets in-memory during `plan` and `apply` operations.
+    *   `schema.tfvars` (or similar): Contains non-secret configuration and is committed to Git directly.
+    *   `schema.secret.tfvars`: Contains all sensitive data and is encrypted with Ansible Vault before being committed. We use **Process Substitution** to decrypt secrets in-memory during `plan` and `apply` operations.
 *   **CI/CD Change Detection:** The automation pipeline acts as a guardrail. It is configured to detect changes within specific stack directories and will only run `plan` or `apply` against the stack that has been modified, preventing accidental cross-environment operations.
 
 
@@ -115,13 +115,13 @@ The project is organized into a single monorepo that combines a data-driven appr
     │   │   ├── main.tf              # Logic to create resources from data (using for_each)
     │   │   ├── variables.tf         # Defines the 'resource_groups' variable structure
     │   │   ├── backend.tf           # S3 backend config for Server A's state file
-    │   │   └── vms.tfvars           # DATA file defining all VMs/LXCs on Server A
+    │   │   └── schema.tfvars        # DATA file defining all VMs/LXCs on Server A
     │   │
     │   ├── proxmox_server_B_no_gpu/ # STACK 2: Manages only Server B (no GPU)
     │   │   ├── main.tf              # Can be an identical copy of the other main.tf
     │   │   ├── variables.tf         # Identical copy
     │   │   ├── backend.tf           # S3 backend config for Server B's state file
-    │   │   └── vms.tfvars           # DATA file defining all VMs/LXCs on Server B
+    │   │   └── schema.tfvars        # DATA file defining all VMs/LXCs on Server B
     │
     └── cloud/
         └── aws_global/              # STACK 3: Manages all AWS resources
@@ -151,19 +151,19 @@ This is the standard procedure for making any change to an existing stack.
 2.  **Edit Configuration Files:** Navigate to the specific stack directory you intend to change.
     *   For **non-sensitive** values (like CPU count, memory, VM name), edit the primary `.tfvars` file directly:
         ```bash
-        vim stacks/onprem/proxmox_server_A_gpu/vms.tfvars
+        vim stacks/onprem/proxmox_server_A_gpu/schema.tfvars
         ```
     *   For **sensitive** values (like passwords or API keys), use `ansible-vault` to safely edit the encrypted secrets file:
         ```bash
-        ansible-vault edit stacks/onprem/proxmox_server_A_gpu/secrets.tfvars
+        ansible-vault edit stacks/onprem/proxmox_server_A_gpu/schema.secret.tfvars
         ```
 
 3.  **Run a Plan:** From the **repository root**, run `tofu plan` using the `-chdir` flag to target your stack. Use process substitution (`<(...)`) to feed the decrypted secrets to the command in-memory.
     ```bash
     # This command targets the 'proxmox_server_A_gpu' stack
     tofu -chdir="stacks/onprem/proxmox_server_A_gpu" plan \
-      -var-file="vms.tfvars" \
-      -var-file=<(ansible-vault view secrets.tfvars)
+      -var-file="schema.tfvars" \
+      -var-file=<(ansible-vault view schema.secret.tfvars)
     ```
 
 4.  **Review the Plan:** Carefully inspect the output. Confirm that the proposed changes are exactly what you expect.
@@ -196,7 +196,7 @@ This procedure is for initializing a new, isolated set of resources (e.g., bring
       }
     }
     ```
-3.  **Populate Configuration:** Edit the `.tfvars` and `secrets.tfvars` files in the new directory to define the resources for the new stack.
+3.  **Populate Configuration:** Edit the `schema.tfvars` and `schema.secret.tfvars` files in the new directory to define the resources for the new stack.
 4.  **Initialize and Apply:** Follow the "Daily Workflow" (steps 3-6) for this new stack directory to initialize, plan, and apply its configuration for the first time.
 
 ---
