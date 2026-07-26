@@ -436,4 +436,37 @@ resources = {
       }
     }
   },
+
+  "netbird" = {
+    enabled         = true
+    type            = "lxc"
+    node_name       = "atlas"
+    description     = "Netbird VPN server/client LXC container. Debian 13."
+    tags            = ["ansible", "netbird", "vpn", "lxc"]
+    on_boot         = true
+    cloud_init_user = "dev"
+    ansible_groups = {
+      "netbird" = {}
+    }
+
+    lxc_config = {
+      template_datastore_id = "WD1TB"
+      template_url          = "http://download.proxmox.com/images/system/debian-13-standard_13.6-1_amd64.tar.zst"
+      os_type               = "debian"
+      cpu_cores             = 1
+      memory_size           = 512
+      disk_size             = 4
+      unprivileged          = true
+      nesting               = true
+    }
+
+    nodes = {
+      "netbird-01" = {
+        vm_id = 1021
+        lxc_config = {
+          ipv4_address = "192.168.0.21/24"
+        }
+      }
+    }
+  },
 }
