@@ -7,7 +7,7 @@
 | **Refresh** | 5 min |
 | **Audience** | Close/known users — household members, power users |
 
-> **Purpose:** Everything in [P1 — Home — Public](HOME_PUBLIC.md) plus household-relevant status panels: weather, smart home device status, and room-by-room IoT overview. This is the "family control panel" — not a monitoring dashboard, but a *living room screen* that happens to run in Grafana.
+> **Purpose:** Everything in [P1 — Home — Public](P1-home-public.md) plus household-relevant status panels: weather, smart home device status, and room-by-room IoT overview. This is the "family control panel" — not a monitoring dashboard, but a *living room screen* that happens to run in Grafana.
 
 **← Back to [Dashboard Catalog](../README.md#-portal-3-dashboards)**
 
@@ -41,7 +41,7 @@ Single-screen. Two sections stacked vertically:
 
 ### Section 1: App Cards
 
-Identical to [P1](HOME_PUBLIC.md#app-cards). Same three app cards (Immich, Obsidian, Copyparty) with the same status indicators and links.
+Identical to [P1](P1-home-public.md#app-cards). Same three app cards (Immich, Obsidian, Copyparty) with the same status indicators and links.
 
 ---
 
@@ -84,4 +84,4 @@ Identical to [P1](HOME_PUBLIC.md#app-cards). Same three app cards (Immich, Obsid
 
 ---
 
-**← Back to [Dashboard Catalog](../README.md#-portal-3-dashboards)** | **Previous: [P1 — Home — Public](HOME_PUBLIC.md)** | **Next: [P3 — Home — Admin](HOME_ADMIN.md)**
+**← Back to [Dashboard Catalog](../README.md#-portal-3-dashboards)** | **Previous: [P1 — Home — Public](P1-home-public.md)** | **Next: [P3 — Home — Admin](P3-home-admin.md)**

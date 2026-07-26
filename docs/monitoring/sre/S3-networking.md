@@ -45,7 +45,7 @@ Cloudflare Tunnel (cloudflared, port 2000/metrics)
 > **Blocker:** None of the five components above are currently scraped by Alloy. This is the largest single batch of new scrape blocks in the plan so far — five separate targets need to be added to `custom-config` before any panel on this dashboard shows data. Recommend doing this as one PR (all five scrape blocks together) since they share the same Alloy config file and testing pass.
 
 > [!NOTE]
-> **Cloudflare Tunnel placement:** `cloudflared` metrics could arguably live on [S6 — External Infrastructure](EXTERNAL_INFRASTRUCTURE.md) since Cloudflare is an external service. This plan keeps tunnel *health* (is it connected, latency, error rate) on S3 because it's part of the request path for every ingress request today — but moves Cloudflare *account-level* data (threats blocked, analytics, cost) to S6, where it belongs alongside the rest of the external-service dashboards. Worth confirming this split matches your mental model before building.
+> **Cloudflare Tunnel placement:** `cloudflared` metrics could arguably live on [S6 — External Infrastructure](S6-external-infrastructure.md) since Cloudflare is an external service. This plan keeps tunnel *health* (is it connected, latency, error rate) on S3 because it's part of the request path for every ingress request today — but moves Cloudflare *account-level* data (threats blocked, analytics, cost) to S6, where it belongs alongside the rest of the external-service dashboards. Worth confirming this split matches your mental model before building.
 
 ---
 

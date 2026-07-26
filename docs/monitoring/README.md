@@ -73,11 +73,11 @@ Each Grafana folder maps to a **persona**. Access control is handled via **Authe
 > **Access control:** Authentik groups determine which portal variant a user sees as their Grafana home dashboard.
 > **Refresh:** 5 min. Static links + live status indicators.
 
-| # | Dashboard | Audience | Content |
-|---|-----------|----------|---------|
-| P1 | **Home — Public** | Generic end users (family, friends) | App links only: Immich, Obsidian, Copyparty. Clean card layout with app icons, descriptions, and direct URLs. Status indicators (🟢/🔴) showing if each app is reachable. No admin links, no metrics. |
-| P2 | **Home — Trusted** | Close/known users (household, power users) | Everything in P1 **plus**: Weather widget (via JSON API datasource or iframe), smart home status panel (lights on/off, fan speed — via Home Assistant API or MQTT metrics), room-by-room IoT status, quick actions links. |
-| P3 | **Home — Admin** | You (platform admin) | Everything in P2 **plus**: Links to all Grafana dashboards (Executive, SRE, Developer, DBA), cluster health summary strip (node count, CPU, alerts), recent alert feed, backup SLA %, quick-links to Traefik dashboard, Longhorn UI, Grafana Explore. This is your personal command center. |
+| # | Dashboard | Audience | Content | Detail Doc |
+|---|-----------|----------|---------|------------|
+| P1 | **Home — Public** | Generic end users (family, friends) | App links only: Immich, Obsidian, Copyparty. Clean card layout with app icons, descriptions, and direct URLs. Status indicators (🟢/🔴) showing if each app is reachable. No admin links, no metrics. | [P1-home-public.md](portal/P1-home-public.md) |
+| P2 | **Home — Trusted** | Close/known users (household, power users) | Everything in P1 **plus**: Weather widget (via JSON API datasource or iframe), smart home status panel (lights on/off, fan speed — via Home Assistant API or MQTT metrics), room-by-room IoT status, quick actions links. | [P2-home-trusted.md](portal/P2-home-trusted.md) |
+| P3 | **Home — Admin** | You (platform admin) | Everything in P2 **plus**: Links to all Grafana dashboards (Executive, SRE, Developer, DBA), cluster health summary strip (node count, CPU, alerts), recent alert feed, backup SLA %, quick-links to Traefik dashboard, Longhorn UI, Grafana Explore. This is your personal command center. | [P3-home-admin.md](portal/P3-home-admin.md) |
 
 > [!NOTE]
 > **Implementation options for Portal dashboards:**
@@ -113,7 +113,7 @@ Each Grafana folder maps to a **persona**. Access control is handled via **Authe
 | S3 | **Networking & Ingress** | Traefik, cert-manager, MetalLB, external-dns | Request rate/error rate/latency (RED), TLS cert expiry, certificate ready status, MetalLB pool usage, DNS sync status, Cloudflare tunnel health | [S3-networking.md](sre/S3-networking.md) |
 | S4 | **Storage** | Longhorn volumes + SeaweedFS object store | Volume health/capacity/IOPS/throughput, node disk space, replica count, SeaweedFS master/volume/filer status, bucket sizes, S3 request rate | [S4-storage.md](sre/S4-storage.md) |
 | S5 | **Monitoring Self-Health** | "Who watches the watchmen?" | Mimir ingestion rate/active series/query latency, Loki ingestion/errors, Alloy scrape target count/failures, Alertmanager notification rate/failures | [S5-monitoring-self-health.md](sre/S5-monitoring-self-health.md) |
-| S6 | **External Infrastructure** | Proxmox, AWS, Cloudflare, AdGuard, Netbird | Proxmox node/VM metrics, AWS S3 storage & cost, Cloudflare tunnels & threats, AdGuard DNS stats, Netbird peer status | [EXTERNAL_INFRASTRUCTURE.md](sre/EXTERNAL_INFRASTRUCTURE.md) |
+| S6 | **External Infrastructure** | Proxmox, AWS, Cloudflare, AdGuard, Netbird | Proxmox node/VM metrics, AWS S3 storage & cost, Cloudflare tunnels & threats, AdGuard DNS stats, Netbird peer status | [S6-external-infrastructure.md](sre/S6-external-infrastructure.md) |
 
 ---
 
@@ -151,7 +151,7 @@ Each dashboard JSON includes links to related dashboards (internal) and external
 
 | Target | Type | Description |
 |--------|------|-------------|
-| [S6 — External Infrastructure](sre/EXTERNAL_INFRASTRUCTURE.md) | Internal (dashboard) | AWS S3 target that Velero backs up to. |
+| [S6 — External Infrastructure](sre/S6-external-infrastructure.md) | Internal (dashboard) | AWS S3 target that Velero backs up to. |
 | [E1 — Platform Overview](executive/E1-platform-overview.md) | Internal (dashboard) | High-level platform view including backup SLA context. |
 | AWS S3 Console | External (placeholder) | Velero backup bucket in AWS. URL: `https://s3.console.aws.amazon.com/s3/buckets?region=us-east-1` |
 
@@ -223,7 +223,7 @@ We build Phase 1 first, then expand. Each module is a self-contained Grafana das
 | [executive/E1-platform-overview.md](executive/E1-platform-overview.md) | **E1** — Detailed panel-by-panel documentation (single-screen, no tabs) |
 | [sre/S3-networking.md](sre/S3-networking.md) | **S3** — Detailed panel-by-panel documentation, organized by tabs |
 | [sre/S4-storage.md](sre/S4-storage.md) | **S4** — Detailed panel-by-panel documentation, organized by tabs |
-| [sre/EXTERNAL_INFRASTRUCTURE.md](sre/EXTERNAL_INFRASTRUCTURE.md) | **S6** — Detailed panel-by-panel documentation, organized by rows |
+| [sre/S6-external-infrastructure.md](sre/S6-external-infrastructure.md) | **S6** — Detailed panel-by-panel documentation, organized by rows |
 | [dba/B1-postgresql.md](dba/B1-postgresql.md) | **B1** — Detailed panel-by-panel documentation, organized by tabs |
 | [dba/B2-cache-and-document-stores.md](dba/B2-cache-and-document-stores.md) | **B2** — Detailed panel-by-panel documentation, organized by tabs |
 | [developer/D1-application-health.md](developer/D1-application-health.md) | **D1** — Detailed panel-by-panel documentation, organized by tabs |
@@ -231,6 +231,9 @@ We build Phase 1 first, then expand. Each module is a self-contained Grafana das
 | [developer/D2-log-explorer.md](developer/D2-log-explorer.md) | **D2** — Detailed panel-by-panel documentation (single-screen sections) |
 | [sre/S5-monitoring-self-health.md](sre/S5-monitoring-self-health.md) | **S5** — Detailed panel-by-panel documentation, organized by tabs |
 | [executive/E2-capacity-and-trends.md](executive/E2-capacity-and-trends.md) | **E2** — Detailed panel-by-panel documentation (single-screen sections) |
+| [portal/P1-home-public.md](portal/P1-home-public.md) | **P1** — Service directory with live status for end users |
+| [portal/P2-home-trusted.md](portal/P2-home-trusted.md) | **P2** — Household portal with weather and smart home status |
+| [portal/P3-home-admin.md](portal/P3-home-admin.md) | **P3** — Admin command center with platform health strip and navigation |
 
 ---
 

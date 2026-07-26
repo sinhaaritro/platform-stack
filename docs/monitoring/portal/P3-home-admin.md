@@ -7,7 +7,7 @@
 | **Refresh** | 1 min |
 | **Audience** | You (platform admin) — personal command center |
 
-> **Purpose:** Everything in [P2 — Home — Trusted](HOME_TRUSTED.md) plus a platform operations summary and quick-links to every tool you use. P3 is *your* landing page — the first thing you see when opening Grafana. It combines household context (weather, smart home) with a compressed infrastructure overview and navigation links to all dashboards and admin UIs. Think of it as a personalized "mission control" rather than a monitoring dashboard.
+> **Purpose:** Everything in [P2 — Home — Trusted](P2-home-trusted.md) plus a platform operations summary and quick-links to every tool you use. P3 is *your* landing page — the first thing you see when opening Grafana. It combines household context (weather, smart home) with a compressed infrastructure overview and navigation links to all dashboards and admin UIs. Think of it as a personalized "mission control" rather than a monitoring dashboard.
 
 **← Back to [Dashboard Catalog](../README.md#-portal-3-dashboards)**
 
@@ -78,10 +78,10 @@ Single-screen. Four sections stacked vertically, ordered by urgency:
 
 | Group | Links |
 |-------|-------|
-| **Executive** | [E1 — Platform Overview](../executive/PLATFORM_OVERVIEW.md), [E2 — Capacity & Trends](../executive/CAPACITY_AND_TRENDS.md) |
-| **SRE / Operations** | [S1 — Backup & DR](../sre/BACKUP_AND_DISASTER_RECOVERY.md), [S2 — Cluster Health](../sre/CLUSTER_AND_NODE_HEALTH.md), [S3 — Networking](../sre/NETWORKING.md), [S4 — Storage](../sre/STORAGE.md), [S5 — Monitoring Health](../sre/MONITORING_SELF_HEALTH.md), [S6 — External Infra](../sre/EXTERNAL_INFRASTRUCTURE.md) |
-| **Developer** | [D1 — App Health](../developer/APPLICATION_HEALTH.md), [D2 — Log Explorer](../developer/LOG_EXPLORER.md), [D3 — Security](../developer/SECURITY_AND_AUTH.md) |
-| **DBA** | [B1 — PostgreSQL](../dba/POSTGRESQL.md), [B2 — Cache & Docs](../dba/CACHE_AND_DOCUMENT_STORES.md) |
+| **Executive** | [E1 — Platform Overview](../executive/E1-platform-overview.md), [E2 — Capacity & Trends](../executive/E2-capacity-and-trends.md) |
+| **SRE / Operations** | [S1 — Backup & DR](../sre/S1-backup-and-disaster-recovery.md), [S2 — Cluster Health](../sre/S2-cluster-and-node-health.md), [S3 — Networking](../sre/S3-networking.md), [S4 — Storage](../sre/S4-storage.md), [S5 — Monitoring Health](../sre/S5-monitoring-self-health.md), [S6 — External Infra](../sre/S6-external-infrastructure.md) |
+| **Developer** | [D1 — App Health](../developer/D1-application-health.md), [D2 — Log Explorer](../developer/D2-log-explorer.md), [D3 — Security](../developer/D3-security-auth.md) |
+| **DBA** | [B1 — PostgreSQL](../dba/B1-postgresql.md), [B2 — Cache & Docs](../dba/B2-cache-and-document-stores.md) |
 
 #### Admin Tool Quick-Links
 
@@ -108,8 +108,8 @@ Single-screen. Four sections stacked vertically, ordered by urgency:
 
 ### Section 4: Household Status
 
-Inherited from [P2 — Home — Trusted](HOME_TRUSTED.md#section-2-household-status). Same weather widget, room status grid, and smart home panels, pushed to the bottom of the page since ops context is more urgent for the admin persona.
+Inherited from [P2 — Home — Trusted](P2-home-trusted.md#section-2-household-status). Same weather widget, room status grid, and smart home panels, pushed to the bottom of the page since ops context is more urgent for the admin persona.
 
 ---
 
-**← Back to [Dashboard Catalog](../README.md#-portal-3-dashboards)** | **Previous: [P2 — Home — Trusted](HOME_TRUSTED.md)**
+**← Back to [Dashboard Catalog](../README.md#-portal-3-dashboards)** | **Previous: [P2 — Home — Trusted](P2-home-trusted.md)**

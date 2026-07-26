@@ -71,4 +71,4 @@ Each card has a colored dot:
 
 ---
 
-**← Back to [Dashboard Catalog](../README.md#-portal-3-dashboards)** | **Next: [P2 — Home — Trusted](HOME_TRUSTED.md)**
+**← Back to [Dashboard Catalog](../README.md#-portal-3-dashboards)** | **Next: [P2 — Home — Trusted](P2-home-trusted.md)**
