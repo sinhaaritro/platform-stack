@@ -409,6 +409,11 @@ resources = {
     ansible_groups  = {}
     on_boot         = true
     cloud_init_user = "adguard"
+    ansible_groups = {
+      "adguard" = {
+        "adguard_version" = "v0.107.78"
+      }
+    }
 
     lxc_config = {
       template_datastore_id       = "WD1TB"

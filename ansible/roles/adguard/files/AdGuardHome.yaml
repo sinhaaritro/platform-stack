@@ -9,8 +9,8 @@ http:
       - GET /dns-query/{ClientID}
       - POST /dns-query/{ClientID}
     insecure_enabled: false
-  address: 0.0.0.0:80
-  session_ttl: 30d
+  address: 0.0.0.0:3000
+  session_ttl: 720h
 users:
   - name: flyover9890
     password: $2a$10$mNJcSxab8h.epuV.5k3HieWqz9P.iEy0CSMvFxSYL5IZQgn0sx9Ya
@@ -97,7 +97,7 @@ tls:
 querylog:
   dir_path: ""
   ignored: []
-  interval: 90d
+  interval: 2160h
   size_memory: 1000
   enabled: true
   ignored_enabled: false
@@ -105,7 +105,7 @@ querylog:
 statistics:
   dir_path: ""
   ignored: []
-  interval: 1d
+  interval: 24h
   enabled: true
   ignored_enabled: false
 filters:
@@ -356,4 +356,4 @@ os:
   group: ""
   user: ""
   rlimit_nofile: 0
-schema_version: 34
+schema_version: 28
