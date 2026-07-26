@@ -57,7 +57,7 @@ Single-screen, no tabs. Panels arranged in rows by importance.
 |--------|------|-------------|
 | [S1 — Backup & DR](../sre/S1-backup-and-disaster-recovery.md) | Internal (dashboard) | Backup SLA % panel is reused directly from S1. |
 | [S2 — Cluster & Node Health](../sre/S2-cluster-and-node-health.md) | Internal (dashboard) | Cluster CPU/Memory gauges and Active Alerts count are reused from S2. |
-| [S6 — External Infrastructure](../sre/S6-external-infrastructure.md) | Internal (dashboard) | External dependency health context for platform overview. |
+| [S6 — External Infrastructure](../sre/EXTERNAL_INFRASTRUCTURE.md) | Internal (dashboard) | External dependency health context for platform overview. |
 | E2 — Capacity & Trends | Internal (placeholder) | Planned rollup of all capacity trends. |
 
 **← Back to [Dashboard Catalog](../README.md#-executive-2-dashboards)** | **Previous: [S2 — Cluster & Node Health](../sre/S2-cluster-and-node-health.md)**

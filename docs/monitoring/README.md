@@ -113,7 +113,7 @@ Each Grafana folder maps to a **persona**. Access control is handled via **Authe
 | S3 | **Networking & Ingress** | Traefik, cert-manager, MetalLB, external-dns | Request rate/error rate/latency (RED), TLS cert expiry, certificate ready status, MetalLB pool usage, DNS sync status, Cloudflare tunnel health | [S3-networking.md](sre/S3-networking.md) |
 | S4 | **Storage** | Longhorn volumes + SeaweedFS object store | Volume health/capacity/IOPS/throughput, node disk space, replica count, SeaweedFS master/volume/filer status, bucket sizes, S3 request rate | [S4-storage.md](sre/S4-storage.md) |
 | S5 | **Monitoring Self-Health** | "Who watches the watchmen?" | Mimir ingestion rate/active series/query latency, Loki ingestion/errors, Alloy scrape target count/failures, Alertmanager notification rate/failures | [S5-monitoring-self-health.md](sre/S5-monitoring-self-health.md) |
-| S6 | **External Infrastructure** | Proxmox, AWS, Cloudflare, AdGuard, Netbird | Proxmox node/VM metrics, AWS S3 storage & cost, Cloudflare tunnels & threats, AdGuard DNS stats, Netbird peer status | [S6-external-infrastructure.md](sre/S6-external-infrastructure.md) |
+| S6 | **External Infrastructure** | Proxmox, AWS, Cloudflare, AdGuard, Netbird | Proxmox node/VM metrics, AWS S3 storage & cost, Cloudflare tunnels & threats, AdGuard DNS stats, Netbird peer status | [EXTERNAL_INFRASTRUCTURE.md](sre/EXTERNAL_INFRASTRUCTURE.md) |
 
 ---
 
@@ -151,7 +151,7 @@ Each dashboard JSON includes links to related dashboards (internal) and external
 
 | Target | Type | Description |
 |--------|------|-------------|
-| [S6 — External Infrastructure](sre/S6-external-infrastructure.md) | Internal (dashboard) | AWS S3 target that Velero backs up to. |
+| [S6 — External Infrastructure](sre/EXTERNAL_INFRASTRUCTURE.md) | Internal (dashboard) | AWS S3 target that Velero backs up to. |
 | [E1 — Platform Overview](executive/E1-platform-overview.md) | Internal (dashboard) | High-level platform view including backup SLA context. |
 | AWS S3 Console | External (placeholder) | Velero backup bucket in AWS. URL: `https://s3.console.aws.amazon.com/s3/buckets?region=us-east-1` |
 
@@ -223,7 +223,7 @@ We build Phase 1 first, then expand. Each module is a self-contained Grafana das
 | [executive/E1-platform-overview.md](executive/E1-platform-overview.md) | **E1** — Detailed panel-by-panel documentation (single-screen, no tabs) |
 | [sre/S3-networking.md](sre/S3-networking.md) | **S3** — Detailed panel-by-panel documentation, organized by tabs |
 | [sre/S4-storage.md](sre/S4-storage.md) | **S4** — Detailed panel-by-panel documentation, organized by tabs |
-| [sre/S6-external-infrastructure.md](sre/S6-external-infrastructure.md) | **S6** — Detailed panel-by-panel documentation, organized by rows |
+| [sre/EXTERNAL_INFRASTRUCTURE.md](sre/EXTERNAL_INFRASTRUCTURE.md) | **S6** — Detailed panel-by-panel documentation, organized by rows |
 | [dba/B1-postgresql.md](dba/B1-postgresql.md) | **B1** — Detailed panel-by-panel documentation, organized by tabs |
 | [dba/B2-cache-and-document-stores.md](dba/B2-cache-and-document-stores.md) | **B2** — Detailed panel-by-panel documentation, organized by tabs |
 | [developer/D1-application-health.md](developer/D1-application-health.md) | **D1** — Detailed panel-by-panel documentation, organized by tabs |

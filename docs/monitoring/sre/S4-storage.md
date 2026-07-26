@@ -138,8 +138,8 @@ Organized into **6 tabs**, same "glance first, drill down after" pattern as S1/S
 
 | Target | Type | Description |
 |--------|------|-------------|
-| [S6 — External Infrastructure](../sre/S6-external-infrastructure.md) | Internal (dashboard) | AWS S3 backup target (Velero bucket) is monitored in S6 Row 2. |
+| [S6 — External Infrastructure](EXTERNAL_INFRASTRUCTURE.md) | Internal (dashboard) | AWS S3 backup target (Velero bucket) is monitored in S6 Row 2. |
 | [B1 — PostgreSQL](../../dba/B1-postgresql.md) | Internal (dashboard) | PG14/PG18 databases run on Longhorn volumes tracked here. |
 | [B2 — Cache & Document Stores](../../dba/B2-cache-and-document-stores.md) | Internal (dashboard) | Valkey and CouchDB data stored in SeaweedFS buckets tracked here. |
 
-**← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)** | **Previous: [S3 — Networking](S3-networking.md)** | **Next: [S6 — External Infrastructure](S6-external-infrastructure.md)**
+**← Back to [Dashboard Catalog](../README.md#-sre--operations-6-dashboards)** | **Previous: [S3 — Networking](S3-networking.md)** | **Next: [S6 — External Infrastructure](EXTERNAL_INFRASTRUCTURE.md)**
