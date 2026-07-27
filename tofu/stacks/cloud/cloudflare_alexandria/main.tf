@@ -1,0 +1,158 @@
+# -----------------------------------------------------------------------------
+# CLOUDFLARE RESOURCE ORCHESTRATION (alexandria)
+# -----------------------------------------------------------------------------
+
+# --- Data Source: Auto-lookup Zone IDs for var.cloudflare.zones ---
+data "cloudflare_zone" "zones" {
+  for_each   = { for k, v in try(var.cloudflare.zones, {}) : k => k }
+  name       = each.key
+  account_id = var.cloudflare_account_id
+}
+
+locals {
+  resolved_zone_ids = {
+    for k, v in data.cloudflare_zone.zones : k => v.id
+  }
+
+  # Flatten explicit DNS records defined inside var.cloudflare.zones[zone].dns_records
+  explicit_dns_records = flatten([
+    for zone_name, zone_data in try(var.cloudflare.zones, {}) : [
+      for idx, record in try(zone_data.dns_records, []) : {
+        composite_key = "${zone_name}.${record.name}.${record.type}.${idx}"
+        zone_id       = local.resolved_zone_ids[zone_name]
+        name          = record.name
+        type          = record.type
+        content       = record.content
+        ttl           = record.ttl
+        proxied       = record.proxied
+        priority      = record.priority
+        comment       = record.comment != null ? record.comment : "Managed by OpenTofu alexandria stack"
+      }
+    ]
+  ])
+
+  # Flatten tunnel DNS records defined inside var.cloudflare.tunnels[tunnel].dns
+  tunnel_dns_records = flatten([
+    for tunnel_name, tunnel in try(var.cloudflare.tunnels, {}) : [
+      for idx, dns_entry in try(tunnel.dns, []) : {
+        composite_key = "tunnel_${tunnel_name}.${dns_entry.hostname}.${idx}"
+        zone_id       = local.resolved_zone_ids[dns_entry.zone_name]
+        name          = dns_entry.hostname
+        type          = "CNAME"
+        content       = "${try(cloudflare_zero_trust_tunnel_cloudflared.tunnels[tunnel_name].id, "")}.cfargotunnel.com"
+        ttl           = 1
+        proxied       = dns_entry.proxied
+        priority      = null
+        comment       = "Tunnel CNAME for ${tunnel_name}"
+      }
+    ]
+  ])
+
+  all_dns_records = concat(local.explicit_dns_records, local.tunnel_dns_records)
+
+  dns_record_map = {
+    for rec in local.all_dns_records : rec.composite_key => rec
+  }
+}
+
+# --- Cloudflare DNS Records ---
+resource "cloudflare_record" "dns" {
+  for_each = local.dns_record_map
+
+  zone_id  = each.value.zone_id
+  name     = each.value.name
+  type     = each.value.type
+  content  = each.value.content
+  ttl      = each.value.ttl
+  proxied  = each.value.proxied
+  priority = each.value.priority
+  comment  = each.value.comment
+}
+
+# --- Cloudflare Zero Trust Tunnels ---
+resource "cloudflare_zero_trust_tunnel_cloudflared" "tunnels" {
+  for_each = try(var.cloudflare.tunnels, {})
+
+  account_id = var.cloudflare_account_id
+  name       = each.key
+  secret     = base64encode("12345678901234567890123456789012") # Default/placeholder secret
+}
+
+# --- Cloudflare Tunnel Configuration (Ingress Rules) ---
+resource "cloudflare_zero_trust_tunnel_cloudflared_config" "tunnel_configs" {
+  for_each = {
+    for k, v in try(var.cloudflare.tunnels, {}) : k => v
+    if length(try(v.ingress, [])) > 0
+  }
+
+  account_id = var.cloudflare_account_id
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.tunnels[each.key].id
+
+  config {
+    dynamic "ingress_rule" {
+      for_each = each.value.ingress
+      content {
+        hostname = ingress_rule.value.hostname
+        service  = ingress_rule.value.service
+        path     = ingress_rule.value.path
+      }
+    }
+  }
+}
+
+# --- Cloudflare Zero Trust Access Applications ---
+resource "cloudflare_zero_trust_access_application" "apps" {
+  for_each = try(var.cloudflare.access_applications, {})
+
+  account_id       = var.cloudflare_account_id
+  zone_id          = each.value.zone_name != null ? try(local.resolved_zone_ids[each.value.zone_name], null) : null
+  name             = each.key
+  domain           = each.value.domain
+  type             = each.value.type
+  session_duration = each.value.session_duration
+}
+
+locals {
+  access_policies = flatten([
+    for app_key, app in try(var.cloudflare.access_applications, {}) : [
+      for policy in app.policies : {
+        composite_key         = "${app_key}.${policy.name}"
+        application_id        = cloudflare_zero_trust_access_application.apps[app_key].id
+        name                  = policy.name
+        decision              = policy.decision
+        include_emails        = policy.include_emails
+        include_email_domains = policy.include_email_domains
+      }
+    ]
+  ])
+  access_policy_map = {
+    for pol in local.access_policies : pol.composite_key => pol
+  }
+}
+
+resource "cloudflare_zero_trust_access_policy" "policies" {
+  for_each = local.access_policy_map
+
+  account_id     = var.cloudflare_account_id
+  application_id = each.value.application_id
+  name           = each.value.name
+  decision       = each.value.decision
+  precedence     = 1
+
+  dynamic "include" {
+    for_each = [1]
+    content {
+      email        = length(each.value.include_emails) > 0 ? each.value.include_emails : null
+      email_domain = length(each.value.include_email_domains) > 0 ? each.value.include_email_domains : null
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
