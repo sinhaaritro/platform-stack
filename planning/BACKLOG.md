@@ -19,7 +19,7 @@
 *   [ ] **Ansible Visualization** — Get the new ansible role visualization
 *   [ ] **Opentofu Visualization** — Get the new opentofu infra visualization.
 *   [ ] **Kubernets Visualization** — Get the new kubernetes cluster visualization.
-*   [x] **Doc cleaning** — Consolidate docs under folder. ✅ All docs now centralized under `docs/`. See `docs/README.md`.
+*   [ ] **Doc cleaning** — make doc naming generic. no specific vm, lxc, etc names.
 *   [ ] ...
 
 ## Bugs

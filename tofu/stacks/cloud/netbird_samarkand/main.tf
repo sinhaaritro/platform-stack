@@ -13,14 +13,92 @@ resource "netbird_group" "groups" {
 resource "netbird_setup_key" "keys" {
   for_each = try(var.netbird.setup_keys, {})
 
-  name        = each.value.name
-  type        = each.value.type
-  expires_in  = each.value.expires_in
-  usage_limit = each.value.usage_limit
-  ephemeral   = each.value.ephemeral
+  name           = each.value.name
+  type           = each.value.type
+  expiry_seconds = each.value.expiry_seconds
+  usage_limit    = each.value.usage_limit
+  ephemeral      = each.value.ephemeral
 
-  auto_assign_groups = [
-    for group_key in try(each.value.auto_assign_groups, []) :
+  auto_groups = [
+    for group_key in try(each.value.auto_groups, []) :
+    try(netbird_group.groups[group_key].id, group_key)
+  ]
+}
+
+# --- Netbird Network Routes ---
+resource "netbird_route" "routes" {
+  for_each = try(var.netbird.routes, {})
+
+  network_id  = each.value.network_id
+  network     = each.value.network
+  description = coalesce(each.value.description, each.key)
+  peer        = each.value.peer_id
+  masquerade  = each.value.masquerade
+  metric      = each.value.metric
+  keep_route  = each.value.keep_route
+  enabled     = each.value.enabled
+
+  groups = [
+    for group_key in each.value.groups :
+    try(netbird_group.groups[group_key].id, group_key)
+  ]
+
+  access_control_groups = [
+    for group_key in try(each.value.access_control_groups, []) :
+    try(netbird_group.groups[group_key].id, group_key)
+  ]
+
+  peer_groups = [
+    for group_key in try(each.value.peer_groups, []) :
+    try(netbird_group.groups[group_key].id, group_key)
+  ]
+}
+
+# --- Netbird Policies ---
+resource "netbird_policy" "policies" {
+  for_each = try(var.netbird.policies, {})
+
+  name    = coalesce(each.value.name, each.key)
+  enabled = each.value.enabled
+
+  dynamic "rule" {
+    for_each = each.value.rules
+    content {
+      name          = rule.value.name
+      action        = rule.value.action
+      bidirectional = rule.value.bidirectional
+      enabled       = rule.value.enabled
+      protocol      = rule.value.protocol
+      ports         = length(rule.value.ports) > 0 ? rule.value.ports : null
+
+      sources = [
+        for group_key in rule.value.sources :
+        try(netbird_group.groups[group_key].id, group_key)
+      ]
+
+      destinations = [
+        for group_key in rule.value.destinations :
+        try(netbird_group.groups[group_key].id, group_key)
+      ]
+    }
+  }
+}
+
+# --- Netbird Nameserver Groups ---
+resource "netbird_nameserver_group" "nameservers" {
+  for_each = try(var.netbird.nameserver_groups, {})
+
+  name                   = coalesce(each.value.name, each.key)
+  description            = each.value.description
+  primary                = each.value.primary
+  enabled                = each.value.enabled
+  search_domains_enabled = each.value.search_domains_enabled
+  domains                = each.value.domains
+
+  nameservers = each.value.nameservers
+
+  groups = [
+    for group_key in each.value.groups :
     try(netbird_group.groups[group_key].id, group_key)
   ]
 }
