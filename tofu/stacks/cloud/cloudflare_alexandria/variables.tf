@@ -80,6 +80,16 @@ variable "cloudflare" {
         action      = string # block | challenge | js_challenge | allow | log | managed_challenge
         enabled     = optional(bool, true)
       })), [])
+
+      # ---------------------------------------------------------------
+      # CACHE RULES (bypass cache for specific hostnames/paths)
+      # ---------------------------------------------------------------
+      cache_rules = optional(list(object({
+        description = string
+        expression  = string              # Cloudflare filter expression, e.g. '(http.host eq "immich.example.com")'
+        action      = optional(string, "bypass") # bypass | override | respect_origin
+        edge_ttl    = optional(number)            # seconds, only for "override" action
+      })), [])
     })), {})
 
     # ---------------------------------------------------------------
@@ -106,6 +116,9 @@ variable "cloudflare" {
         hostname = optional(string) # e.g. "ssh.example.com" ; omit on last catch-all rule
         service  = string          # "ssh://localhost:22", "http://localhost:8080", "rdp://localhost:3389"
         path     = optional(string)
+        origin_request = optional(object({
+          no_tls_verify = optional(bool, false) # skip TLS verification for self-signed certs (e.g. Proxmox)
+        }))
       })), [])
 
       # DNS record(s) pointing hostnames at this tunnel (CNAME to <tunnel_id>.cfargotunnel.com)
@@ -135,5 +148,10 @@ variable "cloudflare" {
   default = {}
 }
 
-
+variable "tunnel_secrets" {
+  description = "Map of tunnel name to its pre-shared secret (base64-encoded, 32+ bytes). Keys must match var.cloudflare.tunnels keys."
+  type        = map(string)
+  sensitive   = true
+  default     = {}
+}
 

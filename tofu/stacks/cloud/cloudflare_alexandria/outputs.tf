@@ -20,4 +20,10 @@ output "resolved_zone_ids" {
   value       = local.resolved_zone_ids
 }
 
-
+output "tunnel_tokens" {
+  description = "Map of tunnel name to its run token. Use with: cloudflared tunnel run --token <TOKEN>"
+  sensitive   = true
+  value = {
+    for k, v in cloudflare_zero_trust_tunnel_cloudflared.tunnels : k => v.tunnel_token
+  }
+}

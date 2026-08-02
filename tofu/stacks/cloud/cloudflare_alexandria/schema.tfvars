@@ -2,43 +2,65 @@
 # STACK CONFIGURATION - CLOUDFLARE EDGE / DNS (Codename: `alexandria`)
 # -----------------------------------------------------------------------------
 
-cloudflare_account_id = "701f3c4f126a1895cde973c3466880df"
-
 cloudflare = {
   zones = {
     "strawslabs.com" = {
-      plan = "free"
+      plan        = "free"
+      dns_records = []
+    }
 
-      dns_records = [
-        # {
-        #   name    = "grafana.hyperion"
-        #   type    = "CNAME"
-        #   content = "homelab-tunnel.cfargotunnel.com"
-        #   proxied = true
-        # }
+    "aritrosinha.dpdns.org" = {
+      plan        = "free"
+      dns_records = []
+
+      cache_rules = [
+        {
+          description = "Bypass cache for Immich (private media)"
+          expression  = "(http.host eq \"immich.hyperion.aritrosinha.dpdns.org\")"
+          action      = "bypass"
+        }
       ]
     }
   }
 
   tunnels = {
-    # "homelab-tunnel" = {
-    #   ingress = [
-    #     {
-    #       hostname = "grafana.hyperion.strawslabs.com"
-    #       service  = "http://192.168.1.150:3000"
-    #     },
-    #     {
-    #       service  = "http_status:404"
-    #     }
-    #   ]
-    #   dns = [
-    #     {
-    #       zone_name = "strawslabs.com"
-    #       hostname  = "grafana.hyperion"
-    #       proxied   = true
-    #     }
-    #   ]
-    # }
+    "homelab-tunnel" = {
+      ingress = [
+        {
+          hostname = "immich.hyperion.aritrosinha.dpdns.org"
+          service  = "http://192.168.0.240:80"
+        },
+        {
+          hostname = "grafana.hyperion.aritrosinha.dpdns.org"
+          service  = "http://192.168.0.240:80"
+        },
+        {
+          hostname       = "atlas.olympus.aritrosinha.dpdns.org"
+          service        = "https://192.168.0.2:8006"
+          origin_request = { no_tls_verify = true }
+        },
+        {
+          service = "http_status:404"
+        }
+      ]
+      dns = [
+        {
+          zone_name = "aritrosinha.dpdns.org"
+          hostname  = "immich.hyperion"
+          proxied   = true
+        },
+        {
+          zone_name = "aritrosinha.dpdns.org"
+          hostname  = "grafana.hyperion"
+          proxied   = true
+        },
+        {
+          zone_name = "aritrosinha.dpdns.org"
+          hostname  = "atlas.olympus"
+          proxied   = true
+        }
+      ]
+    }
   }
 }
 

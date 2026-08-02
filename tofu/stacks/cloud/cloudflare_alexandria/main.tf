@@ -75,7 +75,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared" "tunnels" {
 
   account_id = var.cloudflare_account_id
   name       = each.key
-  secret     = base64encode("12345678901234567890123456789012") # Default/placeholder secret
+  secret     = try(var.tunnel_secrets[each.key], base64encode("placeholder-replace-me-32bytes!!"))
 }
 
 # --- Cloudflare Tunnel Configuration (Ingress Rules) ---
@@ -95,6 +95,13 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "tunnel_configs" {
         hostname = ingress_rule.value.hostname
         service  = ingress_rule.value.service
         path     = ingress_rule.value.path
+
+        dynamic "origin_request" {
+          for_each = ingress_rule.value.origin_request != null ? [ingress_rule.value.origin_request] : []
+          content {
+            no_tls_verify = origin_request.value.no_tls_verify
+          }
+        }
       }
     }
   }
@@ -149,10 +156,44 @@ resource "cloudflare_zero_trust_access_policy" "policies" {
 }
 
 
+# --- Cloudflare Cache Rules (Bypass cache for specific services) ---
+locals {
+  cache_rules_by_zone = {
+    for zone_name, zone_data in try(var.cloudflare.zones, {}) :
+    zone_name => try(zone_data.cache_rules, [])
+    if length(try(zone_data.cache_rules, [])) > 0
+  }
+}
 
+resource "cloudflare_ruleset" "cache_rules" {
+  for_each = local.cache_rules_by_zone
 
+  zone_id     = local.resolved_zone_ids[each.key]
+  name        = "Cache rules for ${each.key}"
+  description = "Managed by OpenTofu alexandria stack"
+  kind        = "zone"
+  phase       = "http_request_cache_settings"
 
+  dynamic "rules" {
+    for_each = each.value
+    content {
+      description = rules.value.description
+      expression  = rules.value.expression
+      action      = "set_cache_settings"
 
+      action_parameters {
+        cache = rules.value.action == "bypass" ? false : true
 
+        dynamic "edge_ttl" {
+          for_each = rules.value.edge_ttl != null ? [rules.value.edge_ttl] : []
+          content {
+            mode    = "override_origin"
+            default = edge_ttl.value
+          }
+        }
+      }
 
-
+      enabled = true
+    }
+  }
+}
