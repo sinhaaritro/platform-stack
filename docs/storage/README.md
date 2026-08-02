@@ -17,7 +17,7 @@ The platform uses a **4-tier model** where each tier is optimized for its worklo
 | **Tier 3** — Object Storage | [SeaweedFS](./SEAWEEDFS.md) | SSD (via Longhorn PVCs) | Logs, metrics, S3-compatible blobs | Inherited from Tier 2 |
 | **Tier 4** — User Data | [NFS](./NFS.md) (TrueNAS / LXC) | HDD | Photos, videos, documents, media | ZFS (mirror/RAIDZ) |
 
-> For the full architecture, diagrams, and design rationale, see [ARCHITECTURE.md](./ARCHITECTURE.md).
+> For the data flow diagram (current vs. future state), see [Storage Architecture Diagram](#storage-architecture-diagram-the-data-view).
 
 ---
 
@@ -100,11 +100,89 @@ Storage budgets are percentage-based, not size-based. The system scales by addin
 
 ---
 
+## Storage Architecture Diagram (The "Data View")
+
+*   **Explanation:** This diagram focuses on a single critical resource: data. It would illustrate where all persistent data lives and how it is accessed. It should show both the **current state** (local SSD storage on Proxmox hosts, `atlas-bedrock`) and the **future state**. The future view would detail:
+    *   The TrueNAS server.
+    *   The "Storage Network" connecting it to the Proxmox hosts.
+    *   How Proxmox accesses storage for VM disks (e.g., via iSCSI or NFS).
+    *   How Kubernetes applications access storage for Persistent Volumes (e.g., via an NFS client).
+    *   The **backup flow**, showing data moving from TrueNAS and Kubernetes to the **AWS S3 bucket** (`babylon`).
+*   **Audience:** Infrastructure managers, anyone concerned with data integrity, backups, and disaster recovery.
+
+```mermaid
+---
+config:
+  theme: redux
+  look: neo
+  layout: elk
+---
+flowchart TD
+ subgraph Diagram["Diagram"]
+        CurrentState["CurrentState"]
+        FutureState["FutureState"]
+        KubeAppsCurrent("Kubernetes Pods (Current)")
+  end
+ subgraph ProxmoxHostC["Proxmox Host (current)"]
+        LocalSSD["<br><b>Local SSD/NVMe</b><br><i>(On Host)</i>"]
+  end
+ subgraph KubernetesVMC["Kubernetes VM"]
+        VMDisk["<br><b>VM Virtual Disk</b><br><i>(40GB, lives on Local SSD)</i>"]
+  end
+ subgraph CurrentState["Current State"]
+    direction LR
+        ProxmoxHostC
+        KubernetesVMC
+        NFSShare["<br><b>NFS Share</b><br><i>/mnt/data</i><br>(Directory on Local SSD)"]
+  end
+ subgraph TrueNASServer["<b>TrueNAS Server</b><br><i>Dedicated Data Storage</i>"]
+        NASPool["<br><b>TrueNAS ZFS Pool</b><br><i>(Bulk Storage)</i>"]
+        iSCSI["<br><b>iSCSI LUNs</b><br><i>(Block Storage)</i>"]
+        NFSFuture["<br><b>NFS Share</b><br><i>(File Storage)</i>"]
+  end
+ subgraph ProxmoxHost["Proxmox Host"]
+        PVEFuture("<b>Proxmox Host</b>")
+  end
+ subgraph KubernetesCluster["Kubernetes Cluster (Future)"]
+        K8sFuture("<b>Kubernetes Pods</b><br>(Jellyfin, Radarr, etc.)")
+  end
+ subgraph OffSiteBackup["Off-site Backup (AWS)"]
+        S3["<br><b>AWS S3 Bucket</b><br><i>(online)</i>"]
+  end
+ subgraph FutureState["Future State (Planned)"]
+    direction LR
+        TrueNASServer
+        ProxmoxHost
+        StorageNetwork["<br><b>Dedicated Storage Network</b><br><i>(10GbE or faster)</i>"]
+        KubernetesCluster
+        OffSiteBackup
+  end
+    LocalSSD -- Hosts VM Disk File --> VMDisk
+    LocalSSD -- Provides Directory For --> NFSShare
+    NASPool --> iSCSI & NFSFuture
+    PVEFuture -- Mounts iSCSI LUN for VM Disks --> StorageNetwork
+    StorageNetwork --> iSCSI & NFSFuture
+    K8sFuture -- Mounts NFS for Media Data --> StorageNetwork
+    NASPool -- "Periodic Backups (e.g., Duplicati/Restic)" --> S3
+    VMDisk -- "Stores App Configs via local-path PVCs" --o KubeAppsCurrent
+    NFSShare -- Mounted Directly by Pods for Media --o KubeAppsCurrent
+    PVEFuture -- Hosts Kubernetes VM --> K8sFuture
+    style LocalSSD fill:#BBDEFB,stroke:#333,stroke-width:2px
+    style NFSShare fill:#BBDEFB,stroke:#333,stroke-width:2px
+    style NASPool fill:#3498db,stroke:#333,stroke-width:2px
+    style S3 fill:#f38020,stroke:#333,stroke-width:2px
+    style StorageNetwork fill:#9b59b6,stroke:#333,stroke-width:2px
+    style Diagram fill:transparent
+
+```
+
+---
+
 ## Documentation Map
 
 | Document | What It Covers |
 |---|---|
-| 📐 [ARCHITECTURE.md](./ARCHITECTURE.md) | 4-tier model, data flow diagrams, dependency chain, tenant isolation, technology rationale |
+| 📐 [ARCHITECTURE.md](./ARCHITECTURE.md) | 4-tier model, dependency chain, tenant isolation, technology rationale |
 | 💾 [LONGHORN.md](./LONGHORN.md) | Block storage: StorageClasses, disk tagging, replication, monitoring, expansion |
 | 🪣 [SEAWEEDFS.md](./SEAWEEDFS.md) | Object storage: S3 backend, buckets, retention profiles, Filer strategy, security |
 | 📁 [NFS.md](./NFS.md) | User data: TrueNAS ideal, LXC interim, provisioner comparison, migration path |

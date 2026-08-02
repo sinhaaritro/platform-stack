@@ -24,11 +24,15 @@ This repository is in transition. You must understand the difference between the
 
 This repository is organized into **Five Logical Layers**, plus automation and documentation.
 
-### Layer 0: Project Management (`planning/` & `docs/adr/`)
+### Layer 0: Project Management (`planning/`)
 *   **The Brain:** Where all work begins.
 *   **`planning/ROADMAP.md`**: Strategic goals.
 *   **`planning/BACKLOG.md`**: The tactical inbox for ideas, technical debt, and issues found mid-task. **AI Agents:** Always check here before declaring a task "done" to ensure no related cleanup was missed.
-*   **`docs/adr/`**: Architecture Decision Records (The "Why").
+
+### Documentation (`docs/`)
+*   **All documentation is centralized under `docs/`.** See [`docs/README.md`](./docs/README.md) for the full table of contents.
+*   Key subdirectories: `guides/`, `layers/`, `runbooks/`, `reference/`, `app_pattern/`, `secrets/`, `storage/`, `networking/`, `backup/`, `monitoring/`.
+*   Technical specs and analysis live in `docs/reference/` (moved from `planning/specs/`).
 
 ### Layer 1: Infrastructure (`tofu/`)
 *   **The Hardware:** Defines "Constraint-based" infrastructure (VMs, LXC containers, networking, DNS).

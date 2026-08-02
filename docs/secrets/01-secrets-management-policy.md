@@ -60,9 +60,47 @@ To allow our automated hooks to distinguish between secret and non-secret files,
 
 The Ansible Vault is encrypted with a master password.
 
-1.  **Obtaining the Password:** The vault password must be obtained from a project administrator through a secure, out-of-band channel (e.g., a password manager share).
-2.  **Configuring Your Environment:** You must set the `ANSIBLE_VAULT_PASSWORD` environment variable.
-   > **See [GETTING_STARTED.md](./GETTING_STARTED.md#3-configure-secrets) for the official setup instructions.**
+### 4.1. Obtaining the Password
+
+The vault password is a shared secret and must be obtained securely from an existing project administrator. **It will never be written down in plain text or committed to this repository.**
+
+### 4.2. Configuring Your Environment
+
+You must export the vault password into an environment variable named `ANSIBLE_VAULT_PASSWORD`.
+
+The most reliable way to ensure this variable is always available is to add it to your shell's profile file.
+
+1.  Open your shell's profile file (e.g., `~/.bashrc`, `~/.zshrc`, or `~/.profile`):
+    ```sh
+    nano ~/.bashrc
+    ```
+
+2.  Add the following line to the end of the file, replacing the placeholder with the actual password you received:
+    ```sh
+    export ANSIBLE_VAULT_PASSWORD="your-secret-password-here"
+    ```
+    **Security Note:** Your shell profile file is now a sensitive file. Ensure its permissions are secure and it is never committed to any repository.
+
+3.  Reload your shell for the change to take effect, or open a new terminal window.
+    ```sh
+    source ~/.bashrc
+    ```
+
+### 4.3. Verifying Your Setup
+
+You can verify that your environment is correctly configured by attempting to view an encrypted file. If the setup is correct, the command will succeed without prompting you for a password.
+
+1.  Navigate to the Ansible directory:
+    ```sh
+    cd ansible/
+    ```
+
+2.  Run the `ansible-vault view` command on a known encrypted file:
+    ```sh
+    # Replace 'group_vars/all/vault.yml' with any encrypted file if needed
+    ansible-vault view group_vars/all/vault.yml
+    ```
+    If you see the decrypted contents of the file printed to your screen, your setup is successful. If you are prompted for a password, the environment variable was not set or exported correctly.
 
 ---
 

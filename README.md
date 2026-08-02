@@ -2,66 +2,74 @@
 
 This repository contains the **complete**, **end-to-end infrastructure**, **configuration**, and **application code** for a multi-site homelab. The entire platform is managed using **GitOps principles**, where this repository serves as the **single source of truth** for the desired state of all environments, from bare-metal Proxmox nodes to cloud resources and Kubernetes applications.
 
-## Documentation Hub
+## Documentation
 
-All high-level documentation for this project is located in the `/docs` directory. Before you begin, please familiarize yourself with the core principles of our setup.
+All project documentation is centralized in the [`/docs`](./docs/README.md) directory. Start here:
 
-*   **[ARCHITECTURE.md](./docs/ARCHITECTURE.md):** Understand the high-level design of our infrastructure.
-*   **[GETTING_STARTED.md](./docs/GETTING_STARTED.md):** The complete guide for new developers to set up their environment and contribute.
-*   **[NAMING_CONVENTION.md](./docs/NAMING_CONVENTION.md):** The single source of truth for naming all resources. **(Required reading)**
-*   **[SECRETS.md](./docs/SECRETS.md):** Our policy for managing secrets with Ansible Vault. **(Required reading)**
+*   **[Documentation Hub](./docs/README.md)** — Master table of contents for all docs.
+*   **[Architecture](./docs/ARCHITECTURE.md)** — High-level design, system overview diagram.
+*   **[Getting Started](./docs/GETTING_STARTED.md)** — Complete developer setup guide.
+*   **[Naming Convention](./docs/NAMING_CONVENTION.md)** — The single source of truth for naming all resources.
+*   **[Secrets Policy](./docs/secrets/01-secrets-management-policy.md)** — Managing secrets with Ansible Vault.
 
-## Core Philosophy
-
-This platform is built on a "separation of concerns" principle, where each layer of the stack is managed by a dedicated tool. This creates a clear, maintainable, and scalable system.
-
-*   **Infrastructure as Code (IaC):** The physical or virtual infrastructure is defined declaratively using **OpenTofu**.
-*   **Configuration Management:** The state of our servers is managed procedurally using **Ansible**.
-*   **Container Orchestration:** Production workloads are deployed and managed at scale using **Kubernetes**.
-*   **Local Development Parity:** Developers can run a complete, multi-service application on their local machine using **Podman Compose**.
+For a detailed map of the repository structure, see **[CODEBASE.md](./CODEBASE.md)**.
 
 ---
 
 ## Directory Structure
 
-The repository is organized into distinct layers, each managed by a specific tool.
-
 ```
 platform-stack/
 ├── Makefile           # Automates common project setup and operational tasks.
-├── docs/              # High-level project documentation (architecture, conventions, etc.).
-│   └── adr/           # Architecture Decision Records (The "Why").
-├── planning/          # Layer 0: High-level roadmap and backlog (The "What").
-├── scripts/           # Contains helper scripts for safety, automation, and CI/CD.
-├── lxc-configs/       # Application-specific configuration files for standalone LXC containers.
-├── tofu/              # Layer 1: Provisions the core infrastructure (VMs, networks, LXCs).
-├── ansible/           # Layer 2: Configures provisioned resources (installs software, applies configs).
-├── k8s/               # Layer 3: Deploys containerized applications to the Kubernetes cluster.
-└── compose/           # Layer 4: Defines services for local development on a single machine.
+├── docs/              # All project documentation (Starlight-ready).
+│   ├── guides/        # How-to guides and setup procedures.
+│   ├── layers/        # Per-layer tool docs (tofu, ansible, kubernetes).
+│   ├── runbooks/      # Disaster recovery and restore procedures.
+│   ├── reference/     # Technical specs, analysis, discussions.
+│   ├── app_pattern/   # K8s app patterns (structure, overlays, lifecycle).
+│   ├── secrets/       # Secrets management docs.
+│   ├── storage/       # Storage architecture docs.
+│   ├── networking/    # Network topology docs.
+│   ├── backup/        # Backup strategy docs.
+│   └── monitoring/    # Monitoring & observability docs.
+├── planning/          # Layer 0: Roadmap and backlog.
+├── scripts/           # Helper scripts for safety, automation, and CI/CD.
+├── lxc-configs/       # Application-specific configs for standalone LXC containers.
+├── tofu/              # Layer 1: Provisions core infrastructure (VMs, networks, LXCs).
+├── ansible/           # Layer 2: Configures provisioned resources.
+├── kubernetes/        # Layer 3: Production Kubernetes cluster (Kustomize).
+└── compose/           # Layer 4: Local development services.
 ```
 
 ---
 
-## One-Time Environment Setup
+## Quick Start
 
-> **[GO TO: GETTING STARTED GUIDE](./docs/GETTING_STARTED.md)**
+**Stack:** `OpenTofu` → `Ansible` → `Kubernetes` (Traefik, Authentik, Prometheus/Grafana) → Podman Compose (local). Managed via `GitOps` with `Cloudflare Tunnels` and `Netbird` for external access.
 
-All developers **must** follow the **[Getting Started](./docs/GETTING_STARTED.md)** guide to:
-1.  Clone the repository.
-2.  **Install Git Hooks** (Critical for security).
-3.  Configure Ansible Vault secrets.
-4.  Install required tools (OpenTofu, Ansible, Task).
+### What to Edit
 
----
+| Want to... | Edit this directory |
+|---|---|
+| Provision a new VM or change resources | `tofu/` |
+| Install software or configure a server | `ansible/` |
+| Deploy or update a Kubernetes app | `kubernetes/` (GitOps) or `k8s/` (legacy Kustomize) |
+| Run services locally for development | `compose/` |
 
-## The Five Layers of the Platform
+### Common Commands
 
-> **[GO TO: CODEBASE MAP](./CODEBASE.md)**
+This project uses **[Task](https://taskfile.dev)** as a command runner. See all available tasks with:
 
-For a detailed breakdown of the repository structure and the purpose of each directory, please refer to **[CODEBASE.md](./CODEBASE.md)**.
+```sh
+task --list
+```
 
-*   **Layer 0:** Project Management (`planning/`)
-*   **Layer 1:** Infrastructure Provisioning (`tofu/`)
-*   **Layer 2:** Server Configuration (`ansible/`)
-*   **Layer 3:** Production Orchestration (`k8s/` & `kubernetes/`)
-*   **Layer 4:** Local Development (`compose/`)
+Frequently used examples:
+
+```sh
+task tofu:fmt        # Validate and format OpenTofu code
+task tofu:plan       # Preview infrastructure changes
+task ansible:playbook -- playbooks/configure-k8s-nodes.yml  # Run an Ansible playbook
+```
+
+For the complete setup (clone, Git hooks, vault password, tool installation), follow the **[Getting Started](./docs/GETTING_STARTED.md)** guide.

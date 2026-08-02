@@ -72,3 +72,83 @@ flowchart TD
 
 - 📄 [NAMING_CONVENTION.md](../NAMING_CONVENTION.md#6-networking--connectivity) - Naming standards for VLANs, switches, hostnames, and NetBird overlay networks.
 - 📄 [ARCHITECTURE.md](../ARCHITECTURE.md) - High-level system architecture and global location topologies (`asgard`, `wano`, `babylon`, `coruscant`).
+
+---
+
+## Logical Network Architecture Diagram (The "Traffic Cop View")
+
+*   **Explanation:** This diagram focuses exclusively on the logical segmentation of your network. It abstracts away the physical hardware and instead illustrates the **VLANs** (or virtual networks) and the flow of traffic between them. It would show which services and machines connect to which network (e.g., `styx-servers-vlan`, `bifrost-iot-vlan`, "Storage Network"). Crucially, it would also show the **firewall** or router at the center, illustrating the rules that govern which networks are allowed to talk to each other. This diagram answers the question: "Who can talk to whom?"
+*   **Audience:** Network administrators, security auditors, developers deploying services with specific network requirements.
+
+```mermaid
+
+```
+
+---
+
+## External Access & Ingress Flow Diagram (The "Front Door View")
+
+*   **Explanation:** This diagram details the complete path a user request takes from the public internet to an internal service. It would start with the user, go to Cloudflare DNS, through the Cloudflare Tunnel, and then show the critical split:
+    1.  Traffic destined for infrastructure management (Proxmox UI) goes to the **NGINX Reverse Proxy**.
+    2.  Traffic destined for applications (Grafana, arr-stack) goes to the **Traefik Ingress Controller** inside Kubernetes.
+    This diagram is essential for understanding your security posture and for troubleshooting external connectivity issues.
+*   **Audience:** Anyone managing security, DNS, or deploying a new user-facing service.
+
+```mermaid
+---
+config:
+  layout: elk
+  theme: redux
+  look: neo
+---
+flowchart TD
+ subgraph Diagram["Diagram"]
+        Internet["Internet"]
+        HomelabNetwork["HomelabNetwork"]
+  end
+ subgraph Internet["Internet / External World"]
+        UserBrowser["User"]
+        Cloudflare["<b>Cloudflare</b><br>DNS &amp; Security Proxy"]
+  end
+ subgraph InfrastructureReverseProxy["Infrastructure Reverse Proxy"]
+        NPM_LXC["<b>Nginx Proxy Manager LXC</b>"]
+  end
+ subgraph ApplicationLayer["Application Services (Pods)"]
+        Jellyfin["Jellyfin Service"]
+        Grafana["Grafana Service"]
+        Arrs["*arr Stack Services"]
+  end
+ subgraph KubernetesVM["Kubernetes VM"]
+        Traefik["<b>Traefik Ingress Controller</b><br><i>(Pod)</i>"]
+        ApplicationLayer
+  end
+ subgraph ProxmoxHost["Proxmox Host"]
+        TunnelLXC["<b>Cloudflare Tunnel LXC</b><br>(bananagator-01)<br><i>Receives all traffic from Cloudflare</i>"]
+        DNSplit["DNSplit"]
+        InfrastructureReverseProxy
+        KubernetesVM
+        PVE_Service["<b>Proxmox UI Service</b><br><i>(On Host)</i>"]
+  end
+ subgraph HomelabNetwork["Homelab Network"]
+        ProxmoxHost
+  end
+ subgraph DNSplit["The Critical Split (Inside Tunnel LXC)"]
+    direction LR
+        Splitter{"<b>Traffic is Forwarded Based on Hostname</b>"}
+  end
+    UserBrowser -- "<b>1.</b> Request for service or infrastructure URL" --> Cloudflare
+    Cloudflare -- "<b>2.</b> Sends request securely via Tunnel" --> TunnelLXC
+    TunnelLXC --> Splitter
+    Splitter -- "<b>Path A: Application Traffic</b><br><i>If Host is serice</i>" --> Traefik
+    Splitter -- "<b>Path B: Infrastructure Traffic</b><br><i>If Host is infrastructure</i>" --> NPM_LXC
+    NPM_LXC -- Forwards Request --> PVE_Service
+    Traefik -- Uses IngressRoute to find correct service --> ApplicationLayer
+    UserBrowser@{ shape: rect}
+    style Cloudflare fill:#f38020
+    style NPM_LXC fill:#C8E6C9
+    style Traefik fill:#E1BEE7
+    style TunnelLXC fill:#FFE0B2
+    style Splitter fill:#FFCDD2,stroke:#333,stroke-width:2px
+    style Diagram fill:transparent
+
+```
