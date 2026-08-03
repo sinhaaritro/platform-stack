@@ -102,3 +102,16 @@ resource "netbird_nameserver_group" "nameservers" {
     try(netbird_group.groups[group_key].id, group_key)
   ]
 }
+
+# --- Generated Ansible Inventory Vars (ansible/inventory.d/netbird_samarkand.yml) ---
+resource "local_sensitive_file" "ansible_inventory" {
+  filename        = "${path.module}/../../../../ansible/inventory.d/netbird_samarkand.yml"
+  file_permission = "0600"
+  content = join("\n", concat(
+    ["all:", "  vars:"],
+    [for k, v in netbird_setup_key.keys :
+      "    netbird_setup_key_${replace(k, "-", "_")}: \"${v.key}\""
+    ],
+    [""]
+  ))
+}

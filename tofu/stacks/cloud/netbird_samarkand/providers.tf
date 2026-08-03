@@ -10,6 +10,10 @@ terraform {
       source  = "netbirdio/netbird"
       version = "~> 0.0.9"
     }
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.0"
+    }
   }
 }
 
