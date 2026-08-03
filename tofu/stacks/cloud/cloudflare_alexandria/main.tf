@@ -2,16 +2,22 @@
 # CLOUDFLARE RESOURCE ORCHESTRATION (alexandria)
 # -----------------------------------------------------------------------------
 
-# --- Data Source: Auto-lookup Zone IDs for var.cloudflare.zones ---
-data "cloudflare_zone" "zones" {
-  for_each   = { for k, v in try(var.cloudflare.zones, {}) : k => k }
-  name       = each.key
+# --- Cloudflare Zones (managed by IaC) ---
+resource "cloudflare_zone" "zones" {
+  for_each   = try(var.cloudflare.zones, {})
   account_id = var.cloudflare_account_id
+  zone       = each.key
+  plan       = each.value.plan
+  paused     = each.value.paused
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 locals {
   resolved_zone_ids = {
-    for k, v in data.cloudflare_zone.zones : k => v.id
+    for k, v in cloudflare_zone.zones : k => v.id
   }
 
   # Flatten explicit DNS records defined inside var.cloudflare.zones[zone].dns_records
@@ -196,4 +202,23 @@ resource "cloudflare_ruleset" "cache_rules" {
       enabled = true
     }
   }
+}
+
+# --- Generated Ansible Inventory Vars (ansible/inventory.d/cloudflare_alexandria.yml) ---
+resource "local_sensitive_file" "ansible_inventory" {
+  filename        = "${path.module}/../../../../ansible/inventory.d/cloudflare_alexandria.yml"
+  file_permission = "0600"
+  content = join("\n", concat(
+    ["all:", "  vars:"],
+    [for k, v in cloudflare_zero_trust_tunnel_cloudflared.tunnels :
+      "    cloudflare_tunnel_token_${replace(k, "-", "_")}: \"${v.tunnel_token}\""
+    ],
+    [for k, v in cloudflare_zero_trust_tunnel_cloudflared.tunnels :
+      "    cloudflare_tunnel_id_${replace(k, "-", "_")}: \"${v.id}\""
+    ],
+    [for k, v in local.resolved_zone_ids :
+      "    cloudflare_zone_id_${replace(replace(k, ".", "_"), "-", "_")}: \"${v}\""
+    ],
+    [""]
+  ))
 }

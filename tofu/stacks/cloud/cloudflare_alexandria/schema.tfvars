@@ -10,8 +10,21 @@ cloudflare = {
     }
 
     "aritrosinha.dpdns.org" = {
-      plan        = "free"
-      dns_records = []
+      plan = "free"
+      dns_records = [
+        {
+          name    = "@"
+          type    = "CNAME"
+          content = "sinhaaritro.github.io"
+          proxied = true
+        },
+        {
+          name    = "www"
+          type    = "CNAME"
+          content = "aritrosinha.dpdns.org"
+          proxied = true
+        }
+      ]
 
       cache_rules = [
         {
