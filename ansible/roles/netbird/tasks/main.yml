@@ -1,0 +1,38 @@
+---
+# ansible/roles/netbird/tasks/main.yml
+- name: Install NetBird client package
+  become: true
+  block:
+    - name: Install netbird via apk (Alpine)
+      community.general.apk:
+        name: netbird
+        state: present
+      when: ansible_os_family == 'Alpine'
+
+    - name: Download netbird installation script (Debian/Ubuntu)
+      ansible.builtin.get_url:
+        url: https://pkgs.netbird.io/install.sh
+        dest: /tmp/netbird_install.sh
+        mode: '0755'
+      when: ansible_os_family == 'Debian'
+
+    - name: Execute netbird installation script (Debian/Ubuntu)
+      ansible.builtin.command: /tmp/netbird_install.sh
+      args:
+        creates: /usr/bin/netbird
+      when: ansible_os_family == 'Debian'
+
+- name: Check NetBird status
+  ansible.builtin.command: netbird status
+  register: netbird_status_check
+  changed_when: false
+  failed_when: false
+
+- name: Connect node to NetBird mesh using onboarding setup key
+  ansible.builtin.command: >
+    netbird up --key {{ netbird_setup_key_atlas_onboarding }}
+  when:
+    - netbird_setup_key_atlas_onboarding is defined
+    - "'Connected' not in netbird_status_check.stdout"
+  register: netbird_up_result
+  changed_when: netbird_up_result.rc == 0

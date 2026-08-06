@@ -122,6 +122,29 @@
   become: true
   roles:
     - role: adguard
+
+# ==============================================================================
+# PLAY 6: VPN LAYER — NetBird Mesh Client
+# Target: NetBird LXC (netbird group)
+# ==============================================================================
+- name: Configure NetBird Mesh Client
+  hosts: netbird
+  tags: netbird
+  become: true
+  roles:
+    - role: netbird
+
+# ==============================================================================
+# PLAY 7: TUNNEL LAYER — Cloudflare Tunnel Daemon
+# Target: Cloudflared LXC (cloudflared group)
+# ==============================================================================
+- name: Configure Cloudflare Tunnel Daemon
+  hosts: cloudflared
+  tags: cloudflared
+  become: true
+  roles:
+    - role: cloudflared
+
 # ==============================================================================
 # PLAY 6: WEB LAYER
 # Target: Web Server
