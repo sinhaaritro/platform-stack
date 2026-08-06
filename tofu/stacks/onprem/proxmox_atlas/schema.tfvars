@@ -441,7 +441,7 @@ resources = {
     enabled         = true
     type            = "lxc"
     node_name       = "atlas"
-    description     = "Netbird VPN server/client LXC container. Debian 13."
+    description     = "Netbird VPN server/client LXC container. Alpine."
     tags            = ["ansible", "netbird", "vpn", "lxc"]
     on_boot         = true
     cloud_init_user = "dev"
@@ -450,14 +450,15 @@ resources = {
     }
 
     lxc_config = {
-      template_datastore_id = "WD1TB"
-      template_url          = "http://download.proxmox.com/images/system/debian-13-standard_13.6-1_amd64.tar.zst"
-      os_type               = "debian"
-      cpu_cores             = 1
-      memory_size           = 512
-      disk_size             = 4
-      unprivileged          = true
-      nesting               = true
+      template_datastore_id       = "WD1TB"
+      template_url                = "http://download.proxmox.com/images/system/alpine-3.24-default_20260714_amd64.tar.xz"
+      template_checksum           = "9877b74de4c4878b70450502618f7b02952e792afdbc91f146f6cba507432dae516674d0bb3a306484d58edc722ff63db1ed3c4e5b0954fb2a2773ec8d8f33bd"
+      template_checksum_algorithm = "sha512"
+      os_type                     = "alpine"
+      cpu_cores                   = 1
+      memory_size                 = 512
+      disk_size                   = 4
+      unprivileged                = true
     }
 
     nodes = {
@@ -469,4 +470,39 @@ resources = {
       }
     }
   },
+
+  "cloudflared" = {
+    enabled         = true
+    type            = "lxc"
+    node_name       = "atlas"
+    description     = "Cloudflare Tunnel connector LXC container. Alpine."
+    tags            = ["ansible", "cloudflared", "tunnel", "lxc"]
+    on_boot         = true
+    cloud_init_user = "dev"
+    ansible_groups = {
+      "cloudflared" = {}
+    }
+
+    lxc_config = {
+      template_datastore_id       = "WD1TB"
+      template_url                = "http://download.proxmox.com/images/system/alpine-3.24-default_20260714_amd64.tar.xz"
+      template_checksum           = "9877b74de4c4878b70450502618f7b02952e792afdbc91f146f6cba507432dae516674d0bb3a306484d58edc722ff63db1ed3c4e5b0954fb2a2773ec8d8f33bd"
+      template_checksum_algorithm = "sha512"
+      os_type                     = "alpine"
+      cpu_cores                   = 1
+      memory_size                 = 256
+      disk_size                   = 2
+      unprivileged                = true
+    }
+
+    nodes = {
+      "cloudflared-01" = {
+        vm_id = 1022
+        lxc_config = {
+          ipv4_address = "192.168.0.22/24"
+        }
+      }
+    }
+  },
 }
+
