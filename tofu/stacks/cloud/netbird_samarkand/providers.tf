@@ -21,6 +21,6 @@ terraform {
 # NETBIRD PROVIDER CONFIGURATION
 # -----------------------------------------------------------------------------
 provider "netbird" {
-  token = var.netbird_management_token
-  url   = var.netbird_api_url
+  token          = var.netbird_management_token
+  management_url = var.netbird_api_url
 }
