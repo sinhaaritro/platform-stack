@@ -7,20 +7,35 @@
       community.general.apk:
         name: netbird
         state: present
-      when: ansible_os_family == 'Alpine'
+      when: ansible_facts['os_family'] == 'Alpine'
 
     - name: Download netbird installation script (Debian/Ubuntu)
       ansible.builtin.get_url:
         url: https://pkgs.netbird.io/install.sh
         dest: /tmp/netbird_install.sh
         mode: '0755'
-      when: ansible_os_family == 'Debian'
+      when: ansible_facts['os_family'] == 'Debian'
 
     - name: Execute netbird installation script (Debian/Ubuntu)
       ansible.builtin.command: /tmp/netbird_install.sh
       args:
         creates: /usr/bin/netbird
-      when: ansible_os_family == 'Debian'
+      when: ansible_facts['os_family'] == 'Debian'
+
+- name: Install and start NetBird service daemon
+  become: true
+  block:
+    - name: Install NetBird daemon service
+      ansible.builtin.command: netbird service install
+      register: netbird_service_install
+      changed_when: netbird_service_install.rc == 0
+      failed_when: false
+
+    - name: Start NetBird daemon service
+      ansible.builtin.command: netbird service start
+      register: netbird_service_start
+      changed_when: netbird_service_start.rc == 0
+      failed_when: false
 
 - name: Check NetBird status
   ansible.builtin.command: netbird status
@@ -30,7 +45,7 @@
 
 - name: Connect node to NetBird mesh using onboarding setup key
   ansible.builtin.command: >
-    netbird up --key {{ netbird_setup_key_atlas_onboarding }}
+    netbird up --setup-key {{ netbird_setup_key_atlas_onboarding }}
   when:
     - netbird_setup_key_atlas_onboarding is defined
     - "'Connected' not in netbird_status_check.stdout"
