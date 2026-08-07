@@ -459,10 +459,11 @@ resources = {
       memory_size                 = 512
       disk_size                   = 4
       unprivileged                = true
+      nesting                     = true
     }
 
     nodes = {
-      "netbird-01" = {
+      "hermes.olympus.strawslabs.com" = {
         vm_id = 1021
         lxc_config = {
           ipv4_address = "192.168.0.21/24"
@@ -496,7 +497,7 @@ resources = {
     }
 
     nodes = {
-      "cloudflared-01" = {
+      "iris.olympus.strawslabs.com" = {
         vm_id = 1022
         lxc_config = {
           ipv4_address = "192.168.0.22/24"

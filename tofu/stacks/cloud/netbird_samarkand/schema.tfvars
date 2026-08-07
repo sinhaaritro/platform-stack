@@ -65,11 +65,11 @@ netbird = {
   # -----------------------------------------------------------------
   routes = {
     "homelab-subnet" = {
-      description           = "Route homelab LAN 192.168.1.0/24 via gateway"
+      description           = "Route homelab LAN 192.168.0.0/24 via gateway"
       network_id            = "homelab-lan"
-      network               = "192.168.1.0/24"
+      network               = "192.168.0.0/24"
       peer_id               = null # Fill after gateway peer enrollment
-      peer_groups           = ["gateway-routers"]
+      peer_groups           = ["servers", "gateway-routers"]
       groups                = ["admin-devices"]
       access_control_groups = ["admin-devices"]
       masquerade            = true
