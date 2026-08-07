@@ -6,3 +6,4 @@ components:
 
 resources:
   - ../../issuers/letsencrypt-prod-aritrosinha
+  - ../../issuers/letsencrypt-prod-strawslabs

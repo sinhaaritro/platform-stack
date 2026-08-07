@@ -13,5 +13,5 @@ spec:
           cloudflare:
             email: sinhaaritro@gmail.com
             apiTokenSecretRef:
-              name: cloudflare-dns-strawslabs
+              name: cloudflare-dns-aritrosinha
               key: api-token

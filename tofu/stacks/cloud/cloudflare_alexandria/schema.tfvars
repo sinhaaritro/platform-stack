@@ -44,7 +44,7 @@ cloudflare = {
           service  = "http://192.168.0.240:80"
         },
         {
-          hostname = "grafana.hyperion.aritrosinha.dpdns.org"
+          hostname = "grafana.hyperion.strawslabs.com"
           service  = "http://192.168.0.240:80"
         },
         {
@@ -63,7 +63,7 @@ cloudflare = {
           proxied   = true
         },
         {
-          zone_name = "aritrosinha.dpdns.org"
+          zone_name = "strawslabs.com"
           hostname  = "grafana.hyperion"
           proxied   = true
         },
