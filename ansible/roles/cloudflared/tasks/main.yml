@@ -9,17 +9,21 @@
         dest: /usr/local/bin/cloudflared
         mode: '0755'
 
-- name: Check Cloudflared service status
-  ansible.builtin.command: cloudflared service status
-  register: cloudflared_status_check
-  changed_when: false
-  failed_when: false
-
-- name: Install and start Cloudflare Tunnel service
+- name: Install Cloudflare Tunnel service
+  become: true
   ansible.builtin.command: >
     cloudflared service install {{ cloudflare_tunnel_token_homelab_tunnel }}
+  args:
+    creates: /etc/init.d/cloudflared
   when:
     - cloudflare_tunnel_token_homelab_tunnel is defined
-    - cloudflared_status_check.rc != 0
   register: cloudflared_install_result
   changed_when: cloudflared_install_result.rc == 0
+
+- name: Ensure cloudflared service is started and enabled
+  become: true
+  ansible.builtin.service:
+    name: cloudflared
+    state: started
+    enabled: true
+  failed_when: false
