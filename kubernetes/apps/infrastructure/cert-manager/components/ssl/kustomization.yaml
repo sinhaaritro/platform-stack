@@ -6,3 +6,4 @@ components:
   - bundles/personal-prod
   - bundles/selfsigned
   - secrets/cloudflare-dns-aritrosinha
+  - secrets/cloudflare-dns-strawslabs
