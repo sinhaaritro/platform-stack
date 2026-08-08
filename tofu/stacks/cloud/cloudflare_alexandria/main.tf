@@ -105,7 +105,8 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "tunnel_configs" {
         dynamic "origin_request" {
           for_each = ingress_rule.value.origin_request != null ? [ingress_rule.value.origin_request] : []
           content {
-            no_tls_verify = origin_request.value.no_tls_verify
+            no_tls_verify        = origin_request.value.no_tls_verify
+            origin_server_name   = origin_request.value.origin_server_name
           }
         }
       }

@@ -117,7 +117,8 @@ variable "cloudflare" {
         service  = string          # "ssh://localhost:22", "http://localhost:8080", "rdp://localhost:3389"
         path     = optional(string)
         origin_request = optional(object({
-          no_tls_verify = optional(bool, false) # skip TLS verification for self-signed certs (e.g. Proxmox)
+          no_tls_verify      = optional(bool, false) # skip TLS verification for self-signed certs (e.g. Proxmox)
+          origin_server_name = optional(string)      # hostname cloudflared should expect from the origin certificate (SNI/verify)
         }))
       })), [])
 

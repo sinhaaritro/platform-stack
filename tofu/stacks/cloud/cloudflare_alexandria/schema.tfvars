@@ -44,8 +44,11 @@ cloudflare = {
           service  = "http://192.168.0.240:80"
         },
         {
-          hostname = "grafana.hyperion.strawslabs.com"
-          service  = "http://192.168.0.240:80"
+          hostname = "grafana-hyperion.strawslabs.com"
+          service  = "https://192.168.0.240:443"
+          origin_request = {
+            origin_server_name = "grafana-hyperion.strawslabs.com"
+          }
         },
         {
           hostname       = "atlas.olympus.aritrosinha.dpdns.org"
@@ -64,7 +67,7 @@ cloudflare = {
         },
         {
           zone_name = "strawslabs.com"
-          hostname  = "grafana.hyperion"
+          hostname  = "grafana-hyperion"
           proxied   = true
         },
         {
