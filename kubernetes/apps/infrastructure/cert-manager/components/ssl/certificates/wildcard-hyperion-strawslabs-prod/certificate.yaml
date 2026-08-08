@@ -1,12 +1,12 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: grafana-cert-strawslabs
-  namespace: monitoring
+  name: wildcard-hyperion-strawslabs-prod
+  namespace: networking
 spec:
-  secretName: grafana-tls-strawslabs
+  secretName: wildcard-hyperion-strawslabs-prod-tls
   issuerRef:
     name: letsencrypt-prod-strawslabs
     kind: ClusterIssuer
   dnsNames:
-    - "grafana.hyperion.strawslabs.com"
+    - "*.hyperion.strawslabs.com"

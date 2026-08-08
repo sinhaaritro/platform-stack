@@ -8,10 +8,10 @@ spec:
   tls:
     - hosts:
         - "grafana.hyperion.aritrosinha.dpdns.org"
-      secretName: grafana-tls
+      secretName: wildcard-hyperion-aritrosinha-prod-tls
     - hosts:
         - "grafana.hyperion.strawslabs.com"
-      secretName: grafana-tls-strawslabs
+      secretName: wildcard-hyperion-strawslabs-prod-tls
   rules:
     - host: "grafana.hyperion.aritrosinha.dpdns.org"
       http:

@@ -3,6 +3,7 @@ kind: Component
 
 components:
   - ../../certificates/wildcard-hyperion-prod
+  - ../../certificates/wildcard-hyperion-strawslabs-prod
 
 resources:
   - ../../issuers/letsencrypt-prod-aritrosinha
