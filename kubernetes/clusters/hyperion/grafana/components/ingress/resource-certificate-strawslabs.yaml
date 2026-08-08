@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-hyperion-strawslabs-prod-tls
+  namespace: monitoring
+spec:
+  secretName: wildcard-hyperion-strawslabs-prod-tls
+  issuerRef:
+    name: letsencrypt-prod-strawslabs
+    kind: ClusterIssuer
+  dnsNames:
+    - "grafana.hyperion.strawslabs.com"
