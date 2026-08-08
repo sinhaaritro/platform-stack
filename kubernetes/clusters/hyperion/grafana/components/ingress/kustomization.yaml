@@ -4,6 +4,7 @@ namespace: monitoring
 
 resources:
   - resource-certificate-strawslabs.yaml
+  - resource-certificate-aritrosinha.yaml
 
 patches:
   - path: patch-ingress.yaml

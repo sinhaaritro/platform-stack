@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-hyperion-aritrosinha-prod-tls
+  namespace: monitoring
+spec:
+  secretName: wildcard-hyperion-aritrosinha-prod-tls
+  issuerRef:
+    name: letsencrypt-prod-aritrosinha
+    kind: ClusterIssuer
+  dnsNames:
+    - "grafana.hyperion.aritrosinha.dpdns.org"

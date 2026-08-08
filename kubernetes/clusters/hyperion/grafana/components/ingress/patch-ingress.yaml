@@ -2,9 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: grafana
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod-aritrosinha"
-spec:
+  spec:
   tls:
     - hosts:
         - "grafana.hyperion.aritrosinha.dpdns.org"
