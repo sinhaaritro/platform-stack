@@ -9,4 +9,4 @@ spec:
     name: letsencrypt-prod-strawslabs
     kind: ClusterIssuer
   dnsNames:
-    - "grafana.hyperion.strawslabs.com"
+    - "grafana-hyperion.strawslabs.com"

@@ -8,7 +8,7 @@ spec:
         - "grafana.hyperion.aritrosinha.dpdns.org"
       secretName: wildcard-hyperion-aritrosinha-prod-tls
     - hosts:
-        - "grafana.hyperion.strawslabs.com"
+        - "grafana-hyperion.strawslabs.com"
       secretName: wildcard-hyperion-strawslabs-prod-tls
   rules:
     - host: "grafana.hyperion.aritrosinha.dpdns.org"
@@ -21,7 +21,7 @@ spec:
                 name: grafana
                 port:
                   number: 80
-    - host: "grafana.hyperion.strawslabs.com"
+    - host: "grafana-hyperion.strawslabs.com"
       http:
         paths:
           - path: /
