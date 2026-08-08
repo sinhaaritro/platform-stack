@@ -11,3 +11,7 @@ patches:
     target:
       kind: Ingress
       name: grafana
+  - path: patch-remove-cluster-issuer-annotation.json
+    target:
+      kind: Ingress
+      name: grafana
