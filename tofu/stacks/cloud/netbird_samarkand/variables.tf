@@ -95,6 +95,36 @@ variable "netbird" {
       primary                = optional(bool, false)
       enabled                = optional(bool, true)
     })), {})
+
+    # ---------------------------------------------------------------
+    # NETWORKS (Virtual network containers)
+    # ---------------------------------------------------------------
+    networks = optional(map(object({
+      name        = string
+      description = optional(string, "")
+    })), {})
+
+    # ---------------------------------------------------------------
+    # NETWORK ROUTERS (Routing peers acting as gateways)
+    # ---------------------------------------------------------------
+    network_routers = optional(map(object({
+      network_key = string
+      peer_groups = list(string)
+      enabled     = optional(bool, true)
+      masquerade  = optional(bool, true)
+      metric      = optional(number, 9000)
+    })), {})
+
+    # ---------------------------------------------------------------
+    # NETWORK RESOURCES (Clientless destinations like VMs/containers)
+    # ---------------------------------------------------------------
+    network_resources = optional(map(object({
+      name        = string
+      description = optional(string, "")
+      network_key = string
+      address     = string
+      groups      = list(string)
+    })), {})
   })
   default = {}
 }

@@ -103,6 +103,43 @@ resource "netbird_nameserver_group" "nameservers" {
   ]
 }
 
+# --- Netbird Networks ---
+resource "netbird_network" "networks" {
+  for_each = try(var.netbird.networks, {})
+
+  name        = each.value.name
+  description = coalesce(each.value.description, each.key)
+}
+
+# --- Netbird Network Routers ---
+resource "netbird_network_router" "routers" {
+  for_each = try(var.netbird.network_routers, {})
+
+  network_id  = netbird_network.networks[each.value.network_key].id
+  peer_groups = [
+    for group_key in each.value.peer_groups :
+    try(netbird_group.groups[group_key].id, group_key)
+  ]
+  enabled     = each.value.enabled
+  masquerade  = each.value.masquerade
+  metric      = each.value.metric
+}
+
+# --- Netbird Network Resources ---
+resource "netbird_network_resource" "resources" {
+  for_each = try(var.netbird.network_resources, {})
+
+  name        = each.value.name
+  description = coalesce(each.value.description, each.key)
+  network_id  = netbird_network.networks[each.value.network_key].id
+  address     = each.value.address
+
+  groups = [
+    for group_key in each.value.groups :
+    try(netbird_group.groups[group_key].id, group_key)
+  ]
+}
+
 # --- Generated Ansible Inventory Vars (ansible/inventory.d/netbird_samarkand.yml) ---
 resource "local_sensitive_file" "ansible_inventory" {
   filename        = "${path.module}/../../../../ansible/inventory.d/netbird_samarkand.yml"

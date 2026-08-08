@@ -162,6 +162,63 @@ netbird = {
   #     domains                = ["home.arpa", "strawslabs.local"]
   #     search_domains_enabled = true
   #     primary                = false
+  #     enabled                = optional(bool, true)
   #   }
   # }
+
+  # -----------------------------------------------------------------
+  # NETWORKS (virtual network containers for architecture mapping)
+  # -----------------------------------------------------------------
+  networks = {
+    "proxmox-atlas" = {
+      name        = "Proxmox Atlas Network"
+      description = "On-premise network at Proxmox Atlas node"
+    }
+  }
+
+  # -----------------------------------------------------------------
+  # NETWORK ROUTERS (routing peers acting as gateways)
+  # -----------------------------------------------------------------
+  network_routers = {
+    "hermes-router" = {
+      network_key = "proxmox-atlas"
+      peer_groups = ["servers"] # Using 'servers' group containing hermes
+    }
+  }
+
+  # -----------------------------------------------------------------
+  # NETWORK RESOURCES (clientless destinations behind the routers)
+  # -----------------------------------------------------------------
+  network_resources = {
+    "hyperion-01" = {
+      name        = "hyperion-01"
+      network_key = "proxmox-atlas"
+      address     = "192.168.0.40/32"
+      groups      = ["servers"] # Allows admin-devices to reach it via standard ACLs
+    }
+    "hyperion-02" = {
+      name        = "hyperion-02"
+      network_key = "proxmox-atlas"
+      address     = "192.168.0.41/32"
+      groups      = ["servers"]
+    }
+    "quanta-01" = {
+      name        = "quanta-01"
+      network_key = "proxmox-atlas"
+      address     = "192.168.0.45/32"
+      groups      = ["servers"]
+    }
+    "adguard-dns" = {
+      name        = "adguard-dns"
+      network_key = "proxmox-atlas"
+      address     = "192.168.0.20/32"
+      groups      = ["servers"]
+    }
+    "cloudflared-tunnel" = {
+      name        = "cloudflared-tunnel"
+      network_key = "proxmox-atlas"
+      address     = "192.168.0.22/32"
+      groups      = ["servers"]
+    }
+  }
 }
