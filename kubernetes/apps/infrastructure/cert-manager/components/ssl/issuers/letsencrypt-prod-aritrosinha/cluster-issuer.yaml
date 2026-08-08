@@ -10,6 +10,9 @@ spec:
       name: letsencrypt-prod-aritrosinha
     solvers:
       - dns01:
+          recursiveResolvers:
+            - "1.1.1.1:53"
+            - "8.8.8.8:53"
           cloudflare:
             email: sinhaaritro@gmail.com
             apiTokenSecretRef:
