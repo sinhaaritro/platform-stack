@@ -10,6 +10,3 @@ helmCharts:
     namespace: networking
     includeCRDs: true
     valuesFile: values.yaml
-
-resources:
-  - servicemonitor.yaml

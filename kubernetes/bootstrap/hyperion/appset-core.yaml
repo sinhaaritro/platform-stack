@@ -21,6 +21,11 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "1"
+                - app: prometheus-operator-crds
+                  namespace: monitoring
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "1"
                 - app: cert-manager
                   namespace: networking
                   serverSideApply: "true"
