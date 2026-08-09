@@ -152,7 +152,7 @@ resources = {
     }
   },
   "quanta" = {
-    enabled     = true
+    enabled     = false
     type        = "vm"
     node_name   = "atlas"
     description = "Kubernets servers. Ubuntu 26.04."

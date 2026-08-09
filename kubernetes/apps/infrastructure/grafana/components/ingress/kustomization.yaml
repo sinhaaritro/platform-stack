@@ -5,5 +5,5 @@ metadata:
 # Template / dummy values. To expose grafana on a cluster, copy this folder to
 # clusters/<name>/grafana/components/ingress and replace every "dummy" value.
 resources:
-  - ingress.yaml
+  - ingress-dummy.yaml
   - cert-dummy.yaml
