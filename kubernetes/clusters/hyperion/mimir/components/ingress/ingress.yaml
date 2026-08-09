@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mimir
+  namespace: monitoring
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - "mimir.hyperion.aritrosinha.dpdns.org"
+      secretName: mimir-tls
+  rules:
+    - host: "mimir.hyperion.aritrosinha.dpdns.org"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mimir-gateway
+                port:
+                  number: 80

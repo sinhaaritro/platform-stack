@@ -1,0 +1,147 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedfs-master
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - "seaweedfs.hyperion.aritrosinha.dpdns.org"
+      secretName: seaweedfs-master-tls
+  rules:
+    - host: "seaweedfs.hyperion.aritrosinha.dpdns.org"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-master
+                port:
+                  number: 9333
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedfs-filer
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+    link.argocd.argoproj.io/external-link: "https://filer.seaweedfs.hyperion.aritrosinha.dpdns.org/"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - "filer.seaweedfs.hyperion.aritrosinha.dpdns.org"
+      secretName: seaweedfs-filer-tls
+  rules:
+    - host: "filer.seaweedfs.hyperion.aritrosinha.dpdns.org"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-filer
+                port:
+                  number: 8888
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedfs-s3
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - "s3.seaweedfs.hyperion.aritrosinha.dpdns.org"
+      secretName: seaweedfs-s3-tls
+  rules:
+    - host: "s3.seaweedfs.hyperion.aritrosinha.dpdns.org"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-s3
+                port:
+                  number: 8333
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedfs-admin
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+    link.argocd.argoproj.io/external-link: "https://admin.seaweedfs.hyperion.aritrosinha.dpdns.org/"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - "admin.seaweedfs.hyperion.aritrosinha.dpdns.org"
+      secretName: seaweedfs-admin-tls
+  rules:
+    - host: "admin.seaweedfs.hyperion.aritrosinha.dpdns.org"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-admin
+                port:
+                  number: 23646
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedfs-volume
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - "volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
+        - "*.volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
+      secretName: seaweedfs-volume-tls
+  rules:
+    - host: "volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-volume
+                port:
+                  number: 8080
+    - host: "*.volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-volume
+                port:
+                  number: 8080

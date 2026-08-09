@@ -12,6 +12,5 @@ components:
   - ../../../apps/infrastructure/longhorn/components/metrics
   - ../../../apps/infrastructure/longhorn/components/minimal
   - ../../../apps/infrastructure/longhorn/components/resource-limits
-  - ../../../apps/infrastructure/longhorn/components/ingress
   - ./components/ingress
   # - ../../../apps/infrastructure/longhorn/components/maintenance-scale-down

@@ -24,6 +24,15 @@ patches:
       - op: replace
         path: /spec/issuerRef/name
         value: letsencrypt-prod-aritrosinha
+      - op: add
+        path: /metadata/labels
+        value:
+          backuplabel.certificate: "true"
+      - op: add
+        path: /spec/secretTemplate
+        value:
+          labels:
+            backuplabel.certificate: "true"
   - target:
       kind: IngressRoute
       name: traefik-dashboard
@@ -32,3 +41,7 @@ patches:
         path: /metadata/annotations
         value:
           link.argocd.argoproj.io/external-link: https://traefik.hyperion.aritrosinha.dpdns.org/dashboard/
+      - op: add
+        path: /metadata/labels
+        value:
+          backuplabel.certificate: "true"

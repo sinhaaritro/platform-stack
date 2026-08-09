@@ -1,0 +1,90 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: seaweedfs-master-tls
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: seaweedfs-master-tls
+  issuerRef:
+    name: letsencrypt-prod-aritrosinha
+    kind: ClusterIssuer
+  dnsNames:
+    - "seaweedfs.hyperion.aritrosinha.dpdns.org"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: seaweedfs-filer-tls
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: seaweedfs-filer-tls
+  issuerRef:
+    name: letsencrypt-prod-aritrosinha
+    kind: ClusterIssuer
+  dnsNames:
+    - "filer.seaweedfs.hyperion.aritrosinha.dpdns.org"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: seaweedfs-s3-tls
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: seaweedfs-s3-tls
+  issuerRef:
+    name: letsencrypt-prod-aritrosinha
+    kind: ClusterIssuer
+  dnsNames:
+    - "s3.seaweedfs.hyperion.aritrosinha.dpdns.org"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: seaweedfs-admin-tls
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: seaweedfs-admin-tls
+  issuerRef:
+    name: letsencrypt-prod-aritrosinha
+    kind: ClusterIssuer
+  dnsNames:
+    - "admin.seaweedfs.hyperion.aritrosinha.dpdns.org"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: seaweedfs-volume-tls
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: seaweedfs-volume-tls
+  issuerRef:
+    name: letsencrypt-prod-aritrosinha
+    kind: ClusterIssuer
+  dnsNames:
+    - "volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
+    - "*.volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"

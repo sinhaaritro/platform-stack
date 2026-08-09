@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: loki-tls
+  namespace: logging
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: loki-tls
+  issuerRef:
+    name: letsencrypt-prod-aritrosinha
+    kind: ClusterIssuer
+  dnsNames:
+    - "loki.hyperion.aritrosinha.dpdns.org"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"

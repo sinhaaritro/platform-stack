@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: alloy-tls
+  namespace: monitoring
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: alloy-tls
+  issuerRef:
+    name: letsencrypt-prod-aritrosinha
+    kind: ClusterIssuer
+  dnsNames:
+    - "alloy.hyperion.aritrosinha.dpdns.org"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"
