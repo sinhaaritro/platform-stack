@@ -3,15 +3,6 @@ kind: Component
 namespace: monitoring
 
 resources:
-  - resource-certificate-strawslabs.yaml
-  - resource-certificate-aritrosinha.yaml
-
-patches:
-  - path: patch-ingress.yaml
-    target:
-      kind: Ingress
-      name: grafana
-  - path: patch-remove-cluster-issuer-annotation.json
-    target:
-      kind: Ingress
-      name: grafana
+  - ingress.yaml
+  - cert-aritrosinha.yaml
+  - cert-strawslabs.yaml

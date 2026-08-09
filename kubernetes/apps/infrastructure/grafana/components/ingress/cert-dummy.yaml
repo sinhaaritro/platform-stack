@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: grafana-dummy
+  namespace: monitoring
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: grafana-dummy-tls
+  issuerRef:
+    name: selfsigned-default
+    kind: ClusterIssuer
+  dnsNames:
+    - "grafana-dummy.example.com"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"

@@ -1,19 +1,20 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: grafana
+  name: grafana-dummy
   namespace: monitoring
+  labels:
+    backuplabel.certificate: "true"
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - grafana.placeholder.local
-      secretName: grafana-tls
+        - grafana-dummy.example.com
+      secretName: grafana-dummy-tls
   rules:
-    - host: grafana.placeholder.local
+    - host: grafana-dummy.example.com
       http:
         paths:
           - path: /
