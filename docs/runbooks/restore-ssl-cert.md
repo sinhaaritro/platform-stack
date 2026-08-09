@@ -2,56 +2,88 @@
 
 **Use Case**: Any scenario — loss, corruption, deletion, or full rebuild of SSL TLS Certificates.
 
-**Behavior**: Restores secrets into the shared, unmanaged `restore` namespace, then replicates only the TLS secrets into the live `networking` namespace.
+**Behavior**: Restores labeled Certificates and their TLS Secrets **in-place** across all namespaces using `existingResourcePolicy: update`. Cert-manager revalidates the restored keypair (dnsNames match) → stays Ready, **no new LE orders**.
+
+> **Prerequisite**: Velero and Cert Manager must be running in the cluster. The restore can run as soon as Velero is up — it is order-independent (apps and cert-manager do not need to be running first).
 
 ---
 
 ## Runbook Steps
 
 ### 1. Identify Backup Name
-Find the latest backup name for SSL certificates:
+Find the latest backup name from the `ssl-certs` schedule:
 ```bash
-kubectl get backups.velero.io -n backup -l velero.io/schedule-name=daily-ssl-certs --sort-by=.metadata.creationTimestamp
+kubectl get backups.velero.io -n backup -l velero.io/schedule-name=ssl-certs --sort-by=.metadata.creationTimestamp
 ```
 
-### 2. Update Restore Configuration
-1. Replace `BACKUP_NAME` in `restore.yaml` (at the bottom of this directory) with the identified backup name.
-2. Apply the restore manifest:
+### 2. Restore
+
+**Option A — CLI (no git change needed):**
+```bash
+velero restore create --from-backup <backup-name> --existing-resource-policy update
+```
+
+**Option B — Declarative (via GitOps):**
+1. Edit `kubernetes/clusters/hyperion/velero/components/schedules/ssl-cert/restore.yaml` — replace `BACKUP_NAME` on line 7 with the identified backup name.
+2. Push to git and let ArgoCD sync, or apply manually:
    ```bash
-   kubectl apply -f restore.yaml
+   kubectl apply -f kubernetes/clusters/hyperion/velero/components/schedules/ssl-cert/restore.yaml
    ```
 
-### 3. Verify Velero Restore Completion
-Verify the restore has finished successfully:
+### 3. Verify Restore Completion
 ```bash
-kubectl get restore ssl-cert-restore -n backup -o jsonpath='{.status.phase}' && echo ""
+velero restore get -n backup
 ```
-**Expected output**:
-```text
-Completed
+**Expected**: `Phase: Completed` with no warnings or errors.
+
+To inspect details:
+```bash
+velero restore describe <restore-name> -n backup | grep -iE "phase|warn|err"
 ```
 
-### 4. Copy TLS Secrets to Live Namespace
-Since Velero restores to the `restore` namespace, extract only TLS secrets, map them to the live `networking` namespace, and apply them:
+### 4. Verify Certificates Are Ready
+Confirm all restored certificates are in Ready state:
 ```bash
-kubectl get secret -n restore --field-selector type=kubernetes.io/tls -o yaml \
-  | sed 's/namespace: restore/namespace: networking/' \
-  | kubectl apply -f -
+kubectl get certificate -A -l backuplabel.certificate=true \
+  -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,READY:.status.conditions[0].status,NOT_AFTER:.status.notAfter
 ```
-**Verify**:
-Verify that the TLS secrets exist in the `networking` namespace:
+**Expected**: All show `READY: True` with the original `notAfter` timestamps (not freshly issued).
+
+Confirm no new LE orders were created (should be 0):
 ```bash
-kubectl get secrets -n networking --field-selector type=kubernetes.io/tls
-```
-**Expected output**:
-```text
-NAME                     TYPE                DATA   AGE
-aritro-net-production    kubernetes.io/tls   2      1m
+kubectl get orders.acme.cert-manager.io -A --no-headers | wc -l
 ```
 
-### 5. Cleanup
-Once verified, clean up temporary resources:
+### 5. Verify TLS Is Served
 ```bash
-kubectl delete ns restore
-kubectl delete restore ssl-cert-restore -n backup
+for h in alertmanager.hyperion.aritrosinha.dpdns.org \
+         alloy.hyperion.aritrosinha.dpdns.org \
+         loki.hyperion.aritrosinha.dpdns.org \
+         longhorn.hyperion.aritrosinha.dpdns.org \
+         mimir.hyperion.aritrosinha.dpdns.org \
+         seaweedfs.hyperion.aritrosinha.dpdns.org \
+         filer.seaweedfs.hyperion.aritrosinha.dpdns.org \
+         s3.seaweedfs.hyperion.aritrosinha.dpdns.org \
+         admin.seaweedfs.hyperion.aritrosinha.dpdns.org \
+         volume.seaweedfs.hyperion.aritrosinha.dpdns.org \
+         traefik.hyperion.aritrosinha.dpdns.org \
+         grafana.hyperion.aritrosinha.dpdns.org \
+         grafana-hyperion.strawslabs.com; do
+  printf "%-55s %s\n" "$h" "$(curl -sI --max-time 10 https://$h | awk 'NR==1{print $2}')"
+done
 ```
+**Expected**: All hosts return `200`.
+
+### 6. Traefik Boot-Order Race (if needed)
+If any host shows `TRAEFIK DEFAULT CERT` instead of the real certificate, Traefik booted before the TLS secrets existed. Fix with a restart:
+```bash
+kubectl -n networking rollout restart deployment/traefik
+```
+Then re-run the curl loop from Step 5.
+
+### 7. Cleanup (CLI restore only)
+If you used the CLI restore (Option A), clean up the restore object:
+```bash
+kubectl delete restore <restore-name> -n backup
+```
+If you used the declarative restore (Option B), reset `BACKUP_NAME` in `restore.yaml` and push to git.
