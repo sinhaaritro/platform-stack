@@ -3,5 +3,5 @@ kind: Component
 namespace: personal
 
 resources:
-  - ingress.yaml
-  - certificate.yaml
+  - ingress-aritrosinha.yaml
+  - cert-aritrosinha.yaml

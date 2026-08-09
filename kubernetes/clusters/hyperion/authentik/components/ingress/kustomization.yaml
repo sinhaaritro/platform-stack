@@ -3,5 +3,5 @@ kind: Component
 namespace: security
 
 resources:
-  - ingress.yaml
-  - certificate.yaml
+  - ingress-aritrosinha.yaml
+  - cert-aritrosinha.yaml
