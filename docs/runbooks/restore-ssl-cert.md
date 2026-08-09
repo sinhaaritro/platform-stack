@@ -32,13 +32,19 @@ velero restore create --from-backup <backup-name> --existing-resource-policy upd
 
 ### 3. Verify Restore Completion
 ```bash
-velero restore get -n backup
+kubectl get restore ssl-cert-restore -n backup -o jsonpath='{.status.phase}' && echo ""
 ```
 **Expected**: `Phase: Completed` with no warnings or errors.
 
-To inspect details:
+To inspect details if PartiallyFailed or Failed:
 ```bash
-velero restore describe <restore-name> -n backup | grep -iE "phase|warn|err"
+kubectl get restore ssl-cert-restore -n backup -o jsonpath='{.status}' | python3 -m json.tool
+```
+
+To see the Errors
+```bash
+kubectl get restore ssl-cert-restore -n backup -o json | python3 -c "import sys,json; d=json.load(sys.stdin); [print(json.dumps(v,indent=2)) for k,v in d.get('status',{}).items() if 'error' in k.lower() or 'warning' in k.lower()]"
+kubectl logs -n backup -l app.kubernetes.io/name=velero --tail=50 | grep -i "ssl-cert-restore"
 ```
 
 ### 4. Verify Certificates Are Ready
@@ -50,6 +56,7 @@ kubectl get certificate -A -l backuplabel.certificate=true \
 **Expected**: All show `READY: True` with the original `notAfter` timestamps (not freshly issued).
 
 Confirm no new LE orders were created (should be 0):
+If 0, then cert-manager made zero outgoing calls to Let's Encrypt when the cluster came up.
 ```bash
 kubectl get orders.acme.cert-manager.io -A --no-headers | wc -l
 ```
@@ -84,6 +91,9 @@ Then re-run the curl loop from Step 5.
 ### 7. Cleanup (CLI restore only)
 If you used the CLI restore (Option A), clean up the restore object:
 ```bash
-kubectl delete restore <restore-name> -n backup
+kubectl delete restore ssl-cert-restore -n backup
 ```
 If you used the declarative restore (Option B), reset `BACKUP_NAME` in `restore.yaml` and push to git.
+```bash
+kubectl apply -f kubernetes/clusters/hyperion/velero/components/schedules/ssl-cert/restore.yaml
+```
