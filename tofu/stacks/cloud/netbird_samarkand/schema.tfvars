@@ -190,11 +190,35 @@ netbird = {
   # NETWORK RESOURCES (clientless destinations behind the routers)
   # -----------------------------------------------------------------
   network_resources = {
+    "adguard-dns" = {
+      name        = "aegis"
+      network_key = "proxmox-atlas"
+      address     = "192.168.0.20/32"
+      groups      = ["servers"]
+    }
+    "netbird-tunnel" = {
+      name        = "hermes"
+      network_key = "proxmox-atlas"
+      address     = "192.168.0.22/32"
+      groups      = ["servers"]
+    }
+    "cloudflared-tunnel" = {
+      name        = "iris"
+      network_key = "proxmox-atlas"
+      address     = "192.168.0.22/32"
+      groups      = ["servers"]
+    }
+    "hephaestus" = {
+      name        = "hephaestus"
+      network_key = "proxmox-atlas"
+      address     = "192.168.0.2/32"
+      groups      = ["servers"]
+    }
     "hyperion-01" = {
       name        = "hyperion-01"
       network_key = "proxmox-atlas"
       address     = "192.168.0.40/32"
-      groups      = ["servers"] # Allows admin-devices to reach it via standard ACLs
+      groups      = ["servers"]
     }
     "hyperion-02" = {
       name        = "hyperion-02"
@@ -206,18 +230,6 @@ netbird = {
       name        = "quanta-01"
       network_key = "proxmox-atlas"
       address     = "192.168.0.45/32"
-      groups      = ["servers"]
-    }
-    "adguard-dns" = {
-      name        = "adguard-dns"
-      network_key = "proxmox-atlas"
-      address     = "192.168.0.20/32"
-      groups      = ["servers"]
-    }
-    "cloudflared-tunnel" = {
-      name        = "cloudflared-tunnel"
-      network_key = "proxmox-atlas"
-      address     = "192.168.0.22/32"
       groups      = ["servers"]
     }
   }
