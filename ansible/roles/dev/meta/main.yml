@@ -1,0 +1,22 @@
+# meta/main.yml
+galaxy_info:
+  author: Aritro
+  role_name: dev
+  namespace: internal
+  description: Developer and debug utility packages for interactive environments.
+  company: None
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - dev
+    - utilities
+    - debug
+
+dependencies: []

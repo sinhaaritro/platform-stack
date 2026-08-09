@@ -1,0 +1,7 @@
+# tasks/main.yml
+---
+- name: Install developer utilities
+  ansible.builtin.apt:
+    name: "{{ dev_packages }}"
+    state: present
+  tags: [dev, packages]

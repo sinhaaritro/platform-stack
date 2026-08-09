@@ -6,22 +6,46 @@
 
 # ==============================================================================
 # PLAY 1: FOUNDATION LAYER
-# Target: All Virtual Machines (Group: vm)
-# Purpose: Universal configuration. Minimal footprint. No heavy runtimes.
+# Target: All Managed Hosts (VMs + LXC Containers)
+# Purpose: Universal baseline. Timezone, Locale, Hostname, Core Packages.
 # ==============================================================================
-- name: Apply Base and Security Configuration
-  hosts: vm
-  tags: vm
+- name: Apply Base Configuration
+  hosts: vm:lxc
+  tags: [base]
   become: true
   roles:
     - role: base # System basics (Timezone, Locales, Packages)
+
+# ==============================================================================
+# PLAY 2: DEVELOPER UTILITIES
+# Target: Hosts in the 'dev' inventory group (VMs or LXCs).
+# Purpose: Interactive/debug tools not needed on production servers.
+# ==============================================================================
+- name: Install Developer Utilities
+  hosts: dev
+  tags: [dev]
+  become: true
+  roles:
+    - role: dev # vim, htop, dnsutils, etc.
+
+# ==============================================================================
+# PLAY 3: VM HARDENING LAYER
+# Target: Virtual Machines Only (Group: vm)
+# Purpose: Security, monitoring, user accounts, and disk mounts.
+#          Not applied to single-purpose LXC containers.
+# ==============================================================================
+- name: Apply Security and Monitoring Configuration
+  hosts: vm
+  tags: [vm]
+  become: true
+  roles:
     - role: security # SSH Hardening, UFW, Fail2Ban
     - role: monitoring # Node Exporter, QEMU Agent
     - role: users # User creation, Git config, SSH Keys
     - role: storage_setup # Mount additional disks (e.g., /dev/sdb -> /data/storage)
 
 # ==============================================================================
-# PLAY 2: DEV/TEST KUBERNETES (KIND)
+# PLAY 4: DEV/TEST KUBERNETES (KIND)
 # Target: Kind (Kubernetes) Server
 # Purpose: Ephemeral clusters. Manual app deployment for testing.
 # ==============================================================================
@@ -36,7 +60,7 @@
     - role: helm # Package Manager (Only installs Helm)
 
 # ==============================================================================
-# PLAY 3A: PRODUCTION KUBERNETES (KUBEADM) - CONTROL PLANE BOOTSTRAP
+# PLAY 5A: PRODUCTION KUBERNETES (KUBEADM) - CONTROL PLANE BOOTSTRAP
 # Target: Control Plane Nodes Only (in kubeadm group)
 # Purpose: Init Cluster, Install CNI, Generate Certs
 # Serial: 1 ensures HA clusters initialize the 1st node completely
@@ -56,7 +80,7 @@
     - role: helm # Ensure Helm
 
 # ==============================================================================
-# PLAY 3B: PRODUCTION KUBERNETES (KUBEADM) - WORKER JOIN
+# PLAY 5B: PRODUCTION KUBERNETES (KUBEADM) - WORKER JOIN
 # Target: Worker Nodes Only (in kubeadm group)
 # Purpose: Join the existing healthy cluster
 # ==============================================================================
@@ -72,7 +96,7 @@
     - role: kubeadm_cluster # Execute Worker-Join
 
 # ==============================================================================
-# PLAY 3C: PRODUCTION KUBERNETES (K3S) - CONTROL PLANE BOOTSTRAP
+# PLAY 5C: PRODUCTION KUBERNETES (K3S) - CONTROL PLANE BOOTSTRAP
 # Target: Control Plane Nodes Only (in k3s group)
 # Purpose: Run K3s Installer, wait for tokens
 # ==============================================================================
@@ -88,7 +112,7 @@
     - role: helm # Ensure Helm
 
 # ==============================================================================
-# PLAY 3D: PRODUCTION KUBERNETES (K3S) - WORKER JOIN
+# PLAY 5D: PRODUCTION KUBERNETES (K3S) - WORKER JOIN
 # Target: Worker Nodes Only (in k3s group)
 # Purpose: Join the existing healthy cluster as agents
 # ==============================================================================
@@ -101,7 +125,7 @@
     - role: k3s_cluster # Execute Worker-Join
 
 # ==============================================================================
-# PLAY 4: PRODUCTION KUBERNETES - MANAGEMENT LAYER
+# PLAY 6: PRODUCTION KUBERNETES - MANAGEMENT LAYER
 # Target: The Hub Server Only (k_management)
 # Purpose: Installs ArgoCD. (UI exposure and Fleet connect delayed).
 # ==============================================================================
@@ -113,7 +137,7 @@
     - role: argocd
 
 # ==============================================================================
-# PLAY 5: DNS LAYER — AdGuard Home
+# PLAY 7: DNS LAYER — AdGuard Home
 # Target: AdGuard Home LXC (adguard group)
 # ==============================================================================
 - name: Configure AdGuard Home DNS
@@ -124,7 +148,7 @@
     - role: adguard
 
 # ==============================================================================
-# PLAY 6: VPN LAYER — NetBird Mesh Client
+# PLAY 8: VPN LAYER — NetBird Mesh Client
 # Target: NetBird LXC (netbird group)
 # ==============================================================================
 - name: Configure NetBird Mesh Client
@@ -135,7 +159,7 @@
     - role: netbird
 
 # ==============================================================================
-# PLAY 7: TUNNEL LAYER — Cloudflare Tunnel Daemon
+# PLAY 9: TUNNEL LAYER — Cloudflare Tunnel Daemon
 # Target: Cloudflared LXC (cloudflared group)
 # ==============================================================================
 - name: Configure Cloudflare Tunnel Daemon
@@ -144,7 +168,6 @@
   become: true
   roles:
     - role: cloudflared
-
 # ==============================================================================
 # PLAY 6: WEB LAYER
 # Target: Web Server

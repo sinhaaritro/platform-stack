@@ -6,24 +6,13 @@ base_user_timezone: "{{ user_timezone | default('UTC') }}"
 # Locale settings (Prevents Perl warnings during installs)
 base_user_locale: "{{ user_locale | default('en_US.UTF-8') }}"
 
-# Essential utility packages
-# TODO: Split the package list. DEV Env needs all, Servers dont need all of these. Server in debug mode might need some.
+# Core packages — the intersection of what ALL hosts (LXC + VM) need.
+# K8s-specific tools (kubectl, kubeadm, helm) are installed by their own roles.
+# Dev/debug extras (vim, htop, etc.) can be added per-host via group_vars.
 base_packages:
   - curl
-  - wget
-  - vim
-  # - git
-  - htop
-  - fastfetch
-  - unzip
-  - zip
   - tar
   - jq
-  - tree
   - ca-certificates
   - gnupg
-  - lsb-release
-  - software-properties-common
-  - net-tools
-  - dnsutils
   - unattended-upgrades

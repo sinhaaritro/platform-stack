@@ -1,0 +1,17 @@
+# defaults/main.yml
+
+# Developer/debug utility packages.
+# These are NOT needed on automated servers (K8s nodes, LXCs).
+# Applied only to dev/workstation hosts.
+dev_packages:
+  - vim
+  - htop
+  - fastfetch
+  - wget
+  - zip
+  - unzip
+  - tree
+  - net-tools
+  - dnsutils
+  - lsb-release
+  - software-properties-common
