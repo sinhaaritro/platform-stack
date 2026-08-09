@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: obsidian
+  namespace: personal
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    link.argocd.argoproj.io/external-link: "https://obsidian.hyperion.aritrosinha.dpdns.org/"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - "obsidian.hyperion.aritrosinha.dpdns.org"
+      secretName: obsidian-tls
+  rules:
+    - host: "obsidian.hyperion.aritrosinha.dpdns.org"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: obsidian
+                port:
+                  name: http

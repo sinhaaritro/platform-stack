@@ -1,0 +1,35 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: authentik-tls
+  namespace: security
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: authentik-tls
+  issuerRef:
+    name: letsencrypt-prod-aritrosinha
+    kind: ClusterIssuer
+  dnsNames:
+    - "authentik.hyperion.aritrosinha.dpdns.org"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: obsidian-tls
+  namespace: security
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: obsidian-tls
+  issuerRef:
+    name: letsencrypt-prod-aritrosinha
+    kind: ClusterIssuer
+  dnsNames:
+    - "obsidian.hyperion.aritrosinha.dpdns.org"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"

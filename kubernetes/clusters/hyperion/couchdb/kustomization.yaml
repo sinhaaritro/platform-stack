@@ -6,7 +6,6 @@ resources:
 
 components:
   - ./components/secrets
-  - ../../../apps/infrastructure/couchdb/components/ingress
   - ./components/ingress
   - ../../../apps/infrastructure/couchdb/components/storage
   # - ../../../apps/infrastructure/couchdb/components/maintenance
