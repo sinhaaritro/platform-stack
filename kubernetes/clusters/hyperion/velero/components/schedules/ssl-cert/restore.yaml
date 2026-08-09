@@ -4,10 +4,6 @@ metadata:
   name: ssl-cert-restore
   namespace: backup
 spec:
-  backupName: BACKUP_NAME # <-- REPLACE with actual backup name (e.g., daily-ssl-certs-20260503010047)
-  includedNamespaces:
-    - networking
-  namespaceMapping:
-    networking: restore
+  backupName: BACKUP_NAME # <-- REPLACE with actual backup name (e.g., ssl-certs-20260809213030)
   existingResourcePolicy: none
   restorePVs: false # SSL certs are K8s Secrets, no PVCs to restore
