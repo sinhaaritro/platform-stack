@@ -5,5 +5,5 @@ metadata:
   namespace: backup
 spec:
   backupName: BACKUP_NAME # <-- REPLACE with actual backup name (e.g., ssl-certs-20260809213030)
-  existingResourcePolicy: none
+  existingResourcePolicy: update # overwrite freshly-issued secrets/certs on rebuild (order-independent DR); cert-manager revalidates restored keypair -> no new LE orders
   restorePVs: false # SSL certs are K8s Secrets, no PVCs to restore
