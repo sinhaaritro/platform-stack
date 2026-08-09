@@ -96,6 +96,20 @@ patches:
             scrape_interval = "15s"
           }
 
+          // Metrics: Discovery (SeaweedFS)
+          discovery.kubernetes "seaweedfs_services" {
+            role = "service"
+          }
+
+          discovery.relabel "seaweedfs_svc" {
+            targets = discovery.kubernetes.seaweedfs_services.targets
+            rule {
+              source_labels = ["__meta_kubernetes_service_name"]
+              regex = ".*seaweedfs.*"
+              action = "keep"
+            }
+          }
+
           // Metrics: Scrape (SeaweedFS)
           prometheus.scrape "seaweedfs" {
             job_name   = "seaweedfs"
