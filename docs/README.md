@@ -116,7 +116,12 @@ How-to guides for specific tasks and setup procedures.
 
 | Guide | Description |
 |---|---|
+| [AWS Setup](./guides/aws-setup.md) | AWS account signup, IAM user creation, API access keys, and scoped permissions |
 | [Ansible VM Lifecycle](./guides/ansible-vm-lifecycle.md) | The journey of a VM from nothing to cluster integration |
+| [Cloudflare Setup](./guides/cloudflare-setup.md) | Cloudflare account, Zero Trust tunnel editing permissions, API tokens |
+| [NetBird Setup](./guides/netbird-setup.md) | NetBird PAT token generation and administration role setup |
+| [Oracle Setup](./guides/oracle-setup.md) | OCI Free Tier, tenant/user OCID retrieval, PEM API key generation |
+| [Proxmox Setup](./guides/proxmox-setup.md) | Proxmox administrative API user, unseparated token creation |
 | [qBittorrent Proxy Setup](./guides/qbittorrent-proxy-setup.md) | Proxy configuration for qBittorrent |
 
 ---
