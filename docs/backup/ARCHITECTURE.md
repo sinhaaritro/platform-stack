@@ -153,7 +153,7 @@ All schedules use a staggered daily window to avoid I/O contention:
 | `monthly-immich` | `30 20 1 * *` | 02:00 AM (1st) | `personal` | `app.kubernetes.io/instance: immich` | ✅ fs-backup | 30 days |
 | `daily-security` | `0 21 * * *` | 02:30 AM | `security` | None (full namespace) | ✅ fs-backup | 30 days |
 | `daily-obsidian` | `30 21 * * *` | 03:00 AM | `personal` | `app: obsidian` | ✅ fs-backup | 30 days |
-| `daily-ssl-certs` | `30 21 * * *` | 03:00 AM | `networking` | None (full namespace) | ❌ Resources only | 30 days |
+| `ssl-certs` | `30 21 * * 6` | 03:00 AM (Sun) | `*` (all) | `backuplabel.certificate: "true"` | ❌ Resources only | 60 days |
 
 > **Adding a new schedule:** Create a new Kustomize component under `velero/components/schedules/<app-name>/` with a `schedule.yaml` and `restore.yaml`. Add the component to the cluster overlay's `kustomization.yaml`.
 

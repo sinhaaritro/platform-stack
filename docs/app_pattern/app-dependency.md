@@ -30,6 +30,7 @@ Here are all the locations where version specifications (Helm charts, container 
 | **Infra** | `node-exporter` | `prometheus-node-exporter` | `https://prometheus-community.github.io/helm-charts` | `4.51.1` | [kustomization.yaml](file:///home/dev/platform-stack/kubernetes/apps/infrastructure/node-exporter/base/kustomization.yaml#L10) |
 | **Infra** | `alloy` | `alloy` | `https://grafana.github.io/helm-charts` | `1.6.0` | [kustomization.yaml](file:///home/dev/platform-stack/kubernetes/apps/infrastructure/alloy/base/kustomization.yaml#L10) |
 | **Infra** | `alertmanager` | `alertmanager` | `https://prometheus-community.github.io/helm-charts` | `1.33.0` | [kustomization.yaml](file:///home/dev/platform-stack/kubernetes/apps/infrastructure/alertmanager/base/kustomization.yaml#L10) |
+| **Infra** | `prometheus-operator-crds` | `prometheus-operator-crds` | `https://prometheus-community.github.io/helm-charts` | `31.0.0` | [kustomization.yaml](file:///home/dev/platform-stack/kubernetes/apps/infrastructure/prometheus-operator-crds/base/kustomization.yaml#L8) |
 | **Infra** | `velero` | `velero` | `https://vmware-tanzu.github.io/helm-charts` | `12.0.0` | [kustomization.yaml](file:///home/dev/platform-stack/kubernetes/apps/infrastructure/velero/base/kustomization.yaml#L10) |
 | **Service**| `immich` | `immich` | `https://immich-app.github.io/immich-charts` | `0.10.3` | [kustomization.yaml](file:///home/dev/platform-stack/kubernetes/apps/services/immich/base/kustomization.yaml#L10) |
 | **Service**| `podinfo` | `podinfo` | `https://stefanprodan.github.io/podinfo` | `6.9.4` | [kustomization.yaml](file:///home/dev/platform-stack/kubernetes/apps/services/podinfo/base/kustomization.yaml#L8) |
@@ -70,6 +71,7 @@ flowchart TD
     subgraph Layer0 ["Tier 1: Core & Security"]
         sys_patch[system-patches]
         seal[sealed-secrets]
+        prom_crds[prometheus-operator-crds]
     end
 
     subgraph Layer1 ["Tier 2: PKI & Secrets Engine"]
@@ -123,6 +125,13 @@ flowchart TD
     sys_patch --> cert
     cert --> ext_sec
     cert --> kyver
+    prom_crds --> cert
+    prom_crds --> lh
+    prom_crds --> mimir
+    prom_crds --> loki
+    prom_crds --> alloy
+    prom_crds --> alert
+    prom_crds --> node_exp
     seal --> ext_sec
 
     mlb --> traf
@@ -172,7 +181,7 @@ flowchart TD
 
 To upgrade the stack with minimal risk of breaking dependent applications, execute upgrades in this order:
 
-1. **Tier 1 (Core Security):** `sealed-secrets`
+1. **Tier 1 (Core Security):** `sealed-secrets`, `prometheus-operator-crds`
 2. **Tier 2 (Base Engine):** `cert-manager` → `external-secrets` & `kyverno`
 3. **Tier 3 (Routing):** `metallb` → `traefik` → `external-dns`
 4. **Tier 4 (Storage):** `longhorn`

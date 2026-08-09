@@ -6,9 +6,8 @@
 ## Feature Ideas
 *   [ ] **Authentik SSO for Obsidian Web** — Add forward auth proxy via Authentik since linuxserver/obsidian has no OAuth. Required before exposing via Cloudflare Tunnel. Implement using Authentik blueprints-as-code.
 *   [ ] **Split Package list of VM and LXC based on Host type in Ansible** — Right now ansible, install all packages, we dont want that
-*   [ ] **Proper backup setup for SSL cert** — Here we are talking about the labels and certs
 *   [ ] **Remove the extra line from the appset** - Kubernetes, in the appset ignore line, try to see if we can remove them
-*   [ ] **New 30day backup schedule for SSL cert** — Get new backup shedule for SSL cert.
+*   [ ] **Proper Backup schedule for all** — Get prod backup schedules for all things.
 *   [ ] **Ansible role for dev vms** — Get new roles, for working vm like flutter, react
 *   [ ] **Ansible Visualization** — Get the new ansible role visualization
 *   [ ] **Opentofu Visualization** — Get the new opentofu infra visualization.

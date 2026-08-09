@@ -97,3 +97,46 @@ If you used the declarative restore (Option B), reset `BACKUP_NAME` in `restore.
 ```bash
 kubectl apply -f kubernetes/clusters/hyperion/velero/components/schedules/ssl-cert/restore.yaml
 ```
+
+---
+
+## Known Gotchas
+
+### Traefik Boot-Order Race (SNI Fallback)
+
+Traefik loads TLS secrets at boot time for SNI routing. If Traefik starts **before** the restored TLS secrets exist in the cluster, it serves its built-in fallback certificate (`TRAEFIK DEFAULT CERT`) instead of the real one. This causes `502` errors on hosts behind Cloudflare Tunnel (strict TLS verification fails on the fallback cert).
+
+**Detection:** `echo | openssl s_client -connect <lb-ip>:443 -servername <host> 2>/dev/null | openssl x509 -noout -subject` shows "TRAEFIK DEFAULT CERT" instead of the real domain.
+
+**Fix:** Restart Traefik after the secrets are restored (Step 6 above). Traefik re-reads all TLS secrets on restart.
+
+**Why per-host Ingress files help:** Each Ingress has exactly one host + one TLS secret. If one host's cert is missing/pending, only that host is affected — the other hosts continue serving correctly. This is because Traefik treats an Ingress TLS block atomically.
+
+### Let's Encrypt Rate Limits
+
+If certificates must be re-issued (backup is unavailable or too old), be aware of these LE limits:
+
+| Limit | Value | Window | Impact |
+|---|---|---|---|
+| Certificates per Registered Domain | 50 | 7 days | Unlikely to hit with ~13 certs |
+| **Duplicate Certificates (exact identifier)** | **5** | **168 hours** | **Most likely to hit during iterative testing** |
+| Failed Validations | 5 | 1 hour | DNS-01 propagation failures count |
+
+**The 5-per-exact-identifier limit** is the dangerous one during DR testing or migrations. If you delete and recreate a `Certificate` resource for the same `dnsName` more than 5 times within 7 days, LE will reject the 6th request with:
+
+```
+429 urn:ietf:params:acme:error:rateLimited: too many certificates (5) already issued
+for this exact set of identifiers in the last 168h0m0s
+```
+
+**Mitigation:**
+- **Never** manually delete a `Certificate` + `Secret` and recreate it for the same dnsName within 7 days
+- Pre-seed TLS secrets before creating the `Certificate` resource (cert-manager will adopt them)
+- Use the **staging** issuer (`letsencrypt-staging-*`) for DR drills that involve fresh issuance
+- If rate-limited: cert-manager auto-retries after the `Retry-After` deadline (visible in the `Order` resource). It's a one-cert, one-time delay — other identifiers are unaffected
+
+**Detection:**
+```bash
+kubectl get orders.acme.cert-manager.io -A
+kubectl get events -n <ns> | grep -i 429
+```

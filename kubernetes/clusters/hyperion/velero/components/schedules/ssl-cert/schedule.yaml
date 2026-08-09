@@ -4,7 +4,7 @@ metadata:
   name: ssl-certs
   namespace: backup
 spec:
-  schedule: "30 21 * * *" # 03:00 AM IST (21:30 UTC)
+  schedule: "30 21 * * 6" # 03:00 AM IST (21:30 UTC) on Sundays
   template:
     includedNamespaces:
       - "*"
@@ -19,4 +19,5 @@ spec:
       matchLabels:
         backuplabel.certificate: "true"
     storageLocation: aws
-    ttl: 720h0m0s # 30 days
+    ttl: 1440h0m0s # 60 days retention (safe buffer for 90-day certs)
+    snapshotVolumes: false # Metadata only, no expensive disk snapshots
