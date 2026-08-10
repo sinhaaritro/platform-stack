@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: ghcr.io/immich-app/postgres:18-vectorchord
+          image: postgres:18.4-bookworm
           env:
             - name: POSTGRES_INITDB_ARGS
               value: "--data-checksums"
@@ -24,5 +24,4 @@ spec:
               name: postgresql
           volumeMounts:
             - name: data
-              mountPath: /var/lib/postgresql/data
-              subPath: postgresql
+              mountPath: /var/lib/postgresql
