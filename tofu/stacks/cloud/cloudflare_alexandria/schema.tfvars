@@ -25,14 +25,6 @@ cloudflare = {
           proxied = true
         }
       ]
-
-      cache_rules = [
-        {
-          description = "Bypass cache for Immich (private media)"
-          expression  = "(http.host eq \"immich.hyperion.aritrosinha.dpdns.org\")"
-          action      = "bypass"
-        }
-      ]
     }
   }
 
@@ -40,8 +32,25 @@ cloudflare = {
     "homelab-tunnel" = {
       ingress = [
         {
-          hostname = "immich.hyperion.aritrosinha.dpdns.org"
-          service  = "http://192.168.0.240:80"
+          hostname = "immich-hyperion.strawslabs.com"
+          service  = "https://192.168.0.240:443"
+          origin_request = {
+            origin_server_name = "immich-hyperion.strawslabs.com"
+          }
+        },
+        {
+          hostname = "authentik-hyperion.strawslabs.com"
+          service  = "https://192.168.0.240:443"
+          origin_request = {
+            origin_server_name = "authentik-hyperion.strawslabs.com"
+          }
+        },
+        {
+          hostname = "obsidian-hyperion.strawslabs.com"
+          service  = "https://192.168.0.240:443"
+          origin_request = {
+            origin_server_name = "obsidian-hyperion.strawslabs.com"
+          }
         },
         {
           hostname = "grafana-hyperion.strawslabs.com"
@@ -61,8 +70,18 @@ cloudflare = {
       ]
       dns = [
         {
-          zone_name = "aritrosinha.dpdns.org"
-          hostname  = "immich.hyperion"
+          zone_name = "strawslabs.com"
+          hostname  = "immich-hyperion"
+          proxied   = true
+        },
+        {
+          zone_name = "strawslabs.com"
+          hostname  = "authentik-hyperion"
+          proxied   = true
+        },
+        {
+          zone_name = "strawslabs.com"
+          hostname  = "obsidian-hyperion"
           proxied   = true
         },
         {

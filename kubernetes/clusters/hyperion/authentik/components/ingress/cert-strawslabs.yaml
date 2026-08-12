@@ -1,17 +1,17 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: authentik-tls
+  name: authentik-cert-strawslabs
   namespace: security
   labels:
     backuplabel.certificate: "true"
 spec:
-  secretName: authentik-tls
+  secretName: authentik-cert-strawslabs-tls
   issuerRef:
-    name: letsencrypt-prod-aritrosinha
+    name: letsencrypt-prod-strawslabs
     kind: ClusterIssuer
   dnsNames:
-    - "authentik.hyperion.aritrosinha.dpdns.org"
+    - "authentik-hyperion.strawslabs.com"
   secretTemplate:
     labels:
       backuplabel.certificate: "true"

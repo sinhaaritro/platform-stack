@@ -1,8 +1,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: obsidian
-  namespace: personal
+  name: authentik-strawslabs
+  namespace: security
   labels:
     backuplabel.certificate: "true"
   annotations:
@@ -11,16 +11,16 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - "obsidian.hyperion.aritrosinha.dpdns.org"
-      secretName: obsidian-tls
+        - "authentik-hyperion.strawslabs.com"
+      secretName: authentik-cert-strawslabs-tls
   rules:
-    - host: "obsidian.hyperion.aritrosinha.dpdns.org"
+    - host: "authentik-hyperion.strawslabs.com"
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: obsidian
+                name: authentik-server
                 port:
-                  name: http
+                  number: 80

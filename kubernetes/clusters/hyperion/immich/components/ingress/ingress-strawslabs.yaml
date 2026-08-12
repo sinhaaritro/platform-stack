@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: obsidian
+  name: immich-strawslabs
   namespace: personal
   labels:
     backuplabel.certificate: "true"
@@ -11,16 +11,16 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - "obsidian.hyperion.aritrosinha.dpdns.org"
-      secretName: obsidian-tls
+        - "immich-hyperion.strawslabs.com"
+      secretName: immich-cert-strawslabs-tls
   rules:
-    - host: "obsidian.hyperion.aritrosinha.dpdns.org"
+    - host: "immich-hyperion.strawslabs.com"
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: obsidian
+                name: immich-server
                 port:
-                  name: http
+                  number: 2283
