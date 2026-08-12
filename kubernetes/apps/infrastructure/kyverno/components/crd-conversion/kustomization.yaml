@@ -1,0 +1,125 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: CustomResourceDefinition
+      name: deletingpolicies.policies.kyverno.io
+    patch: |-
+      apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      metadata:
+        name: deletingpolicies.policies.kyverno.io
+      spec:
+        conversion:
+          strategy: None
+  - target:
+      kind: CustomResourceDefinition
+      name: generatingpolicies.policies.kyverno.io
+    patch: |-
+      apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      metadata:
+        name: generatingpolicies.policies.kyverno.io
+      spec:
+        conversion:
+          strategy: None
+  - target:
+      kind: CustomResourceDefinition
+      name: imagevalidatingpolicies.policies.kyverno.io
+    patch: |-
+      apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      metadata:
+        name: imagevalidatingpolicies.policies.kyverno.io
+      spec:
+        conversion:
+          strategy: None
+  - target:
+      kind: CustomResourceDefinition
+      name: mutatingpolicies.policies.kyverno.io
+    patch: |-
+      apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      metadata:
+        name: mutatingpolicies.policies.kyverno.io
+      spec:
+        conversion:
+          strategy: None
+  - target:
+      kind: CustomResourceDefinition
+      name: namespaceddeletingpolicies.policies.kyverno.io
+    patch: |-
+      apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      metadata:
+        name: namespaceddeletingpolicies.policies.kyverno.io
+      spec:
+        conversion:
+          strategy: None
+  - target:
+      kind: CustomResourceDefinition
+      name: namespacedgeneratingpolicies.policies.kyverno.io
+    patch: |-
+      apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      metadata:
+        name: namespacedgeneratingpolicies.policies.kyverno.io
+      spec:
+        conversion:
+          strategy: None
+  - target:
+      kind: CustomResourceDefinition
+      name: namespacedimagevalidatingpolicies.policies.kyverno.io
+    patch: |-
+      apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      metadata:
+        name: namespacedimagevalidatingpolicies.policies.kyverno.io
+      spec:
+        conversion:
+          strategy: None
+  - target:
+      kind: CustomResourceDefinition
+      name: namespacedmutatingpolicies.policies.kyverno.io
+    patch: |-
+      apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      metadata:
+        name: namespacedmutatingpolicies.policies.kyverno.io
+      spec:
+        conversion:
+          strategy: None
+  - target:
+      kind: CustomResourceDefinition
+      name: namespacedvalidatingpolicies.policies.kyverno.io
+    patch: |-
+      apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      metadata:
+        name: namespacedvalidatingpolicies.policies.kyverno.io
+      spec:
+        conversion:
+          strategy: None
+  - target:
+      kind: CustomResourceDefinition
+      name: policyexceptions.policies.kyverno.io
+    patch: |-
+      apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      metadata:
+        name: policyexceptions.policies.kyverno.io
+      spec:
+        conversion:
+          strategy: None
+  - target:
+      kind: CustomResourceDefinition
+      name: validatingpolicies.policies.kyverno.io
+    patch: |-
+      apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      metadata:
+        name: validatingpolicies.policies.kyverno.io
+      spec:
+        conversion:
+          strategy: None
