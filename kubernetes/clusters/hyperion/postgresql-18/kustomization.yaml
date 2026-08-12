@@ -10,4 +10,5 @@ components:
   - ./components/secrets
   - ../../../apps/infrastructure/postgresql-18/components/storage
   - ../../../apps/infrastructure/postgresql-18/components/resource-limits
+  - ../../../apps/infrastructure/postgresql-18/components/immich
   # - ../../../apps/infrastructure/postgresql-18/components/maintenance

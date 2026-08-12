@@ -16,6 +16,15 @@ spec:
       containers:
         - name: postgres
           image: postgres:18.4-bookworm
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              PRELOAD_LIBS=""
+              for f in /etc/pg-extensions.d/*/install.sh; do
+                if [ -f "$f" ]; then . "$f"; fi
+              done
+              exec docker-entrypoint.sh postgres ${PRELOAD_LIBS:+ -c shared_preload_libraries="$PRELOAD_LIBS"}
           env:
             - name: POSTGRES_INITDB_ARGS
               value: "--data-checksums"

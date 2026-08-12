@@ -1,12 +1,11 @@
-image:
-  tag: v1.114.0
-
 controllers:
   main:
     containers:
       main:
         # DB and Redis credentials are injected by components/secrets
         env: {}
+        image:
+          tag: v3.1.0
 
     initContainers:
       init-storage:

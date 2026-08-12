@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgresql-18
+spec:
+  template:
+    spec:
+      containers:
+        - name: postgres
+          volumeMounts:
+            - name: pg-ext-immich
+              mountPath: /etc/pg-extensions.d/immich
+              readOnly: true
+      volumes:
+        - name: pg-ext-immich
+          configMap:
+            name: pg-ext-immich
