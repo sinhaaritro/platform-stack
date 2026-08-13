@@ -157,6 +157,24 @@ All schedules use a staggered daily window to avoid I/O contention:
 
 > **Adding a new schedule:** Create a new Kustomize component under `velero/components/schedules/<app-name>/` with a `schedule.yaml` and `restore.yaml`. Add the component to the cluster overlay's `kustomization.yaml`.
 
+### Deleting Backups
+
+> **Gotcha:** `kubectl delete backups.velero.io <name>` does **not** permanently delete a backup — it only removes the CR. The S3 data remains and Velero's backup-sync recreates the CR from object storage within ~2 minutes.
+
+To permanently delete a backup (S3 data + CR), use a `DeleteBackupRequest` (equivalent to `velero delete backup <name> --confirm`):
+```bash
+cat <<EOF | kubectl apply -f -
+apiVersion: velero.io/v1
+kind: DeleteBackupRequest
+metadata:
+  name: dbr-<backup-name>
+  namespace: backup
+spec:
+  backupName: <backup-name>
+EOF
+```
+The request auto-removes when done; the backup CR will not resurrect afterwards.
+
 ---
 
 ## rclone — Tier 4: NFS User Data
