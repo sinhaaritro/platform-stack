@@ -4,7 +4,7 @@ metadata:
   name: security-restore
   namespace: backup
 spec:
-  backupName: BACKUP_NAME # <-- REPLACE with actual backup name
+  backupName: authentik-drill # <-- REPLACE with actual backup name
   includedNamespaces:
     - security
   namespaceMapping:
