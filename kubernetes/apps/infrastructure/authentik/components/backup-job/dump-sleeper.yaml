@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentik-db-dump
+  namespace: security
+  labels:
+    app.kubernetes.io/name: authentik-db-dump
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: authentik-db-dump
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: authentik-db-dump
+      annotations:
+        # Velero runs this pg_dump right before backing up the volume,
+        # so every daily-security backup contains a fresh database dump.
+        pre.hook.backup.velero.io/container: db-dump
+        pre.hook.backup.velero.io/command: '["/bin/sh","-c","PGPASSWORD=$DB_PASSWORD pg_dump -h $DB_HOSTNAME -U $DB_USERNAME -d $DB_DATABASE_NAME -f /backup/authentik-db.sql -c -C -O"]'
+        pre.hook.backup.velero.io/timeout: 2m
+    spec:
+      # fsGroup makes kubelet/Longhorn chown the PVC to gid 999 on mount,
+      # so the non-root postgres client can write the dump.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: db-dump
+          image: postgres:18-alpine
+          command: ["sleep", "infinity"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          env:
+            - name: DB_HOSTNAME
+              value: postgresql-18.storage.svc.cluster.local
+          envFrom:
+            - secretRef:
+                name: authentik-db-credentials
+          volumeMounts:
+            - name: db-backup
+              mountPath: /backup
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+      volumes:
+        - name: db-backup
+          persistentVolumeClaim:
+            claimName: authentik-db-backup

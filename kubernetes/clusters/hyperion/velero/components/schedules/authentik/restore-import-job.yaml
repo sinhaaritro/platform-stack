@@ -1,0 +1,78 @@
+# DR TOOL - unapplied template, alongside restore.yaml.
+# This directory's kustomization only emits schedule.yaml; restore.yaml and
+# this file are manual DR manifests (see docs/runbooks/restore-authentik.md).
+# Applied AFTER the Velero restore has brought back the authentik-db-backup
+# PVC (with the dump on it). It terminates DB connections, drops the authentik
+# database, then imports the dump from the restored PVC.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: authentik-db-restore-import
+  namespace: security
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: restore-import
+          image: postgres:18-alpine
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          command:
+            - /bin/sh
+            - -c
+            - |
+              export PGPASSWORD=$ADMIN_PASSWORD
+              PG_HOST="postgresql-18.storage.svc.cluster.local"
+
+              echo "Waiting for PostgreSQL at $PG_HOST..."
+              RETRIES=60
+              until pg_isready -h "$PG_HOST" -U postgres -t 1 > /dev/null 2>&1; do
+                RETRIES=$((RETRIES - 1))
+                if [ "$RETRIES" -le 0 ]; then
+                  echo "ERROR: Timed out waiting for PostgreSQL."
+                  exit 1
+                fi
+                echo "  Not ready yet. Retrying in 5s... ($RETRIES attempts left)"
+                sleep 5
+              done
+
+              echo "Terminating connections to database '$DB_NAME'..."
+              psql -h "$PG_HOST" -U postgres -d postgres -c \
+                "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$DB_NAME' AND pid <> pg_backend_pid();" || true
+
+              echo "Dropping database '$DB_NAME'..."
+              psql -h "$PG_HOST" -U postgres -d postgres -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS \"$DB_NAME\";"
+
+              echo "Importing dump from /backup/authentik-db.sql..."
+              psql -h "$PG_HOST" -U postgres -d postgres -v ON_ERROR_STOP=1 -f /backup/authentik-db.sql
+              echo "Restore complete."
+          env:
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-18-admin
+                  key: POSTGRES_PASSWORD
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-db-credentials
+                  key: DB_DATABASE_NAME
+          volumeMounts:
+            - name: db-backup
+              mountPath: /backup
+              readOnly: true
+      volumes:
+        - name: db-backup
+          persistentVolumeClaim:
+            claimName: authentik-db-backup
