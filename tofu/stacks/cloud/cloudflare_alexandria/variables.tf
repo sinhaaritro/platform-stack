@@ -49,7 +49,7 @@ variable "cloudflare" {
         content  = string              # IP, hostname, or text value
         ttl      = optional(number, 1) # 1 = "auto" when proxied
         proxied  = optional(bool, true)
-        priority = optional(number)    # for MX / SRV
+        priority = optional(number) # for MX / SRV
         comment  = optional(string)
       })), [])
 
@@ -86,11 +86,28 @@ variable "cloudflare" {
       # ---------------------------------------------------------------
       cache_rules = optional(list(object({
         description = string
-        expression  = string              # Cloudflare filter expression, e.g. '(http.host eq "immich.example.com")'
+        expression  = string                     # Cloudflare filter expression, e.g. '(http.host eq "immich.example.com")'
         action      = optional(string, "bypass") # bypass | override | respect_origin
-        edge_ttl    = optional(number)            # seconds, only for "override" action
+        edge_ttl    = optional(number)           # seconds, only for "override" action
       })), [])
     })), {})
+
+    # ---------------------------------------------------------------
+    # ACCOUNT-LEVEL REDIRECT RULES (apply to all zones in the account)
+    # ---------------------------------------------------------------
+    account_rulesets = optional(list(object({
+      name        = string
+      description = optional(string, "")
+      rules = list(object({
+        description           = string
+        expression            = string                # Cloudflare filter expression, e.g. '(http.host eq "app.example.com")'
+        action                = string                # "redirect" (only supported action for now)
+        status_code           = optional(number, 301) # 301 | 302 | 307 | 308
+        target_url            = string                # static redirect URL
+        preserve_query_string = optional(bool, false)
+        enabled               = optional(bool, true)
+      }))
+    })), [])
 
     # ---------------------------------------------------------------
     # WEBSITES / APPS hosted via Cloudflare Pages
@@ -114,7 +131,7 @@ variable "cloudflare" {
 
       ingress = optional(list(object({
         hostname = optional(string) # e.g. "ssh.example.com" ; omit on last catch-all rule
-        service  = string          # "ssh://localhost:22", "http://localhost:8080", "rdp://localhost:3389"
+        service  = string           # "ssh://localhost:22", "http://localhost:8080", "rdp://localhost:3389"
         path     = optional(string)
         origin_request = optional(object({
           no_tls_verify      = optional(bool, false) # skip TLS verification for self-signed certs (e.g. Proxmox)

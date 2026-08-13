@@ -105,8 +105,8 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "tunnel_configs" {
         dynamic "origin_request" {
           for_each = ingress_rule.value.origin_request != null ? [ingress_rule.value.origin_request] : []
           content {
-            no_tls_verify        = origin_request.value.no_tls_verify
-            origin_server_name   = origin_request.value.origin_server_name
+            no_tls_verify      = origin_request.value.no_tls_verify
+            origin_server_name = origin_request.value.origin_server_name
           }
         }
       }
@@ -201,6 +201,39 @@ resource "cloudflare_ruleset" "cache_rules" {
       }
 
       enabled = true
+    }
+  }
+}
+
+# --- Account-Level Redirect Rules (e.g. maintenance/hold redirects) ---
+resource "cloudflare_ruleset" "account_redirect_rules" {
+  for_each = {
+    for rs in try(var.cloudflare.account_rulesets, []) : rs.name => rs
+  }
+
+  account_id  = var.cloudflare_account_id
+  name        = each.key
+  description = each.value.description
+  kind        = "custom"
+  phase       = "http_request_dynamic_redirect"
+
+  dynamic "rules" {
+    for_each = each.value.rules
+    content {
+      description = rules.value.description
+      expression  = rules.value.expression
+      action      = rules.value.action
+      enabled     = rules.value.enabled
+
+      action_parameters {
+        from_value {
+          status_code           = rules.value.status_code
+          preserve_query_string = rules.value.preserve_query_string
+          target_url {
+            value = rules.value.target_url
+          }
+        }
+      }
     }
   }
 }

@@ -97,6 +97,25 @@ cloudflare = {
       ]
     }
   }
+
+  # Declared intent: no account-level redirect rules.
+  # Any deliberate redirect (maintenance page, domain migration) goes here, e.g.:
+  #   account_rulesets = [
+  #     {
+  #       name        = "maintenance-hold"
+  #       description = "Temporary hold for maintenance"
+  #       rules = [
+  #         {
+  #           description = "Redirect all traffic during maintenance"
+  #           expression  = "(http.host in {\"app.strawslabs.com\"})"
+  #           action      = "redirect"
+  #           status_code = 302
+  #           target_url  = "https://example.com/maintenance"
+  #         }
+  #       ]
+  #     }
+  #   ]
+  account_rulesets = []
 }
 
 
