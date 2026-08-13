@@ -13,4 +13,4 @@ spec:
         app.kubernetes.io/instance: immich
     storageLocation: aws
     defaultVolumesToFsBackup: true
-    ttl: 720h0m0s # 30 days
+    ttl: 8760h0m0s # 12 monthly copies (1 year)
