@@ -6,10 +6,6 @@ spec:
   template:
     metadata:
       annotations:
-        # Before backing up the PVC, Velero will execute this pg_dump command.
-        # This guarantees a consistent database snapshot is stored alongside the file data.
-        pre.hook.backup.velero.io/container: main
-        pre.hook.backup.velero.io/command: '["/bin/sh", "-c", "PGPASSWORD=$DB_PASSWORD pg_dump -h $DB_HOSTNAME -U $DB_USERNAME -f /data/backups/immich-db.sql -c -C -O $DB_DATABASE_NAME"]'
         # Exclude massive media volume from Velero volume backups
         backup.velero.io/backup-volumes-excludes: data
     spec:
@@ -22,4 +18,3 @@ spec:
         - name: db-backup
           persistentVolumeClaim:
             claimName: immich-db-backup
-
