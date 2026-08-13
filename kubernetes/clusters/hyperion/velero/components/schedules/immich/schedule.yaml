@@ -1,10 +1,10 @@
 apiVersion: velero.io/v1
 kind: Schedule
 metadata:
-  name: monthly-immich
+  name: daily-immich
   namespace: backup
 spec:
-  schedule: "30 20 1 * *" # 02:00 AM IST on the 2nd (20:30 UTC on the 1st) of every month
+  schedule: "0 3 * * *" # 03:00 UTC daily, 1h after immich's own DB dump (02:00 UTC)
   template:
     includedNamespaces:
       - personal
@@ -13,4 +13,4 @@ spec:
         app.kubernetes.io/instance: immich
     storageLocation: aws
     defaultVolumesToFsBackup: true
-    ttl: 8760h0m0s # 12 monthly copies (1 year)
+    ttl: 336h0m0s # 14 daily copies (2 weeks)

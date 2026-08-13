@@ -150,8 +150,8 @@ All schedules use a staggered daily window to avoid I/O contention:
 
 | Schedule Name | Cron (UTC) | IST Equivalent | Namespace | Label Selector | PVC Backup | Retention |
 |---|---|---|---|---|---|---|
-| `monthly-immich` | `30 20 1 * *` | 02:00 AM (1st) | `personal` | `app.kubernetes.io/instance: immich` | ✅ fs-backup | 30 days |
-| `daily-security` | `0 21 * * *` | 02:30 AM | `security` | None (full namespace) | ✅ fs-backup | 30 days |
+| `daily-immich` | `0 3 * * *` | 08:30 AM | `personal` | `app.kubernetes.io/instance: immich` | ✅ fs-backup | 14 days |
+| `daily-security` | `0 21 * * *` | 02:30 AM | `security` | None (full namespace) | ✅ fs-backup | 14 days |
 | `daily-obsidian` | `30 21 * * *` | 03:00 AM | `personal` | `app: obsidian` | ✅ fs-backup | 30 days |
 | `ssl-certs` | `30 21 * * 6` | 03:00 AM (Sun) | `*` (all) | `backuplabel.certificate: "true"` | ❌ Resources only | 60 days |
 
