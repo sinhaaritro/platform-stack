@@ -30,6 +30,7 @@ resource "null_resource" "lxc_template_customizer" {
   }
 
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = templatefile("${path.module}/templates/customize_lxc_${contains(["debian", "ubuntu"], lower(each.value.os_type)) ? "debian" : "alpine"}.sh.tftpl", {
       template_url    = each.value.url
       cache_dir       = var.local_cache_dir

@@ -187,6 +187,7 @@ module "proxmox_lxc" {
   # Disk
   disk_datastore_id = each.value.disk_datastore_id
   disk_size         = each.value.disk_size
+  mount_points      = each.value.mount_points
 
   # Network
   vlan_bridge = each.value.vlan_bridge

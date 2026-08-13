@@ -143,6 +143,8 @@ locals {
       ipv4_address = item.node_override.lxc_config.ipv4_address
       ipv4_gateway = coalesce(item.node_override.lxc_config.ipv4_gateway, item.app_group.lxc_config.ipv4_gateway, "192.168.0.1")
 
+      mount_points = coalesce(item.node_override.lxc_config.mount_points, item.app_group.lxc_config.mount_points)
+
       user_account_username = (
         (var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")] != null &&
           var.user_credentials[coalesce(item.node_override.cloud_init_user, item.app_group.cloud_init_user, "default_user")].username != null &&

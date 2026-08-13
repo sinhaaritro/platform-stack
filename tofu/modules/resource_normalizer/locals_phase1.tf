@@ -66,6 +66,7 @@ locals {
           vlan_bridge                 = try(cluster.lxc_config.vlan_bridge, "vmbr0")
           vlan_id                     = try(cluster.lxc_config.vlan_id, 0)
           ipv4_gateway                = try(cluster.lxc_config.ipv4_gateway, null)
+          mount_points                = try(cluster.lxc_config.mount_points, [])
         } : null
 
         nodes = {
@@ -118,6 +119,7 @@ locals {
               vlan_id                     = try(node.lxc_config.vlan_id, null)
               ipv4_address                = try(node.lxc_config.ipv4_address, "dhcp")
               ipv4_gateway                = try(node.lxc_config.ipv4_gateway, null)
+              mount_points                = try(node.lxc_config.mount_points, null)
             } : null
           }
         }

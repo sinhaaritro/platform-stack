@@ -162,3 +162,19 @@ variable "dns_servers" {
   type        = list(string)
   default     = []
 }
+
+variable "mount_points" {
+  description = "Additional volume mounts or bind mounts for the container."
+  type = list(object({
+    path          = string
+    volume        = string
+    size          = optional(string)
+    mount_options = optional(list(string))
+    read_only     = optional(bool, false)
+    backup        = optional(bool, false)
+    quota         = optional(bool, false)
+    acl           = optional(bool, false)
+    replicate     = optional(bool, true)
+  }))
+  default = []
+}

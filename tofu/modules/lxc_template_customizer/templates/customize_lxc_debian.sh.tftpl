@@ -26,6 +26,9 @@ if [ ! -f "$TARGET_PATH" ]; then
   
   sudo mount --bind /dev "$WORK_DIR/rootfs/dev"
   sudo mount --bind /proc "$WORK_DIR/rootfs/proc"
+  sudo mkdir -p "$WORK_DIR/rootfs/tmp"
+  sudo chmod 1777 "$WORK_DIR/rootfs/tmp"
+  sudo mount -t tmpfs tmpfs "$WORK_DIR/rootfs/tmp"
 
   sudo chroot "$WORK_DIR/rootfs" /bin/sh -c "DEBIAN_FRONTEND=noninteractive apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y openssh-server sudo python3 && ssh-keygen -A"
   sudo mkdir -p "$WORK_DIR/rootfs/run/sshd" "$WORK_DIR/rootfs/root/.ansible/tmp"
@@ -37,6 +40,7 @@ if [ ! -f "$TARGET_PATH" ]; then
   sudo chroot "$WORK_DIR/rootfs" /bin/sh -c "systemctl enable ssh 2>/dev/null || update-rc.d ssh enable 2>/dev/null || true"
   sudo chroot "$WORK_DIR/rootfs" /bin/sh -c "apt-get clean && rm -rf /var/lib/apt/lists/*"
 
+  sudo umount "$WORK_DIR/rootfs/tmp" 2>/dev/null || true
   sudo umount "$WORK_DIR/rootfs/proc" 2>/dev/null || true
   sudo umount "$WORK_DIR/rootfs/dev" 2>/dev/null || true
 

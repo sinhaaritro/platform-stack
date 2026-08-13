@@ -400,6 +400,48 @@ resources = {
     }
   },
 
+  "oceanus" = {
+    enabled         = true
+    type            = "lxc"
+    node_name       = "atlas"
+    description     = "NFS/Samba storage server. Debian 12."
+    tags            = ["ansible", "storage", "nfs", "samba", "lxc"]
+    on_boot         = true
+    cloud_init_user = "dev"
+    ansible_groups = {
+      "storage_lxc" = {}
+    }
+
+    lxc_config = {
+      template_datastore_id       = "WD1TB"
+      template_url                = "http://download.proxmox.com/images/system/debian-12-standard_12.12-1_amd64.tar.zst"
+      template_checksum           = "50c85eaaece677a3ebe01cc909b83872e9da2a22c29ae652838afce71e83222fdf40f6accecd7d52b180e912fc1f85ecdf7b3fc4d3027da4d865e509a9e76597"
+      template_checksum_algorithm = "sha512"
+      os_type                     = "debian"
+      disk_datastore_id           = "WD1TB"
+      disk_size                   = 4
+      cpu_cores                   = 1
+      memory_size                 = 512
+      unprivileged                = true
+      mount_points = [
+        {
+          path   = "/export/data"
+          volume = "WD4TB"
+          size   = "100G"
+        }
+      ]
+    }
+
+    nodes = {
+      "oceanus.olympus.strawslabs.com" = {
+        vm_id = 1037
+        lxc_config = {
+          ipv4_address = "192.168.0.53/24"
+        }
+      }
+    }
+  },
+
   "adguard" = {
     enabled         = true
     type            = "lxc"

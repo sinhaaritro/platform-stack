@@ -27,6 +27,21 @@ resource "proxmox_virtual_environment_container" "module_lxc" {
     size         = var.disk_size
   }
 
+  dynamic "mount_point" {
+    for_each = var.mount_points
+    content {
+      path          = mount_point.value.path
+      volume        = mount_point.value.volume
+      size          = mount_point.value.size
+      mount_options = mount_point.value.mount_options
+      read_only     = mount_point.value.read_only
+      backup        = mount_point.value.backup
+      quota         = mount_point.value.quota
+      acl           = mount_point.value.acl
+      replicate     = mount_point.value.replicate
+    }
+  }
+
   # --- Hardware Resources ---
   cpu {
     cores = var.cpu_cores
