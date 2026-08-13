@@ -13,3 +13,11 @@ metadata:
   namespace: security
 spec:
   replicas: 0
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentik-db-dump
+  namespace: security
+spec:
+  replicas: 0
