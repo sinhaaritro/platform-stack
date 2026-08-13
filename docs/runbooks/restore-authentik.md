@@ -39,6 +39,17 @@ kubectl -n restore get pods | grep authentik-db-dump
 # Expected: 1/1 Running (dump PVC mounted)
 ```
 
+To inspect details if PartiallyFailed or Failed:
+```bash
+kubectl get restore security-restore -n backup -o jsonpath='{.status}' | python3 -m json.tool
+```
+
+To see the Errors
+```bash
+kubectl get restore security-restore -n backup -o json | python3 -c "import sys,json; d=json.load(sys.stdin); [print(json.dumps(v,indent=2)) for k,v in d.get('status',{}).items() if 'error' in k.lower() or 'warning' in k.lower()]"
+kubectl logs -n backup -l app.kubernetes.io/name=velero --tail=50 | grep -i "security-restore"
+```
+
 ### 4. Import the Database Dump
 ```bash
 sed 's/namespace: security/namespace: restore/' \
