@@ -3,7 +3,12 @@
 # this file are manual DR manifests (see docs/runbooks/restore-authentik.md).
 # Applied AFTER the Velero restore has brought back the authentik-db-backup
 # PVC (with the dump on it). It terminates DB connections, drops the authentik
-# database, then imports the dump from the restored PVC.
+# database, recreates it with the app user as owner, then imports the dump
+# from the restored PVC.
+#
+# NOTE: pg_dump 18 emits \restrict/\unrestrict + DROP/CREATE DATABASE lines
+# that psql refuses or mis-handles mid-script; the import filters them out and
+# creates the database up front (same pattern as the immich restore runbook).
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -54,8 +59,14 @@ spec:
               echo "Dropping database '$DB_NAME'..."
               psql -h "$PG_HOST" -U postgres -d postgres -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS \"$DB_NAME\";"
 
-              echo "Importing dump from /backup/authentik-db.sql..."
-              psql -h "$PG_HOST" -U postgres -d postgres -v ON_ERROR_STOP=1 -f /backup/authentik-db.sql
+              echo "Creating database '$DB_NAME' owned by '$DB_USERNAME'..."
+              psql -h "$PG_HOST" -U postgres -d postgres -v ON_ERROR_STOP=1 \
+                -c "CREATE DATABASE \"$DB_NAME\" OWNER \"$DB_USERNAME\";"
+
+              echo "Importing dump from /backup/authentik-db.sql as '$DB_USERNAME'..."
+              sed -E '/^(DROP DATABASE|CREATE DATABASE|ALTER DATABASE|\\connect|\\restrict|\\unrestrict)/d' \
+                /backup/authentik-db.sql | \
+                PGPASSWORD=$DB_PASSWORD psql -h "$PG_HOST" -U "$DB_USERNAME" -d "$DB_NAME" -v ON_ERROR_STOP=1
               echo "Restore complete."
           env:
             - name: ADMIN_PASSWORD
@@ -68,6 +79,16 @@ spec:
                 secretKeyRef:
                   name: authentik-db-credentials
                   key: DB_DATABASE_NAME
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-db-credentials
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-db-credentials
+                  key: DB_PASSWORD
           volumeMounts:
             - name: db-backup
               mountPath: /backup
