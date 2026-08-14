@@ -8,4 +8,15 @@
   until: base_apt_status is success
   retries: 10
   delay: 5
+  when: ansible_facts['os_family'] == "Debian"
   tags: [base, apt]
+
+- name: Update apk cache (with retry for lock)
+  community.general.apk:
+    update_cache: true
+  register: base_apk_status
+  until: base_apk_status is success
+  retries: 10
+  delay: 5
+  when: ansible_facts['os_family'] == "Alpine"
+  tags: [base, apk]

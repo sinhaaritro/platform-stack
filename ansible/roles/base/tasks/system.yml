@@ -1,41 +1,92 @@
 # tasks/system.yml
 ---
-- name: Set system timezone
-  community.general.timezone:
-    name: "{{ base_user_timezone }}"
+# --- Timezone ---
+- name: Install tzdata (Alpine)
+  community.general.apk:
+    name: tzdata
+    state: present
+  when: ansible_facts['os_family'] == "Alpine"
   tags: [base, timezone]
 
-- name: Install systemd-timesyncd
+- name: Set timezone via symlink (LXC-safe)
+  ansible.builtin.file:
+    src: "/usr/share/zoneinfo/{{ base_user_timezone }}"
+    dest: /etc/localtime
+    state: link
+    force: true
+  tags: [base, timezone]
+
+- name: Write /etc/timezone (Debian)
+  ansible.builtin.copy:
+    content: "{{ base_user_timezone }}\n"
+    dest: /etc/timezone
+    mode: "0644"
+  when: ansible_facts['os_family'] == "Debian"
+  tags: [base, timezone]
+
+# --- NTP ---
+# LXC containers inherit time from the host — NTP is both unnecessary
+# and impossible (adjtimex syscall is blocked).
+- name: Install systemd-timesyncd (Debian VMs only)
   ansible.builtin.apt:
     name: systemd-timesyncd
     state: present
+  when:
+    - ansible_facts['os_family'] == "Debian"
+    - ansible_facts['virtualization_type'] | default('') != 'lxc'
   tags: [base, time]
 
-- name: Enable NTP (Timesync)
+- name: Enable NTP - systemd-timesyncd (Debian VMs only)
   ansible.builtin.service:
     name: systemd-timesyncd
     state: started
     enabled: true
   notify: Restart systemd-timesyncd
+  when:
+    - ansible_facts['os_family'] == "Debian"
+    - ansible_facts['virtualization_type'] | default('') != 'lxc'
   tags: [base, time]
 
-- name: Set hostname to inventory name
+# --- Hostname ---
+# hostnamectl needs systemd-dbus which LXC containers don't have.
+# Use the hostname module only on VMs, file-based on LXC.
+- name: Set hostname (VMs)
   ansible.builtin.hostname:
     name: "{{ inventory_hostname }}"
+  when: ansible_facts['virtualization_type'] | default('') != 'lxc'
   tags: [base, network]
 
-- name: Generate system locales
+- name: Set hostname via /etc/hostname (LXC)
+  ansible.builtin.copy:
+    content: "{{ inventory_hostname }}\n"
+    dest: /etc/hostname
+    mode: "0644"
+  when: ansible_facts['virtualization_type'] | default('') == 'lxc'
+  tags: [base, network]
+
+- name: Apply hostname immediately (LXC)
+  ansible.builtin.command: hostname {{ inventory_hostname }}
+  changed_when: true
+  when: ansible_facts['virtualization_type'] | default('') == 'lxc'
+  tags: [base, network]
+
+# --- Locale ---
+- name: Generate system locales (Debian)
   community.general.locale_gen:
     name: "{{ base_user_locale }}"
     state: present
+  when: ansible_facts['os_family'] == "Debian"
   tags: [base, locale]
 
+# --- Performance tuning ---
+# sysctl requires /proc/sys write access, which LXC may not have.
 - name: Increase fs.inotify.max_user_instances (Fix "too many open files")
   ansible.posix.sysctl:
     name: fs.inotify.max_user_instances
     value: "8192"
     state: present
     reload: true
+  when: ansible_facts['virtualization_type'] | default('') != 'lxc'
   tags: [base, system, performance]
 
 - name: Increase fs.inotify.max_user_watches (Fix "too many open files")
@@ -44,4 +95,5 @@
     value: "524288"
     state: present
     reload: true
+  when: ansible_facts['virtualization_type'] | default('') != 'lxc'
   tags: [base, system, performance]

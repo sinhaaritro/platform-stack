@@ -1,18 +1,28 @@
 # tasks/packages.yml
 ---
-- name: Install base utilities
+- name: Install base utilities (Debian)
   ansible.builtin.apt:
     name: "{{ base_packages }}"
     state: present
+  when: ansible_facts['os_family'] == "Debian"
+  tags: [base, packages]
+
+- name: Install base utilities (Alpine)
+  community.general.apk:
+    name: "{{ base_packages_alpine }}"
+    state: present
+  when: ansible_facts['os_family'] == "Alpine"
   tags: [base, packages]
 
 # Useful cleanup to keep VM disk images smaller
 - name: Remove useless packages from the cache
   ansible.builtin.apt:
     autoclean: true
+  when: ansible_facts['os_family'] == "Debian"
   tags: [base, maintenance]
 
 - name: Remove dependencies that are no longer required
   ansible.builtin.apt:
     autoremove: true
+  when: ansible_facts['os_family'] == "Debian"
   tags: [base, maintenance]

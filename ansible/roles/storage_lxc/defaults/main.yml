@@ -1,0 +1,18 @@
+---
+# defaults/main.yml - Default variables for the storage_lxc role
+
+storage_lxc_export_path: "/export/data"
+
+storage_lxc_ganesha_export_id: 1
+storage_lxc_ganesha_protocols: "3, 4"
+
+storage_lxc_samba_share_name: "oceanus"
+storage_lxc_samba_share_comment: "NFS/Samba storage share (oceanus)"
+
+storage_lxc_nfs_packages:
+  - nfs-ganesha
+  - nfs-ganesha-vfs
+  - rpcbind
+
+storage_lxc_samba_packages:
+  - samba

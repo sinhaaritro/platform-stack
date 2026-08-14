@@ -16,3 +16,11 @@ base_packages:
   - ca-certificates
   - gnupg
   - unattended-upgrades
+
+# Alpine equivalents — no unattended-upgrades on Alpine
+base_packages_alpine:
+  - curl
+  - tar
+  - jq
+  - ca-certificates
+  - gnupg

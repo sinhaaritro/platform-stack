@@ -1,0 +1,11 @@
+---
+# tasks/main.yml - Storage LXC (NFS + Samba) tasks
+
+- name: Install NFS and Samba packages
+  ansible.builtin.include_tasks: install.yml
+
+- name: Configure NFS export and Samba share
+  ansible.builtin.include_tasks: configure.yml
+
+- name: Manage NFS and Samba service lifecycle
+  ansible.builtin.include_tasks: service.yml

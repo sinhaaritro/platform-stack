@@ -1,0 +1,12 @@
+---
+# handlers/main.yml - Service restarts for the storage_lxc role
+
+- name: Restart nfs-ganesha
+  ansible.builtin.service:
+    name: nfs-ganesha
+    state: restarted
+
+- name: Restart smbd
+  ansible.builtin.service:
+    name: smbd
+    state: restarted
