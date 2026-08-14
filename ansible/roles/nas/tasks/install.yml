@@ -3,11 +3,11 @@
 
 - name: Install NFS server packages
   ansible.builtin.apt:
-    name: "{{ storage_lxc_nfs_packages }}"
+    name: "{{ nas_nfs_packages }}"
     state: present
     update_cache: true
 
 - name: Install Samba packages
   ansible.builtin.apt:
-    name: "{{ storage_lxc_samba_packages }}"
+    name: "{{ nas_samba_packages }}"
     state: present

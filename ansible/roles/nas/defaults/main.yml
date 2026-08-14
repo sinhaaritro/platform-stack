@@ -1,0 +1,19 @@
+---
+# defaults/main.yml - Default variables for the nas role
+
+nas_export_path: "/export/data"
+nas_export_network: "192.168.0.0/24"
+nas_export_options: "rw,sync,no_subtree_check,no_root_squash"
+
+nas_data_device: "/dev/sdb"
+
+nas_samba_share_name: "oceanus"
+nas_samba_share_comment: "NFS/Samba storage share (oceanus)"
+
+nas_nfs_packages:
+  - nfs-kernel-server
+  - nfs-common
+  - rpcbind
+
+nas_samba_packages:
+  - samba

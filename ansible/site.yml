@@ -170,15 +170,15 @@
     - role: cloudflared
 
 # ==============================================================================
-# PLAY 10: STORAGE LAYER — NFS/Samba Storage LXC
-# Target: oceanus LXC (storage_lxc group)
+# PLAY 10: STORAGE LAYER — NAS (NFS/Samba)
+# Target: oceanus VM (nas group)
 # ==============================================================================
-- name: Configure Storage LXC (NFS/Samba)
-  hosts: storage_lxc
-  tags: storage_lxc
+- name: Configure NAS (NFS/Samba)
+  hosts: nas
+  tags: nas
   become: true
   roles:
-    - role: storage_lxc
+    - role: nas
 # ==============================================================================
 # PLAY 6: WEB LAYER
 # Target: Web Server

@@ -1,5 +1,5 @@
 ---
-# tasks/service.yml - Ganesha NFS and Samba service management
+# tasks/service.yml - NFS and Samba service management
 
 - name: Enable and start rpcbind
   ansible.builtin.service:
@@ -7,9 +7,9 @@
     state: started
     enabled: true
 
-- name: Enable and start Ganesha NFS server
+- name: Enable and start NFS server
   ansible.builtin.service:
-    name: nfs-ganesha
+    name: nfs-kernel-server
     state: started
     enabled: true
 

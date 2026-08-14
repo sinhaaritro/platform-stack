@@ -1,5 +1,14 @@
 # tasks/pre_tasks.yml
 ---
+- name: Wait for cloud-init to complete
+  ansible.builtin.wait_for:
+    path: /run/cloud-init/result.json
+    timeout: 300
+  when:
+    - ansible_facts['os_family'] == "Debian"
+    - ansible_facts['distribution'] == "Ubuntu"
+  tags: [base]
+
 - name: Update apt cache (with retry for lock)
   ansible.builtin.apt:
     update_cache: true
