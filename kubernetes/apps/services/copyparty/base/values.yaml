@@ -15,7 +15,6 @@ configMap:
         p: 3923
         xff-src: lan
         http-only
-        stats
 
       [accounts]
         admin: d52c8f613a6dfcae21691cb1
@@ -44,6 +43,18 @@ volumeConfig:
         - "ReadWriteOnce"
       size: "1Gi"
       storageClass: "longhorn"
+  copypartyConfig:
+    volumeMount:
+      name: "copyparty-config"
+      mountPath: "/cfg"
+    volume:
+      name: "copyparty-config"
+      secret: null
+      configMap:
+        name: "copyparty-config"
+
+app:
+  args: []
 
 resources:
   limits:
