@@ -16,13 +16,15 @@ ingress:
 
 volumeConfig:
   userData:
-    persistence:
-      enabled: true
-      pvcName: "user-data"
-      accessModes:
-        - "ReadWriteOnce"
-      size: "20Gi"
-      storageClass: "longhorn"
+    volumeMount:
+      name: "user-data"
+      mountPath: "/w"
+    volume:
+      name: "user-data"
+      emptyDir: null
+      nfs:
+        server: "192.168.0.53"
+        path: "/export/data"
   appData:
     persistence:
       enabled: true

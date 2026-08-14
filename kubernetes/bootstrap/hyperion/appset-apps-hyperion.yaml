@@ -18,6 +18,11 @@ spec:
             serverSideApply: "true"
             replace: "false"
             wave: "6"
+          - app: nfs-provisioner
+            namespace: storage
+            serverSideApply: "true"
+            replace: "false"
+            wave: "5"
           - app: authentik
             namespace: security
             serverSideApply: "true"

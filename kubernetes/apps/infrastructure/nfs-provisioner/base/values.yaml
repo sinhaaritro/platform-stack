@@ -1,0 +1,16 @@
+nfs:
+  server: "192.168.0.53"
+  path: /export/data
+  mountOptions:
+    - hard
+    - noatime
+    - actimeo=2
+
+storageClass:
+  create: true
+  name: nfs
+  allowVolumeExpansion: true
+  reclaimPolicy: Retain
+  archiveOnDelete: true
+  accessModes: ReadWriteMany
+  volumeBindingMode: Immediate
