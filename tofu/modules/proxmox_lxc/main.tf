@@ -8,11 +8,16 @@ resource "proxmox_virtual_environment_container" "module_lxc" {
   started       = var.started
   unprivileged  = var.unprivileged
 
-  features {
-    nesting = var.nesting
-    # Need root user. So turned off from GitOps
-    # fuse    = var.fuse
-    # keyctl  = var.keyctl
+  # Feature flags may only be changed by root@pam on privileged containers,
+  # so they are only sent for unprivileged ones (privileged get Proxmox defaults).
+  dynamic "features" {
+    for_each = var.unprivileged ? [1] : []
+    content {
+      nesting = var.nesting
+      # Need root user. So turned off from GitOps
+      # fuse    = var.fuse
+      # keyctl  = var.keyctl
+    }
   }
 
   # --- OS Template ---
