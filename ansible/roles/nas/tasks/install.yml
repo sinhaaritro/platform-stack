@@ -1,13 +1,8 @@
 ---
 # tasks/install.yml - Package installation
 
-- name: Install NFS server packages
+- name: Install NFS client packages
   ansible.builtin.apt:
-    name: "{{ nas_nfs_packages }}"
+    name: "{{ nas_client_packages }}"
     state: present
     update_cache: true
-
-- name: Install Samba packages
-  ansible.builtin.apt:
-    name: "{{ nas_samba_packages }}"
-    state: present

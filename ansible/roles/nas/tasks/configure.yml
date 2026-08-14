@@ -1,59 +1,18 @@
 ---
-# tasks/configure.yml - Data disk, NFS export and Samba share configuration
+# tasks/configure.yml - NFS client mount
 
-- name: Create filesystem on data disk if blank
-  community.general.filesystem:
-    fstype: ext4
-    dev: "{{ nas_data_device }}"
-    state: present
-
-- name: Get data disk UUID
-  ansible.builtin.command: "blkid -s UUID -o value {{ nas_data_device }}"
-  register: nas_data_uuid
-  changed_when: false
-
-- name: Ensure export directory exists
+- name: Ensure mount directory exists
   ansible.builtin.file:
-    path: "{{ nas_export_path }}"
+    path: "{{ nas_mount_path }}"
     state: directory
     owner: root
     group: root
     mode: "0777"
 
-- name: Mount data disk
+- name: Mount NAS share
   ansible.posix.mount:
-    path: "{{ nas_export_path }}"
-    src: "UUID={{ nas_data_uuid.stdout }}"
-    fstype: ext4
-    opts: defaults,noatime
+    path: "{{ nas_mount_path }}"
+    src: "{{ nas_server }}:{{ nas_remote_path }}"
+    fstype: nfs
+    opts: "{{ nas_mount_options }}"
     state: mounted
-
-- name: Configure NFS export
-  ansible.builtin.template:
-    src: exports.j2
-    dest: /etc/exports
-    owner: root
-    group: root
-    mode: "0644"
-  notify: Export NFS filesystems
-
-- name: Configure Samba share
-  ansible.builtin.blockinfile:
-    path: /etc/samba/smb.conf
-    marker: "# {mark} ANSIBLE MANAGED: {{ nas_samba_share_name }}"
-    create: true
-    owner: root
-    group: root
-    mode: "0644"
-    block: |
-      [{{ nas_samba_share_name }}]
-         path = {{ nas_export_path }}
-         comment = {{ nas_samba_share_comment }}
-         browseable = yes
-         read only = no
-         guest ok = yes
-         create mask = 0777
-         directory mask = 0777
-         force user = nobody
-         force group = nogroup
-  notify: Restart smbd

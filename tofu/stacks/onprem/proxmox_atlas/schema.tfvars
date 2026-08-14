@@ -403,8 +403,8 @@ resources = {
     enabled         = true
     type            = "vm"
     node_name       = "atlas"
-    description     = "NAS storage server (NFS/Samba). Ubuntu 26.04."
-    tags            = ["ansible", "storage", "nfs", "samba", "vm"]
+    description     = "NAS NFS client (mounts host export /WD4TB/shared/v1). Ubuntu 26.04."
+    tags            = ["ansible", "storage", "nfs", "vm"]
     on_boot         = true
     cloud_init_user = "dev"
     ansible_groups = {
@@ -418,14 +418,6 @@ resources = {
       disk_size         = 8
       cpu_cores         = 1
       memory_size       = 1024
-      additional_disks = [
-        {
-          interface    = "scsi1"
-          datastore_id = "WD4TB"
-          size         = 100
-          ssd          = true
-        }
-      ]
     }
 
     nodes = {

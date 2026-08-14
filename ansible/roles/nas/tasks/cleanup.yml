@@ -1,0 +1,19 @@
+---
+# tasks/cleanup.yml - Remove obsolete NAS server components
+
+- name: Remove NFS server and Samba packages
+  ansible.builtin.apt:
+    name: "{{ nas_server_packages }}"
+    state: absent
+    purge: true
+
+- name: Remove stale NFS export configuration
+  ansible.builtin.file:
+    path: /etc/exports
+    state: absent
+
+- name: Remove stale local disk mounts from fstab
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    regexp: '\s/data/storage\s'
+    state: absent

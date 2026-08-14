@@ -1,11 +1,11 @@
 ---
-# tasks/main.yml - NAS (NFS + Samba) tasks
+# tasks/main.yml - NAS client (NFS mount) tasks
 
-- name: Install NFS and Samba packages
+- name: Install NFS client packages
   ansible.builtin.include_tasks: install.yml
 
-- name: Configure data disk, NFS export and Samba share
+- name: Configure NFS client mount
   ansible.builtin.include_tasks: configure.yml
 
-- name: Manage NFS and Samba service lifecycle
-  ansible.builtin.include_tasks: service.yml
+- name: Remove obsolete NAS server components
+  ansible.builtin.include_tasks: cleanup.yml

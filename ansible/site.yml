@@ -170,10 +170,10 @@
     - role: cloudflared
 
 # ==============================================================================
-# PLAY 10: STORAGE LAYER — NAS (NFS/Samba)
-# Target: oceanus VM (nas group)
+# PLAY 10: STORAGE LAYER — NAS client (NFS mount)
+# Target: oceanus VM (nas group). Mounts the host export /WD4TB/shared/v1.
 # ==============================================================================
-- name: Configure NAS (NFS/Samba)
+- name: Configure NAS client (NFS mount)
   hosts: nas
   tags: nas
   become: true
