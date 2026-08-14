@@ -1,6 +1,6 @@
 nfs:
-  server: "192.168.0.53"
-  path: /export/data
+  server: "192.168.0.2"
+  path: /WD4TB/shared/v1
   mountOptions:
     - hard
     - noatime
