@@ -44,6 +44,6 @@ spec:
           volumes:
             - name: library
               persistentVolumeClaim:
-                claimName: immich-library
+                claimName: immich
           restartPolicy: OnFailure
 

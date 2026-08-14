@@ -4,7 +4,7 @@ kind: Component
 patches:
   - target:
       kind: PersistentVolumeClaim
-      name: immich-library
+      name: immich
     patch: |-
       - op: replace
         path: /spec/storageClassName

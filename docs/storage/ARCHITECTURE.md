@@ -23,7 +23,7 @@ The platform's storage is organized into four logical tiers, each with a distinc
 ┌─────────────────────────────────────────────────────────────────┐
 │ TIER 4: User Data (NFS)                                         │
 │   Images, Videos, Documents — user-visible files                │
-│   Backed by: HDD (TrueNAS / NAS VM interim)                        │
+│   Backed by: HDD (TrueNAS / host-level NAS interim)             │
 │   Protection: ZFS (mirror/RAIDZ)                                │
 │   Access: NFS mount in pods + file manager UI                   │
 ├─────────────────────────────────────────────────────────────────┤
@@ -87,7 +87,7 @@ The platform's storage is organized into four logical tiers, each with a distinc
 
 **What it stores:** User-visible files — photos, videos, documents, markdown notes, and any data the end-user expects to browse and manage through a file manager interface.
 
-**How it works:** A dedicated storage server (TrueNAS, or an interim NAS VM — `oceanus` with kernel NFS) exports directories via NFS. Kubernetes pods mount these NFS shares to read and write user data. Users can also directly access the NFS share via a file manager (SMB/CIFS on Windows, NFS on Linux) for a "desktop-like" experience.
+**How it works:** A dedicated storage server (TrueNAS, or an interim host-level NAS — Proxmox host kernel NFS (`atlas`)) exports directories via NFS. Kubernetes pods mount these NFS shares to read and write user data. Users can also directly access the NFS share via a file manager (SMB/CIFS on Windows, NFS on Linux) for a "desktop-like" experience.
 
 **Protection:** ZFS on the storage server. The HDD pool is configured as a ZFS mirror (2 disks) or RAIDZ (3+ disks), providing checksumming, self-healing, and single-disk failure tolerance. ZFS scrub schedules verify data integrity periodically.
 
@@ -159,7 +159,7 @@ flowchart LR
     User["User"] --> Ingress["Traefik\nIngress"]
     Ingress --> AppPod["App Pod\n(e.g., Immich)"]
     AppPod -->|"writes photo to\n/data/photos/"| NFSMount["NFS Volume\nMount"]
-    NFSMount -->|"NFS protocol"| NFSServer["NFS Server\n(TrueNAS / NAS VM)"]
+    NFSMount -->|"NFS protocol"| NFSServer["NFS Server\n(TrueNAS / host NFS)"]
     NFSServer -->|"writes to"| ZFSPool["ZFS Pool\n(HDD Mirror/RAIDZ)"]
   end
 
@@ -232,7 +232,7 @@ flowchart TD
     SeaweedFS --> Observability["Loki / Mimir / Alloy\n(Observability Stack)"]
     K8s --> NFSProvisioner["NFS CSI Provisioner"]
 
-    HDD["Tier 4: Physical HDD\n(TrueNAS / NAS VM)"] --> NFSServer["NFS Server"]
+    HDD["Tier 4: Physical HDD\n(TrueNAS / host NFS)"] --> NFSServer["NFS Server"]
     NFSServer --> NFSProvisioner
 
     NFSProvisioner --> Apps["Application Pods"]
@@ -258,7 +258,7 @@ flowchart TD
 4.  **Longhorn** deploys its Manager daemonset. Block storage is available.
 5.  **SeaweedFS** starts. Its PVCs are fulfilled by Longhorn. S3 endpoint becomes available.
 6.  **Observability stack** (Loki, Mimir, Alloy) starts. Connects to SeaweedFS for log/metric storage.
-7.  **NFS Server** (TrueNAS or the NAS VM) starts independently (runs on HDD, outside K8s). NFS provisioner in K8s connects to it.
+7.  **NFS Server** (TrueNAS or the host-level NAS) starts independently (runs on HDD, outside K8s). NFS provisioner in K8s connects to it.
 8.  **Application pods** start. They consume Longhorn PVCs (for config) and NFS volumes (for user data).
 
 > **Critical insight:** The NFS/HDD path (Tier 4) is **independent** of the SSD path (Tiers 1-3). If Longhorn is down, user data on NFS is still accessible. If NFS is down, app configs on Longhorn are still intact. This is by design — failure domains are isolated.
@@ -294,7 +294,7 @@ flowchart TD
 
     subgraph SharedInfra["Shared Infrastructure"]
       ProxmoxHosts["Proxmox Host(s)\n(SSD Pool)"]
-      NFSServer["NFS Server\n(TrueNAS / NAS VM)\n(HDD Pool)"]
+      NFSServer["NFS Server\n(TrueNAS / host NFS)\n(HDD Pool)"]
     end
 
     ClusterA --> LonghornA --> ProxmoxHosts
@@ -398,7 +398,7 @@ All storage requests in Kubernetes are mediated through StorageClasses. The plat
 | [README.md](./README.md) | Storage overview, quick reference, "I need to store X → use Y" |
 | [LONGHORN.md](./LONGHORN.md) | Block storage: StorageClasses, disk tagging, replication, expansion |
 | [SEAWEEDFS.md](./SEAWEEDFS.md) | Object storage: S3 backend, buckets, retention profiles, architecture |
-| [NFS.md](./NFS.md) | User data: TrueNAS ideal, NAS VM interim, NFS provisioner comparison |
+| [NFS.md](./NFS.md) | User data: TrueNAS ideal, host-level NAS interim, NFS provisioner comparison |
 | [CAPACITY_PLANNING.md](./CAPACITY_PLANNING.md) | Storage categories, growth projections, expansion playbooks |
 | [`docs/backup/`](../backup/README.md) | Backup strategy, ABC model, restore runbooks, verification, cost planning |
 | [`docs/ARCHITECTURE.md`](../ARCHITECTURE.md) | Overall platform architecture (parent document) |

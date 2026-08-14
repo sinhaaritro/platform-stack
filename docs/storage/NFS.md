@@ -2,7 +2,7 @@
 
 > **Tier:** Tier 4 — User Data
 > **Role:** Stores user-visible files (photos, videos, documents, markdown notes) accessible to both Kubernetes pods and end-users via file manager.
-> **Backing:** HDD pool (TrueNAS with ZFS, or interim NAS VM — `oceanus`).
+> **Backing:** HDD pool (TrueNAS with ZFS, or interim — Proxmox host kernel NFS + Samba on the `WD4TB` pool).
 
 ---
 
@@ -133,9 +133,9 @@ tank/                          # Root pool
 
 ---
 
-## Interim Architecture (NAS VM — oceanus)
+## Interim Architecture (Host-level NAS)
 
-Until TrueNAS hardware is available, user data is served from a Proxmox **VM** (`oceanus`) running **kernel NFS** (`nfs-kernel-server`) and Samba.
+Until TrueNAS hardware is available, user data is served directly from the **Proxmox host** (`atlas`, `192.168.0.2`): the kernel NFS server (`nfs-kernel-server`) and Samba (`smbd`) export `/WD4TB/shared/v1` straight off the `WD4TB` ZFS pool. No NAS VM is involved.
 
 ```mermaid
 ---
@@ -145,14 +145,12 @@ config:
   layout: elk
 ---
 flowchart TD
-  subgraph Diagram["Interim Architecture: NAS VM"]
-    subgraph ProxmoxHost["Proxmox Host"]
-      ZPool["WD4TB ZFS Pool\n(zvol: vm-1037-disk-1)"]
-      subgraph VM["NAS VM (oceanus)"]
-        NFSService["NFS Server\n(nfs-kernel-server)"]
-        SMBService["Samba\n(smbd)"]
-        MountPoint["/export/data\n(ext4 on /dev/sdb)"]
-      end
+  subgraph Diagram["Interim Architecture: Host-level NAS"]
+    subgraph ProxmoxHost["Proxmox Host (atlas)"]
+      ZPool["WD4TB ZFS Pool"]
+      Export["/WD4TB/shared/v1\n(exported via /etc/exports)"]
+      NFSService["kernel nfsd"]
+      SMBService["Samba (smbd)"]
     end
 
     subgraph K8s["Kubernetes Cluster"]
@@ -161,13 +159,18 @@ flowchart TD
       AppPod["App Pod"]
     end
 
-    ZPool --> MountPoint
-    MountPoint --> NFSService
-    MountPoint --> SMBService
+    subgraph Oceanus["oceanus VM"]
+      ClientMount["/export/data\n(NFS client mount)"]
+    end
+
+    ZPool --> Export
+    Export --> NFSService
+    Export --> SMBService
     NFSService -->|"NFS export"| Provisioner
     Provisioner --> PVC
     PVC --> AppPod
-    SMBService -->|"\\\\oceanus\\data"| Desktop["Desktop File Manager"]
+    NFSService -->|"NFS mount"| ClientMount
+    SMBService -->|"\\atlas\shared\v1"| Desktop["Desktop File Manager"]
   end
 
   style ZPool fill:#FFCDD2
@@ -175,50 +178,47 @@ flowchart TD
   style Provisioner fill:#E1BEE7
   style AppPod fill:#C8E6C9
   style SMBService fill:#FFF9C4
+  style ClientMount fill:#BBDEFB
   style Diagram fill:transparent
 ```
 
-### Current Setup (oceanus)
+### Current Setup
 
 | Aspect | Details |
 |---|---|
-| **Guest** | VM `oceanus` (vm_id 1037), Ubuntu 26.04, 1 vCPU / 1 GiB RAM |
-| **Data disk** | 100 GiB ext4 zvol on the WD4TB host pool (`/dev/sdb`), mounted at `/export/data` |
-| **NFS server** | `nfs-kernel-server` + `rpcbind` — kernel NFSv4 (no Ganesha) |
-| **Export** | `/export/data` → `192.168.0.0/24(rw,sync,no_subtree_check,no_root_squash)` |
-| **SMB** | `smbd` share of the same directory for desktop access |
-| **Provisioning** | OpenTofu (`schema.tfvars`, `type = "vm"`) + Ansible role `nas` |
-| **In Kubernetes** | SC `nfs` → `nfs-subdir-external-provisioner` → one subdir per PVC under `/export/data` |
+| **NFS server** | Proxmox host `atlas` (192.168.0.2), kernel `nfsd` (NFSv4), export `/WD4TB/shared/v1` via `/etc/exports` |
+| **SMB** | Host `smbd` serves the same directory to desktop clients |
+| **Data layout version** | `/WD4TB/shared/v1` — the `v1` suffix is a deliberate **layout-versioning convention**: a future rework of the directory structure lives under `v2`, `v3`, … next to the old one, so consumers can migrate in place |
+| **Client VMs** | `oceanus` mounts `192.168.0.2:/WD4TB/shared/v1` at `/export/data` (Ansible role `nas`, fstab with `hard,noatime,actimeo=2`) |
+| **In Kubernetes** | SC `nfs` → `nfs-subdir-external-provisioner` → one subdir per PVC under `/WD4TB/shared/v1` |
+| **Provisioning** | Host config is manual (exports, SMB); `oceanus` is a thin client provisioned by OpenTofu + Ansible |
 
-### Why Not an LXC?
+### Why Not an LXC or a NAS VM?
 
 The original plan ran **NFS-Ganesha inside an LXC container**. It was abandoned after a kernel-level failure:
 
 - Ganesha's `FSAL_VFS` resolves NFS file handles with `name_to_handle_at()` + `open_by_handle_at()`.
 - In the kernel (`fs/fhandle.c`), `may_decode_fh()` gates `open_by_handle_at()` on `CAP_DAC_READ_SEARCH` in the **initial user namespace**.
 - **Empirically verified on this host:** inside a privileged LXC (initial userns `user:[4026531837]`, full `uid_map`, `CapEff` including `DAC_READ_SEARCH`), `name_to_handle_at` works but `open_by_handle_at` returns `EPERM` on *every* filesystem (`/`, `/etc`, `/usr`, the data disk) — while the identical test on the Proxmox host succeeds on both ext4 and ZFS.
-- Result: Ganesha cannot serve NFS from **any** LXC on this host. A **VM** runs in the host's initial user namespace and passes the check — and kernel `nfsd` doesn't need file-handle decoding at all, which is why the interim server uses `nfs-kernel-server`.
+- Result: Ganesha cannot serve NFS from **any** LXC on this host. Kernel `nfsd` doesn't need file-handle decoding at all — and running it directly on the **host** (rather than in a NAS VM) removes the VM overhead and keeps the data on ZFS, which is why the interim design is host-level.
 
 ### Differences from Target Architecture
 
-| Aspect | Interim (NAS VM) | Target (TrueNAS) |
+| Aspect | Interim (Host-level NAS) | Target (TrueNAS) |
 |---|---|---|
-| **Storage server** | Proxmox VM (`oceanus`) | Dedicated TrueNAS appliance |
-| **Filesystem** | ext4 on a ZFS-backed zvol | ZFS with mirror/RAIDZ |
-| **Data protection** | Host ZFS zvol snapshots (manual) | ZFS checksumming + self-healing |
+| **Storage server** | Proxmox host (`atlas`) | Dedicated TrueNAS appliance |
+| **Filesystem** | ZFS (WD4TB pool, host) | ZFS with mirror/RAIDZ |
+| **Data protection** | ZFS snapshots (manual/host-side) | ZFS checksumming + self-healing |
 | **CSI provisioner** | `nfs-subdir-external-provisioner` | `democratic-csi` |
 | **Quota support** | ❌ No per-directory quotas | ✅ ZFS dataset quotas |
 | **Snapshot support** | ❌ No snapshots | ✅ ZFS snapshots via K8s |
 | **TrueNAS UI** | ❌ Not applicable | ✅ Full management via browser |
 
-### NAS VM Setup Overview
+### Host Setup Overview
 
-1.  **Create VM** in Proxmox (via OpenTofu): Ubuntu 26.04, root disk on WD1TB, data disk = 100 GiB zvol on the WD4TB pool (`scsi1` → `/dev/sdb`).
-2.  **Run Ansible role `nas`:** formats `/dev/sdb` (ext4, if blank), mounts it at `/export/data` via UUID in `/etc/fstab`.
-3.  **Install NFS server:** `nfs-kernel-server` + `rpcbind` (role-managed).
-4.  **Export the directory:** `/etc/exports` from the role template: `/export/data 192.168.0.0/24(rw,sync,no_subtree_check,no_root_squash)`.
-5.  **Samba:** `smbd` exposes the same data as a Windows/macOS network share.
-6.  **Deploy provisioner** in Kubernetes (see Dynamic Provisioning below).
+1.  **Host (`atlas`)**: `WD4TB` ZFS pool → directory `/WD4TB/shared/v1`, exported in `/etc/exports` (`rw,no_subtree_check`), Samba share for desktop access. (Manual — documented here; not in GitOps.)
+2.  **Client VMs** (e.g., `oceanus`): Ansible role `nas` installs `nfs-common` and mounts `192.168.0.2:/WD4TB/shared/v1` at `/export/data` via fstab (`hard,noatime,actimeo=2`). The role also purges any stale NFS-server/Samba packages.
+3.  **Deploy provisioner** in Kubernetes (see Dynamic Provisioning below).
 
 ---
 
@@ -231,12 +231,12 @@ Two provisioners are documented: one for the interim NAS VM setup, one for the t
 | Aspect | Details |
 |---|---|
 | **How it works** | Given a base NFS share, it creates subdirectories per PVC |
-| **PVC → Storage** | PVC `my-data` → `/export/data/namespace-my-data-pvc-uuid/` |
+| **PVC → Storage** | PVC `my-data` → `/WD4TB/shared/v1/namespace-my-data-pvc-uuid/` |
 | **TrueNAS-aware?** | ❌ No — it just creates directories. TrueNAS doesn't know about PVCs |
 | **Quotas** | ❌ No per-PVC quotas (NFS has no directory-level quotas) |
 | **Snapshots** | ❌ Not supported |
-| **Complexity** | Very low — single Helm chart, minimal config |
-| **Best for** | NAS VM interim, simple setups, development |
+| **Complexity** | Very low — Helm chart, one template per path/SC |
+| **Best for** | Host-level NAS interim, simple setups, development |
 
 ### democratic-csi (Target)
 
@@ -262,6 +262,50 @@ Two provisioners are documented: one for the interim NAS VM setup, one for the t
 | Multi-protocol (NFS + iSCSI + SMB) | ❌ (NFS only) | ✅ |
 | External dependencies | NFS server only | TrueNAS + API access |
 | Helm chart | `nfs-subdir-external-provisioner` | `democratic-csi` |
+
+---
+
+## Provisioner Structure (GitOps)
+
+The `nfs-subdir-external-provisioner` chart is assembled from reusable **template components**, so multiple provisioner instances (different NFS paths, different StorageClasses) can be mixed and matched without duplicating the chart.
+
+```
+apps/infrastructure/nfs-provisioner/
+├── base/                          # Namespace + vendored chart + DEFAULT values
+│   ├── kustomization.yaml         #   (helmCharts: releaseName nfs-provisioner)
+│   └── values.yaml                #   generic defaults (SC name nfs, RWX, mountOptions)
+└── components/                    # Template components (reusable, no instance specifics)
+    ├── atlas-nas/                 #   sets NFS server/path on Deployment env + root PV
+    │                              #     (192.168.0.2:/WD4TB/shared/v1)
+    └── sc-nfs/                    #   sets StorageClass semantics (name nfs, Retain, archive,
+                                   #     pathPattern -> <namespace>/<PVC-name>)
+clusters/hyperion/nfs-provisioner/
+└── kustomization.yaml             # actual app = base + components
+```
+
+- **The chart renders the provisioner's root PV itself** (with the `nfs-subdir-external-provisioner` label selector + empty `storageClassName`), so nothing extra has to be pre-created — the `atlas-nas` component only fills in the NFS server/path on it.
+- **How it works:** the chart's root PVC is bound to that root PV and mounted at `/persistentvolumes`; each dynamic PVC gets a subdirectory under it, advertised as `NFS_PATH + subdir`. The root PV must therefore point at the **base path** (`/WD4TB/shared/v1`), never a subdirectory.
+- **Adding a path:** copy `atlas-nas` → `atlas-nas-v2` (new server/path) — the Deployment env and root PV are patched via the chart-static `app=nfs-subdir-external-provisioner` label, so the template works for any `releaseName`.
+- **Adding a StorageClass:** copy `sc-nfs` → `sc-nfs-backup` (e.g., `reclaimPolicy: Delete`), and set `storageClass.name` in the instance's values.
+- **Multiple instances:** each needs its own overlay with a unique `helmCharts.releaseName` (`releaseName` cannot be overridden by overlays) and its own root PV — the chart renders one per release with a matching label selector.
+
+### Path Naming Template (all apps)
+
+SC `nfs` carries a `pathPattern` of **`${.PVC.namespace}/${.PVC.name}`** — the provisioner creates every PVC's directory as `v1/<namespace>/<PVC-name>/` instead of the default `<namespace>-<pvc-name>-<pv-uid>`:
+
+| App (PVC name) | Namespace | Directory on share |
+|---|---|---|
+| `immich` | `personal` | `v1/personal/immich/` |
+| `obsidian` | `personal` | `v1/personal/obsidian/` |
+| `projects` | `personal` | `v1/personal/projects/` |
+| `shared` | `personal` | `v1/personal/shared/` |
+
+Convention for **all apps** using SC `nfs`:
+1. Choose the PVC name to BE the desired folder name (`immich`, not `immich-library`).
+2. The namespace determines the top-level tenant folder (`personal/`, `tenant-*/`, …).
+3. `v1/<namespace>/<PVC-name>/` is the only layout — no other subdirectories appear at the share root.
+
+> **Renaming** a PVC changes the directory; existing data must be moved by hand (the old directory is never touched by the provisioner — `Retain` + `archiveOnDelete`).
 
 ---
 
@@ -365,39 +409,34 @@ flowchart LR
 
 ## Directory Structure
 
-Whether using direct NFS or dynamic provisioning, the NFS export follows a consistent directory layout scoped by tenant and application.
+Whether using direct NFS or dynamic provisioning, the NFS export follows a consistent directory layout scoped by version, tenant and application.
 
 ### Standard Layout
 
 ```
-/export/data/                        # NFS root export
-├── personal/                        # Tenant: personal
-│   ├── immich/                      # App: Immich
-│   │   ├── photos/                  # User photos
-│   │   └── thumbnails/              # Generated thumbnails
-│   ├── jellyfin/                    # App: Jellyfin
-│   │   ├── movies/                  # Movie library
-│   │   ├── tv-shows/                # TV series
-│   │   └── music/                   # Music library
-│   ├── obsidian/                    # App: Obsidian
-│   │   └── vaults/                  # Markdown vaults
-│   └── downloads/                   # Torrent downloads
-│       ├── complete/
-│       └── incomplete/
-├── business-acme/                   # Tenant: business
-│   ├── nextcloud/
-│   └── documents/
-└── shared/                          # Cross-tenant shared data
-    └── public-media/                # Shared media library
+/WD4TB/shared/v1/                  # NFS root export (versioned: v1, v2, ...)
+├── personal/                      # Tenant: personal (namespace)
+│   ├── immich/                    # PVC "immich" (namespace/PVC-name convention)
+│   ├── obsidian/                  # PVC "obsidian"
+│   ├── projects/                  # PVC "projects"
+│   ├── media/                     # PVC "media"
+│   ├── tenant-.../                # per-tenant PVCs
+│   └── shared/                    # PVC "shared"
+├── business-acme/                 # Tenant: business (namespace)
+└── ...
 ```
+
+> **Layout versioning:** the top level is `/WD4TB/shared/v1`. A future rework of the directory tree lives in `/WD4TB/shared/v2` next to it; consumers (provisioner, client mounts, Samba share) are re-pointed one by one. The host export covers the whole `/WD4TB/shared` tree, so every version is visible to everyone at all times.
+
+> **Directory naming:** every dynamic PVC lands in `v1/<namespace>/<PVC-name>/` (see [Path Naming Template](#path-naming-template-all-apps)). No other directories are created at the share root by the provisioner.
 
 ### Access Permissions
 
 | Path | Kubernetes Access | User Access | Permission |
 |---|---|---|---|
-| `/export/data/personal/` | Pods in personal cluster | Personal user via file manager | `rw` for user, `ro` for pods where appropriate |
-| `/export/data/business-acme/` | Pods in business cluster | Business user via file manager | `rw` for user, `ro` for pods where appropriate |
-| `/export/data/shared/` | All clusters | All users | `ro` for most, `rw` for admins |
+| `/WD4TB/shared/v1/personal/` | Pods in personal cluster | Personal user via file manager | `rw` for user, `ro` for pods where appropriate |
+| `/WD4TB/shared/v1/business-acme/` | Pods in business cluster | Business user via file manager | `rw` for user, `ro` for pods where appropriate |
+| `/WD4TB/shared/v1/shared/` | All clusters | All users | `ro` for most, `rw` for admins |
 
 ---
 
@@ -409,24 +448,24 @@ One of the key reasons for choosing NFS is that users can browse their data dire
 
 | OS | Protocol | How to Mount |
 |---|---|---|
-| **Windows** | SMB/CIFS | File Explorer → Map Network Drive → `\\truenas-ip\data\personal` |
-| **macOS** | SMB or NFS | Finder → Go → Connect to Server → `smb://truenas-ip/data/personal` |
-| **Linux** | NFS | `mount -t nfs truenas-ip:/export/data/personal /mnt/mydata` |
+| **Windows** | SMB/CIFS | File Explorer → Map Network Drive → `\\192.168.0.2\shared\v1` |
+| **macOS** | SMB or NFS | Finder → Go → Connect to Server → `smb://192.168.0.2/shared/v1` |
+| **Linux** | NFS | `mount -t nfs 192.168.0.2:/WD4TB/shared/v1 /mnt/mydata` |
 | **iOS/Android** | WebDAV or SMB | Third-party file manager apps |
 
-> **Note:** SMB/CIFS is the recommended protocol for end-user desktop access. NFS is used for Kubernetes pod mounts. TrueNAS serves both protocols from the same dataset, so a file written by a Kubernetes pod via NFS is instantly visible to a user via SMB.
+> **Note:** SMB/CIFS is the recommended protocol for end-user desktop access. NFS is used for Kubernetes pod mounts. The host serves both protocols from the same directory, so a file written by a Kubernetes pod via NFS is instantly visible to a user via SMB.
 
 ---
 
 ## Migration Path
 
-The migration from the interim NAS VM to TrueNAS is designed to be non-disruptive. It happens in two phases.
+The migration from the interim host-level NAS to TrueNAS is designed to be non-disruptive. It happens in two phases.
 
 ### Phase 1: Swap NFS Server (Minimal Disruption)
 
-1.  **Set up TrueNAS** with the same export paths as the NAS VM (e.g., `/export/data/`).
-2.  **Rsync data** from the NAS VM to TrueNAS: `rsync -avz /export/data/ truenas:/export/data/`.
-3.  **Update the provisioner config** to point at the TrueNAS IP instead of the NAS VM IP.
+1.  **Set up TrueNAS** with the same export paths (e.g., `/WD4TB/shared/v1/`).
+2.  **Rsync data** from the host: `rsync -avz 192.168.0.2:/WD4TB/shared/v1/ truenas:/WD4TB/shared/v1/`.
+3.  **Update the provisioner config** — swap the `atlas-nas` component (or its values) to point at the TrueNAS IP instead of `192.168.0.2`.
 4.  **Result:** Existing PVCs continue to work. New PVCs use TrueNAS. Data is now on ZFS.
 
 ### Phase 2: Upgrade Provisioner (Full Feature Unlock)

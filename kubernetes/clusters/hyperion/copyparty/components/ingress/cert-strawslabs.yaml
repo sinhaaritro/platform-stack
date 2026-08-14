@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: copyparty-cert-strawslabs
+  namespace: copyparty
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: copyparty-cert-strawslabs-tls
+  issuerRef:
+    name: letsencrypt-prod-strawslabs
+    kind: ClusterIssuer
+  dnsNames:
+    - "copyparty-hyperion.strawslabs.com"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"

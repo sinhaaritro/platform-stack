@@ -1,18 +1,24 @@
 ingress:
+  enabled: false
+
+configMap:
   enabled: true
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/proxy-body-size: "0"
-  hosts:
-    - host: copyparty.hyperion.example.com
-      paths:
-        - path: /
-          pathType: Prefix
-          servicePortName: http
-  tls:
-    - hosts:
-        - copyparty.hyperion.example.com
-      secretName: copyparty-tls
+  name: copyparty-config
+  data:
+    config.conf: |-
+      [global]
+        p: 3923
+        xff-src: lan
+        http-only
+        stats
+
+      [accounts]
+        admin: d52c8f613a6dfcae21691cb1
+
+      [/]
+        .
+        accs:
+          rwda: admin
 
 volumeConfig:
   userData:
@@ -23,8 +29,8 @@ volumeConfig:
       name: "user-data"
       emptyDir: null
       nfs:
-        server: "192.168.0.53"
-        path: "/export/data"
+        server: "192.168.0.2"
+        path: "/WD4TB/shared/v1"
   appData:
     persistence:
       enabled: true

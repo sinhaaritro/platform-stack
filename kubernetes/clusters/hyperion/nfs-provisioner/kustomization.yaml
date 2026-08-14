@@ -4,3 +4,7 @@ namespace: storage
 
 resources:
   - ../../../apps/infrastructure/nfs-provisioner/base
+
+components:
+  - ../../../apps/infrastructure/nfs-provisioner/components/atlas-nas
+  - ../../../apps/infrastructure/nfs-provisioner/components/sc-nfs

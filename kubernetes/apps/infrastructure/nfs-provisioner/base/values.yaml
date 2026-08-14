@@ -1,16 +1,17 @@
+storageClass:
+  create: true
+  name: nfs
+  defaultClass: false
+  allowVolumeExpansion: true
+  reclaimPolicy: Delete
+  archiveOnDelete: false
+  accessModes: ReadWriteMany
+  volumeBindingMode: Immediate
+
 nfs:
-  server: "192.168.0.2"
-  path: /WD4TB/shared/v1
+  server: ""
+  path: ""
   mountOptions:
     - hard
     - noatime
     - actimeo=2
-
-storageClass:
-  create: true
-  name: nfs
-  allowVolumeExpansion: true
-  reclaimPolicy: Retain
-  archiveOnDelete: true
-  accessModes: ReadWriteMany
-  volumeBindingMode: Immediate

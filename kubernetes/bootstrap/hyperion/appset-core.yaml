@@ -111,11 +111,11 @@ spec:
                   serverSideApply: "true"
                   replace: "false"
                   wave: "11"
-                # - app: copyparty
-                #   namespace: copyparty
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "11"
+                - app: copyparty
+                  namespace: copyparty
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "11"
 
   template:
     metadata:

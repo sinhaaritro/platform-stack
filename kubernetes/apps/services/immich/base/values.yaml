@@ -34,11 +34,11 @@ immich:
   metrics:
     enabled: true
 
-  # All Immich data stored on Longhorn PVC (immich-library, 50Gi).
+  # All Immich data stored on NFS PVC (immich, 50Gi).
   # Velero backup to be configured separately.
   persistence:
     library:
-      existingClaim: immich-library
+      existingClaim: immich
 
 server:
   ingress:

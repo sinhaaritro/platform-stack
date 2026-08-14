@@ -236,7 +236,7 @@ volume:
 
 With `nfs-subdir-external-provisioner`, there are **no per-PVC quotas**. A single app can consume the entire NFS share.
 
-**Mitigation for interim (NAS VM):**
+**Mitigation for interim (host-level NAS):**
 -   Set filesystem-level quotas on the NFS server (limited, per-user not per-directory).
 -   Monitor per-app usage via Prometheus exporters.
 

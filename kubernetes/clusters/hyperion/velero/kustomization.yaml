@@ -12,5 +12,4 @@ components:
   - ./components/encryption-kopia
   - ./components/schedules/ssl-cert
   - ./components/schedules/obsidian
-  - ./components/schedules/immich
   - ./components/schedules/authentik
