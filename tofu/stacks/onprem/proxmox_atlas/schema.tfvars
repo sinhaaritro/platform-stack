@@ -116,7 +116,6 @@ resources = {
         }
       },
       "hyperion-02" = {
-        enabled         = true
         vm_id           = 1041
         tags            = ["k_worker"]
         cloud_init_user = "dev"
@@ -413,12 +412,12 @@ resources = {
     }
 
     vm_config = {
-      os_type            = "ubuntu"
-      os_version         = "26.04"
-      disk_datastore_id  = "WD1TB"
-      disk_size          = 8
-      cpu_cores          = 1
-      memory_size        = 1024
+      os_type           = "ubuntu"
+      os_version        = "26.04"
+      disk_datastore_id = "WD1TB"
+      disk_size         = 8
+      cpu_cores         = 1
+      memory_size       = 1024
       additional_disks = [
         {
           interface    = "scsi1"
