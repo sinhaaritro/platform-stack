@@ -9,6 +9,24 @@
         dest: /usr/local/bin/cloudflared
         mode: '0755'
 
+- name: Ensure Cloudflare Tunnel config directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/cloudflared
+    state: directory
+    mode: "0700"
+
+- name: Write Cloudflare Tunnel token file
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/cloudflared/token
+    content: "{{ cloudflare_tunnel_token_homelab_tunnel }}"
+    owner: root
+    group: root
+    mode: "0600"
+  when:
+    - cloudflare_tunnel_token_homelab_tunnel is defined
+
 - name: Install Cloudflare Tunnel service
   become: true
   ansible.builtin.command: >
