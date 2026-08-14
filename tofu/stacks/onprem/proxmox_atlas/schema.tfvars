@@ -422,7 +422,7 @@ resources = {
       disk_size                   = 4
       cpu_cores                   = 1
       memory_size                 = 512
-      unprivileged                = true
+      unprivileged                = false
       mount_points = [
         {
           path   = "/export/data"
