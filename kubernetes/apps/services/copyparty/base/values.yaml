@@ -1,6 +1,11 @@
 ingress:
   enabled: false
 
+containerPorts:
+  - name: "http"
+    port: 3923
+    protocol: "TCP"
+
 configMap:
   enabled: true
   name: copyparty-config
