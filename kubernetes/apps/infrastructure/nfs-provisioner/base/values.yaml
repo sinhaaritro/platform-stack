@@ -5,7 +5,6 @@ nfs:
     - hard
     - noatime
     - actimeo=2
-    - vers=3
 
 storageClass:
   create: true
