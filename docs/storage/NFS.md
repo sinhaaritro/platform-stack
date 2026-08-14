@@ -2,7 +2,7 @@
 
 > **Tier:** Tier 4 — User Data
 > **Role:** Stores user-visible files (photos, videos, documents, markdown notes) accessible to both Kubernetes pods and end-users via file manager.
-> **Backing:** HDD pool (TrueNAS with ZFS, or interim LXC with HDD passthrough).
+> **Backing:** HDD pool (TrueNAS with ZFS, or interim NAS VM — `oceanus`).
 
 ---
 
@@ -133,9 +133,9 @@ tank/                          # Root pool
 
 ---
 
-## Interim Architecture (LXC-NFS)
+## Interim Architecture (NAS VM — oceanus)
 
-Until TrueNAS hardware is available, user data is served from a Proxmox LXC container with HDD passthrough.
+Until TrueNAS hardware is available, user data is served from a Proxmox **VM** (`oceanus`) running **kernel NFS** (`nfs-kernel-server`) and Samba.
 
 ```mermaid
 ---
@@ -145,61 +145,86 @@ config:
   layout: elk
 ---
 flowchart TD
-  subgraph Diagram["Interim Architecture: LXC-NFS"]
+  subgraph Diagram["Interim Architecture: NAS VM"]
     subgraph ProxmoxHost["Proxmox Host"]
-      HDD["Physical HDD\n(passed through to LXC)"]
-      subgraph LXC["NFS Server LXC"]
+      ZPool["WD4TB ZFS Pool\n(zvol: vm-1037-disk-1)"]
+      subgraph VM["NAS VM (oceanus)"]
         NFSService["NFS Server\n(nfs-kernel-server)"]
-        MountPoint["/export/data\n(mounted HDD)"]
+        SMBService["Samba\n(smbd)"]
+        MountPoint["/export/data\n(ext4 on /dev/sdb)"]
       end
     end
 
     subgraph K8s["Kubernetes Cluster"]
       Provisioner["nfs-subdir-external\n-provisioner"]
-      PVC["PVC\n(nfs-user-data)"]
+      PVC["PVC\n(SC: nfs)"]
       AppPod["App Pod"]
     end
 
-    HDD --> MountPoint
+    ZPool --> MountPoint
     MountPoint --> NFSService
+    MountPoint --> SMBService
     NFSService -->|"NFS export"| Provisioner
     Provisioner --> PVC
     PVC --> AppPod
+    SMBService -->|"\\\\oceanus\\data"| Desktop["Desktop File Manager"]
   end
 
-  style HDD fill:#FFCDD2
+  style ZPool fill:#FFCDD2
   style NFSService fill:#FFE0B2
   style Provisioner fill:#E1BEE7
   style AppPod fill:#C8E6C9
+  style SMBService fill:#FFF9C4
   style Diagram fill:transparent
 ```
 
+### Current Setup (oceanus)
+
+| Aspect | Details |
+|---|---|
+| **Guest** | VM `oceanus` (vm_id 1037), Ubuntu 26.04, 1 vCPU / 1 GiB RAM |
+| **Data disk** | 100 GiB ext4 zvol on the WD4TB host pool (`/dev/sdb`), mounted at `/export/data` |
+| **NFS server** | `nfs-kernel-server` + `rpcbind` — kernel NFSv4 (no Ganesha) |
+| **Export** | `/export/data` → `192.168.0.0/24(rw,sync,no_subtree_check,no_root_squash)` |
+| **SMB** | `smbd` share of the same directory for desktop access |
+| **Provisioning** | OpenTofu (`schema.tfvars`, `type = "vm"`) + Ansible role `nas` |
+| **In Kubernetes** | SC `nfs` → `nfs-subdir-external-provisioner` → one subdir per PVC under `/export/data` |
+
+### Why Not an LXC?
+
+The original plan ran **NFS-Ganesha inside an LXC container**. It was abandoned after a kernel-level failure:
+
+- Ganesha's `FSAL_VFS` resolves NFS file handles with `name_to_handle_at()` + `open_by_handle_at()`.
+- In the kernel (`fs/fhandle.c`), `may_decode_fh()` gates `open_by_handle_at()` on `CAP_DAC_READ_SEARCH` in the **initial user namespace**.
+- **Empirically verified on this host:** inside a privileged LXC (initial userns `user:[4026531837]`, full `uid_map`, `CapEff` including `DAC_READ_SEARCH`), `name_to_handle_at` works but `open_by_handle_at` returns `EPERM` on *every* filesystem (`/`, `/etc`, `/usr`, the data disk) — while the identical test on the Proxmox host succeeds on both ext4 and ZFS.
+- Result: Ganesha cannot serve NFS from **any** LXC on this host. A **VM** runs in the host's initial user namespace and passes the check — and kernel `nfsd` doesn't need file-handle decoding at all, which is why the interim server uses `nfs-kernel-server`.
+
 ### Differences from Target Architecture
 
-| Aspect | Interim (LXC-NFS) | Target (TrueNAS) |
+| Aspect | Interim (NAS VM) | Target (TrueNAS) |
 |---|---|---|
-| **Storage server** | Proxmox LXC | Dedicated TrueNAS appliance |
-| **Filesystem** | ext4 or XFS on raw HDD | ZFS with mirror/RAIDZ |
-| **Data protection** | None (single disk) or manual mdadm | ZFS checksumming + self-healing |
+| **Storage server** | Proxmox VM (`oceanus`) | Dedicated TrueNAS appliance |
+| **Filesystem** | ext4 on a ZFS-backed zvol | ZFS with mirror/RAIDZ |
+| **Data protection** | Host ZFS zvol snapshots (manual) | ZFS checksumming + self-healing |
 | **CSI provisioner** | `nfs-subdir-external-provisioner` | `democratic-csi` |
 | **Quota support** | ❌ No per-directory quotas | ✅ ZFS dataset quotas |
 | **Snapshot support** | ❌ No snapshots | ✅ ZFS snapshots via K8s |
 | **TrueNAS UI** | ❌ Not applicable | ✅ Full management via browser |
 
-### LXC Setup Overview
+### NAS VM Setup Overview
 
-1.  **Create LXC** in Proxmox (via OpenTofu).
-2.  **Pass through HDD** to the LXC (Proxmox disk passthrough).
-3.  **Mount HDD** at `/export/data` inside the LXC.
-4.  **Install NFS server:** `apt install nfs-kernel-server`.
-5.  **Export the directory:** Add `/export/data *(rw,sync,no_subtree_check,no_root_squash)` to `/etc/exports`.
+1.  **Create VM** in Proxmox (via OpenTofu): Ubuntu 26.04, root disk on WD1TB, data disk = 100 GiB zvol on the WD4TB pool (`scsi1` → `/dev/sdb`).
+2.  **Run Ansible role `nas`:** formats `/dev/sdb` (ext4, if blank), mounts it at `/export/data` via UUID in `/etc/fstab`.
+3.  **Install NFS server:** `nfs-kernel-server` + `rpcbind` (role-managed).
+4.  **Export the directory:** `/etc/exports` from the role template: `/export/data 192.168.0.0/24(rw,sync,no_subtree_check,no_root_squash)`.
+5.  **Samba:** `smbd` exposes the same data as a Windows/macOS network share.
 6.  **Deploy provisioner** in Kubernetes (see Dynamic Provisioning below).
 
 ---
 
 ## NFS Provisioner Comparison
 
-Two provisioners are documented: one for the interim LXC setup, one for the target TrueNAS setup.
+Two provisioners are documented: one for the interim NAS VM setup, one for the target TrueNAS setup.
 
 ### nfs-subdir-external-provisioner (Interim)
 
@@ -211,7 +236,7 @@ Two provisioners are documented: one for the interim LXC setup, one for the targ
 | **Quotas** | ❌ No per-PVC quotas (NFS has no directory-level quotas) |
 | **Snapshots** | ❌ Not supported |
 | **Complexity** | Very low — single Helm chart, minimal config |
-| **Best for** | LXC-NFS interim, simple setups, development |
+| **Best for** | NAS VM interim, simple setups, development |
 
 ### democratic-csi (Target)
 
@@ -395,13 +420,13 @@ One of the key reasons for choosing NFS is that users can browse their data dire
 
 ## Migration Path
 
-The migration from LXC-NFS to TrueNAS is designed to be non-disruptive. It happens in two phases.
+The migration from the interim NAS VM to TrueNAS is designed to be non-disruptive. It happens in two phases.
 
 ### Phase 1: Swap NFS Server (Minimal Disruption)
 
-1.  **Set up TrueNAS** with the same export paths as the LXC (e.g., `/export/data/`).
-2.  **Rsync data** from LXC to TrueNAS: `rsync -avz /export/data/ truenas:/export/data/`.
-3.  **Update the provisioner config** to point at the TrueNAS IP instead of the LXC IP.
+1.  **Set up TrueNAS** with the same export paths as the NAS VM (e.g., `/export/data/`).
+2.  **Rsync data** from the NAS VM to TrueNAS: `rsync -avz /export/data/ truenas:/export/data/`.
+3.  **Update the provisioner config** to point at the TrueNAS IP instead of the NAS VM IP.
 4.  **Result:** Existing PVCs continue to work. New PVCs use TrueNAS. Data is now on ZFS.
 
 ### Phase 2: Upgrade Provisioner (Full Feature Unlock)

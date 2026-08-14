@@ -15,7 +15,7 @@ The platform uses a **4-tier model** where each tier is optimized for its worklo
 | **Tier 1** — Platform OS | Proxmox local storage | SSD | Proxmox OS, ISOs, VM disks | RAID (optional) |
 | **Tier 2** — App Block Storage | [Longhorn](./LONGHORN.md) | SSD (via VM disk) | Databases, app configs, stateful workloads | Longhorn replication |
 | **Tier 3** — Object Storage | [SeaweedFS](./SEAWEEDFS.md) | SSD (via Longhorn PVCs) | Logs, metrics, S3-compatible blobs | Inherited from Tier 2 |
-| **Tier 4** — User Data | [NFS](./NFS.md) (TrueNAS / LXC) | HDD | Photos, videos, documents, media | ZFS (mirror/RAIDZ) |
+| **Tier 4** — User Data | [NFS](./NFS.md) (TrueNAS / NAS VM) | HDD | Photos, videos, documents, media | ZFS (mirror/RAIDZ) |
 
 > For the data flow diagram (current vs. future state), see [Storage Architecture Diagram](#storage-architecture-diagram-the-data-view).
 
@@ -79,7 +79,7 @@ The platform uses two NFS provisioners depending on the infrastructure maturity:
 
 | Phase | Provisioner | Storage Backend | Key Capability |
 |---|---|---|---|
-| **Interim** | `nfs-subdir-external-provisioner` | LXC with HDD passthrough | Simple, subdirectory-based PVCs |
+| **Interim** | `nfs-subdir-external-provisioner` | NAS VM (kernel NFS) | Simple, subdirectory-based PVCs |
 | **Target** | `democratic-csi` | TrueNAS with ZFS | ZFS datasets per PVC, quotas, snapshots, TrueNAS UI visibility |
 
 > For the full comparison, see [NFS.md → NFS Provisioner Comparison](./NFS.md#nfs-provisioner-comparison).
@@ -185,7 +185,7 @@ flowchart TD
 | 📐 [ARCHITECTURE.md](./ARCHITECTURE.md) | 4-tier model, dependency chain, tenant isolation, technology rationale |
 | 💾 [LONGHORN.md](./LONGHORN.md) | Block storage: StorageClasses, disk tagging, replication, monitoring, expansion |
 | 🪣 [SEAWEEDFS.md](./SEAWEEDFS.md) | Object storage: S3 backend, buckets, retention profiles, Filer strategy, security |
-| 📁 [NFS.md](./NFS.md) | User data: TrueNAS ideal, LXC interim, provisioner comparison, migration path |
+| 📁 [NFS.md](./NFS.md) | User data: TrueNAS ideal, NAS VM interim, provisioner comparison, migration path |
 | 📊 [CAPACITY_PLANNING.md](./CAPACITY_PLANNING.md) | Storage categories, budget allocation, ZFS sizing, expansion playbooks, alerts |
 
 ### Related Documentation (Outside This Directory)
