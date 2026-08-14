@@ -8,6 +8,7 @@
 *   [ ] **Split Package list of VM and LXC based on Host type in Ansible** — Right now ansible, install all packages, we dont want that
 *   [ ] **Remove the extra line from the appset** - Kubernetes, in the appset ignore line, try to see if we can remove them
 *   [ ] **Proper Backup schedule for all** — Get prod backup schedules for all things.
+*   [ ] **Remove Certamangers need 2nd api token** — Maybe we can remove the 2nd api token. and use tofu to create a token, then give it access
 *   [ ] **Ansible role for dev vms** — Get new roles, for working vm like flutter, react
 *   [ ] **Ansible Visualization** — Get the new ansible role visualization
 *   [ ] **Opentofu Visualization** — Get the new opentofu infra visualization.
