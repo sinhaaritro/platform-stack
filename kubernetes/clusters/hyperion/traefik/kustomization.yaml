@@ -7,6 +7,5 @@ resources:
 components:
   - ../../../apps/infrastructure/traefik/components/minimal
   - ../../../apps/infrastructure/traefik/components/resource-limits
-  - ../../../apps/infrastructure/traefik/components/ingress # Generic base resource
-  - ./components/dashboard # Hyperion specific patch of ingress
+  - ./components/ingress
   # - ../../../apps/infrastructure/traefik/components/maintenance
