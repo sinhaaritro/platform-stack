@@ -1,0 +1,20 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-dummy
+  namespace: networking
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    link.argocd.argoproj.io/external-link: "https://traefik.example.com/dashboard/"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`traefik.example.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
+  tls:
+    secretName: traefik-dummy-tls

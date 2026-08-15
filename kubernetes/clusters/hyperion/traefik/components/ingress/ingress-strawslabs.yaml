@@ -1,0 +1,20 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-strawslabs
+  namespace: networking
+  labels:
+    backuplabel.certificate: "true"
+  # annotations:
+  #   link.argocd.argoproj.io/external-link: https://traefik-hyperion.strawslabs.com/dashboard/
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`traefik-hyperion.strawslabs.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
+  tls:
+    secretName: traefik-cert-strawslabs-tls

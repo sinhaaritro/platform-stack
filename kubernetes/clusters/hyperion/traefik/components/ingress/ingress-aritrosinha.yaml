@@ -1,0 +1,20 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-aritrosinha
+  namespace: networking
+  labels:
+    backuplabel.certificate: "true"
+  # annotations:
+  #   link.argocd.argoproj.io/external-link: https://traefik.hyperion.aritrosinha.dpdns.org/dashboard/
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`traefik.hyperion.aritrosinha.dpdns.org`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
+  tls:
+    secretName: traefik-cert-aritrosinha-tls
