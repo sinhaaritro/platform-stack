@@ -1,12 +1,12 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: seaweedfs-master-tls
+  name: seaweedfs-master-strawslabs
   namespace: storage
   labels:
     backuplabel.certificate: "true"
 spec:
-  secretName: seaweedfs-master-tls
+  secretName: seaweedfs-master-strawslabs-tls
   issuerRef:
     name: letsencrypt-prod-strawslabs
     kind: ClusterIssuer
@@ -19,12 +19,12 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: seaweedfs-filer-tls
+  name: seaweedfs-filer-strawslabs
   namespace: storage
   labels:
     backuplabel.certificate: "true"
 spec:
-  secretName: seaweedfs-filer-tls
+  secretName: seaweedfs-filer-strawslabs-tls
   issuerRef:
     name: letsencrypt-prod-strawslabs
     kind: ClusterIssuer
@@ -37,12 +37,12 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: seaweedfs-s3-tls
+  name: seaweedfs-s3-strawslabs
   namespace: storage
   labels:
     backuplabel.certificate: "true"
 spec:
-  secretName: seaweedfs-s3-tls
+  secretName: seaweedfs-s3-strawslabs-tls
   issuerRef:
     name: letsencrypt-prod-strawslabs
     kind: ClusterIssuer
@@ -55,12 +55,12 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: seaweedfs-admin-tls
+  name: seaweedfs-admin-strawslabs
   namespace: storage
   labels:
     backuplabel.certificate: "true"
 spec:
-  secretName: seaweedfs-admin-tls
+  secretName: seaweedfs-admin-strawslabs-tls
   issuerRef:
     name: letsencrypt-prod-strawslabs
     kind: ClusterIssuer
@@ -73,12 +73,12 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: seaweedfs-volume-tls
+  name: seaweedfs-volume-strawslabs
   namespace: storage
   labels:
     backuplabel.certificate: "true"
 spec:
-  secretName: seaweedfs-volume-tls
+  secretName: seaweedfs-volume-strawslabs-tls
   issuerRef:
     name: letsencrypt-prod-strawslabs
     kind: ClusterIssuer

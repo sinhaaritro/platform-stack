@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-master
+  name: seaweedfs-master-strawslabs
   namespace: storage
   labels:
     backuplabel.certificate: "true"
@@ -12,7 +12,7 @@ spec:
   tls:
     - hosts:
         - "seaweedfs-hyperion.strawslabs.com"
-      secretName: seaweedfs-master-tls
+      secretName: seaweedfs-master-strawslabs-tls
   rules:
     - host: "seaweedfs-hyperion.strawslabs.com"
       http:
@@ -28,7 +28,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-filer
+  name: seaweedfs-filer-strawslabs
   namespace: storage
   labels:
     backuplabel.certificate: "true"
@@ -40,7 +40,7 @@ spec:
   tls:
     - hosts:
         - "filer.seaweedfs-hyperion.strawslabs.com"
-      secretName: seaweedfs-filer-tls
+      secretName: seaweedfs-filer-strawslabs-tls
   rules:
     - host: "filer.seaweedfs-hyperion.strawslabs.com"
       http:
@@ -56,7 +56,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-s3
+  name: seaweedfs-s3-strawslabs
   namespace: storage
   labels:
     backuplabel.certificate: "true"
@@ -67,7 +67,7 @@ spec:
   tls:
     - hosts:
         - "s3.seaweedfs-hyperion.strawslabs.com"
-      secretName: seaweedfs-s3-tls
+      secretName: seaweedfs-s3-strawslabs-tls
   rules:
     - host: "s3.seaweedfs-hyperion.strawslabs.com"
       http:
@@ -83,7 +83,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-admin
+  name: seaweedfs-admin-strawslabs
   namespace: storage
   labels:
     backuplabel.certificate: "true"
@@ -95,7 +95,7 @@ spec:
   tls:
     - hosts:
         - "admin.seaweedfs-hyperion.strawslabs.com"
-      secretName: seaweedfs-admin-tls
+      secretName: seaweedfs-admin-strawslabs-tls
   rules:
     - host: "admin.seaweedfs-hyperion.strawslabs.com"
       http:
@@ -111,7 +111,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-volume
+  name: seaweedfs-volume-strawslabs
   namespace: storage
   labels:
     backuplabel.certificate: "true"
@@ -123,7 +123,7 @@ spec:
     - hosts:
         - "volume.seaweedfs-hyperion.strawslabs.com"
         - "*.volume.seaweedfs-hyperion.strawslabs.com"
-      secretName: seaweedfs-volume-tls
+      secretName: seaweedfs-volume-strawslabs-tls
   rules:
     - host: "volume.seaweedfs-hyperion.strawslabs.com"
       http:

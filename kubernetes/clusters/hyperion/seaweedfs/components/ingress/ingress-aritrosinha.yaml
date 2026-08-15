@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-master
+  name: seaweedfs-master-aritrosinha
   namespace: storage
   labels:
     backuplabel.certificate: "true"
@@ -12,7 +12,7 @@ spec:
   tls:
     - hosts:
         - "seaweedfs.hyperion.aritrosinha.dpdns.org"
-      secretName: seaweedfs-master-tls
+      secretName: seaweedfs-master-aritrosinha-tls
   rules:
     - host: "seaweedfs.hyperion.aritrosinha.dpdns.org"
       http:
@@ -28,7 +28,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-filer
+  name: seaweedfs-filer-aritrosinha
   namespace: storage
   labels:
     backuplabel.certificate: "true"
@@ -40,7 +40,7 @@ spec:
   tls:
     - hosts:
         - "filer.seaweedfs.hyperion.aritrosinha.dpdns.org"
-      secretName: seaweedfs-filer-tls
+      secretName: seaweedfs-filer-aritrosinha-tls
   rules:
     - host: "filer.seaweedfs.hyperion.aritrosinha.dpdns.org"
       http:
@@ -56,7 +56,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-s3
+  name: seaweedfs-s3-aritrosinha
   namespace: storage
   labels:
     backuplabel.certificate: "true"
@@ -67,7 +67,7 @@ spec:
   tls:
     - hosts:
         - "s3.seaweedfs.hyperion.aritrosinha.dpdns.org"
-      secretName: seaweedfs-s3-tls
+      secretName: seaweedfs-s3-aritrosinha-tls
   rules:
     - host: "s3.seaweedfs.hyperion.aritrosinha.dpdns.org"
       http:
@@ -83,7 +83,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-admin
+  name: seaweedfs-admin-aritrosinha
   namespace: storage
   labels:
     backuplabel.certificate: "true"
@@ -95,7 +95,7 @@ spec:
   tls:
     - hosts:
         - "admin.seaweedfs.hyperion.aritrosinha.dpdns.org"
-      secretName: seaweedfs-admin-tls
+      secretName: seaweedfs-admin-aritrosinha-tls
   rules:
     - host: "admin.seaweedfs.hyperion.aritrosinha.dpdns.org"
       http:
@@ -111,7 +111,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-volume
+  name: seaweedfs-volume-aritrosinha
   namespace: storage
   labels:
     backuplabel.certificate: "true"
@@ -123,7 +123,7 @@ spec:
     - hosts:
         - "volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
         - "*.volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
-      secretName: seaweedfs-volume-tls
+      secretName: seaweedfs-volume-aritrosinha-tls
   rules:
     - host: "volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
       http:

@@ -1,12 +1,12 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: seaweedfs-master-tls
+  name: seaweedfs-master-aritrosinha
   namespace: storage
   labels:
     backuplabel.certificate: "true"
 spec:
-  secretName: seaweedfs-master-tls
+  secretName: seaweedfs-master-aritrosinha-tls
   issuerRef:
     name: letsencrypt-prod-aritrosinha
     kind: ClusterIssuer
@@ -19,12 +19,12 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: seaweedfs-filer-tls
+  name: seaweedfs-filer-aritrosinha
   namespace: storage
   labels:
     backuplabel.certificate: "true"
 spec:
-  secretName: seaweedfs-filer-tls
+  secretName: seaweedfs-filer-aritrosinha-tls
   issuerRef:
     name: letsencrypt-prod-aritrosinha
     kind: ClusterIssuer
@@ -37,12 +37,12 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: seaweedfs-s3-tls
+  name: seaweedfs-s3-aritrosinha
   namespace: storage
   labels:
     backuplabel.certificate: "true"
 spec:
-  secretName: seaweedfs-s3-tls
+  secretName: seaweedfs-s3-aritrosinha-tls
   issuerRef:
     name: letsencrypt-prod-aritrosinha
     kind: ClusterIssuer
@@ -55,12 +55,12 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: seaweedfs-admin-tls
+  name: seaweedfs-admin-aritrosinha
   namespace: storage
   labels:
     backuplabel.certificate: "true"
 spec:
-  secretName: seaweedfs-admin-tls
+  secretName: seaweedfs-admin-aritrosinha-tls
   issuerRef:
     name: letsencrypt-prod-aritrosinha
     kind: ClusterIssuer
@@ -73,12 +73,12 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: seaweedfs-volume-tls
+  name: seaweedfs-volume-aritrosinha
   namespace: storage
   labels:
     backuplabel.certificate: "true"
 spec:
-  secretName: seaweedfs-volume-tls
+  secretName: seaweedfs-volume-aritrosinha-tls
   issuerRef:
     name: letsencrypt-prod-aritrosinha
     kind: ClusterIssuer
