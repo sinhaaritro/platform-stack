@@ -1,0 +1,145 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedfs-master-dummy
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - seaweedfs-dummy.example.com
+      secretName: seaweedfs-master-dummy-tls
+  rules:
+    - host: seaweedfs-dummy.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-master
+                port:
+                  number: 9333
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedfs-filer-dummy
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - filer.seaweedfs-dummy.example.com
+      secretName: seaweedfs-filer-dummy-tls
+  rules:
+    - host: filer.seaweedfs-dummy.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-filer
+                port:
+                  number: 8888
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedfs-s3-dummy
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - s3.seaweedfs-dummy.example.com
+      secretName: seaweedfs-s3-dummy-tls
+  rules:
+    - host: s3.seaweedfs-dummy.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-s3
+                port:
+                  number: 8333
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedfs-admin-dummy
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - admin.seaweedfs-dummy.example.com
+      secretName: seaweedfs-admin-dummy-tls
+  rules:
+    - host: admin.seaweedfs-dummy.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-admin
+                port:
+                  number: 23646
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedfs-volume-dummy
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - volume.seaweedfs-dummy.example.com
+        - "*.volume.seaweedfs-dummy.example.com"
+      secretName: seaweedfs-volume-dummy-tls
+  rules:
+    - host: volume.seaweedfs-dummy.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-volume
+                port:
+                  number: 8080
+    - host: "*.volume.seaweedfs-dummy.example.com"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-volume
+                port:
+                  number: 8080

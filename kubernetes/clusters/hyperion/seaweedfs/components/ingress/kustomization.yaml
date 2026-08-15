@@ -4,4 +4,6 @@ namespace: storage
 
 resources:
   - ingress-aritrosinha.yaml
+  - ingress-strawslabs.yaml
   - cert-aritrosinha.yaml
+  - cert-strawslabs.yaml
