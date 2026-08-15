@@ -1,17 +1,17 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: longhorn-cert-aritrosinha
+  name: longhorn-dummy
   namespace: longhorn-system
   labels:
     backuplabel.certificate: "true"
 spec:
-  secretName: longhorn-cert-aritrosinha-tls
+  secretName: longhorn-dummy-tls
   issuerRef:
-    name: letsencrypt-prod-aritrosinha
+    name: selfsigned-default
     kind: ClusterIssuer
   dnsNames:
-    - "longhorn-hyperion.aritrosinha.dpdns.org"
+    - "longhorn.example.com"
   secretTemplate:
     labels:
       backuplabel.certificate: "true"
