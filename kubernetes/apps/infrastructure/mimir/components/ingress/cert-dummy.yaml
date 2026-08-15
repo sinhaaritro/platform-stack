@@ -1,17 +1,17 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: mimir-cert-aritrosinha
+  name: mimir-dummy
   namespace: monitoring
   labels:
     backuplabel.certificate: "true"
 spec:
-  secretName: mimir-cert-aritrosinha-tls
+  secretName: mimir-dummy-tls
   issuerRef:
-    name: letsencrypt-prod-aritrosinha
+    name: selfsigned-default
     kind: ClusterIssuer
   dnsNames:
-    - "mimir.hyperion.aritrosinha.dpdns.org"
+    - "mimir-dummy.example.com"
   secretTemplate:
     labels:
       backuplabel.certificate: "true"
