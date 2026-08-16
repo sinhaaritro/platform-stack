@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: retry-failed-certs
+  namespace: networking
+spec:
+  schedule: "0 */12 * * *"
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          serviceAccountName: cert-retry-sa
+          containers:
+          - name: retry
+            image: bitnami/kubectl:latest
+            command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Checking for failed certificates..."
+              failed_certs=$(kubectl get cert -A -o jsonpath='{range .items[*]}{.metadata.namespace}{" "}{.metadata.name}{"\n"}{end}' | awk '$3=="False"{print $1, $2}')
+              
+              if [ -z "$failed_certs" ]; then
+                echo "No failed certificates found."
+                exit 0
+              fi
+              
+              while read -r ns name; do
+                echo "Processing failed cert: $ns/$name"
+                kubectl delete order -n "$ns" --field-selector="status.conditions[*].type!=Ready" 2>/dev/null || true
+                kubectl delete cert "$name" -n "$ns" --force-deletion 2>/dev/null || true
+                echo "Deleted $ns/$name - cert-manager will retry issuance"
+              done <<< "$failed_certs"
+              
+              echo "Done. Cert-manager will retry failed certificates."
+          restartPolicy: OnFailure
