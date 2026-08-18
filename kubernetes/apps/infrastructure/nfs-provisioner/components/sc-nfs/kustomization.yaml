@@ -13,4 +13,4 @@ patches:
       reclaimPolicy: Retain
       parameters:
         archiveOnDelete: "true"
-        pathPattern: "${.PVC.namespace}/${.PVC.name}"
+        pathPattern: "v1/${.PVC.namespace}/${.PVC.name}"

@@ -19,7 +19,7 @@ patches:
                   - name: NFS_SERVER
                     value: "192.168.0.2"
                   - name: NFS_PATH
-                    value: /WD4TB/shared/v1
+                    value: /WD4TB/shared
   - target:
       kind: PersistentVolume
       labelSelector: app=nfs-subdir-external-provisioner
@@ -31,4 +31,4 @@ patches:
       spec:
         nfs:
           server: 192.168.0.2
-          path: /WD4TB/shared/v1
+          path: /WD4TB/shared

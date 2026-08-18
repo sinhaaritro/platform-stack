@@ -1,0 +1,38 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+  - pvc.yaml
+
+patches:
+  - target:
+      kind: Deployment
+      name: obsidian
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: obsidian
+      spec:
+        template:
+          spec:
+            initContainers:
+              - name: init-vaults
+                image: busybox:latest
+                command:
+                  - sh
+                  - -c
+                  - mkdir -p /nas/vaults && chown 1000:1000 /nas/vaults
+                volumeMounts:
+                  - name: vaults
+                    mountPath: /nas
+            containers:
+              - name: obsidian
+                volumeMounts:
+                  - name: vaults
+                    mountPath: /config/vaults
+                    subPath: vaults
+            volumes:
+              - name: vaults
+                persistentVolumeClaim:
+                  claimName: obsidian

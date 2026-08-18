@@ -12,6 +12,6 @@ components:
   - ./components/ingress
   - ./components/dns-fix
   - ../../../apps/services/obsidian/components/storage
-  - ./components/storage-nfs
+  - ./components/storage-vaults-nfs
   - ../../../apps/services/obsidian/components/auth-authentik
   # - ../../../apps/services/obsidian/components/maintenance

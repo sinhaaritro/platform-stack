@@ -190,7 +190,7 @@ flowchart TD
 | **SMB** | Host `smbd` serves the same directory to desktop clients |
 | **Data layout version** | `/WD4TB/shared/v1` — the `v1` suffix is a deliberate **layout-versioning convention**: a future rework of the directory structure lives under `v2`, `v3`, … next to the old one, so consumers can migrate in place |
 | **Client VMs** | `oceanus` mounts `192.168.0.2:/WD4TB/shared/v1` at `/export/data` (Ansible role `nas`, fstab with `hard,noatime,actimeo=2`) |
-| **In Kubernetes** | SC `nfs` → `nfs-subdir-external-provisioner` → one subdir per PVC under `/WD4TB/shared/v1` |
+| **In Kubernetes** | SC `nfs` → `nfs-subdir-external-provisioner` → one `v1/<namespace>/<PVC-name>` subdir per PVC under `/WD4TB/shared` |
 | **Provisioning** | Host config is manual (exports, SMB); `oceanus` is a thin client provisioned by OpenTofu + Ansible |
 
 ### Why Not an LXC or a NAS VM?
@@ -276,22 +276,22 @@ apps/infrastructure/nfs-provisioner/
 │   └── values.yaml                #   generic defaults (SC name nfs, RWX, mountOptions)
 └── components/                    # Template components (reusable, no instance specifics)
     ├── atlas-nas/                 #   sets NFS server/path on Deployment env + root PV
-    │                              #     (192.168.0.2:/WD4TB/shared/v1)
+    │                              #     (192.168.0.2:/WD4TB/shared)
     └── sc-nfs/                    #   sets StorageClass semantics (name nfs, Retain, archive,
-                                   #     pathPattern -> <namespace>/<PVC-name>)
+                                   #     pathPattern -> v1/<namespace>/<PVC-name>)
 clusters/hyperion/nfs-provisioner/
 └── kustomization.yaml             # actual app = base + components
 ```
 
 - **The chart renders the provisioner's root PV itself** (with the `nfs-subdir-external-provisioner` label selector + empty `storageClassName`), so nothing extra has to be pre-created — the `atlas-nas` component only fills in the NFS server/path on it.
-- **How it works:** the chart's root PVC is bound to that root PV and mounted at `/persistentvolumes`; each dynamic PVC gets a subdirectory under it, advertised as `NFS_PATH + subdir`. The root PV must therefore point at the **base path** (`/WD4TB/shared/v1`), never a subdirectory.
+- **How it works:** the chart's root PVC is bound to that root PV and mounted at `/persistentvolumes`; each dynamic PVC gets a subdirectory under it, advertised as `NFS_PATH + subdir`. The root PV must therefore point at the **base path** (`/WD4TB/shared`, the versionless parent), never a subdirectory.
 - **Adding a path:** copy `atlas-nas` → `atlas-nas-v2` (new server/path) — the Deployment env and root PV are patched via the chart-static `app=nfs-subdir-external-provisioner` label, so the template works for any `releaseName`.
 - **Adding a StorageClass:** copy `sc-nfs` → `sc-nfs-backup` (e.g., `reclaimPolicy: Delete`), and set `storageClass.name` in the instance's values.
 - **Multiple instances:** each needs its own overlay with a unique `helmCharts.releaseName` (`releaseName` cannot be overridden by overlays) and its own root PV — the chart renders one per release with a matching label selector.
 
 ### Path Naming Template (all apps)
 
-SC `nfs` carries a `pathPattern` of **`${.PVC.namespace}/${.PVC.name}`** — the provisioner creates every PVC's directory as `v1/<namespace>/<PVC-name>/` instead of the default `<namespace>-<pvc-name>-<pv-uid>`:
+SC `nfs` carries a `pathPattern` of **`v1/${.PVC.namespace}/${.PVC.name}`** — the provisioner creates every PVC's directory as `v1/<namespace>/<PVC-name>/` instead of the default `<namespace>-<pvc-name>-<pv-uid>`. The leading `v1/` is the layout-version segment, held in the manifest so a version bump (`v1` → `v2`) is a StorageClass `pathPattern` edit rather than a server-side change:
 
 | App (PVC name) | Namespace | Directory on share |
 |---|---|---|
