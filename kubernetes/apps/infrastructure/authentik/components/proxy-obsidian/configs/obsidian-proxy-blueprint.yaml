@@ -98,12 +98,15 @@ entries:
       enabled: true
       timeout: 30
 
-  # Outpost Attachment
+  # Outpost Attachment and Configuration
   - model: authentik_outposts.outpost
     state: present
     identifiers:
       name: authentik Embedded Outpost
     attrs:
+      config:
+        authentik_host: http://authentik-server.security.svc.cluster.local
+        authentik_host_browser: https://authentik-hyperion.strawslabs.com
       providers:
         - !KeyOf obsidian-provider-private
         - !KeyOf obsidian-provider-public
