@@ -13,14 +13,15 @@ entries:
       users:
         - !Find [authentik_core.user, [username, akadmin]]
 
+  # Provider 1: Private Domain (aritrosinha.dpdns.org)
   - model: authentik_providers_proxy.proxyprovider
     state: present
-    id: obsidian-provider
+    id: obsidian-provider-private
     identifiers:
-      name: Obsidian
+      name: Obsidian (Private)
     attrs:
-      name: Obsidian
-      mode: proxy
+      name: Obsidian (Private)
+      mode: forward_single
       authorization_flow:
         !Find [
           authentik_flows.flow,
@@ -32,31 +33,77 @@ entries:
       internal_host: http://obsidian.personal.svc.cluster.local:3000
       internal_host_ssl_validation: false
 
+  # Provider 2: Public Domain (strawslabs.com)
+  - model: authentik_providers_proxy.proxyprovider
+    state: present
+    id: obsidian-provider-public
+    identifiers:
+      name: Obsidian (Public)
+    attrs:
+      name: Obsidian (Public)
+      mode: forward_single
+      authorization_flow:
+        !Find [
+          authentik_flows.flow,
+          [slug, default-provider-authorization-implicit-consent],
+        ]
+      invalidation_flow:
+        !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+      external_host: https://obsidian-hyperion.strawslabs.com
+      internal_host: http://obsidian.personal.svc.cluster.local:3000
+      internal_host_ssl_validation: false
+
+  # Application 1: Private Domain
   - model: authentik_core.application
     state: present
-    id: obsidian-app
+    id: obsidian-app-private
     identifiers:
-      slug: obsidian
+      slug: obsidian-private
     attrs:
-      name: Obsidian
-      provider: !KeyOf obsidian-provider
+      name: Obsidian (Private)
+      provider: !KeyOf obsidian-provider-private
       meta_launch_url: "https://obsidian.hyperion.aritrosinha.dpdns.org"
       meta_icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/obsidian.png"
 
+  # Application 2: Public Domain
+  - model: authentik_core.application
+    state: present
+    id: obsidian-app-public
+    identifiers:
+      slug: obsidian-public
+    attrs:
+      name: Obsidian (Public)
+      provider: !KeyOf obsidian-provider-public
+      meta_launch_url: "https://obsidian-hyperion.strawslabs.com"
+      meta_icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/obsidian.png"
+
+  # Policy Bindings
   - model: authentik_policies.policybinding
     state: present
     identifiers:
-      target: !KeyOf obsidian-app
+      target: !KeyOf obsidian-app-private
       group: !KeyOf obsidian-access-group
       order: 0
     attrs:
       enabled: true
       timeout: 30
 
+  - model: authentik_policies.policybinding
+    state: present
+    identifiers:
+      target: !KeyOf obsidian-app-public
+      group: !KeyOf obsidian-access-group
+      order: 0
+    attrs:
+      enabled: true
+      timeout: 30
+
+  # Outpost Attachment
   - model: authentik_outposts.outpost
     state: present
     identifiers:
       name: authentik Embedded Outpost
     attrs:
       providers:
-        - !KeyOf obsidian-provider
+        - !KeyOf obsidian-provider-private
+        - !KeyOf obsidian-provider-public

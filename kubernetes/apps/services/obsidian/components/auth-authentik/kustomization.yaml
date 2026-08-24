@@ -8,4 +8,11 @@ patches:
     patch: |
       - op: add
         path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.middlewares
-        value: security-authentik-auth@kubernetescrd
+        value: networking-authentik-auth@kubernetescrd
+  - target:
+      kind: Ingress
+      name: obsidian-strawslabs
+    patch: |
+      - op: add
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.middlewares
+        value: networking-authentik-auth@kubernetescrd
