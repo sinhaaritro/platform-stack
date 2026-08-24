@@ -13,7 +13,7 @@ components:
   - ./components/ingress
   - ../../../apps/infrastructure/authentik/components/resource-limits
   - ../../../apps/infrastructure/authentik/components/replica-count
-  - ../../../apps/infrastructure/authentik/components/init-db
+  # - ../../../apps/infrastructure/authentik/components/init-db
   - ../../../apps/infrastructure/authentik/components/oauth-immich
   - ../../../apps/infrastructure/authentik/components/proxy-obsidian
   - ../../../apps/infrastructure/authentik/components/backup-job

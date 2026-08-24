@@ -105,7 +105,7 @@ entries:
       name: authentik Embedded Outpost
     attrs:
       config:
-        authentik_host: http://authentik-server.security.svc.cluster.local
+        authentik_host: https://authentik-hyperion.strawslabs.com
         authentik_host_browser: https://authentik-hyperion.strawslabs.com
       providers:
         - !KeyOf obsidian-provider-private
