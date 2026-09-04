@@ -17,6 +17,27 @@ spec:
     - host: "seaweedfs.hyperion.aritrosinha.dpdns.org"
       http:
         paths:
+          - path: /admin
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-admin
+                port:
+                  number: 23646
+          - path: /filer
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-filer
+                port:
+                  number: 8888
+          - path: /volume
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-volume
+                port:
+                  number: 8080
           - path: /
             pathType: Prefix
             backend:

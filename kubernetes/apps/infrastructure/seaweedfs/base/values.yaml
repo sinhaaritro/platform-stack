@@ -69,8 +69,7 @@ volume:
 
   # PublicURL is critical. Using string interpolation format that shell will evaluate.
   extraArgs:
-    - "-publicUrl=${POD_NAME}.${SEAWEEDFS_FULLNAME}-volume.seaweedfs.ruth.examp\
-      le.com:80"
+    - "-publicUrl=${POD_NAME}.volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
     - "-max=30"
 
   dataDirs:
