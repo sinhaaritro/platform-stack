@@ -1,0 +1,16 @@
+# Default base values for rustfs
+replicaCount: 2
+
+storageclass:
+  name: longhorn0rep
+  dataStorageSize: 256Mi
+  logStorageSize: 256Mi
+
+secret:
+  allowInsecureDefaults: true
+  rustfs:
+    access_key: "rustfsadmin"
+    secret_key: "rustfsadmin"
+
+ingress:
+  enabled: false

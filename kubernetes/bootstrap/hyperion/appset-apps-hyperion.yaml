@@ -23,6 +23,11 @@ spec:
             serverSideApply: "true"
             replace: "false"
             wave: "5"
+          - app: rustfs
+            namespace: storage-test
+            serverSideApply: "true"
+            replace: "false"
+            wave: "6"
           - app: authentik
             namespace: security
             serverSideApply: "true"

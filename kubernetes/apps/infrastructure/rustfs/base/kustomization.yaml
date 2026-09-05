@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: storage-test
+
+helmCharts:
+  - name: rustfs
+    repo: https://charts.rustfs.com
+    version: 1.0.0-rc.5
+    releaseName: rustfs
+    namespace: storage-test
+    valuesFile: values.yaml
+
+patches:
+  - path: patch-delete-test-pod.yaml

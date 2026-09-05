@@ -1,0 +1,6 @@
+$patch: delete
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rustfs-test-connection
+  namespace: storage-test
