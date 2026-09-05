@@ -1,0 +1,172 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedtest-master-dummy
+  namespace: storage-test
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - seaweedtest-dummy.example.com
+      secretName: seaweedtest-master-dummy-tls
+  rules:
+    - host: seaweedtest-dummy.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedtest-seaweedfs-master
+                port:
+                  number: 9333
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedtest-filer-dummy
+  namespace: storage-test
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - filer.seaweedtest-dummy.example.com
+      secretName: seaweedtest-filer-dummy-tls
+  rules:
+    - host: filer.seaweedtest-dummy.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedtest-seaweedfs-filer
+                port:
+                  number: 8888
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedtest-s3-dummy
+  namespace: storage-test
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - s3.seaweedtest-dummy.example.com
+      secretName: seaweedtest-s3-dummy-tls
+  rules:
+    - host: s3.seaweedtest-dummy.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedtest-seaweedfs-s3
+                port:
+                  number: 8333
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedtest-admin-dummy
+  namespace: storage-test
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - admin.seaweedtest-dummy.example.com
+      secretName: seaweedtest-admin-dummy-tls
+  rules:
+    - host: admin.seaweedtest-dummy.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedtest-seaweedfs-admin
+                port:
+                  number: 23646
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedtest-volume-dummy
+  namespace: storage-test
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - volume.seaweedtest-dummy.example.com
+        - "*.volume.seaweedtest-dummy.example.com"
+      secretName: seaweedtest-volume-dummy-tls
+  rules:
+    - host: volume.seaweedtest-dummy.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedtest-seaweedfs-volume
+                port:
+                  number: 8080
+    - host: "*.volume.seaweedtest-dummy.example.com"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedtest-seaweedfs-volume
+                port:
+                  number: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedtest-webdav-dummy
+  namespace: storage-test
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - webdav.seaweedtest-dummy.example.com
+      secretName: seaweedtest-webdav-dummy-tls
+  rules:
+    - host: webdav.seaweedtest-dummy.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedtest-webdav
+                port:
+                  number: 7333

@@ -6,5 +6,8 @@ resources:
   - ../../../apps/infrastructure/seaweedtest/base
 
 components:
+  - ../../../apps/infrastructure/seaweedtest/components/storage
   - ../../../apps/infrastructure/seaweedtest/components/webdav
+  - ../../../apps/infrastructure/seaweedtest/components/admin
+  - ../../../apps/infrastructure/seaweedtest/components/filer-client-service
   - ./components/ingress

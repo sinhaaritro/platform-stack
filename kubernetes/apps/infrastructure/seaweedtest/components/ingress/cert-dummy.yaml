@@ -1,0 +1,108 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: seaweedtest-master-dummy
+  namespace: storage-test
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: seaweedtest-master-dummy-tls
+  issuerRef:
+    name: selfsigned-default
+    kind: ClusterIssuer
+  dnsNames:
+    - "seaweedtest-dummy.example.com"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: seaweedtest-filer-dummy
+  namespace: storage-test
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: seaweedtest-filer-dummy-tls
+  issuerRef:
+    name: selfsigned-default
+    kind: ClusterIssuer
+  dnsNames:
+    - "filer.seaweedtest-dummy.example.com"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: seaweedtest-s3-dummy
+  namespace: storage-test
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: seaweedtest-s3-dummy-tls
+  issuerRef:
+    name: selfsigned-default
+    kind: ClusterIssuer
+  dnsNames:
+    - "s3.seaweedtest-dummy.example.com"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: seaweedtest-admin-dummy
+  namespace: storage-test
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: seaweedtest-admin-dummy-tls
+  issuerRef:
+    name: selfsigned-default
+    kind: ClusterIssuer
+  dnsNames:
+    - "admin.seaweedtest-dummy.example.com"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: seaweedtest-volume-dummy
+  namespace: storage-test
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: seaweedtest-volume-dummy-tls
+  issuerRef:
+    name: selfsigned-default
+    kind: ClusterIssuer
+  dnsNames:
+    - "volume.seaweedtest-dummy.example.com"
+    - "*.volume.seaweedtest-dummy.example.com"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: seaweedtest-webdav-dummy
+  namespace: storage-test
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: seaweedtest-webdav-dummy-tls
+  issuerRef:
+    name: selfsigned-default
+    kind: ClusterIssuer
+  dnsNames:
+    - "webdav.seaweedtest-dummy.example.com"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"

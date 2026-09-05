@@ -11,11 +11,9 @@ master:
       memory: 256Mi
   data:
     type: "persistentVolumeClaim"
-    storageClass: "longhorn0rep"
     size: "1Gi"
   logs:
     type: "persistentVolumeClaim"
-    storageClass: "longhorn0rep"
     size: "1Gi"
   affinity: ""
   nodeSelector: {}
@@ -34,15 +32,12 @@ volume:
   dataDirs:
     - name: data
       type: "persistentVolumeClaim"
-      storageClass: "longhorn0rep"
       size: "10Gi"
   idx:
     type: "persistentVolumeClaim"
-    storageClass: "longhorn0rep"
     size: "1Gi"
   logs:
     type: "persistentVolumeClaim"
-    storageClass: "longhorn0rep"
     size: "1Gi"
   affinity: ""
   nodeSelector: {}
@@ -58,11 +53,9 @@ filer:
       memory: 1Gi
   data:
     type: "persistentVolumeClaim"
-    storageClass: "longhorn0rep"
     size: "2Gi"
   logs:
     type: "persistentVolumeClaim"
-    storageClass: "longhorn0rep"
     size: "1Gi"
   affinity: ""
   nodeSelector: {}
@@ -71,8 +64,7 @@ admin:
   enabled: true
   port: 23646
   grpcPort: 33646
-  adminUser: "admin"
-  adminPassword: "admin"
+  existingSecret: "seaweedtest-admin-creds"
   resources:
     requests:
       cpu: 50m
@@ -82,11 +74,9 @@ admin:
       memory: 128Mi
   data:
     type: "persistentVolumeClaim"
-    storageClass: "longhorn0rep"
     size: "2Gi"
   logs:
     type: "persistentVolumeClaim"
-    storageClass: "longhorn0rep"
     size: "2Gi"
   affinity: ""
   nodeSelector: {}

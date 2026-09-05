@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+metadata:
+  name: ingress
+# Template / dummy values. To expose seaweedtest on a cluster, copy this folder to
+# clusters/<name>/seaweedtest/components/ingress and replace every "dummy" value.
+resources:
+  - ingress-dummy.yaml
+  - cert-dummy.yaml

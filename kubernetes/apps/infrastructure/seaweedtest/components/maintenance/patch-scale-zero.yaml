@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedtest-seaweedfs-master
+  namespace: storage-test
+spec:
+  replicas: 0
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedtest-seaweedfs-volume
+  namespace: storage-test
+spec:
+  replicas: 0
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedtest-seaweedfs-filer
+  namespace: storage-test
+spec:
+  replicas: 0
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedtest-seaweedfs-admin
+  namespace: storage-test
+spec:
+  replicas: 0
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seaweedtest-seaweedfs-s3
+  namespace: storage-test
+spec:
+  replicas: 0
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seaweedtest-seaweedfs-worker
+  namespace: storage-test
+spec:
+  replicas: 0
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seaweedtest-webdav
+  namespace: storage-test
+spec:
+  replicas: 0

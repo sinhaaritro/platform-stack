@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedtest-seaweedfs-master
+  namespace: storage-test
+spec:
+  volumeClaimTemplates:
+    - metadata:
+        name: data-storage-test
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: local-path
+    - metadata:
+        name: seaweedfs-master-log-volume
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: local-path
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedtest-seaweedfs-filer
+  namespace: storage-test
+spec:
+  volumeClaimTemplates:
+    - metadata:
+        name: data-filer
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 2Gi
+        storageClassName: local-path
+    - metadata:
+        name: seaweedfs-filer-log-volume
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: local-path
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedtest-seaweedfs-volume
+  namespace: storage-test
+spec:
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: local-path
+    - metadata:
+        name: idx
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: local-path
+    - metadata:
+        name: logs
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: local-path
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedtest-seaweedfs-admin
+  namespace: storage-test
+spec:
+  volumeClaimTemplates:
+    - metadata:
+        name: admin-data
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 2Gi
+        storageClassName: local-path
+    - metadata:
+        name: admin-logs
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 2Gi
+        storageClassName: local-path
