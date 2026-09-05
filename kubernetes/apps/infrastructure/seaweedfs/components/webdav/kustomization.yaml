@@ -3,5 +3,4 @@ kind: Component
 namespace: storage
 
 resources:
-  - secret-s3-service-accounts.yaml
-  - job-s3-config.yaml
+  - webdav.yaml

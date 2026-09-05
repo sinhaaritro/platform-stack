@@ -45,11 +45,3 @@ metadata:
   namespace: storage
 spec:
   replicas: 0
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: seaweedfs-webdav
-  namespace: storage
-spec:
-  replicas: 0

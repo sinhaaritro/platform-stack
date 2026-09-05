@@ -1,20 +1,7 @@
-# global:
-
 master:
-  enabled: true
-  port: 9333
-  grpcPort: 19333
-  metricsPort: 9327
-  ipBind: "0.0.0.0"
-  volumePreallocate: false
-  volumeSizeLimitMB: 1000
-  # Upstream uses 001 (Rack awareness), chart default 000. Matching upstream.
-  defaultReplication: "000"
-  disableHttp: false
-  resumeState: false
+  replicas: 3
   electionTimeout: "10s"
   heartbeatInterval: "300ms"
-
   resources:
     requests:
       cpu: 100m
@@ -22,43 +9,17 @@ master:
     limits:
       cpu: 200m
       memory: 256Mi
-  terminationGracePeriodSeconds: 60
-
-  ingress:
-    enabled: true
-    className: null
-    host: "master.seaweedfs.local"
-    path: "/sw-master/?(.*)"
-    pathType: ImplementationSpecific
-    annotations: {}
-    tls: []
   data:
     type: "persistentVolumeClaim"
-
+    size: "1Gi"
   logs:
     type: "persistentVolumeClaim"
-
-  affinity: |
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchLabels:
-                app.kubernetes.io/component: master
-                app.kubernetes.io/instance: {{ .Release.Name }}
-                app.kubernetes.io/name: {{ template "seaweedfs.name" . }}
-            topologyKey: kubernetes.io/hostname
+    size: "1Gi"
+  affinity: ""
+  nodeSelector: {}
 
 volume:
-  enabled: true
-  port: 8080
-  grpcPort: 18080
-  metricsPort: 9327
-  ipBind: "0.0.0.0"
-  minFreeSpacePercent: 1
-  terminationGracePeriodSeconds: 60
-
+  replicas: 2
   resources:
     requests:
       cpu: 500m
@@ -66,62 +27,23 @@ volume:
     limits:
       cpu: 2000m
       memory: 4Gi
-
-  # PublicURL is critical. Using string interpolation format that shell will evaluate.
   extraArgs:
     - "-publicUrl=${POD_NAME}.volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
-    - "-max=30"
-
   dataDirs:
     - name: data
       type: "persistentVolumeClaim"
-
-  data:
-    type: "persistentVolumeClaim"
-
+      size: "10Gi"
   idx:
     type: "persistentVolumeClaim"
-
+    size: "1Gi"
   logs:
     type: "persistentVolumeClaim"
-
-  initContainers: |
-    - name: seaweedfs-vol-fix-idx
-      image: "{{ template "seaweedfs.volume.image" $ }}"
-      imagePullPolicy: IfNotPresent
-      command: ["/bin/sh", "-c"]
-      args: ["weed fix /data; if ls /data/*.idx  >/dev/null 2>&1; then mv /data/*.idx /idx/ ; fi; "]
-      volumeMounts:
-        - mountPath: /idx
-          name: idx
-        - mountPath: /data
-          name: data
-
-  affinity: |
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchLabels:
-                app.kubernetes.io/component: volume
-                app.kubernetes.io/instance: {{ .Release.Name }}
-                app.kubernetes.io/name: {{ template "seaweedfs.name" . }}
-            topologyKey: kubernetes.io/hostname
+    size: "1Gi"
+  affinity: ""
+  nodeSelector: {}
 
 filer:
-  enabled: true
-  port: 8888
-  grpcPort: 18888
-  metricsPort: 9327
-  ipBind: "0.0.0.0"
-  defaultReplicaPlacement: "000"
-  disableDirListing: false
-  dirListLimit: 100000
-  disableHttp: false
-  redirectOnRead: false
-  terminationGracePeriodSeconds: 60
-
+  replicas: 2
   resources:
     requests:
       cpu: 200m
@@ -129,35 +51,39 @@ filer:
     limits:
       cpu: 1000m
       memory: 1Gi
-
-  ingress:
-    enabled: true
-    className: null
-    host: "seaweedfs.cluster.local"
-    path: "/"
-    pathType: Prefix
-    annotations: {}
-    tls: []
   data:
     type: "persistentVolumeClaim"
-
+    size: "2Gi"
   logs:
     type: "persistentVolumeClaim"
+    size: "1Gi"
+  affinity: ""
+  nodeSelector: {}
 
-  affinity: |
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchLabels:
-                app.kubernetes.io/component: filer
-                app.kubernetes.io/instance: {{ .Release.Name }}
-                app.kubernetes.io/name: {{ template "seaweedfs.name" . }}
-            topologyKey: kubernetes.io/hostname
+admin:
+  enabled: true
+  port: 23646
+  grpcPort: 33646
+  existingSecret: "seaweedfs-admin-creds"
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+  data:
+    type: "persistentVolumeClaim"
+    size: "2Gi"
+  logs:
+    type: "persistentVolumeClaim"
+    size: "2Gi"
+  affinity: ""
+  nodeSelector: {}
 
 s3:
   enabled: true
+  replicas: 2
   port: 8333
   metricsPort: 9327
   enableAuth: true
@@ -170,95 +96,31 @@ s3:
       memory: 256Mi
     limits:
       cpu: 500m
-      memory: 2Gi
-
-  ingress:
-    enabled: true
-    className: null
-    host: "s3.seaweedfs.local"
-    path: "/"
-    pathType: Prefix
-    annotations: {}
-    tls: []
+      memory: 1Gi
   logs:
-    type: "hostPath"
-    hostPathPrefix: /storage # Placeholder, upstream s3 deployment doesn't show logs volumeMounts explicitly in the snippet I saw?
-    # Re-checking upstream: s3 deployment (lines 312+) has no volumeMounts.
-    # So we should probably set this to emptyDir or disable if possible to match.
-    # Chart defaults logs to hostPath/emptyDir.
-    # Let's use emptyDir for now.
-    # type: "emptyDir"
+    type: "emptyDir"
+  affinity: ""
+  nodeSelector: {}
 
 worker:
   enabled: true
+  replicas: 1
   metricsPort: 9327
-  capabilities: "vacuum,balance,erasure_coding"
-  maxConcurrent: 3
+  jobType: "all"
+  maxDetect: 1
+  maxExecute: 4
   workingDir: "/tmp/seaweedfs-worker"
   terminationGracePeriodSeconds: 60
-
   resources:
     requests:
-      cpu: "500m"
-      memory: "512Mi"
-    limits:
-      cpu: "2"
-      memory: "2Gi"
-
-  affinity: |
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchLabels:
-                app.kubernetes.io/component: worker
-                app.kubernetes.io/instance: {{ .Release.Name }}
-                app.kubernetes.io/name: {{ template "seaweedfs.name" . }}
-            topologyKey: kubernetes.io/hostname
-
-admin:
-  enabled: true
-  port: 23646
-  grpcPort: 33646
-  terminationGracePeriodSeconds: 60
-
-  resources:
-    requests:
-      cpu: 50m
-      memory: 64Mi
-    limits:
-      cpu: 200m
+      cpu: 100m
       memory: 128Mi
-
-  adminUser: "admin"
-  adminPassword: "admin" # Upstream secret decodes to 'admin'
-
+    limits:
+      cpu: 500m
+      memory: 512Mi
   data:
-    type: "persistentVolumeClaim"
-
+    type: "emptyDir"
   logs:
-    type: "persistentVolumeClaim"
-
-  ingress:
-    enabled: true
-    className: null
-    host: "admin.seaweedfs.local"
-    path: "/"
-    pathType: Prefix
-    annotations: {}
-    tls: []
-
-  affinity: |
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchLabels:
-                app.kubernetes.io/component: admin
-                app.kubernetes.io/instance: {{ .Release.Name }}
-                app.kubernetes.io/name: {{ template "seaweedfs.name" . }}
-            topologyKey: kubernetes.io/hostname
-
-# Missing: WebDAV (not in chart) add in future
+    type: "emptyDir"
+  affinity: ""
+  nodeSelector: {}

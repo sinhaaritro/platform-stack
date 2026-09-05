@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-master-strawslabs
+  name: seaweedfs-master-dummy
   namespace: storage
   labels:
     backuplabel.certificate: "true"
@@ -11,10 +11,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - "seaweedfs-hyperion.strawslabs.com"
-      secretName: seaweedfs-master-strawslabs-tls
+        - seaweedfs-dummy.example.com
+      secretName: seaweedfs-master-dummy-tls
   rules:
-    - host: "seaweedfs-hyperion.strawslabs.com"
+    - host: seaweedfs-dummy.example.com
       http:
         paths:
           - path: /
@@ -28,21 +28,20 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-filer-strawslabs
+  name: seaweedfs-filer-dummy
   namespace: storage
   labels:
     backuplabel.certificate: "true"
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-    # link.argocd.argoproj.io/external-link: "https://filer.seaweedfs-hyperion.strawslabs.com/"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - "filer.seaweedfs-hyperion.strawslabs.com"
-      secretName: seaweedfs-filer-strawslabs-tls
+        - filer.seaweedfs-dummy.example.com
+      secretName: seaweedfs-filer-dummy-tls
   rules:
-    - host: "filer.seaweedfs-hyperion.strawslabs.com"
+    - host: filer.seaweedfs-dummy.example.com
       http:
         paths:
           - path: /
@@ -56,7 +55,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-s3-strawslabs
+  name: seaweedfs-s3-dummy
   namespace: storage
   labels:
     backuplabel.certificate: "true"
@@ -66,10 +65,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - "s3.seaweedfs-hyperion.strawslabs.com"
-      secretName: seaweedfs-s3-strawslabs-tls
+        - s3.seaweedfs-dummy.example.com
+      secretName: seaweedfs-s3-dummy-tls
   rules:
-    - host: "s3.seaweedfs-hyperion.strawslabs.com"
+    - host: s3.seaweedfs-dummy.example.com
       http:
         paths:
           - path: /
@@ -83,21 +82,20 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-admin-strawslabs
+  name: seaweedfs-admin-dummy
   namespace: storage
   labels:
     backuplabel.certificate: "true"
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-    # link.argocd.argoproj.io/external-link: "https://admin.seaweedfs-hyperion.strawslabs.com/"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - "admin.seaweedfs-hyperion.strawslabs.com"
-      secretName: seaweedfs-admin-strawslabs-tls
+        - admin.seaweedfs-dummy.example.com
+      secretName: seaweedfs-admin-dummy-tls
   rules:
-    - host: "admin.seaweedfs-hyperion.strawslabs.com"
+    - host: admin.seaweedfs-dummy.example.com
       http:
         paths:
           - path: /
@@ -111,7 +109,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: seaweedfs-volume-strawslabs
+  name: seaweedfs-volume-dummy
   namespace: storage
   labels:
     backuplabel.certificate: "true"
@@ -121,11 +119,11 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - "volume.seaweedfs-hyperion.strawslabs.com"
-        - "*.volume.seaweedfs-hyperion.strawslabs.com"
-      secretName: seaweedfs-volume-strawslabs-tls
+        - volume.seaweedfs-dummy.example.com
+        - "*.volume.seaweedfs-dummy.example.com"
+      secretName: seaweedfs-volume-dummy-tls
   rules:
-    - host: "volume.seaweedfs-hyperion.strawslabs.com"
+    - host: volume.seaweedfs-dummy.example.com
       http:
         paths:
           - path: /
@@ -135,7 +133,7 @@ spec:
                 name: seaweedfs-volume
                 port:
                   number: 8080
-    - host: "*.volume.seaweedfs-hyperion.strawslabs.com"
+    - host: "*.volume.seaweedfs-dummy.example.com"
       http:
         paths:
           - path: /
@@ -145,32 +143,3 @@ spec:
                 name: seaweedfs-volume
                 port:
                   number: 8080
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: seaweedfs-webdav-strawslabs
-  namespace: storage
-  labels:
-    backuplabel.certificate: "true"
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-    link.argocd.argoproj.io/external-link: "https://webdav.seaweedfs-hyperion.strawslabs.com/"
-spec:
-  ingressClassName: traefik
-  tls:
-    - hosts:
-        - "webdav.seaweedfs-hyperion.strawslabs.com"
-      secretName: seaweedfs-webdav-strawslabs-tls
-  rules:
-    - host: "webdav.seaweedfs-hyperion.strawslabs.com"
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: seaweedfs-webdav
-                port:
-                  number: 7333
-

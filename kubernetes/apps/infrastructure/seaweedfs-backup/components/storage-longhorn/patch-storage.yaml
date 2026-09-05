@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedfs-master
+  namespace: storage
+spec:
+  volumeClaimTemplates:
+    - metadata:
+        name: data-storage # From chart
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: longhorn
+    - metadata:
+        name: seaweedfs-master-log-volume # From chart
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: longhorn0rep
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedfs-filer
+  namespace: storage
+spec:
+  volumeClaimTemplates:
+    - metadata:
+        name: data-filer
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: longhorn
+    - metadata:
+        name: seaweedfs-filer-log-volume
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: longhorn0rep
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedfs-volume
+  namespace: storage
+spec:
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 20Gi # Starting small, easy to expand
+        storageClassName: longhorn0rep
+    - metadata:
+        name: idx
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: longhorn0rep
+    - metadata:
+        name: logs
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: longhorn0rep
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedfs-admin
+  namespace: storage
+spec:
+  volumeClaimTemplates:
+    - metadata:
+        name: admin-data
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: longhorn
+    - metadata:
+        name: admin-logs
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: longhorn0rep

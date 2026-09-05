@@ -1,0 +1,25 @@
+global:
+  imageName: chrislusf/seaweedfs
+  enableSecurity: false
+
+# Enable Admin
+admin:
+  enabled: true
+  replicas: 1
+  port: 23646
+  grpcPort: 33646
+
+  # Authentication
+  secret:
+    existingSecret: "seaweedfs-admin-creds"
+    userKey: "username"
+    pwKey: "password"
+
+  # Admin Data Persistence (Optional but recommended)
+  data:
+    type: "emptyDir"
+    size: "1Gi"
+
+  logs:
+    type: "emptyDir"
+    size: "1Gi"

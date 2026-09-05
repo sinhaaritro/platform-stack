@@ -1,0 +1,90 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: seaweedfs-master-dummy
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: seaweedfs-master-dummy-tls
+  issuerRef:
+    name: selfsigned-default
+    kind: ClusterIssuer
+  dnsNames:
+    - "seaweedfs-dummy.example.com"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: seaweedfs-filer-dummy
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: seaweedfs-filer-dummy-tls
+  issuerRef:
+    name: selfsigned-default
+    kind: ClusterIssuer
+  dnsNames:
+    - "filer.seaweedfs-dummy.example.com"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: seaweedfs-s3-dummy
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: seaweedfs-s3-dummy-tls
+  issuerRef:
+    name: selfsigned-default
+    kind: ClusterIssuer
+  dnsNames:
+    - "s3.seaweedfs-dummy.example.com"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: seaweedfs-admin-dummy
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: seaweedfs-admin-dummy-tls
+  issuerRef:
+    name: selfsigned-default
+    kind: ClusterIssuer
+  dnsNames:
+    - "admin.seaweedfs-dummy.example.com"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: seaweedfs-volume-dummy
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: seaweedfs-volume-dummy-tls
+  issuerRef:
+    name: selfsigned-default
+    kind: ClusterIssuer
+  dnsNames:
+    - "volume.seaweedfs-dummy.example.com"
+    - "*.volume.seaweedfs-dummy.example.com"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"
