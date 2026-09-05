@@ -111,3 +111,27 @@ s3:
     type: "emptyDir"
   affinity: ""
   nodeSelector: {}
+
+worker:
+  enabled: true
+  replicas: 1
+  metricsPort: 9327
+  jobType: "all"
+  maxDetect: 1
+  maxExecute: 4
+  workingDir: "/tmp/seaweedfs-worker"
+  terminationGracePeriodSeconds: 60
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  data:
+    type: "emptyDir"
+  logs:
+    type: "emptyDir"
+  affinity: ""
+  nodeSelector: {}
+
