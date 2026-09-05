@@ -1,0 +1,141 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedtest-master-strawslabs
+  namespace: storage-test
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+    link.argocd.argoproj.io/external-link: "http://seaweedtest-hyperion.strawslabs.com/"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: "seaweedtest-hyperion.strawslabs.com"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedtest-seaweedfs-master
+                port:
+                  number: 9333
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedtest-volume-strawslabs
+  namespace: storage-test
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+    argocd.argoproj.io/ignore-default-links: "true"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: "volume.seaweedtest-hyperion.strawslabs.com"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedtest-seaweedfs-volume
+                port:
+                  number: 8080
+    - host: "*.volume.seaweedtest-hyperion.strawslabs.com"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedtest-seaweedfs-volume
+                port:
+                  number: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedtest-admin-strawslabs
+  namespace: storage-test
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+    link.argocd.argoproj.io/external-link: "http://admin.seaweedtest-hyperion.strawslabs.com/"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: "admin.seaweedtest-hyperion.strawslabs.com"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedtest-seaweedfs-admin
+                port:
+                  number: 23646
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedtest-filer-strawslabs
+  namespace: storage-test
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+    link.argocd.argoproj.io/external-link: "http://filer.seaweedtest-hyperion.strawslabs.com/"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: "filer.seaweedtest-hyperion.strawslabs.com"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedtest-seaweedfs-filer
+                port:
+                  number: 8888
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedtest-s3-strawslabs
+  namespace: storage-test
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+    link.argocd.argoproj.io/external-link: "http://s3.seaweedtest-hyperion.strawslabs.com/"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: "s3.seaweedtest-hyperion.strawslabs.com"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedtest-seaweedfs-s3
+                port:
+                  number: 8333
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedtest-webdav-strawslabs
+  namespace: storage-test
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+    link.argocd.argoproj.io/external-link: "http://webdav.seaweedtest-hyperion.strawslabs.com/"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: "webdav.seaweedtest-hyperion.strawslabs.com"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedtest-seaweedfs-webdav
+                port:
+                  number: 7333

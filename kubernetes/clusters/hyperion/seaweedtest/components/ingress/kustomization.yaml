@@ -3,4 +3,5 @@ kind: Component
 namespace: storage-test
 
 resources:
-  - ingress.yaml
+  - ingress-aritrosinha.yaml
+  - ingress-strawslabs.yaml
