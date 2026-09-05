@@ -107,3 +107,25 @@ spec:
                 name: seaweedtest-seaweedfs-s3
                 port:
                   number: 8333
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedtest-webdav
+  namespace: storage-test
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+    link.argocd.argoproj.io/external-link: "http://webdav.seaweedtest.hyperion.aritrosinha.dpdns.org/"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: "webdav.seaweedtest.hyperion.aritrosinha.dpdns.org"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedtest-seaweedfs-webdav
+                port:
+                  number: 7333

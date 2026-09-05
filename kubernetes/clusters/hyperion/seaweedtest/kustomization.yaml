@@ -6,4 +6,5 @@ resources:
   - ../../../apps/infrastructure/seaweedtest/base
 
 components:
+  - ../../../apps/infrastructure/seaweedtest/components/webdav
   - ./components/ingress
