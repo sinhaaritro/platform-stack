@@ -1,4 +1,7 @@
 master:
+  replicas: 3
+  electionTimeout: "10s"
+  heartbeatInterval: "300ms"
   resources:
     requests:
       cpu: 100m
@@ -14,8 +17,11 @@ master:
     type: "persistentVolumeClaim"
     storageClass: "longhorn0rep"
     size: "1Gi"
+  affinity: ""
+  nodeSelector: {}
 
 volume:
+  replicas: 2
   resources:
     requests:
       cpu: 500m
@@ -38,8 +44,11 @@ volume:
     type: "persistentVolumeClaim"
     storageClass: "longhorn0rep"
     size: "1Gi"
+  affinity: ""
+  nodeSelector: {}
 
 filer:
+  replicas: 2
   resources:
     requests:
       cpu: 200m
@@ -55,6 +64,8 @@ filer:
     type: "persistentVolumeClaim"
     storageClass: "longhorn0rep"
     size: "1Gi"
+  affinity: ""
+  nodeSelector: {}
 
 admin:
   enabled: true
@@ -77,20 +88,12 @@ admin:
     type: "persistentVolumeClaim"
     storageClass: "longhorn0rep"
     size: "2Gi"
-  affinity: |
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchLabels:
-                app.kubernetes.io/component: admin
-                app.kubernetes.io/instance: {{ .Release.Name }}
-                app.kubernetes.io/name: {{ template "seaweedfs.name" . }}
-            topologyKey: kubernetes.io/hostname
+  affinity: ""
+  nodeSelector: {}
 
 s3:
   enabled: true
+  replicas: 2
   port: 8333
   metricsPort: 9327
   enableAuth: false
@@ -106,3 +109,5 @@ s3:
       memory: 1Gi
   logs:
     type: "emptyDir"
+  affinity: ""
+  nodeSelector: {}
