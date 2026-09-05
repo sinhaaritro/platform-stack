@@ -4,3 +4,6 @@ namespace: storage-test
 
 resources:
   - ../../../apps/infrastructure/seaweedtest/base
+
+components:
+  - ./components/ingress

@@ -1,0 +1,51 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedtest-master
+  namespace: storage-test
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: "seaweedtest.hyperion.aritrosinha.dpdns.org"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedtest-seaweedfs-master
+                port:
+                  number: 9333
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedtest-volume
+  namespace: storage-test
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: "volume.seaweedtest.hyperion.aritrosinha.dpdns.org"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedtest-seaweedfs-volume
+                port:
+                  number: 8080
+    - host: "*.volume.seaweedtest.hyperion.aritrosinha.dpdns.org"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedtest-seaweedfs-volume
+                port:
+                  number: 8080

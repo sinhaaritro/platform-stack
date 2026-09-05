@@ -8,3 +8,4 @@ helmCharts:
     version: 4.39.0
     releaseName: seaweedtest
     namespace: storage-test
+    valuesFile: values.yaml
