@@ -14,3 +14,7 @@ secret:
 
 ingress:
   enabled: false
+
+extraEnv:
+  - name: RUSTFS_RPC_SECRET
+    value: "rustfsrpcsecret2026cluster"
