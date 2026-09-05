@@ -88,3 +88,21 @@ admin:
                 app.kubernetes.io/instance: {{ .Release.Name }}
                 app.kubernetes.io/name: {{ template "seaweedfs.name" . }}
             topologyKey: kubernetes.io/hostname
+
+s3:
+  enabled: true
+  port: 8333
+  metricsPort: 9327
+  enableAuth: false
+  bindAddress: "0.0.0.0"
+  domainName: ""
+  terminationGracePeriodSeconds: 60
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+  logs:
+    type: "emptyDir"
