@@ -1,3 +1,25 @@
 volume:
   extraArgs:
     - "-publicUrl=${POD_NAME}.volume.seaweedtest.hyperion.aritrosinha.dpdns.org"
+
+admin:
+  enabled: true
+  port: 23646
+  grpcPort: 33646
+  adminUser: "admin"
+  adminPassword: "admin"
+  data:
+    type: "emptyDir"
+  logs:
+    type: "emptyDir"
+  affinity: |
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/component: admin
+                app.kubernetes.io/instance: {{ .Release.Name }}
+                app.kubernetes.io/name: {{ template "seaweedfs.name" . }}
+            topologyKey: kubernetes.io/hostname
