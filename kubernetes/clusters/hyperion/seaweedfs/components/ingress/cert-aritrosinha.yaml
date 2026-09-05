@@ -88,22 +88,3 @@ spec:
   secretTemplate:
     labels:
       backuplabel.certificate: "true"
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: seaweedfs-webdav-aritrosinha
-  namespace: storage
-  labels:
-    backuplabel.certificate: "true"
-spec:
-  secretName: seaweedfs-webdav-aritrosinha-tls
-  issuerRef:
-    name: letsencrypt-prod-aritrosinha
-    kind: ClusterIssuer
-  dnsNames:
-    - "webdav.seaweedfs.hyperion.aritrosinha.dpdns.org"
-  secretTemplate:
-    labels:
-      backuplabel.certificate: "true"
-
