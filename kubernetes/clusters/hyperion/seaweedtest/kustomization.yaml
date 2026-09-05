@@ -10,4 +10,5 @@ components:
   - ../../../apps/infrastructure/seaweedtest/components/webdav
   - ../../../apps/infrastructure/seaweedtest/components/admin
   - ../../../apps/infrastructure/seaweedtest/components/filer-client-service
+  - ../../../apps/infrastructure/seaweedtest/components/s3-config
   - ./components/ingress
