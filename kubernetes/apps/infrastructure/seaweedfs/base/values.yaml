@@ -31,6 +31,7 @@ volume:
     - name: data
       type: "persistentVolumeClaim"
       size: "10Gi"
+      maxVolumes: 32
   idx:
     type: "persistentVolumeClaim"
     size: "1Gi"
