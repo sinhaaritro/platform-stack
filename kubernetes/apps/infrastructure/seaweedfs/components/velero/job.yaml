@@ -46,6 +46,19 @@ spec:
               s3.configure -user=velero -access_key=$S3_ACCESS_KEY -secret_key=$S3_SECRET_KEY -actions=Read,Write,List,Tagging -apply
               EOF
 
+              # Remove the legacy literal key left behind by the old s3-config
+              # job, whose heredoc failed to expand \$VELERO_ACCESS_KEY and stored
+              # the literal string as the access key.
+              echo "Cleaning up legacy literal access keys..."
+              echo "s3.accesskey.list -user=velero" | weed shell -master=$MASTER 2>/dev/null \
+                | awk 'NR>1 {print $1}' \
+                | while read -r K; do
+                    case "$K" in
+                      "$S3_ACCESS_KEY") ;;
+                      *) echo "Deleting stale key: $K"; echo "s3.accesskey.delete -user=velero -access_key=$K" | weed shell -master=$MASTER ;;
+                    esac
+                  done
+
               echo "Creating scoped buckets..."
               for BUCKET in velero; do
                 if ! echo "s3.bucket.list" | weed shell -master=$MASTER | grep -q "$BUCKET"; then
