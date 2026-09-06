@@ -13,5 +13,5 @@ spec:
     s3ForcePathStyle: "true"
     s3Url: http://seaweedfs-s3.storage.svc:8333
   credential:
-    name: velero-seaweedfs-creds
-    key: cloud
+    name: velero-s3
+    key: aws_access_key_id
