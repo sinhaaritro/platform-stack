@@ -27,8 +27,6 @@ volume:
     limits:
       cpu: 2000m
       memory: 4Gi
-  extraArgs:
-    - "-publicUrl=${POD_NAME}.volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
   dataDirs:
     - name: data
       type: "persistentVolumeClaim"

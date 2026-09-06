@@ -143,7 +143,6 @@ spec:
   tls:
     - hosts:
         - "volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
-        - "*.volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
       secretName: seaweedfs-volume-aritrosinha-tls
   rules:
     - host: "volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
@@ -156,13 +155,32 @@ spec:
                 name: seaweedfs-volume
                 port:
                   number: 8080
-    - host: "*.volume.seaweedfs.hyperion.aritrosinha.dpdns.org"
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedfs-webdav-aritrosinha
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+    link.argocd.argoproj.io/external-link: "https://webdav.seaweedfs.hyperion.aritrosinha.dpdns.org/"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - "webdav.seaweedfs.hyperion.aritrosinha.dpdns.org"
+      secretName: seaweedfs-webdav-aritrosinha-tls
+  rules:
+    - host: "webdav.seaweedfs.hyperion.aritrosinha.dpdns.org"
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: seaweedfs-volume
+                name: seaweedfs-webdav
                 port:
-                  number: 8080
+                  number: 7333
+

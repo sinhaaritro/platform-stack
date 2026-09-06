@@ -120,7 +120,6 @@ spec:
   tls:
     - hosts:
         - volume.seaweedfs-dummy.example.com
-        - "*.volume.seaweedfs-dummy.example.com"
       secretName: seaweedfs-volume-dummy-tls
   rules:
     - host: volume.seaweedfs-dummy.example.com
@@ -133,13 +132,31 @@ spec:
                 name: seaweedfs-volume
                 port:
                   number: 8080
-    - host: "*.volume.seaweedfs-dummy.example.com"
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedfs-webdav-dummy
+  namespace: storage
+  labels:
+    backuplabel.certificate: "true"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - webdav.seaweedfs-dummy.example.com
+      secretName: seaweedfs-webdav-dummy-tls
+  rules:
+    - host: webdav.seaweedfs-dummy.example.com
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: seaweedfs-volume
+                name: seaweedfs-webdav
                 port:
-                  number: 8080
+                  number: 7333
+
