@@ -112,9 +112,6 @@ spec:
                 fi
               done
 
-              # Velero is provisioned per cluster by components/velero
-              # (user <cluster>-velero, bucket <cluster>-velero) - do not add it here.
-
               echo "Assigning Strict Bucket Isolation..."
               weed shell -master=$MASTER <<EOF
               s3.configure -user=mimir -buckets=mimir-tsdb,mimir-ruler,mimir-alertmanager -apply
