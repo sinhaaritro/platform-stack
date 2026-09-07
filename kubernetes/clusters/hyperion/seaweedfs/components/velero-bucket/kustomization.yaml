@@ -1,12 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 
+# hyperion-specific velero S3 bucket provisioner.
+# The Job is a full copy of the shared template
+# (apps/infrastructure/seaweedfs/components/velero/job.yaml) with the
+# hyperion values filled in. The image is replaced at the app level
+# (see clusters/hyperion/seaweedfs/kustomization.yaml).
 resources:
   - sealed-velero-s3.yaml
-
-patches:
-  - path: patch-velero-job.yaml
-    target:
-      kind: Job
-      name: s3-velero-provision
-      namespace: storage
+  - job.yaml

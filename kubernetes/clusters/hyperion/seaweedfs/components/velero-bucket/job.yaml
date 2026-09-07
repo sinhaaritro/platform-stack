@@ -7,10 +7,6 @@ metadata:
     argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
 spec:
-  # TEMPLATE: copy this whole file to clusters/<cluster>/seaweedfs/components/velero-bucket/job.yaml
-  # and set the cluster-specific values in the env block below (VELERO_USER, VELERO_BUCKET,
-  # S3_SECRET_NAME, S3_ACTIONS, BACKOFF_LIMIT, QUOTA). Everything the script does is driven
-  # by these env vars so a cluster only edits the values at the top.
   backoffLimit: 6
   template:
     metadata:
@@ -23,13 +19,13 @@ spec:
           image: seaweedfs-placeholder
           imagePullPolicy: IfNotPresent
           env:
-            # ---- Cluster-specific values (change these per cluster) ----
+            # ---- hyperion-specific values ----
             - name: VELERO_USER
-              value: "CHANGE_ME-user"
+              value: "hyperion-velero"
             - name: VELERO_BUCKET
-              value: "CHANGE_ME-bucket"
+              value: "hyperion-velero"
             - name: S3_SECRET_NAME
-              value: "CHANGE_ME-secret"
+              value: "hyperion-velero-s3"
             - name: S3_ACTIONS
               value: "Read,Write,List,Tagging"
             - name: QUOTA
@@ -38,12 +34,12 @@ spec:
             - name: S3_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: CHANGE_ME-secret
+                  name: hyperion-velero-s3
                   key: access_key
             - name: S3_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: CHANGE_ME-secret
+                  name: hyperion-velero-s3
                   key: secret_key
           command: ["/bin/sh", "-c"]
           args:
