@@ -9,7 +9,7 @@ metadata:
 spec:
   # TEMPLATE: copy this whole file to clusters/<cluster>/seaweedfs/components/velero-bucket/job.yaml
   # and set the cluster-specific values in the env block below (VELERO_USER, VELERO_BUCKET,
-  # S3_SECRET_NAME, S3_ACTIONS, BACKOFF_LIMIT, QUOTA). Everything the script does is driven
+  # S3_SECRET_NAME, S3_ACTIONS, QUOTA_MB, TTL). Everything the script does is driven
   # by these env vars so a cluster only edits the values at the top.
   backoffLimit: 6
   template:
