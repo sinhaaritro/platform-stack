@@ -1,0 +1,12 @@
+- op: replace
+  path: /spec/template/spec/containers/0/env/0/valueFrom/secretKeyRef/name
+  value: hyperion-velero-s3
+- op: replace
+  path: /spec/template/spec/containers/0/env/1/valueFrom/secretKeyRef/name
+  value: hyperion-velero-s3
+- op: replace
+  path: /spec/template/spec/containers/0/env/2/value
+  value: hyperion-velero
+- op: replace
+  path: /spec/template/spec/containers/0/env/3/value
+  value: hyperion-velero

@@ -3,3 +3,6 @@ kind: Component
 
 resources:
   - sealed-velero-s3.yaml
+  - external-secret.yaml
+  - cluster-secret-store.yaml
+  - bsl.yaml

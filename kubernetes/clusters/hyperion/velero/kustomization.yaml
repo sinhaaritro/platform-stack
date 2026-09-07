@@ -7,7 +7,7 @@ resources:
   - ../../../apps/infrastructure/velero/base
 
 components:
-  - ../../../apps/infrastructure/velero/components/s3-seaweedfs
+  - ./components/s3-seaweedfs-cluster
   - ./components/s3-aws
   - ./components/encryption-kopia
   - ./components/schedules/ssl-cert

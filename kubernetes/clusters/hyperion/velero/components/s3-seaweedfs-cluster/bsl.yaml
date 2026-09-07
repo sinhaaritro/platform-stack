@@ -1,0 +1,17 @@
+apiVersion: velero.io/v1
+kind: BackupStorageLocation
+metadata:
+  name: default
+  namespace: backup
+spec:
+  provider: aws
+  default: true
+  objectStorage:
+    bucket: hyperion-velero
+  config:
+    region: us-east-1
+    s3ForcePathStyle: "true"
+    s3Url: http://seaweedfs-s3.storage.svc:8333
+  credential:
+    name: hyperion-velero-s3
+    key: cloud

@@ -11,7 +11,7 @@ spec:
   template:
     metadata:
       annotations:
-        platform.stack/revision: "1"
+        platform.stack/revision: "2"
     spec:
       restartPolicy: OnFailure
       containers:
@@ -29,6 +29,10 @@ spec:
                 secretKeyRef:
                   name: velero-s3
                   key: secret_key
+            - name: VELERO_USER
+              value: velero
+            - name: VELERO_BUCKET
+              value: velero
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -41,37 +45,54 @@ spec:
                 sleep 2
               done
 
-              echo "Configuring S3 user velero..."
+              echo "Configuring S3 user $VELERO_USER..."
               weed shell -master=$MASTER <<EOF
-              s3.configure -user=velero -access_key=$S3_ACCESS_KEY -secret_key=$S3_SECRET_KEY -actions=Read,Write,List,Tagging -apply
+              s3.configure -user=$VELERO_USER -access_key=$S3_ACCESS_KEY -secret_key=$S3_SECRET_KEY -actions=Read,Write,List,Tagging -apply
               EOF
 
               # Remove the legacy literal key left behind by the old s3-config
               # job, whose heredoc failed to expand \$VELERO_ACCESS_KEY and stored
               # the literal string as the access key.
               echo "Cleaning up legacy literal access keys..."
-              echo "s3.accesskey.list -user=velero" | weed shell -master=$MASTER 2>/dev/null \
+              echo "s3.accesskey.list -user=$VELERO_USER" | weed shell -master=$MASTER 2>/dev/null \
                 | awk 'NR>1 {print $1}' \
                 | while read -r K; do
                     case "$K" in
                       "$S3_ACCESS_KEY") ;;
-                      *) echo "Deleting stale key: $K"; echo "s3.accesskey.delete -user=velero -access_key=$K" | weed shell -master=$MASTER ;;
+                      *) echo "Deleting stale key: $K"; echo "s3.accesskey.delete -user=$VELERO_USER -access_key=$K" | weed shell -master=$MASTER ;;
                     esac
                   done
 
               echo "Creating scoped buckets..."
-              for BUCKET in velero; do
+              BUCKETS="$VELERO_BUCKET"
+              # Legacy single-name bucket, only if it differs from the per-cluster name
+              if [ "$VELERO_BUCKET" != "velero" ]; then
+                BUCKETS="$VELERO_BUCKET velero"
+              fi
+              for BUCKET in $BUCKETS; do
                 if ! echo "s3.bucket.list" | weed shell -master=$MASTER | grep -q "$BUCKET"; then
-                  echo "Creating bucket $BUCKET for user velero..."
-                  echo "s3.bucket.create -name=$BUCKET -owner=velero" | weed shell -master=$MASTER
+                  if [ "$BUCKET" = "$VELERO_BUCKET" ]; then
+                    echo "Creating bucket $BUCKET for user $VELERO_USER (with Object Lock)..."
+                    echo "s3.bucket.create -name=$BUCKET -owner=$VELERO_USER --withLock" | weed shell -master=$MASTER
+                  else
+                    echo "Creating legacy bucket $BUCKET for user $VELERO_USER..."
+                    echo "s3.bucket.create -name=$BUCKET -owner=$VELERO_USER" | weed shell -master=$MASTER
+                  fi
                 else
                   echo "Bucket $BUCKET already exists."
+                  if [ "$BUCKET" = "$VELERO_BUCKET" ]; then
+                    echo "Enabling Object Lock on bucket $BUCKET..."
+                    echo "s3.bucket.lock -name=$BUCKET -enable" | weed shell -master=$MASTER
+                  fi
                 fi
               done
 
+              echo "Applying quota (50Gi) to bucket $VELERO_BUCKET..."
+              echo "fs.configure -locationPrefix=/buckets/$VELERO_BUCKET/ -ttl=50G -apply" | weed shell -master=$MASTER
+
               echo "Assigning strict bucket isolation..."
               weed shell -master=$MASTER <<EOF
-              s3.configure -user=velero -buckets=velero -apply
+              s3.configure -user=$VELERO_USER -buckets=$VELERO_BUCKET -apply
               EOF
 
-              echo "velero S3 service account and buckets provisioned!"
+              echo "$VELERO_USER S3 service account and buckets provisioned!"
