@@ -32,8 +32,10 @@ spec:
               value: "CHANGE_ME-secret"
             - name: S3_ACTIONS
               value: "Read,Write,List,Tagging"
-            - name: QUOTA
-              value: "50G"
+            - name: QUOTA_MB
+              value: "51200"
+            - name: TTL
+              value: "30d"
             # ---- Credentials (referenced by name; keys are fixed: access_key/secret_key) ----
             - name: S3_ACCESS_KEY
               valueFrom:
@@ -99,8 +101,11 @@ spec:
                 fi
               done
 
-              echo "Applying quota ($QUOTA) to bucket $VELERO_BUCKET..."
-              echo "fs.configure -locationPrefix=/buckets/$VELERO_BUCKET/ -ttl=$QUOTA -apply" | weed shell -master=$MASTER
+              echo "Applying TTL ($TTL) to bucket $VELERO_BUCKET..."
+              echo "fs.configure -locationPrefix=/buckets/$VELERO_BUCKET/ -ttl=$TTL -apply" | weed shell -master=$MASTER
+
+              echo "Applying quota ($QUOTA_MB MB) to bucket $VELERO_BUCKET..."
+              echo "s3.bucket.quota -name=$VELERO_BUCKET -sizeMB=$QUOTA_MB" | weed shell -master=$MASTER
 
               echo "Assigning strict bucket isolation..."
               weed shell -master=$MASTER <<EOF
