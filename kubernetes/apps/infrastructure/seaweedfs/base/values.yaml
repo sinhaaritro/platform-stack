@@ -1,5 +1,5 @@
 master:
-  replicas: 3
+  replicas: 1
   electionTimeout: "10s"
   heartbeatInterval: "300ms"
   resources:
@@ -19,7 +19,7 @@ master:
   nodeSelector: {}
 
 volume:
-  replicas: 2
+  replicas: 1
   resources:
     requests:
       cpu: 500m
@@ -42,7 +42,7 @@ volume:
   nodeSelector: {}
 
 filer:
-  replicas: 2
+  replicas: 1
   resources:
     requests:
       cpu: 200m
@@ -82,7 +82,7 @@ admin:
 
 s3:
   enabled: true
-  replicas: 2
+  replicas: 1
   port: 8333
   metricsPort: 9327
   enableAuth: true
