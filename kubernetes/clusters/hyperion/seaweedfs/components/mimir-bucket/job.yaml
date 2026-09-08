@@ -1,0 +1,102 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: s3-mimir-provision
+  namespace: storage
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  backoffLimit: 6
+  template:
+    metadata:
+      annotations:
+        platform.stack/revision: "1"
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: s3-provision
+          image: seaweedfs-placeholder
+          imagePullPolicy: IfNotPresent
+          env:
+            # ---- hyperion-specific values ----
+            - name: MIMIR_USER
+              value: "hyperion-mimir"
+            - name: MIMIR_BUCKETS
+              value: "hyperion-mimir-tsdb hyperion-mimir-ruler hyperion-mimir-alertmanager"
+            - name: S3_SECRET_NAME
+              value: "hyperion-mimir-s3"
+            - name: S3_ACTIONS
+              value: "Read,Write,List,Tagging"
+            - name: QUOTA_MB
+              value: "51200"
+            - name: TTL
+              value: "30d"
+            # ---- Credentials (referenced by name; keys are fixed: access_key/secret_key) ----
+            - name: S3_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hyperion-mimir-s3
+                  key: access_key
+            - name: S3_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hyperion-mimir-s3
+                  key: secret_key
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              echo "Waiting for SeaweedFS Master..."
+              MASTER="seaweedfs-master:9333"
+
+              until echo "s3.bucket.list" | weed shell -master=$MASTER >/dev/null 2>&1; do
+                echo "Waiting for master at $MASTER..."
+                sleep 2
+              done
+
+              echo "Configuring S3 user $MIMIR_USER..."
+              weed shell -master=$MASTER <<EOF
+              s3.configure -user=$MIMIR_USER -access_key=$S3_ACCESS_KEY -secret_key=$S3_SECRET_KEY -actions=$S3_ACTIONS -apply
+              EOF
+
+              # Remove the legacy literal key left behind by the old s3-config
+              # job, whose heredoc failed to expand \$MIMIR_ACCESS_KEY and stored
+              # the literal string as the access key.
+              echo "Cleaning up legacy literal access keys..."
+              echo "s3.accesskey.list -user=$MIMIR_USER" | weed shell -master=$MASTER 2>/dev/null \
+                | awk 'NR>1 {print $1}' \
+                | while read -r K; do
+                    case "$K" in
+                      "$S3_ACCESS_KEY") ;;
+                      *) echo "Deleting stale key: $K"; echo "s3.accesskey.delete -user=$MIMIR_USER -access_key=$K" | weed shell -master=$MASTER ;;
+                    esac
+                  done
+
+              echo "Creating scoped buckets..."
+              for BUCKET in $MIMIR_BUCKETS; do
+                if ! echo "s3.bucket.list" | weed shell -master=$MASTER | grep -q "$BUCKET"; then
+                  echo "Creating bucket $BUCKET for user $MIMIR_USER..."
+                  echo "s3.bucket.create -name=$BUCKET -owner=$MIMIR_USER" | weed shell -master=$MASTER
+                else
+                  echo "Bucket $BUCKET already exists."
+                fi
+
+                if [ -n "$TTL" ]; then
+                  echo "Applying TTL ($TTL) to bucket $BUCKET..."
+                  echo "fs.configure -locationPrefix=/buckets/$BUCKET/ -ttl=$TTL -apply" | weed shell -master=$MASTER
+                fi
+
+                if [ -n "$QUOTA_MB" ]; then
+                  echo "Applying quota ($QUOTA_MB MB) to bucket $BUCKET..."
+                  echo "s3.bucket.quota -name=$BUCKET -sizeMB=$QUOTA_MB" | weed shell -master=$MASTER
+                fi
+              done
+
+              echo "Assigning strict bucket isolation..."
+              BUCKETS_CSV=$(echo "$MIMIR_BUCKETS" | tr ' ' ',')
+              weed shell -master=$MASTER <<EOF
+              s3.configure -user=$MIMIR_USER -buckets=$BUCKETS_CSV -apply
+              EOF
+
+              echo "$MIMIR_USER S3 service account and buckets provisioned!"

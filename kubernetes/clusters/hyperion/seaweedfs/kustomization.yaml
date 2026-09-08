@@ -13,7 +13,7 @@ components:
   - ./components/ingress
   - ./components/velero-bucket
   - ./components/loki-bucket
-  # - ./components/mimir-bucket
+  - ./components/mimir-bucket
 
   # - ../../../apps/infrastructure/seaweedfs/components/maintenance # Uncomment to scale down statefulsets
 

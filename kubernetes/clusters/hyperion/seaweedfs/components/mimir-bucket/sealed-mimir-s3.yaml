@@ -1,0 +1,21 @@
+---
+kind: SealedSecret
+apiVersion: bitnami.com/v1alpha1
+metadata:
+  name: hyperion-mimir-s3
+  namespace: storage
+  annotations:
+    argocd.argoproj.io/sync-wave: '-2'
+spec:
+  template:
+    metadata:
+      name: hyperion-mimir-s3
+      namespace: storage
+      annotations:
+        argocd.argoproj.io/sync-wave: '-2'
+        sealedsecrets.bitnami.com/namespace-wide: ''
+    type: Opaque
+  encryptedData:
+    access_key: AgDLhnZjHaWaeR1gylbP2YOVOuM8mKSb49JTeh145j5CnPMXJHSRb/8R7BjgmU+N/YtLHh7tpzOGx2ihjOZMMeDGEO3KaNCeW1JGfWPVsL0GeZvvAR/YdCobXE7FiX0/GJWPmIa+mKknLJ4xxj5hSZPcQx/jMs+nIVeZ4BzH+e6AQdayGcB65B32hkffJrEi8ezRRuu5eCvsSYUWPV0yOxRKTIm0Vb2reJaiTzgeHm8LX23kZvvS9lFAMp/YOjljunhJtPfqbpXlkjRbl2/Oj+k55bl03b9zCPIG+8ypLZo1AfC9myiYGN41lSzoK5YkKb1XDavqKYyWTQdRHnDcv3clRqBWyq3b65mMdT6OSGwVAXTc+zeWiTQR4P9d0yKMaE/3a0yD+13SgKQm/JPthBi99+zCqROqKGlNrjPLrUmIBl+MKBE+OAiUxwHfmS+jim5EiqNzwgan11T5vDGhMhWem/4wmCEZoyFN1yQJfBdW3z+P042FGKkF2uVCo/S8Z1Fwkf+Wwh0m+ZC78plpWulyjJAcZXltkZsKujrx9+s3EeGnDyQAhHGVZzkFZh5R4sHlvd+uYv28OiRvcKJ50lx/EzGMfbxfJv2E+w8qVAjORY0LpuaO0mVR/Ab0YJaci4ijV/tBoAg12CR6a1bYoDaaAqVSuQaNuFELA5hH20or4MeOzG8+KUR/BeNXEG8Cd1x4a3v9ZMBXaP7nxFFiII0ob6KKl6Tx/kvlxQ==
+    secret_key: AgDKPJt00rT4jJpB2LNuubLBrVkIZYL1QhmAMNsTutcdOuEsrX6/sg/Bw6GIDD+Jw/9dDwsJCDPiWvok+HVpoxH/my5XUHX/sXGaOHmEUVRAsnAMvgCMBtM5E1jmrU5bNiHkdc7EuUfvnKtHJYyLH9U6qPMmMXMd8su5dxjMzNFg9eGJB+OHRhPeL6wUsCqqPgpwP444YsRFZRzAAmpFfrqia+YG/+f5Zt4C4pLv2hCni1e0kNzYBVocrnKbDkvjMVLzZ7ZHXvxuZt9JJ4TJUqv9GFusUS/wZShOMf4IDvLj+cDbMuxIko+jq9pHwjY185FUxPWE1/2ejHBHrqbzD2pLWJHxA27fIyFab6vxpYYg7TBqV1olhWbGrZAKQ6LXzmGPYGq7LCKWLzReJmsIOpwSnQ2pawNTGqcjkaXQa7hpASL2az9BUx50uIr9PdAcweBarwFtk7YrCeKoIrxNqw7E6EopDXn4bU3oUTdAThUtO5i+EKpytMN3NJ4GKcOuH8PW6YBdb5FDFRqf6qzQ1TX9DWsHilsp600Y9AEaDlgw1T8c49y4/Mu02j38dFBoil3vIGiFFWiRnsz6wwdDzAY2CKO3LX2NG3BRx7q9BBSmQ8hrhxG/zHXNj1WtA0372ENo3f7vc2ZChGvOe2QUZ5Bj91xDDtgmv1s4f3ARZUKh6l8/NwlfaiYNf0aiWp9Ucw9raGKMGIOfDIvMpHkwxCeT4lAk8orSFqYa1upnkPLUDj+SxSf/rdbd
+

@@ -9,4 +9,5 @@ components:
   - ../../../apps/infrastructure/mimir/components/single-zone
   - ../../../apps/infrastructure/mimir/components/resource-limits
   - ./components/ingress
+  - ./components/s3-seaweedfs-cluster
   # - ../../../apps/infrastructure/mimir/components/maintenance
