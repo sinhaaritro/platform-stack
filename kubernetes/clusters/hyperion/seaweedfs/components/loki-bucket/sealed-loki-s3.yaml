@@ -1,0 +1,21 @@
+---
+kind: SealedSecret
+apiVersion: bitnami.com/v1alpha1
+metadata:
+  name: hyperion-loki-s3
+  namespace: storage
+  annotations:
+    argocd.argoproj.io/sync-wave: '-2'
+spec:
+  template:
+    metadata:
+      name: hyperion-loki-s3
+      namespace: storage
+      annotations:
+        argocd.argoproj.io/sync-wave: '-2'
+        sealedsecrets.bitnami.com/namespace-wide: ''
+    type: Opaque
+  encryptedData:
+    access_key: AgB6DAIZmQtgwfASvPYtAvOEBsXArzkl+3zqzet4G405feSotZJ+s337T/PKmB76WAfLkfQmj7Si87y4VFavP+4AcDncwGMmZ20Hyvz+8Jhy6/bp80sJkm87QQJVyecFz/5mKKDEbYkVAKtHkRxvXOOC90S4O5dhMaSiF2gSOcpiJgEl/Lq6R+C5PAESVW84csEejepoRC5WDlfQirSMI6PbEST7SR9txnO4q6PAxvRNIgucCB4gT08XS07omyNexRsmG/v7k3WBaObUFX057wt2IkxDroufwM7VFdvEQPCz6fRj71P+1I6xTwUzAAuIu7cp0PXIH3x9WRjpn5hyqT11B2JBYWfaHuQLi/vh77SmWkYQ5EDCZh708RJkXIrCLUNLhvCmVKKm8QZNt4eQYuWZgMJ4z/lU1Jmes491td0aa1GGg5nSyUPk9IAILxlVoM8JSeONIbpz7mkt2Kv5GG/BheBGDb53mxfW5xV9Ko5jUJnlGY2R/Vy7xW2xVVTW/mAopayqbPLA0ehp8+vsBA1tJiP4/BkpCcRaG9RZ97S+Z/JTPf5n+zT9jN+L+MqOL8Hrvimwy6pU4RT8hoKj6ORzn1rxalEIdqmKbKB+E5q/g5GOvefc2YYB5Q2O1yb8+Tq5QupzAOHfJwmdaoQ51zminbvBgjcjtdbBost9Q8J0qD9XlW/h3lq3NpZy3/bXWTYzORyLEXf1GZsz7ociGhyPNCdL6ifi6ogT
+    secret_key: AgAhv3hSG8wy8zuG7s02xuNLV9GjwbpNnMQkHYZSvFRB1EitGU2BXEmQ61zb0qj6gTvlvUimXNEC8LF2QcicS1UEZ/w1DN3jGh7mAIzIsjH1yFIpm29ERmIISywy2frqYURE8EzvFn0jkRIIeQYkiIhEwvln7UyLePHssFJWbxwG+ykQpFq3JFclxtnXGbWZmzctJmQPI4SweTdjmbgXtxcsKJnLzkb15P0bXXmPACV8nR4C5F2sHc/WZR8Qv2P36TC7BU1khugZPkLi2bPBgDQpoXxWiXMRjCL7pl8y50TI1qtaYLirn3LpNYPZUyc+TMpLTrPGjFVVWYaSsLEuaPjVpTbiih6afKrUTPm/MWuQA4F0MPiCyy6PAoZ86TCV/XK1ccjT9EP/A0/GiGqOLqLZ7240YqYjCy2sY4Q09Xkx/7AP7OuiNJvRj0ctqK4APuhP1FMZPppL1ybuUoDsSrr2K+zWaPQaBRp7ZcxaJKU9rqfxKLfmW+9W4YX/SXpJisMOrZqPpB7A9YtE6R3RYbbepQlnUqveQJX4Q9uWe2SlpIEok6xSmT4XP4Ju2Z5WFrrtqdtBwPMr9ufsZ/eK3nuhRCqD5zeSMCXR+vK0wmv+7WVs+eMYg0Ym69I55ZoN6tz5snuEyE1irHkR5WmUDeL2ZlgW0kDVX9tFmEC+L74PeYp5P68jlRhhwvNFyRcwkq76Za4Q//g1/7ICkFqC+7cNIG2IBBobDlIgtox3gKSEg8TxCKhceToy
+

@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: loki-tls
+  namespace: logging
+  labels:
+    backuplabel.certificate: "true"
+spec:
+  secretName: loki-tls
+  issuerRef:
+    name: letsencrypt-prod-dummy
+    kind: ClusterIssuer
+  dnsNames:
+    - "loki.dummy.example.com"
+  secretTemplate:
+    labels:
+      backuplabel.certificate: "true"

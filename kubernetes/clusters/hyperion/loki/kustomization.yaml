@@ -8,7 +8,7 @@ resources:
 components:
   - ../../../apps/infrastructure/loki/components/minimal-replicas
   - ../../../apps/infrastructure/loki/components/resource-limits
-  - ../../../apps/infrastructure/loki/components/storage-s3
+  - ./components/storage-data
   - ../../../apps/infrastructure/loki/components/storage-retention
   - ../../../apps/infrastructure/loki/components/storage-pvc
   - ./components/ingress

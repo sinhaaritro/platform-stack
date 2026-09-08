@@ -3,17 +3,18 @@ kind: Ingress
 metadata:
   name: loki
   namespace: logging
+  labels:
+    backuplabel.certificate: "true"
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - loki.placeholder.local
+        - "loki.dummy.example.com"
       secretName: loki-tls
   rules:
-    - host: loki.placeholder.local
+    - host: "loki.dummy.example.com"
       http:
         paths:
           - path: /

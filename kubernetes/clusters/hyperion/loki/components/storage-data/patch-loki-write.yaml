@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: loki-write
+spec:
+  template:
+    spec:
+      containers:
+        - name: write
+          env:
+            - name: S3_ENDPOINT
+              value: "http://seaweedfs-s3.storage.svc:8333"
+            - name: S3_REGION
+              value: "us-east-1"
+            - name: S3_BUCKET_CHUNKS
+              value: "hyperion-loki-chunks"
+            - name: S3_BUCKET_RULER
+              value: "hyperion-loki-ruler"
+            - name: S3_BUCKET_ADMIN
+              value: "hyperion-loki-admin"
+            - name: S3_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hyperion-loki-s3
+                  key: access_key
+            - name: S3_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hyperion-loki-s3
+                  key: secret_key

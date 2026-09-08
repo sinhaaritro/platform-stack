@@ -12,11 +12,13 @@ components:
   - ../../../apps/infrastructure/seaweedfs/components/filer-client-service
   - ./components/ingress
   - ./components/velero-bucket
+  - ./components/loki-bucket
+  - ./components/mimir-bucket
 
   # - ../../../apps/infrastructure/seaweedfs/components/maintenance # Uncomment to scale down statefulsets
 
 replacements:
-  # Inject the live seaweedfs image into the velero provision Job
+  # Inject the live seaweedfs image into the provision Jobs
   - source:
       kind: StatefulSet
       name: seaweedfs-master
@@ -27,4 +29,13 @@ replacements:
           name: s3-velero-provision
         fieldPaths:
           - spec.template.spec.containers.0.image
-
+      - select:
+          kind: Job
+          name: s3-loki-provision
+        fieldPaths:
+          - spec.template.spec.containers.0.image
+      - select:
+          kind: Job
+          name: s3-mimir-provision
+        fieldPaths:
+          - spec.template.spec.containers.0.image
