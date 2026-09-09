@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Generic home for all custom local-path StorageClasses on hyperion.
+# Each SC is routed to a node path via the `storageClassConfigs` map in the
+# k3s-managed `local-path-config` ConfigMap (patched in system-patches).
+#
+#   SC name                ->  hyperion-01 path
+#   local-path-seaweedfs   ->  /data/storage/seaweedfs   (250G WD4TB)
+#
+# Add more SCs here (one file each) and a matching entry in the CM patch to
+# give other apps a slice of the big local disk.
+
+resources:
+  - storageclass.yaml

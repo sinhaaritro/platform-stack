@@ -56,7 +56,7 @@ spec:
                 #   serverSideApply: "true"
                 #   replace: "false"
                 #   wave: "5"
-                - app: local-path-seaweedfs
+                - app: local-path-disks
                   namespace: storage
                   serverSideApply: "true"
                   replace: "false"
