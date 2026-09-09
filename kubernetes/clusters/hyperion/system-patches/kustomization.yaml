@@ -5,6 +5,9 @@ resources:
   # - kube-proxy.yaml
   - coredns-custom.yaml
   - namespaces.yaml
+  # Patch only data.config.json on the k3s-owned CM (a full resource would drop
+  # the helperPod/setup/teardown keys that k3s manages)
+  - patch-local-path-config.yaml
 
 patches:
   - path: patch-local-path.yaml

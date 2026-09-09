@@ -6,7 +6,7 @@ resources:
   - ../../../apps/infrastructure/seaweedfs/base
 
 components:
-  - ../../../apps/infrastructure/seaweedfs/components/storage
+  - ../../../apps/infrastructure/seaweedfs/components/storage-local-path-seaweedfs
   - ../../../apps/infrastructure/seaweedfs/components/webdav
   - ../../../apps/infrastructure/seaweedfs/components/admin
   - ../../../apps/infrastructure/seaweedfs/components/filer-client-service
