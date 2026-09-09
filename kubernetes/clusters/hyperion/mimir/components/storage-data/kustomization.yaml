@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+  - cluster-secret-store.yaml
+  - external-secret.yaml
+
+# Override the chart-rendered mimir-config ConfigMap: point the S3 block at the
+# hyperion-mimir-s3 credentials (access key mimir_61c0d8df6600f57817e1) and the
+# per-cluster hyperion-mimir-* buckets. The full mimir.yaml is replaced because
+# the chart emits it as a single string-valued data key.
+patches:
+  - path: patch-mimir-config.yaml
+    target:
+      kind: ConfigMap
+      name: mimir-config
