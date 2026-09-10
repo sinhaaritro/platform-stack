@@ -10,4 +10,5 @@ components:
   - ../../../apps/infrastructure/mimir/components/resource-limits
   - ./components/ingress
   - ./components/storage-data
+  - ./components/storage-ingester
   # - ../../../apps/infrastructure/mimir/components/maintenance

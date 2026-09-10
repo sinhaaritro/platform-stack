@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+# Right-size the Mimir ingester PVC. The chart default of 2Gi is too small for
+# the ingester's WAL + active head (3276-segment WAL observed), which caused
+# "preallocate: no space left on device" crash-loops. Local state only holds the
+# WAL + head; 30-day retention lives in the S3 TSDB bucket, so 10Gi is
+# right-sized (active window + ~2x headroom for added apps on hyperion).
+patches:
+  - path: patch-ingester-pvc.yaml
+    target:
+      kind: StatefulSet
+      name: mimir-ingester.*
