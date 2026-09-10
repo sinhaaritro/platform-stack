@@ -18,10 +18,10 @@ patches:
                 resources:
                   limits:
                     cpu: 1000m
-                    memory: 2Gi
+                    memory: 4Gi
                   requests:
                     cpu: 100m
-                    memory: 256Mi
+                    memory: 512Mi
   - target:
       kind: Deployment
       name: ".*mimir-distributor.*"
