@@ -224,18 +224,6 @@ spec:
           name: l2advertisements.metallb.io
           jsonPointers:
             - /spec/conversion/webhook/clientConfig/caBundle
-      # Velero boots at wave 2 (DR-first), before seaweedfs (wave 7). Its
-      # in-cluster "default" BSL reports Error until seaweedfs + its S3 creds
-      # exist. Treat that transient Error as Healthy so it does not hold the
-      # WaitFor gate and block wave 3+ apps. The BSL still applies and
-      # self-heals to Available once seaweedfs is up.
-      healthStatusCode:
-        - group: velero.io
-          kind: BackupStorageLocation
-          name: default
-          namespace: backup
-          healthStatusCode:
-            "Error": Healthy
       project: default
       source:
         repoURL: https://github.com/sinhaaritro/platform-stack.git

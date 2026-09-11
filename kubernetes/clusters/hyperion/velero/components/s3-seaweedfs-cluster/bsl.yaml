@@ -3,6 +3,13 @@ kind: BackupStorageLocation
 metadata:
   name: default
   namespace: backup
+  annotations:
+    # Velero boots at wave 2 (DR-first), before seaweedfs (wave 7). This
+    # in-cluster BSL reports Error until seaweedfs + its S3 creds exist. Exclude
+    # it from the app's health so the transient Error does not hold the
+    # WaitFor gate and block wave 3+ apps. The BSL still applies and self-heals
+    # to Available once seaweedfs is up. (AWS BSL keeps its real health.)
+    argocd.argoproj.io/ignore-healthcheck: "true"
 spec:
   provider: aws
   default: true
