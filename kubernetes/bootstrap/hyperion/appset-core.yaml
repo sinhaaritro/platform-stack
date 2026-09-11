@@ -11,126 +11,158 @@ spec:
           - clusters: {}
           - list:
               elements:
+                # Tier 0 — foundation (no in-cluster deps)
                 - app: system-patches
                   namespace: kube-system
                   serverSideApply: "true"
                   replace: "false"
                   wave: "0"
-                - app: nfs-provisioner
-                  namespace: storage
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "5"
                 - app: sealed-secrets
                   namespace: security
                   serverSideApply: "true"
                   replace: "false"
                   wave: "1"
+                  waitFor: "Deployment/sealed-secrets"
                 - app: prometheus-operator-crds
                   namespace: monitoring
                   serverSideApply: "true"
                   replace: "false"
                   wave: "1"
+                - app: velero
+                  namespace: backup
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "2"
+                  waitFor: "Deployment/velero"
+                # Tier 1 — platform services (no in-cluster deps)
                 - app: cert-manager
                   namespace: networking
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "2"
+                  wave: "3"
+                  waitFor: "Deployment/cert-manager"
                 - app: external-secrets
                   namespace: security
                   serverSideApply: "true"
                   replace: "false"
                   wave: "3"
+                  waitFor: "Deployment/external-secrets"
                 - app: kyverno
                   namespace: security
                   serverSideApply: "true"
                   replace: "false"
                   wave: "3"
+                  waitFor: "Deployment/kyverno-admission-controller"
                 - app: metallb
                   namespace: networking
                   serverSideApply: "true"
                   replace: "false"
                   wave: "4"
-                - app: traefik
-                  namespace: networking
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "4"
-                # - app: external-dns
-                #   namespace: external-dns
-                #   serverSideApply: "true"
-                #   replace: "false"
-                #   wave: "5"
+                  waitFor: "Deployment/metallb-controller"
                 - app: local-path-disks
                   namespace: storage
                   serverSideApply: "true"
                   replace: "false"
                   wave: "4"
+                - app: nfs-provisioner
+                  namespace: storage
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "4"
+                  waitFor: "Deployment/nfs-subdir-external-provisioner"
                 - app: longhorn
                   namespace: longhorn-system
                   serverSideApply: "true"
                   replace: "false"
                   wave: "5"
-                - app: valkey
-                  namespace: storage
+                  waitFor: "Deployment/longhorn-driver-deployer"
+                # Tier 2 — network entry
+                - app: traefik
+                  namespace: networking
                   serverSideApply: "true"
                   replace: "false"
                   wave: "6"
+                  waitFor: "Deployment/traefik"
+                # - app: external-dns
+                #   namespace: external-dns
+                #   serverSideApply: "true"
+                #   replace: "false"
+                #   wave: "6"
+                # Tier 3 — object storage
                 - app: seaweedfs
                   namespace: storage
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "6"
+                  wave: "7"
+                  waitFor: "StatefulSet/seaweedfs-master,StatefulSet/seaweedfs-filer,StatefulSet/seaweedfs-volume"
                 # - app: seaweedtest
                 #   namespace: storage-test
                 #   serverSideApply: "true"
                 #   replace: "false"
+                #   wave: "7"
+                # - app: rustfs
+                #   namespace: storage-test
+                #   serverSideApply: "true"
+                #   replace: "false"
                 #   wave: "6"
+                # Tier 4 — datastores + log/metric backends
+                - app: valkey
+                  namespace: storage
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "8"
+                  waitFor: "StatefulSet/redis"
                 - app: loki
                   namespace: logging
                   serverSideApply: "false"
                   replace: "false"
-                  wave: "7"
+                  wave: "9"
+                  waitFor: "StatefulSet/loki-write,StatefulSet/loki-read,StatefulSet/loki-backend"
                 - app: mimir
                   namespace: monitoring
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "7"
-                - app: grafana
-                  namespace: monitoring
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "8"
+                  wave: "9"
+                  waitFor: "StatefulSet/mimir-ingester,StatefulSet/mimir-compactor,StatefulSet/mimir-store-gateway"
+                # Tier 5 — metric emitters + alerting (no app deps)
                 - app: node-exporter
                   namespace: monitoring
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "9"
+                  wave: "10"
+                  waitFor: "DaemonSet/node-exporter"
                 - app: kube-state-metrics
                   namespace: monitoring
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "9"
-                - app: alloy
-                  namespace: monitoring
-                  serverSideApply: "true"
-                  replace: "false"
-                  wave: "9"
+                  wave: "10"
+                  waitFor: "Deployment/kube-state-metrics"
                 - app: alertmanager
                   namespace: monitoring
                   serverSideApply: "true"
                   replace: "false"
                   wave: "10"
-                - app: velero
-                  namespace: backup
+                  waitFor: "StatefulSet/alertmanager"
+                # Tier 6 — monitoring consumers
+                - app: grafana
+                  namespace: monitoring
                   serverSideApply: "true"
                   replace: "false"
                   wave: "11"
+                  waitFor: "Deployment/grafana"
+                - app: alloy
+                  namespace: monitoring
+                  serverSideApply: "true"
+                  replace: "false"
+                  wave: "11"
+                  waitFor: "DaemonSet/alloy"
+                  # Tier 9 — end-user apps
                 - app: copyparty
                   namespace: copyparty
                   serverSideApply: "true"
                   replace: "false"
-                  wave: "11"
+                  wave: "12"
+                  waitFor: "Deployment/copyparty"
 
   template:
     metadata:
@@ -192,6 +224,18 @@ spec:
           name: l2advertisements.metallb.io
           jsonPointers:
             - /spec/conversion/webhook/clientConfig/caBundle
+      # Velero boots at wave 2 (DR-first), before seaweedfs (wave 7). Its
+      # in-cluster "default" BSL reports Error until seaweedfs + its S3 creds
+      # exist. Treat that transient Error as Healthy so it does not hold the
+      # WaitFor gate and block wave 3+ apps. The BSL still applies and
+      # self-heals to Available once seaweedfs is up.
+      healthStatusCode:
+        - group: velero.io
+          kind: BackupStorageLocation
+          name: default
+          namespace: backup
+          healthStatusCode:
+            "Error": Healthy
       project: default
       source:
         repoURL: https://github.com/sinhaaritro/platform-stack.git
@@ -208,6 +252,7 @@ spec:
           - CreateNamespace=true
           - ServerSideApply={{.serverSideApply}}
           - Replace={{.replace}}
+          - "{{if .waitFor}}WaitFor={{.waitFor}}{{end}}"
         retry:
           limit: 10
           backoff:

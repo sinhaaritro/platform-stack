@@ -7,42 +7,49 @@ spec:
   goTemplate: true
   generators:
     - list:
+        # Waves start above core-infrastructure's max (12) because both sets
+        # share project "default" and WaitFor gates are project-scoped.
+        # Chain: longhorn(core) -> pg18/couchdb -> authentik -> immich/obsidian
         elements:
+          # Tier 4 — datastores (need longhorn, wave 5 in core)
           - app: postgresql-18
             namespace: storage
             serverSideApply: "true"
             replace: "false"
-            wave: "6"
+            wave: "13"
+            waitFor: "StatefulSet/postgresql-18"
           - app: couchdb
             namespace: storage
             serverSideApply: "true"
             replace: "false"
-            wave: "6"
-          # - app: rustfs
-          #   namespace: storage-test
-          #   serverSideApply: "true"
-          #   replace: "false"
-          #   wave: "6"
+            wave: "13"
+            waitFor: "StatefulSet/couchdb-couchdb"
+          # Tier 7 — identity (needs postgresql-18, valkey(core), sealed-secrets(core))
           - app: authentik
             namespace: security
             serverSideApply: "true"
             replace: "false"
-            wave: "7"
+            wave: "14"
+            waitFor: "Deployment/authentik-server"
+          # Tier 9 — end-user apps
           - app: immich
             namespace: personal
             serverSideApply: "true"
             replace: "false"
-            wave: "8"
+            wave: "15"
+            waitFor: "Deployment/immich-server"
           - app: obsidian
             namespace: personal
             serverSideApply: "true"
             replace: "false"
-            wave: "8"
+            wave: "15"
+            waitFor: "Deployment/obsidian"
           - app: podinfo
             namespace: podinfo
             serverSideApply: "true"
             replace: "false"
-            wave: "8"
+            wave: "15"
+            waitFor: "Deployment/podinfo"
   template:
     metadata:
       name: "hyperion-{{.app}}"
@@ -65,6 +72,7 @@ spec:
           - CreateNamespace=true
           - ServerSideApply={{.serverSideApply}}
           - Replace={{.replace}}
+          - '{{if .waitFor}}WaitFor={{.waitFor}}{{end}}'
         retry:
           limit: 10
           backoff:
