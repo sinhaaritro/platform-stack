@@ -105,14 +105,14 @@ resources = {
           cpu_cores    = 12
           memory_size  = 16384
           disk_size    = 32
-          additional_disks = [
-            {
-              interface    = "scsi1"
-              datastore_id = "WD4TB"
-              size         = 150
-              ssd          = true
-            }
-          ]
+           additional_disks = [
+             {
+               interface    = "scsi1"
+               datastore_id = "WD4TB"
+               size         = 250
+               ssd          = true
+             }
+           ]
         }
       },
       "hyperion-02" = {
