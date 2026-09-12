@@ -27,7 +27,7 @@ spec:
             - name: S3_SECRET_NAME
               value: "hyperion-loki-s3"
             - name: S3_ACTIONS
-              value: "Read,Write,List,Tagging"
+              value: "Read,Write,List,Tagging,Delete"
             - name: QUOTA_MB
               value: "51200"
             - name: TTL
