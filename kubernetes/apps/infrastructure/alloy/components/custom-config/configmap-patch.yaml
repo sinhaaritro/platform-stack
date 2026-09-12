@@ -1,0 +1,236 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alloy
+data:
+  config.alloy: |
+    // ============================================================
+    // DISCOVERY (shared across all components)
+    // ============================================================
+
+    // Pod discovery — used for log collection
+    discovery.kubernetes "pods" {
+      role = "pod"
+    }
+
+    // Service discovery — single shared watch for ALL metric scrape targets
+    // (previously 6 separate discovery.kubernetes blocks, each opening
+    // its own watch stream to the API server)
+    discovery.kubernetes "services" {
+      role = "service"
+    }
+
+    // ============================================================
+    // LOGGING
+    // ============================================================
+
+    discovery.relabel "pod_logs" {
+      targets = discovery.kubernetes.pods.targets
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        action = "keep"
+        regex = ".*"
+      }
+      rule {
+        source_labels = ["__meta_kubernetes_pod_name"]
+        target_label = "pod"
+      }
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        target_label = "namespace"
+      }
+      rule {
+        source_labels = ["__meta_kubernetes_pod_container_name"]
+        target_label = "container"
+      }
+      rule {
+        source_labels = ["__meta_kubernetes_pod_node_name"]
+        target_label = "node"
+      }
+    }
+
+    loki.source.kubernetes "pod_logs" {
+      targets    = discovery.relabel.pod_logs.output
+      forward_to = [loki.write.default.receiver]
+    }
+
+    loki.write "default" {
+      endpoint {
+        url = "http://loki-gateway.logging.svc.cluster.local:80/loki/api/v1/push"
+        tenant_id = "1"
+      }
+    }
+
+    // ============================================================
+    // METRICS: Relabel & Scrape
+    // ============================================================
+
+    // --- Node Exporter ---
+    discovery.relabel "node_exporter" {
+      targets = discovery.kubernetes.services.targets
+      rule {
+        source_labels = ["__meta_kubernetes_service_name"]
+        regex = ".*node-exporter.*"
+        action = "keep"
+      }
+    }
+
+    prometheus.scrape "node_exporter" {
+      job_name   = "node-exporter"
+      targets    = discovery.relabel.node_exporter.output
+      forward_to = [prometheus.remote_write.mimir.receiver]
+      scrape_interval = "15s"
+    }
+
+    // --- Kube State Metrics ---
+    discovery.relabel "kube_state_metrics" {
+      targets = discovery.kubernetes.services.targets
+      rule {
+        source_labels = ["__meta_kubernetes_service_name"]
+        regex = ".*kube-state-metrics.*"
+        action = "keep"
+      }
+    }
+
+    prometheus.scrape "kube_state_metrics" {
+      job_name   = "kube-state-metrics"
+      targets    = discovery.relabel.kube_state_metrics.output
+      forward_to = [prometheus.remote_write.mimir.receiver]
+      scrape_interval = "15s"
+    }
+
+    // --- SeaweedFS ---
+    discovery.relabel "seaweedfs_svc" {
+      targets = discovery.kubernetes.services.targets
+      rule {
+        source_labels = ["__meta_kubernetes_service_name"]
+        regex = ".*seaweedfs.*"
+        action = "keep"
+      }
+    }
+
+    prometheus.scrape "seaweedfs" {
+      job_name   = "seaweedfs"
+      targets    = discovery.relabel.seaweedfs_svc.output
+      forward_to = [prometheus.remote_write.mimir.receiver]
+      scrape_interval = "15s"
+    }
+
+    // --- Traefik ---
+    discovery.relabel "traefik" {
+      targets = discovery.kubernetes.services.targets
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        action = "keep"
+        regex = "networking"
+      }
+      rule {
+        source_labels = ["__meta_kubernetes_service_name"]
+        regex = "traefik.*"
+        action = "keep"
+      }
+    }
+
+    prometheus.scrape "traefik" {
+      job_name   = "traefik"
+      targets    = discovery.relabel.traefik.output
+      forward_to = [prometheus.remote_write.mimir.receiver]
+      scrape_interval = "15s"
+    }
+
+    // --- cert-manager ---
+    discovery.relabel "cert_manager" {
+      targets = discovery.kubernetes.services.targets
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        action = "keep"
+        regex = "networking"
+      }
+      rule {
+        source_labels = ["__meta_kubernetes_service_name"]
+        regex = "cert-manager$"
+        action = "keep"
+      }
+    }
+
+    prometheus.scrape "cert_manager" {
+      job_name   = "cert-manager"
+      targets    = discovery.relabel.cert_manager.output
+      forward_to = [prometheus.remote_write.mimir.receiver]
+      scrape_interval = "15s"
+    }
+
+    // --- MetalLB ---
+    discovery.relabel "metallb" {
+      targets = discovery.kubernetes.services.targets
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        action = "keep"
+        regex = "networking"
+      }
+      rule {
+        source_labels = ["__meta_kubernetes_service_name"]
+        regex = "metallb-.*"
+        action = "keep"
+      }
+    }
+
+    prometheus.scrape "metallb" {
+      job_name   = "metallb"
+      targets    = discovery.relabel.metallb.output
+      forward_to = [prometheus.remote_write.mimir.receiver]
+      scrape_interval = "15s"
+    }
+
+    // --- external-dns ---
+    discovery.relabel "external_dns" {
+      targets = discovery.kubernetes.services.targets
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        action = "keep"
+        regex = "external-dns"
+      }
+      rule {
+        source_labels = ["__meta_kubernetes_service_name"]
+        regex = "external-dns$"
+        action = "keep"
+      }
+    }
+
+    prometheus.scrape "external_dns" {
+      job_name   = "external-dns"
+      targets    = discovery.relabel.external_dns.output
+      forward_to = [prometheus.remote_write.mimir.receiver]
+      scrape_interval = "15s"
+    }
+
+    // --- Velero ---
+    discovery.relabel "velero" {
+      targets = discovery.kubernetes.services.targets
+      rule {
+        source_labels = ["__meta_kubernetes_service_name"]
+        regex = "velero.*"
+        action = "keep"
+      }
+    }
+
+    prometheus.scrape "velero" {
+      job_name   = "velero"
+      targets    = discovery.relabel.velero.output
+      forward_to = [prometheus.remote_write.mimir.receiver]
+      scrape_interval = "30s"
+      metrics_path    = "/metrics"
+    }
+
+    // ============================================================
+    // METRICS: Remote Write
+    // ============================================================
+
+    prometheus.remote_write "mimir" {
+      endpoint {
+        url = "http://mimir-gateway.monitoring.svc.cluster.local:80/api/v1/push"
+        headers = {
+          "X-Scope-OrgID" = "anonymous",
+        }
+      }
+    }
