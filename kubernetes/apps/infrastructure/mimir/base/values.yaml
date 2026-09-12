@@ -36,6 +36,10 @@ mimir:
 minio:
   enabled: false
 
+kafka:
+  persistence:
+    storageClassName: longhorn
+
 # Replicas (Single Zone = 1)
 ingester:
   replicas: 1

@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+# Put Mimir Kafka storage on hyperion's 150GB disk (local-path-seaweedfs)
+# instead of the 32GB root disk (local-path default).
+patches:
+  - path: patch-kafka-pvc.yaml
+    target:
+      kind: StatefulSet
+      name: mimir-kafka.*

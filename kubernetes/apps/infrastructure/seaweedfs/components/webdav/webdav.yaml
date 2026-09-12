@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/component: webdav
     app.kubernetes.io/instance: seaweedfs
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: seaweedfs

@@ -11,4 +11,5 @@ components:
   - ./components/ingress
   - ./components/storage-data
   - ./components/storage-ingester
+  - ./components/storage-kafka
   # - ../../../apps/infrastructure/mimir/components/maintenance
