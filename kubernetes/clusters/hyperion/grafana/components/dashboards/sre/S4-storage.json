@@ -299,13 +299,32 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "rate(longhorn_volume_io_rate_bytes[5m])",
-                        "legendFormat": "{{volume}} I/O Rate"
+                        "expr": "longhorn_volume_read_throughput",
+                        "legendFormat": "{{volume}} Read"
                       },
                       "version": "v0"
                     }
                   },
                   "refId": "A"
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "expr": "longhorn_volume_write_throughput",
+                        "legendFormat": "{{volume}} Write"
+                      },
+                      "version": "v0"
+                    }
+                  },
+                  "refId": "B"
                 }
               ],
               "queryOptions": {},
@@ -405,13 +424,32 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "rate(longhorn_volume_operation_count[5m])",
-                        "legendFormat": "{{volume}} Operations"
+                        "expr": "longhorn_volume_read_iops",
+                        "legendFormat": "{{volume}} Read IOPS"
                       },
                       "version": "v0"
                     }
                   },
                   "refId": "A"
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "expr": "longhorn_volume_write_iops",
+                        "legendFormat": "{{volume}} Write IOPS"
+                      },
+                      "version": "v0"
+                    }
+                  },
+                  "refId": "B"
                 }
               ],
               "queryOptions": {},
@@ -511,8 +549,8 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "longhorn_volume_condition{condition=\"scheduled\"}",
-                        "legendFormat": "{{volume}} Scheduled"
+                        "expr": "longhorn_volume_state",
+                        "legendFormat": "{{volume}} State"
                       },
                       "version": "v0"
                     }
@@ -524,10 +562,10 @@
               "transformations": []
             }
           },
-          "description": "Volume scheduling status.",
+          "description": "Volume state (1=creating, 2=attached, 3=detached, 4=deleting).",
           "id": 5,
           "links": [],
-          "title": "Longhorn Volume Conditions",
+          "title": "Longhorn Volume State",
           "vizConfig": {
             "group": "stat",
             "kind": "VizConfig",
@@ -594,7 +632,7 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "longhorn_node_disk_info",
+                        "expr": "longhorn_disk_capacity_bytes",
                         "legendFormat": "{{node}} {{disk}} Capacity"
                       },
                       "version": "v0"
@@ -700,7 +738,7 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "longhorn_node_disk_usage_bytes",
+                        "expr": "longhorn_disk_usage_bytes",
                         "legendFormat": "{{node}} {{disk}} Usage"
                       },
                       "version": "v0"
@@ -806,8 +844,8 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "longhorn_engine_image_up",
-                        "legendFormat": "{{image}} Up"
+                        "expr": "longhorn_node_status{condition=\"ready\"}",
+                        "legendFormat": "{{node}} Ready"
                       },
                       "version": "v0"
                     }
@@ -819,10 +857,10 @@
               "transformations": []
             }
           },
-          "description": "Engine image health.",
+          "description": "Longhorn node readiness status.",
           "id": 8,
           "links": [],
-          "title": "Longhorn Engine Images",
+          "title": "Longhorn Node Readiness",
           "vizConfig": {
             "group": "stat",
             "kind": "VizConfig",
@@ -889,8 +927,8 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "longhorn_replica_count",
-                        "legendFormat": "{{volume}} Replicas"
+                        "expr": "longhorn_volume_robustness",
+                        "legendFormat": "{{volume}} Robustness"
                       },
                       "version": "v0"
                     }
@@ -902,10 +940,10 @@
               "transformations": []
             }
           },
-          "description": "Number of replicas per volume.",
+          "description": "Volume robustness per volume (0=unknown, 1=healthy, 2=degraded, 3=faulted).",
           "id": 9,
           "links": [],
-          "title": "Longhorn Replica Count",
+          "title": "Longhorn Volume Robustness (per volume)",
           "vizConfig": {
             "group": "timeseries",
             "kind": "VizConfig",
@@ -1165,7 +1203,7 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "seaweedfs_volume_count",
+                        "expr": "SeaweedFS_volumeServer_volumes",
                         "legendFormat": "Volume Count"
                       },
                       "version": "v0"
@@ -1235,7 +1273,7 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "seaweedfs_total_size_bytes",
+                        "expr": "SeaweedFS_volumeServer_total_disk_size",
                         "legendFormat": "Total Size"
                       },
                       "version": "v0"
@@ -1341,8 +1379,8 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "seaweedfs_used_size_bytes",
-                        "legendFormat": "Used Size"
+                        "expr": "SeaweedFS_volumeServer_total_disk_size{type=\"normal\"}",
+                        "legendFormat": "Disk Size (normal)"
                       },
                       "version": "v0"
                     }
@@ -1447,8 +1485,8 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "seaweedfs_object_count",
-                        "legendFormat": "Object Count"
+                        "expr": "SeaweedFS_volumeServer_max_volumes",
+                        "legendFormat": "Max Volumes"
                       },
                       "version": "v0"
                     }
@@ -1460,10 +1498,10 @@
               "transformations": []
             }
           },
-          "description": "Number of objects stored.",
+          "description": "Maximum number of volumes per volume server.",
           "id": 15,
           "links": [],
-          "title": "SeaweedFS Object Count",
+          "title": "SeaweedFS Max Volumes",
           "vizConfig": {
             "group": "stat",
             "kind": "VizConfig",
@@ -1517,8 +1555,8 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "seaweedfs_object_size_bytes",
-                        "legendFormat": "Object Size"
+                        "expr": "SeaweedFS_volumeServer_total_disk_size / SeaweedFS_volumeServer_volumes",
+                        "legendFormat": "Avg Size per Volume"
                       },
                       "version": "v0"
                     }
@@ -1530,10 +1568,10 @@
               "transformations": []
             }
           },
-          "description": "Average object size.",
+          "description": "Average disk size per volume.",
           "id": 16,
           "links": [],
-          "title": "SeaweedFS Object Size",
+          "title": "SeaweedFS Avg Volume Size",
           "vizConfig": {
             "group": "timeseries",
             "kind": "VizConfig",
@@ -1623,7 +1661,7 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "rate(seaweedfs_read_count[5m])",
+                        "expr": "rate(SeaweedFS_volumeServer_request_total{type=\"get\"}[5m])",
                         "legendFormat": "Reads/sec"
                       },
                       "version": "v0"
@@ -1642,7 +1680,7 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "rate(seaweedfs_write_count[5m])",
+                        "expr": "rate(SeaweedFS_volumeServer_request_total{type=\"write\"}[5m])",
                         "legendFormat": "Writes/sec"
                       },
                       "version": "v0"
@@ -1748,8 +1786,8 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "rate(seaweedfs_read_bytes[5m])",
-                        "legendFormat": "Read Bytes/sec"
+                        "expr": "rate(SeaweedFS_s3_request_total{type=\"get\"}[5m])",
+                        "legendFormat": "S3 GET Requests/sec"
                       },
                       "version": "v0"
                     }
@@ -1767,8 +1805,8 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "rate(seaweedfs_write_bytes[5m])",
-                        "legendFormat": "Write Bytes/sec"
+                        "expr": "rate(SeaweedFS_s3_request_total{type=\"put\"}[5m])",
+                        "legendFormat": "S3 PUT Requests/sec"
                       },
                       "version": "v0"
                     }
@@ -1780,10 +1818,10 @@
               "transformations": []
             }
           },
-          "description": "I/O throughput.",
+          "description": "S3 API request rates (GET/PUT).",
           "id": 18,
           "links": [],
-          "title": "SeaweedFS I/O Rate",
+          "title": "SeaweedFS S3 Request Rate",
           "vizConfig": {
             "group": "timeseries",
             "kind": "VizConfig",
@@ -1827,7 +1865,7 @@
                       "mode": "off"
                     }
                   },
-                  "unit": "Bps"
+                  "unit": "reqps"
                 },
                 "overrides": []
               },
@@ -1873,8 +1911,8 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "seaweedfs_collection_count",
-                        "legendFormat": "Collections"
+                        "expr": "count(SeaweedFS_volumeServer_volumes) by (collection)",
+                        "legendFormat": "{{collection}}"
                       },
                       "version": "v0"
                     }
@@ -1886,7 +1924,7 @@
               "transformations": []
             }
           },
-          "description": "Number of collections.",
+          "description": "Volume count grouped by collection.",
           "id": 19,
           "links": [],
           "title": "SeaweedFS Collections",
@@ -1943,7 +1981,7 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "seaweedfs_volume_server_count",
+                        "expr": "count(up{job=~\"seaweedfs.*\"} == 1)",
                         "legendFormat": "Volume Servers"
                       },
                       "version": "v0"

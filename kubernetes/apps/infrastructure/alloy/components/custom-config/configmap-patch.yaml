@@ -222,6 +222,28 @@ data:
       metrics_path    = "/metrics"
     }
 
+    // --- Longhorn ---
+    discovery.relabel "longhorn" {
+      targets = discovery.kubernetes.services.targets
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        action = "keep"
+        regex = "longhorn-system"
+      }
+      rule {
+        source_labels = ["__meta_kubernetes_service_name"]
+        regex = "longhorn-backend"
+        action = "keep"
+      }
+    }
+
+    prometheus.scrape "longhorn" {
+      job_name   = "longhorn"
+      targets    = discovery.relabel.longhorn.output
+      forward_to = [prometheus.remote_write.mimir.receiver]
+      scrape_interval = "30s"
+    }
+
     // ============================================================
     // METRICS: Remote Write
     // ============================================================
