@@ -4,7 +4,7 @@ This document provides a comprehensive view of your physical host capacity, curr
 
 ---
 
-## 1. Current Host Resource Availability (`moo-moo`)
+## 1. Current Host Resource Availability (`atlas`)
 
 This section tracks the physical "Headroom" remaining on your Proxmox host based on your verified hardware specs.
 
@@ -21,10 +21,23 @@ This section tracks the physical "Headroom" remaining on your Proxmox host based
 | Range | Usage | Description |
 | :--- | :--- | :--- |
 | **.1** | **Gateway** | Your Router. |
-| **.2 - .9** | **Physical Infrastructure** | Proxmox Node (moo-moo), Physical Hardware. |
-| **.10 - .99** | **Static Servers** | K8s Nodes, standalone LXCs, Database VMs. |
+| **.2 - .9** | **Physical Infrastructure** | Proxmox Node (`atlas`), Physical Hardware, Switches. |
+| **.10 - .99** | **Static Servers** | Admin workstations, Core & App LXCs, Standalone VMs, K8s Clusters. *(See Sub-Table Below)* |
 | **.100 - .199** | **DHCP Pool** | Mobile devices, Laptops, IoT. (Router Configured) |
 | **.200 - .254** | **Virtual IPs** | MetalLB Load Balancer IPs for K8s services. |
+
+### Static Server Sub-Table (`192.168.0.10` – `192.168.0.99`)
+
+| IP Block | Category / Group | Workloads & Purpose | Type | Proxmox ID Range | **Slots** | **Suggested Allocation** |
+| :--- | :--- | :--- | :--- | :--- | :---: | :--- |
+| **`.10` – `.19`** | **Admin & Dev Workstations** | Primary dev workstations, management jump boxes, runner hosts | VM | `1010` – `1019` | **10** | • 2–3 Dev Workstations<br>• 2–3 CI/CD Runners<br>• 4 Spares |
+| **`.20` – `.29`** | **Core Infrastructure LXCs** | Mission-critical edge networking, DNS, VPN tunnels, auth | LXC | `1020` – `1029` | **10** | • 1 DNS (`adguard`)<br>• 1 VPN (`netbird`)<br>• 1 Ingress (`cloudflared`)<br>• 7 Spares |
+| **`.30` – `.39`** | **Auxiliary & App LXCs** | Microservices, monitoring scrapers, support containers | LXC | `1030` – `1039` | **10** | • 4–6 Support / Scraper LXCs<br>• 4 Spares |
+| **`.40` – `.49`** | **Standalone Server VMs** | Dedicated single-purpose VMs (Databases, Web, NAS client) | VM | `1040` – `1049` | **10** | • 2 Web Servers (`.41-.42`)<br>• 2–3 DBs (`.45-.46`)<br>• 1 NAS Client (`.47`)<br>• 4 Spares |
+| **`.50` – `.79`** | **Production Kubernetes Clusters** | Multi-cluster production nodes (`hyperion`, `quanta`, `elysia`) | VM | `1050` – `1079` | **30** | • 10 IPs: `hyperion` (`.50-.59`)<br>• 10 IPs: `quanta` (`.60-.69`)<br>• 10 IPs: `elysia` (`.70-.79`) |
+| **`.80` – `.89`** | **Dev & Test Kubernetes Clusters** | Ephemeral, feature-testing, or lab Kubernetes nodes (Kind, K3d) | VM | `1080` – `1089` | **10** | • 2–3 Test / Kind Clusters<br>• 7 Spares |
+| **`.90` – `.99`** | **Sandbox, Lab & Staging** | Disposable test beds, dirty environments, OS upgrade trials | VM / LXC | `1090` – `1099` | **10** | • 2–3 Sandboxes<br>• 7 Spares |
+| **Total** | **Static Server Range** | — | — | — | **90** | — |
 
 ---
 
@@ -48,38 +61,49 @@ To prevent data usage from crashing your Operating Systems, every Kubernetes nod
 
 ## 4. Proposed "Clean Slate" Allocation
 
-This layout optimizes your **32GB RAM** and utilizes the two-disk model for stability.
+This layout optimizes your **32GB RAM** and utilizes the two-disk model for stability across your Kubernetes clusters.
 
-### Cluster `ruth` (Management & Heavy Apps)
+### Cluster `hyperion` (Core & Observability)
 *Hosting: Immich, Obsidian, Observability, ArgoCD*
 
 | ID | Name | IP Address | RAM | Boot Disk | Data Disk |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **1020** | **ruth-01** | `.20` | 6 GB | 12 GB | 20 GB |
-| **1021** | **ruth-02** | `.21` | 4 GB | 12 GB | 40 GB |
-| **1022** | **ruth-03** | `.22` | 4 GB | 12 GB | 20 GB |
-| **1023** | **ruth-04** | `.23` | (TBD) | 12 GB | (TBD) |
-| **1024** | **ruth-05** | `.24` | (TBD) | 12 GB | (TBD) |
+| **1050** | **hyperion-01** | `.50` | 6 GB | 12 GB | 20 GB |
+| **1051** | **hyperion-02** | `.51` | 4 GB | 12 GB | 40 GB |
+| **1052** | **hyperion-03** | `.52` | 4 GB | 12 GB | 20 GB |
+| **1053** | **hyperion-04** | `.53` | (TBD) | 12 GB | (TBD) |
+| **1054** | **hyperion-05** | `.54` | (TBD) | 12 GB | (TBD) |
 
-### Cluster `arr` (Media Processing)
-*Hosting: Sonarr, Radarr, Prowlarr, etc.*
+### Cluster `quanta` (Media & Entertainment Stack)
+*Hosting: Sonarr, Radarr, Prowlarr, Jellyfin, Torrents*
 
 | ID | Name | IP Address | RAM | Boot Disk | Data Disk |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **1025** | **arr-01** | `.25` | 2 GB | 12 GB | 10 GB |
-| **1026** | **arr-02** | `.26` | 4 GB | 12 GB | 20 GB |
-| **1027** | **arr-03** | `.27` | 4 GB | 12 GB | 20 GB |
-| **1028** | **arr-04** | `.28` | (TBD) | 12 GB | (TBD) |
-| **1029** | **arr-05** | `.29` | (TBD) | 12 GB | (TBD) |
+| **1060** | **quanta-01** | `.60` | 2 GB | 12 GB | 10 GB |
+| **1061** | **quanta-02** | `.61` | 4 GB | 12 GB | 20 GB |
+| **1062** | **quanta-03** | `.62` | 4 GB | 12 GB | 20 GB |
+| **1063** | **quanta-04** | `.63` | (TBD) | 12 GB | (TBD) |
+| **1064** | **quanta-05** | `.64` | (TBD) | 12 GB | (TBD) |
+
+### Cluster `elysia` (Management & Multi-Tenant Staging)
+*Hosting: Management Hub, Fleet Operations, Staging Workloads*
+
+| ID | Name | IP Address | RAM | Boot Disk | Data Disk |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **1070** | **elysia-01** | `.70` | 4 GB | 12 GB | 10 GB |
+| **1071** | **elysia-02** | `.71` | 4 GB | 12 GB | 20 GB |
+| **1072** | **elysia-03** | `.72` | 4 GB | 12 GB | 20 GB |
+| **1073** | **elysia-04** | `.73` | (TBD) | 12 GB | (TBD) |
+| **1074** | **elysia-05** | `.74` | (TBD) | 12 GB | (TBD) |
 
 ---
 
 ## 5. Network Strategy & Connectivity
 
 - **Nginx Proxy Manager**: **RETIRED**. Redundant due to CF Tunnels.
-- **ID/IP Linking**: All VIDs match IP suffixes (e.g., ID `1020` = `.20`).
-- **Access Flow**: Internet ➡️ Cloudflare ➡️ **CF Tunnel LXC** ➡️ **Traefik (K8s)**.
-- **Internal Access**: CF Tunnel LXC (ID 2050) provides access to Proxmox, AdGuard, and Zero Trust SSH.
+- **ID/IP Linking**: All VIDs match IP suffixes (e.g., ID `1050` = `.50`).
+- **Access Flow**: Internet ➡️ Cloudflare ➡️ **CF Tunnel LXC (ID 1022)** ➡️ **Traefik (K8s)**.
+- **Internal Access**: CF Tunnel LXC (`.22`) and NetBird (`.21`) provide access to Proxmox, AdGuard (`.20`), and Zero Trust SSH.
 - **Sandbox**: ID **1099** (IP `.99`) sits at the end of the static server range for isolated testing.
 
 ---

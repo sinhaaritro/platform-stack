@@ -1,6 +1,10 @@
-# Infrastructure Inventory & Allocation Map (Clean Slate)
+# Infrastructure Inventory & Allocation Map (Legacy Reference)
+ 
+> [!WARNING]
+> **Outdated / Deprecated Notice**: This document reflects early prototype allocations (e.g. `ruth`, `arr` clusters) and is getting outdated.
+> For the authoritative IPAM strategy, static sub-table layout, and current Kubernetes cluster allocations (`hyperion`, `quanta`, `elysia`), refer to **[`docs/reference/resource-planning.md`](./resource-planning.md)** and the active OpenTofu stack configuration in **[`tofu/stacks/onprem/proxmox_atlas/schema.tfvars`](../../tofu/stacks/onprem/proxmox_atlas/schema.tfvars)**.
 
-This table serves as the definitive record for your fresh deployment. The **ID and IP are strictly linked** based on your network management strategy.
+This table serves as historical context for previous allocations. The **ID and IP are strictly linked** based on your network management strategy.
 
 ## 0. Templates (Proxmox Images)
 | ID | Name | OS | Description | Pool |

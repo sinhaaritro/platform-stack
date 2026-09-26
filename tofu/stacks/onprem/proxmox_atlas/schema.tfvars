@@ -55,10 +55,10 @@ resources = {
 
     nodes = {
       "kind-01" = {
-        vm_id           = 700
+        vm_id           = 1080
         cloud_init_user = "dev"
         vm_config = {
-          ipv4_address = "192.168.0.70/24"
+          ipv4_address = "192.168.0.80/24"
         }
       }
     }
@@ -97,11 +97,11 @@ resources = {
 
     nodes = {
       "hyperion-01" = {
-        vm_id           = 1040
+        vm_id           = 1050
         tags            = ["k_control"]
         cloud_init_user = "dev"
         vm_config = {
-          ipv4_address = "192.168.0.40/24"
+          ipv4_address = "192.168.0.50/24"
           cpu_cores    = 12
           memory_size  = 16384
           disk_size    = 32
@@ -116,11 +116,11 @@ resources = {
         }
       },
       "hyperion-02" = {
-        vm_id           = 1041
+        vm_id           = 1051
         tags            = ["k_worker"]
         cloud_init_user = "dev"
         vm_config = {
-          ipv4_address = "192.168.0.41/24"
+          ipv4_address = "192.168.0.51/24"
           additional_disks = [
             {
               interface    = "scsi1"
@@ -133,11 +133,11 @@ resources = {
       },
       "hyperion-03" = {
         enabled         = false
-        vm_id           = 1042
+        vm_id           = 1052
         tags            = ["k_worker"]
         cloud_init_user = "dev"
         vm_config = {
-          ipv4_address = "192.168.0.42/24"
+          ipv4_address = "192.168.0.52/24"
           additional_disks = [
             {
               interface    = "scsi1"
@@ -177,11 +177,11 @@ resources = {
 
     nodes = {
       "quanta-01" = {
-        vm_id           = 1045
+        vm_id           = 1060
         tags            = ["k_control"]
         cloud_init_user = "dev"
         vm_config = {
-          ipv4_address = "192.168.0.45/24"
+          ipv4_address = "192.168.0.60/24"
           additional_disks = [
             {
               interface    = "scsi1"
@@ -194,11 +194,11 @@ resources = {
       },
       "quanta-02" = {
         enabled         = false
-        vm_id           = 1046
+        vm_id           = 1061
         tags            = ["k_worker"]
         cloud_init_user = "dev"
         vm_config = {
-          ipv4_address = "192.168.0.46/24"
+          ipv4_address = "192.168.0.61/24"
           additional_disks = [
             {
               interface    = "scsi1"
@@ -211,11 +211,11 @@ resources = {
       },
       "quanta-03" = {
         enabled         = false
-        vm_id           = 1047
+        vm_id           = 1062
         tags            = ["k_worker"]
         cloud_init_user = "dev"
         vm_config = {
-          ipv4_address = "192.168.0.47/24"
+          ipv4_address = "192.168.0.62/24"
           additional_disks = [
             {
               interface    = "scsi1"
@@ -262,11 +262,11 @@ resources = {
 
     nodes = {
       "elysia-01" = {
-        vm_id           = 1050
+        vm_id           = 1070
         tags            = ["k_control"]
         cloud_init_user = "dev"
         vm_config = {
-          ipv4_address = "192.168.0.50/24"
+          ipv4_address = "192.168.0.70/24"
           cpu_cores    = 12
           memory_size  = 16384
           disk_size    = 32
@@ -307,7 +307,7 @@ resources = {
 
     nodes = {
       "web-server-01" = {
-        vm_id           = 1031
+        vm_id           = 1041
         tags            = ["server", "ubuntu"]
         cloud_init_user = "dev"
         ansible_groups = {
@@ -318,17 +318,17 @@ resources = {
         }
         vm_config = {
           disk_datastore_id = "WD4TB"
-          ipv4_address      = "192.168.0.31/24"
+          ipv4_address      = "192.168.0.41/24"
         }
       },
       "web-server-02" = {
         enabled         = false
-        vm_id           = 1032
+        vm_id           = 1042
         tags            = ["server", "ubuntu"]
         cloud_init_user = "web_admins"
         vm_config = {
           disk_datastore_id = "WD4TB"
-          ipv4_address      = "192.168.0.32/24"
+          ipv4_address      = "192.168.0.42/24"
         }
       }
     }
@@ -339,7 +339,7 @@ resources = {
     type            = "vm"
     node_name       = "atlas"
     description     = "Primary database servers. Ubuntu 26.04."
-    tags            = ["db", "ansible"]
+    tags        = ["db", "ansible"]
     cloud_init_user = "db_admins"
 
     vm_config = {
@@ -348,19 +348,19 @@ resources = {
 
     nodes = {
       "db-server-01" = {
-        vm_id = 1035
+        vm_id = 1045
         tags  = ["mongo"]
         vm_config = {
-          ipv4_address = "192.168.0.35/24"
+          ipv4_address = "192.168.0.45/24"
         }
       },
       "db-server-02" = {
-        vm_id       = 1036
+        vm_id       = 1046
         description = "Primary database servers, for postgress. Ubuntu 26.04."
         tags        = ["postgres"]
         vm_config = {
           disk_size    = 16
-          ipv4_address = "192.168.0.36/24"
+          ipv4_address = "192.168.0.46/24"
         }
       },
     }
@@ -422,9 +422,9 @@ resources = {
 
     nodes = {
       "oceanus.olympus.strawslabs.com" = {
-        vm_id = 1037
+        vm_id = 1047
         vm_config = {
-          ipv4_address = "192.168.0.53/24"
+          ipv4_address = "192.168.0.47/24"
         }
       }
     }
@@ -536,4 +536,3 @@ resources = {
     }
   },
 }
-
