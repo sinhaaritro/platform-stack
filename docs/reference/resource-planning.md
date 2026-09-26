@@ -33,7 +33,7 @@ This section tracks the physical "Headroom" remaining on your Proxmox host based
 | **`.10` – `.19`** | **Admin & Dev Workstations** | Primary dev workstations, management jump boxes, runner hosts | VM | `1010` – `1019` | **10** | • 2–3 Dev Workstations<br>• 2–3 CI/CD Runners<br>• 4 Spares |
 | **`.20` – `.29`** | **Core Infrastructure LXCs** | Mission-critical edge networking, DNS, VPN tunnels, auth | LXC | `1020` – `1029` | **10** | • 1 DNS (`adguard`)<br>• 1 VPN (`netbird`)<br>• 1 Ingress (`cloudflared`)<br>• 7 Spares |
 | **`.30` – `.39`** | **Auxiliary & App LXCs** | Microservices, monitoring scrapers, support containers | LXC | `1030` – `1039` | **10** | • 4–6 Support / Scraper LXCs<br>• 4 Spares |
-| **`.40` – `.49`** | **Standalone Server VMs** | Dedicated single-purpose VMs (Databases, Web, NAS client) | VM | `1040` – `1049` | **10** | • 2 Web Servers (`.41-.42`)<br>• 2–3 DBs (`.45-.46`)<br>• 1 NAS Client (`.47`)<br>• 4 Spares |
+| **`.40` – `.49`** | **Standalone Server VMs** | Dedicated single-purpose VMs (Databases, Web, NAS client) | VM | `1040` – `1049` | **10** | • 1 Dev Server (`agora`, `.40`)<br>• 2 Web Servers (`.41-.42`)<br>• 2–3 DBs (`.45-.46`)<br>• 1 NAS Client (`.47`)<br>• 3 Spares |
 | **`.50` – `.79`** | **Production Kubernetes Clusters** | Multi-cluster production nodes (`hyperion`, `quanta`, `elysia`) | VM | `1050` – `1079` | **30** | • 10 IPs: `hyperion` (`.50-.59`)<br>• 10 IPs: `quanta` (`.60-.69`)<br>• 10 IPs: `elysia` (`.70-.79`) |
 | **`.80` – `.89`** | **Dev & Test Kubernetes Clusters** | Ephemeral, feature-testing, or lab Kubernetes nodes (Kind, K3d) | VM | `1080` – `1089` | **10** | • 2–3 Test / Kind Clusters<br>• 7 Spares |
 | **`.90` – `.99`** | **Sandbox, Lab & Staging** | Disposable test beds, dirty environments, OS upgrade trials | VM / LXC | `1090` – `1099` | **10** | • 2–3 Sandboxes<br>• 7 Spares |
@@ -112,6 +112,6 @@ This layout optimizes your **32GB RAM** and utilizes the two-disk model for stab
 
 | Metric | Provisioned | Host Capacity | Balance | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **RAM** | **24 GB** | 32 GB | **8 GB** | 🟢 Healthy Buffer |
-| **CPU Threads** | **18 vCores** | 16 Threads | **-2** | 🟢 Healthy Over-provision |
-| **Total Disk** | **242 GB** | 481 GB | **239 GB** | 🟢 Safe (Thin) |
+| **RAM** | **28 GB** | 32 GB | **4 GB** | 🟢 Safe Buffer |
+| **CPU Threads** | **20 vCores** | 16 Threads | **-4** | 🟢 Healthy Over-provision |
+| **Total Disk** | **258 GB** | 481 GB | **223 GB** | 🟢 Safe (Thin) |

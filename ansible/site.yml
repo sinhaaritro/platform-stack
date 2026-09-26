@@ -45,6 +45,30 @@
     - role: storage_setup # Mount additional disks (e.g., /dev/sdb -> /data/storage)
 
 # ==============================================================================
+# PLAY 3A: DOCKER ENGINE (STANDALONE)
+# Target: Hosts in the 'docker' inventory group.
+# Purpose: Install Docker for non-K8s use cases (e.g., running Postgres in dev).
+# ==============================================================================
+- name: Install Docker Engine (Standalone)
+  hosts: docker
+  tags: [docker]
+  become: true
+  roles:
+    - role: docker
+
+# ==============================================================================
+# PLAY 3B: NODE.JS / BUN RUNTIME
+# Target: Hosts in the 'node' inventory group.
+# Purpose: Install Node.js LTS and Bun for application development.
+# ==============================================================================
+- name: Install Node.js and Bun Runtime
+  hosts: node
+  tags: [node]
+  become: true
+  roles:
+    - role: node
+
+# ==============================================================================
 # PLAY 4: DEV/TEST KUBERNETES (KIND)
 # Target: Kind (Kubernetes) Server
 # Purpose: Ephemeral clusters. Manual app deployment for testing.
@@ -179,6 +203,7 @@
   become: true
   roles:
     - role: nas
+
 # ==============================================================================
 # PLAY 6: WEB LAYER
 # Target: Web Server

@@ -51,7 +51,7 @@ kubectl logs -n backup -l app.kubernetes.io/name=velero --tail=50 | grep -i "ssl
 Confirm all restored certificates are in Ready state:
 ```bash
 kubectl get certificate -A -l backuplabel.certificate=true \
-  -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,READY:.status.conditions[0].status,NOT_AFTER:.status.notAfter
+  -o custom-columns='NAMESPACE:.metadata.namespace,NAME:.metadata.name,READY:.status.conditions[?(@.type=="Ready")].status,REASON:.status.conditions[?(@.type=="Ready")].reason,NOT_AFTER:.status.notAfter'
 ```
 **Expected**: All show `READY: True` with the original `notAfter` timestamps (not freshly issued).
 
@@ -101,6 +101,33 @@ kubectl apply -f kubernetes/clusters/hyperion/velero/components/schedules/ssl-ce
 ---
 
 ## Known Gotchas
+
+### Manual backup code
+```bash
+kubectl create -f - <<EOF
+apiVersion: velero.io/v1
+kind: Backup
+metadata:
+  name: ssl-certs-manual-$(date +%Y%m%d)
+  namespace: backup
+spec:
+  includedNamespaces:
+    - "*"
+  includedResources:
+    - secrets
+    - certificates.cert-manager.io
+  excludedResources:
+    - certificaterequests.cert-manager.io
+    - orders.acme.cert-manager.io
+    - challenges.acme.cert-manager.io
+  labelSelector:
+    matchLabels:
+      backuplabel.certificate: "true"
+  storageLocation: aws
+  ttl: 1440h0m0s
+  snapshotVolumes: false
+EOF
+```
 
 ### Traefik Boot-Order Race (SNI Fallback)
 

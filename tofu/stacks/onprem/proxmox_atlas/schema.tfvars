@@ -284,6 +284,44 @@ resources = {
   },
 
 
+  "agora" = {
+    enabled     = true
+    type        = "vm"
+    node_name   = "atlas"
+    description = "Merch store dev environment. Ubuntu 26.04."
+    tags        = ["agora", "ansible", "ubuntu", "dev", "docker"]
+    ansible_groups = {
+      "timezone" = {
+        "user_timezone" = "Asia/Kolkata"
+        "user_locale"   = "en_US.UTF-8"
+      }
+      "dev"    = {}
+      "docker" = {}
+      "node"   = {
+        "node_version" = "22"
+        "bun_version"  = "latest"
+      }
+    }
+
+    vm_config = {
+      cpu_cores         = 2
+      memory_size       = 4096
+      disk_datastore_id = "local-lvm"
+      os_version        = "26.04"
+      disk_size         = 16
+    }
+
+    nodes = {
+      "agora-01" = {
+        vm_id           = 1040
+        cloud_init_user = "dev"
+        vm_config = {
+          ipv4_address = "192.168.0.40/24"
+        }
+      }
+    }
+  },
+
   "web_server" = {
     enabled     = false
     type        = "vm"
