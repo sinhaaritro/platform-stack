@@ -15,5 +15,8 @@ components:
   - ../../../apps/services/immich/components/config
   - ./components/config
   - ../../../apps/services/immich/components/backup-volumes
-  - ./components/rclone-archive
+  # rclone offsite backup (immich-rclone-backup) — disabled for now.
+  # Enable by uncommenting BOTH the app-level and cluster-level components below.
+  # - ../../../apps/services/immich/components/rclone-backup
+  # - ./components/rclone-backup
   # - ../../../apps/services/immich/components/maintenance

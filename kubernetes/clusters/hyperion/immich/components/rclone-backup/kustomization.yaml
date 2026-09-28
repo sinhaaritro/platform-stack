@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+namespace: personal
+
+resources:
+  - sealed-secret.yaml
+
+# Cluster-specific Immich backup destination (overrides the app-level default).
+# TODO: replace with the real remote:bucket/prefix once the backup location is decided.
+configMapGenerator:
+  - name: immich-backup-config
+    behavior: replace
+    literals:
+      - DESTINATION=REPLACE_ME_REMOTE:REPLACE_ME_BUCKET/immich
+generatorOptions:
+  disableNameSuffixHash: true
