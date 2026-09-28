@@ -1,149 +1,149 @@
-# Immich Database Restore Runbook
+# Immich Restore Runbook
 
-**Use Case**: Disaster recovery, database corruption, deletion, or full rebuild.
+**Use case**: disaster recovery, database corruption/deletion, or full rebuild.
 
-**Behavior**: The `daily-immich` Velero backup captures the Immich namespace **plus the app's own database dumps** (Immich v3 auto-dumps the DB daily at 02:00 UTC into `/data/backups` on the `immich-db-backup` PVC, keep-last-14). Restore = namespace-mapped Velero restore of the PVC, copy the newest dump onto the live PVC, then restore via the Immich web UI (Administration → Maintenance → Restore database backup).
-
-> **Prerequisite**: Velero and Authentik must be running (Immich login goes through Authentik OAuth). On a freshly rebuilt cluster, wait for Longhorn CSI to be fully ready before restoring (see Gotchas).
+> **Prerequisite**: Authentik must be running (Immich login goes through Authentik OAuth). On a freshly rebuilt cluster, wait for Longhorn CSI and the NFS mount to be ready before restoring.
 
 ---
 
-## Runbook Steps
+## Data layout (Immich v3)
 
-### 1. Identify Backup Name
+| Piece | Where | Backed up by |
+|---|---|---|
+| **Dataset** (media + dumps) | `immich` PVC — NFS, RWX, 50Gi, mounted at `/data` | Local: ZFS snapshots (NAS). Offsite: rclone → Cloud S3 |
+| — `upload/`, `library/` | originals + storage-template copies | as above |
+| — `profile/`, `thumbs/`, `encoded-video/` | avatars / thumbnails / transcodes | `profile` yes; `thumbs` + `encoded-video` excluded (regenerable) |
+| — `backups/` | app DB dumps (`immich-db-backup-<immich>-pg<pg>-<ts>.sql.gz`, keep 14, daily 02:00) | as above (**must** be included) |
+| **Database** | PostgreSQL 18 on a **Longhorn** PVC (SSD) — *not* on the NAS | via the app dump in `/data/backups` |
+| **K8s manifests / secrets** | Git (ArgoCD) | Git + SealedSecrets |
+
+There is **no Velero schedule for Immich**. K8s state is recovered from Git; data is recovered from the dataset + the DB dump.
+
+---
+
+## Failure scenarios
+
+Two independent halves. The **NAS half does not need Kubernetes** — never let a cluster drive a NAS rebuild. Do them in order.
+
+| Scenario | NAS intact? | Recovery |
+|---|---|---|
+| **A** — app/cluster lost | ✅ | Rebuild cluster → **[2] Restore the app + database** |
+| **B** — NAS/HDD lost | ❌ | **[1] Restore the NAS dataset** → rebuild cluster → **[2] Restore the app + database** |
+
+> **RPO**: Scenario A ≈ 1 day (last DB dump). Scenario B = the offsite cadence (monthly until changed).
+
+---
+
+## Enabling the offsite backup (once, when destination is decided)
+
+The `rclone-backup` component ships **disabled** (`suspend: true`) with a dummy destination.
+
+1. Set the destination in `kubernetes/clusters/hyperion/immich/components/rclone-backup/kustomization.yaml`:
+   ```yaml
+   configMapGenerator:
+     - name: immich-backup-config
+       behavior: replace
+       literals:
+         - DESTINATION=aws:<bucket>/immich
+   ```
+2. Uncomment **both** lines in `kubernetes/clusters/hyperion/immich/kustomization.yaml`:
+   ```
+   - ../../../apps/services/immich/components/rclone-backup
+   - ./components/rclone-backup
+   ```
+3. Flip `suspend: true` → `false` in `kubernetes/apps/services/immich/components/rclone-backup/cronjob.yaml`.
+4. Sync ArgoCD. Verify:
+   ```bash
+   kubectl -n personal get cronjob immich-rclone-backup      # SUSPEND should be False
+   kubectl -n personal get secret immich-aws-creds           # creds decrypted
+   kubectl -n personal get cm immich-backup-config -o jsonpath='{.data.DESTINATION}'
+   ```
+5. Dry-run it once:
+   ```bash
+   kubectl -n personal create job --from=cronjob/immich-rclone-backup immich-rclone-backup-manual
+   kubectl -n personal logs -f job/immich-rclone-backup-manual
+   ```
+
+> This is the in-cluster option. It can equally be owned by the NAS itself (e.g. a TrueNAS Cloud Sync task on the share, which is rclone under the hood) — same destination, same restore commands below, but it also works when Kubernetes is down. Pick one owner; do not run both.
+
+---
+
+## 1. Restore the NAS dataset (from the S3 backup)
+
+The dataset physically lives on the NAS, so restore it **on the NAS — no cluster required**. Rebuild the share first; the cluster comes later.
+
+1. Rebuild the NAS share (empty).
+2. On the NAS (or any host that can reach both S3 and the share), pull the dataset back from the offsite copy:
+   ```bash
+   rclone copy aws:<bucket>/immich /mnt/data/contents/private/immich \
+     --transfers 4 --checkers 8 --verbose
+   chown -R 1000:1000 /mnt/data/contents/private/immich
+   ```
+   This restores `upload/`, `library/`, `profile/`, `backups/`. `thumbs/` and `encoded-video/` are regenerable and not in the backup — Immich regenerates them.
+3. **Alternate path — only if the cluster is already up** and the `immich` PVC is bindable: apply the manual Job, which runs the *same* `rclone copy` into `/data`:
+   ```bash
+   kubectl apply -f kubernetes/apps/services/immich/components/rclone-backup/restore-job.yaml
+   kubectl -n personal logs -f job/immich-rclone-restore
+   kubectl -n personal delete job immich-rclone-restore
+   ```
+   The Job is **not** referenced by kustomize on purpose — ArgoCD must never auto-run it.
+
+> During a real NAS rebuild the Immich pods can't mount the `immich` PVC at all, so the Job is impossible — use the NAS-side copy.
+
+---
+
+## 2. Restore the app + database (from the app DB dump)
+
+PostgreSQL lives on a Longhorn PVC (not the NAS), so a rebuilt cluster always starts with an **empty** DB. It is repopulated from Immich's own dump in `/data/backups/` (wherever those are — on the NAS share, and restored in step 1 if the NAS was lost).
+
+1. Rebuild/bring up the cluster from Git; confirm the `immich` PVC binds to the (populated) share:
+   ```bash
+   kubectl -n personal get pvc immich
+   kubectl -n personal exec deploy/immich-server -- ls /data   # upload library profile thumbs encoded-video backups
+   ```
+2. Restore the DB from the newest `/data/backups/*.sql.gz` via the maintenance UI (see **DB restore via the maintenance UI**).
+3. Log in and verify the timeline/albums.
+
+---
+
+## DB restore via the maintenance UI
+
+Use the dump under `/data/backups/`. Immich v3 restores through its own maintenance UI/API.
+
+1. Open Immich. If it is in **maintenance mode** (unable to start normally, e.g. no admin), go to the maintenance URL printed in the server logs:
+   ```bash
+   kubectl -n personal logs deploy/immich-server | grep -i maintenance
+   ```
+2. Go to **Administration → Maintenance → Restore database backup**, pick the newest dump, and confirm.
+3. Immich: creates a restore point → wipes the DB → restores the dump → runs migrations → health-checks. On failure it **auto-rolls back** to the restore point.
+
+**Pick the right file.** `restore-point-immich-db-backup-*.sql.gz` files are snapshots Immich takes *immediately before* each restore — they reflect the **current (often empty) DB**, not your data. Always pick `immich-db-backup-*.sql.gz`.
+
+**"Server health check failed, no admin exists"** = the restored DB had no active admin. It is a *database* check — unrelated to the `profile/` folder (which only holds avatars). Verify the dump actually has an admin:
+
 ```bash
-kubectl get backups.velero.io -n backup -l velero.io/schedule-name=daily-immich --sort-by=.metadata.creationTimestamp
-```
-Use the newest `daily-immich-*` backup. Legacy `monthly-immich-*` backups contain the old plain-SQL `immich-db.sql` and are **not** restorable via the UI (they are deleted once the first `daily-immich` backup exists).
-
-### 2. Restore (namespace-mapped)
-```bash
-kubectl create ns restore
-```
-Edit `kubernetes/clusters/hyperion/velero/components/schedules/immich/restore.yaml` — replace `BACKUP_NAME` with the backup name from Step 1 — then apply:
-```bash
-kubectl apply -f kubernetes/clusters/hyperion/velero/components/schedules/immich/restore.yaml
-```
-The template carries the namespace-mapped spec (`namespaceMapping: personal → restore`, PVCs only, `existingResourcePolicy: none`, `restorePVs: true`).
-
-### 3. Verify Restore Completion
-```bash
-kubectl -n backup get restore immich-restore -o jsonpath='{.status.phase}' && echo ""
-# Expected: Completed (inspect .status via `... -o jsonpath='{.status}' | python3 -m json.tool` if not)
-kubectl -n backup get podvolumerestores.velero.io -l velero.io/restore-name=immich-restore
-# Expected: all Completed
-kubectl -n restore get pvc
-# Expected: immich-db-backup Bound (1Gi)
-```
-
-To see the Errors/Warnings:
-```bash
-kubectl get restore immich-restore -n backup -o json | python3 -c "import sys,json; d=json.load(sys.stdin); [print(json.dumps(v,indent=2)) for k,v in d.get('status',{}).items() if 'error' in k.lower() or 'warning' in k.lower()]"
-kubectl logs -n backup -l app.kubernetes.io/name=velero --tail=50 | grep -i "immich-restore"
-```
-
-### 4. Copy the Newest Dump to the Live PVC
-The `immich-db-backup` PVC is `RWX`, so two pods can share it — but a pod can only mount claims from its own namespace, so the copy hops through your machine.
-
-Spin up a reader pod on the restored PVC (`restore` ns):
-```bash
-cat <<'EOF' | kubectl apply -f -
-apiVersion: v1
-kind: Pod
-metadata:
-  name: restore-temp
-  namespace: restore
-spec:
-  containers:
-  - name: utils
-    image: busybox
-    command: ["sleep", "3600"]
-    volumeMounts:
-    - name: data
-      mountPath: /data
-  volumes:
-  - name: data
-    persistentVolumeClaim:
-      claimName: immich-db-backup
-EOF
-kubectl -n restore wait pod/restore-temp --for=condition=Ready --timeout=120s
-```
-
-Download the newest app dump and push it onto the live PVC:
-```bash
-DUMP=$(kubectl exec -n restore restore-temp -- sh -c 'ls /data/immich-db-backup-*.sql.gz | tail -1')
-kubectl cp restore/restore-temp:$DUMP /tmp/immich-dump.sql.gz
-cat <<'EOF' | kubectl apply -f -
-apiVersion: v1
-kind: Pod
-metadata:
-  name: immich-live
-  namespace: personal
-spec:
-  containers:
-  - name: utils
-    image: busybox
-    command: ["sleep", "3600"]
-    volumeMounts:
-    - name: data
-      mountPath: /data/backups
-  volumes:
-  - name: data
-    persistentVolumeClaim:
-      claimName: immich-db-backup
-EOF
-kubectl -n personal wait pod/immich-live --for=condition=Ready --timeout=120s
-kubectl cp /tmp/immich-dump.sql.gz personal/immich-live:/data/backups/
-kubectl -n personal exec immich-live -- ls -lh /data/backups/
-```
-
-**Verify the dump landed**:
-```bash
-kubectl -n personal exec deploy/immich-server -- ls -lh /data/backups/
-# Expected: immich-db-backup-v<immich-version>-pg<pg-version>-<timestamp>.sql.gz
-```
-
-### 5. Restore via the Immich UI
-1. Log in to Immich (via Authentik) and go to **Administration → Maintenance**.
-2. Expand **Restore database backup** — the copied dump appears with its version and creation date.
-3. Click **Restore** and confirm.
-4. The server: creates a restore point of the current DB → wipes and restores the dump → runs any migrations → health-checks. On failure (e.g. corrupted dump), it rolls back to the restore point automatically.
-
-### 6. Verify Data Restored
-```bash
-kubectl -n personal get deploy immich-server
-# Expected: 1/1 Running
-```
-Log in with existing accounts and check the timeline/albums are present. The dump is only the database — media (photos/videos) is not in Velero backups.
-
-### 7. Cleanup
-```bash
-kubectl -n backup delete restore immich-restore
-kubectl -n restore delete pod restore-temp
-kubectl delete ns restore
-kubectl -n personal delete pod immich-live
-sed -i 's/^  backupName: .*/  backupName: BACKUP_NAME # <-- REPLACE with actual backup name/' \
-  kubernetes/clusters/hyperion/velero/components/schedules/immich/restore.yaml
+# in the immich-server pod
+zcat /data/backups/<dump>.sql.gz | \
+  awk '/^COPY public."user" /{f=1;next} f&&/^\\\.$/{exit} f{print}' | cut -f1,2,6,8,15
+# cols: id, email, isAdmin, deletedAt, status
 ```
 
 ---
 
 ## Notes & Gotchas
 
-- **Version pinning**: the dump filename embeds the Immich version (`immich-db-backup-v3.1.0-pg18.1-...sql.gz`). Immich does not support downgrades — restore a dump with the same or newer server version. The chart image is pinned in git, so a rebuilt cluster boots the same version that wrote the dump.
-- **Dump freshness**: the app dumps the DB daily at 02:00 UTC (keep last 14). `daily-immich` runs at 03:00 UTC — 1h after the dump — so every Velero backup captures a ≤1h-old dump. DB RPO = 1 day.
-- **Triggering a dump manually**: Administration → Job Queues → **Create job** → **Create Database Dump** (API: `POST https://immich.hyperion.aritrosinha.dpdns.org/api/jobs` with `{"name": "backup-database"}`, authenticated with an admin session cookie or API key). Logs show `Database Backup Starting/Success` in the `immich-server` pod.
-- **Media is not in Velero backups** (library/upload/thumbs excluded by design; `immich-library` is NAS-backed). To restore media after a wipe: uncomment the maintenance component (`../../../apps/services/immich/components/maintenance` in `kubernetes/clusters/hyperion/immich/kustomization.yaml` — scales both deployments to 0), then run the rclone restore job (`kubernetes/clusters/hyperion/immich/components/rclone-archive/restore-job.yaml`) to copy `nas_backup/immich` → `/data`, then revert the maintenance component.
-- **Maintenance mode**: optional for the DB restore — the UI restore happens on the running app and handles the wipe internally (restore point protects you). Only needed for the media rclone restore.
-- **Freshly rebuilt cluster**: the restore can hang `InProgress` if Longhorn's CSI driver isn't registered yet (`CSINode <node> does not contain driver driver.longhorn.io`). It self-heals in ~4-5 min once `kubectl get csinodes` shows the driver.
-- **OAuth dependency**: Immich login goes through Authentik — restore Authentik first after a full rebuild.
-- **RWX PVC**: `immich-db-backup` is `ReadWriteMany`, so no multi-attach races (unlike the Authentik dump PVC).
-- **In-place restore vs ArgoCD**: the namespace-mapped restore is the safe default (the live PVC carries the ArgoCD tracking annotation, so in-place restore races ArgoCD's self-heal). In-place is only safe when git matches the cluster (right after a full rebuild).
+- **Version pinning**: the dump filename embeds the Immich + PG version (`immich-db-backup-v3.1.0-pg18.4-...sql.gz`). Immich does not support downgrades — restore with the same or newer server version. The chart image is pinned in Git, so a rebuilt cluster boots the same version.
+- **DB dump freshness**: daily at 02:00 UTC, keep 14. RPO for the DB = 1 day.
+- **Triggering a dump manually**: `POST /api/jobs` with `{"name":"backup-database"}` (admin session/API key). Logs show `Database Backup Starting/Success`.
+- **The DB is not on the NAS**: a rebuilt cluster always starts with an empty Postgres — the dump in `backups/` is the bridge. The NAS ZFS snapshot (B) protects against data corruption/deletion while the HDD survives; it does not contain the DB.
+- **Offsite (C) is opt-in**: until the offsite job is enabled/owned, a NAS/site loss is unrecoverable. Treat NAS recovery as unavailable until then.
+- **`profile/` is cosmetic** (avatars); `thumbs/` and `encoded-video/` are regenerable — deliberately excluded from the offsite sync.
+- **OAuth dependency**: restore Authentik before Immich after a full rebuild.
 
 ---
 
 ## Drill Log
 
-| Date | Backup Used | Restore | Import | Result |
-|---|---|---|---|---|
-| _pending_ | `daily-immich-...` | Completed | UI restore | — |
+| Date | Backup Used | Restore | Result |
+|---|---|---|---|
+| _pending_ | `immich-db-backup-...` | UI restore | — |

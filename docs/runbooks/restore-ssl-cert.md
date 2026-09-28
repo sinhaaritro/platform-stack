@@ -4,7 +4,31 @@
 
 **Behavior**: Restores labeled Certificates and their TLS Secrets **in-place** across all namespaces using `existingResourcePolicy: update`. Cert-manager revalidates the restored keypair (dnsNames match) → stays Ready, **no new LE orders**.
 
-> **Prerequisite**: Velero and Cert Manager must be running in the cluster. The restore can run as soon as Velero is up — it is order-independent (apps and cert-manager do not need to be running first).
+> **CRITICAL — Pause cert-manager first (Step 0)**: The restore is **not** order-independent with respect to cert-manager. If cert-manager is running while the TLS Secrets are missing, it immediately starts **issuing new certificates** (creates `CertificateRequest`/`Order`/`Challenge` and sets `Issuing=True`). Restoring the Secrets afterwards does **not** cancel that in-flight issuance — the Certificate shows `Ready=True` but stays stuck in `Issuing=True` ("still loading" in UIs) until the order completes, and you get avoidable Let's Encrypt orders. **Scale cert-manager to 0 before restoring, then bring it back up only after the restore is `Completed`.**
+
+---
+
+## Step 0 — Pause cert-manager (MANDATORY before restore)
+
+Scale the cert-manager Deployments (`cert-manager`, `cert-manager-cainjector`, `cert-manager-webhook`) to 0 so it cannot race the restore. Do this through GitOps — ArgoCD self-heal will revert a raw `kubectl scale`.
+
+1. Enable the maintenance component for the cluster (e.g. `hyperion`, and any other cluster being restored):
+
+   `kubernetes/clusters/hyperion/cert-manager/kustomization.yaml` — uncomment:
+   ```yaml
+   - ../../../apps/infrastructure/cert-manager/components/maintenance
+   ```
+   This applies `apps/infrastructure/cert-manager/components/maintenance/patch-scale-zero.yaml`, setting `replicas: 0` on all three Deployments.
+
+2. Commit, push, and let ArgoCD sync (or `kubectl apply -k kubernetes/clusters/hyperion/cert-manager/`).
+
+3. **Verify cert-manager is actually down before continuing** — do not proceed until both commands show 0 replicas and no pods:
+   ```bash
+   kubectl -n networking get deploy cert-manager cert-manager-cainjector cert-manager-webhook
+   kubectl -n networking get pods -l app.kubernetes.io/instance=cert-manager
+   ```
+
+> **Full cluster rebuild**: enable the maintenance component in Git **before** the cluster is rebuilt. Otherwise ArgoCD may deploy cert-manager before you can pause it, re-creating the race described above.
 
 ---
 
@@ -47,7 +71,21 @@ kubectl get restore ssl-cert-restore -n backup -o json | python3 -c "import sys,
 kubectl logs -n backup -l app.kubernetes.io/name=velero --tail=50 | grep -i "ssl-cert-restore"
 ```
 
-### 4. Verify Certificates Are Ready
+### 4. Resume cert-manager
+
+**Only after Step 3 shows `Completed`**, remove the maintenance patch so cert-manager comes back up and reconciles the restored Secrets:
+
+1. Re-comment the maintenance component in `kubernetes/clusters/hyperion/cert-manager/kustomization.yaml`:
+   ```yaml
+   # - ../../../apps/infrastructure/cert-manager/components/maintenance
+   ```
+2. Commit, push, let ArgoCD sync (or `kubectl apply -k kubernetes/clusters/hyperion/cert-manager/`).
+3. Verify it is running again:
+   ```bash
+   kubectl -n networking get deploy cert-manager cert-manager-cainjector cert-manager-webhook
+   ```
+
+### 5. Verify Certificates Are Ready
 Confirm all restored certificates are in Ready state:
 ```bash
 kubectl get certificate -A -l backuplabel.certificate=true \
@@ -61,7 +99,7 @@ If 0, then cert-manager made zero outgoing calls to Let's Encrypt when the clust
 kubectl get orders.acme.cert-manager.io -A --no-headers | wc -l
 ```
 
-### 5. Verify TLS Is Served
+### 6. Verify TLS Is Served
 ```bash
 for h in alertmanager.hyperion.aritrosinha.dpdns.org \
          alloy.hyperion.aritrosinha.dpdns.org \
@@ -81,14 +119,14 @@ done
 ```
 **Expected**: All hosts return `200`.
 
-### 6. Traefik Boot-Order Race (if needed)
+### 7. Traefik Boot-Order Race (if needed)
 If any host shows `TRAEFIK DEFAULT CERT` instead of the real certificate, Traefik booted before the TLS secrets existed. Fix with a restart:
 ```bash
 kubectl -n networking rollout restart deployment/traefik
 ```
-Then re-run the curl loop from Step 5.
+Then re-run the curl loop from Step 6.
 
-### 7. Cleanup (CLI restore only)
+### 8. Cleanup (CLI restore only)
 If you used the CLI restore (Option A), clean up the restore object:
 ```bash
 kubectl delete restore ssl-cert-restore -n backup
