@@ -1,0 +1,42 @@
+# playbooks/20-runtimes.yml
+---
+# ==============================================================================
+# APPLICATION RUNTIMES LAYER
+# Target: Hosts tagged docker, node, bun, python, git.
+# Purpose: Language runtimes and tooling for application development.
+# ==============================================================================
+
+- name: Install Docker Engine (Standalone)
+  hosts: docker
+  tags: [docker]
+  become: true
+  roles:
+    - role: docker
+
+- name: Install Node.js Runtime
+  hosts: node
+  tags: [node]
+  become: true
+  roles:
+    - role: node
+
+- name: Install Bun Runtime
+  hosts: bun
+  tags: [bun]
+  become: true
+  roles:
+    - role: bun
+
+- name: Install Python Runtime
+  hosts: python
+  tags: [python]
+  become: true
+  roles:
+    - role: python
+
+- name: Install Git
+  hosts: git
+  tags: [git]
+  become: true
+  roles:
+    - role: git

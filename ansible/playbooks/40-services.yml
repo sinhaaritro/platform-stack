@@ -1,0 +1,65 @@
+# playbooks/40-services.yml
+---
+# ==============================================================================
+# PLATFORM SERVICES LAYER
+# Target: adguard, netbird, cloudflared, nas hosts.
+# Purpose: DNS, VPN, tunnel, and storage-client services.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# DNS LAYER — AdGuard Home
+# ------------------------------------------------------------------------------
+- name: Configure AdGuard Home DNS
+  hosts: adguard
+  tags: adguard
+  become: true
+  roles:
+    - role: adguard
+
+# ------------------------------------------------------------------------------
+# VPN LAYER — NetBird Mesh Client
+# ------------------------------------------------------------------------------
+- name: Configure NetBird Mesh Client
+  hosts: netbird
+  tags: netbird
+  become: true
+  roles:
+    - role: netbird
+
+# ------------------------------------------------------------------------------
+# TUNNEL LAYER — Cloudflare Tunnel Daemon
+# ------------------------------------------------------------------------------
+- name: Configure Cloudflare Tunnel Daemon
+  hosts: cloudflared
+  tags: cloudflared
+  become: true
+  roles:
+    - role: cloudflared
+
+# ------------------------------------------------------------------------------
+# STORAGE LAYER — NAS client (NFS mount)
+# Mounts the host export /WD4TB/shared/v1.
+# ------------------------------------------------------------------------------
+- name: Configure NAS client (NFS mount)
+  hosts: nas
+  tags: nas
+  become: true
+  roles:
+    - role: nas
+
+# ==============================================================================
+# DISABLED / FUTURE LAYERS
+# ==============================================================================
+# - name: Configure Web Server
+#   hosts: web_server
+#   tags: web_server
+#   become: true
+#   roles:
+#     - role: nginx
+#
+# - name: Configure Postgres Database
+#   hosts: postgres
+#   tags: postgres
+#   become: true
+#   roles:
+#     - role: postgres

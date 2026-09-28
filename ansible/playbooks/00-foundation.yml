@@ -1,0 +1,22 @@
+# playbooks/00-foundation.yml
+---
+# ==============================================================================
+# FOUNDATION LAYER
+# Target: All Managed Hosts (VMs + LXC Containers) and dev hosts.
+# Purpose: Universal baseline (timezone, locale, hostname, core packages)
+#          plus interactive developer utilities.
+# ==============================================================================
+
+- name: Apply Base Configuration
+  hosts: vm:lxc
+  tags: [base]
+  become: true
+  roles:
+    - role: base # System basics (Timezone, Locales, Packages)
+
+- name: Install Developer Utilities
+  hosts: dev
+  tags: [dev]
+  become: true
+  roles:
+    - role: dev # vim, htop, dnsutils, etc.

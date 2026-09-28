@@ -1,0 +1,90 @@
+# playbooks/30-kubernetes.yml
+---
+# ==============================================================================
+# KUBERNETES LAYER
+# Target: kind, kubeadm, k3s hosts and the management node.
+# Purpose: Provision and manage dev (kind), kubeadm, and k3s clusters,
+#          then install the ArgoCD management layer.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# DEV/TEST KUBERNETES (KIND)
+# Ephemeral clusters. Manual app deployment for testing.
+# ------------------------------------------------------------------------------
+- name: Configure Dev Kubernetes (Kind)
+  hosts: kind
+  tags: kind
+  become: true
+  roles:
+    - role: docker # Runtime Dependency (Must run first)
+    - role: k8s_repo # Manage the official Kubernetes Apt repositories.
+    - role: kind # Cluster Manager (Provisions the cluster)
+    - role: helm # Package Manager (Only installs Helm)
+
+# ------------------------------------------------------------------------------
+# PRODUCTION KUBERNETES (KUBEADM) - CONTROL PLANE BOOTSTRAP
+# Serial: 1 ensures HA clusters initialize the 1st node completely
+# before the 2nd/3rd node try to join it.
+# ------------------------------------------------------------------------------
+- name: Bootstrap Kubeadm Control Plane
+  hosts: "k_control:&kubeadm"
+  tags: [k_control, kubeadm]
+  become: true
+  serial: 1
+  roles:
+    - role: docker # Ensure Runtime
+    - role: k8s_repo # Ensure Repos
+    - role: kubeadm # Ensure Binaries/Kernel
+    - role: kubeadm_cluster # Execute Init/CNI/Control-Join
+    - role: storage_local # Setup Storage Class
+    - role: helm # Ensure Helm
+
+# ------------------------------------------------------------------------------
+# PRODUCTION KUBERNETES (KUBEADM) - WORKER JOIN
+# Parallel is fine here - all workers can join at once.
+# ------------------------------------------------------------------------------
+- name: Join Kubeadm Worker Nodes
+  hosts: "k_worker:&kubeadm"
+  tags: [k_worker, kubeadm]
+  become: true
+  roles:
+    - role: docker
+    - role: k8s_repo
+    - role: kubeadm
+    - role: kubeadm_cluster # Execute Worker-Join
+
+# ------------------------------------------------------------------------------
+# PRODUCTION KUBERNETES (K3S) - CONTROL PLANE BOOTSTRAP
+# ------------------------------------------------------------------------------
+- name: Bootstrap K3s Control Plane
+  hosts: "k_control:&k3s"
+  tags: [k_control, k3s]
+  become: true
+  serial: 1
+  roles:
+    - role: k3s # Ensure Dependencies/Script
+    - role: k3s_cluster # Execute Init/Control-Join
+    - role: storage_local # Setup Storage Class
+    - role: helm # Ensure Helm
+
+# ------------------------------------------------------------------------------
+# PRODUCTION KUBERNETES (K3S) - WORKER JOIN
+# ------------------------------------------------------------------------------
+- name: Join K3s Worker Nodes
+  hosts: "k_worker:&k3s"
+  tags: [k_worker, k3s]
+  become: true
+  roles:
+    - role: k3s
+    - role: k3s_cluster # Execute Worker-Join
+
+# ------------------------------------------------------------------------------
+# PRODUCTION KUBERNETES - MANAGEMENT LAYER
+# Installs ArgoCD. (UI exposure and Fleet connect delayed).
+# ------------------------------------------------------------------------------
+- name: Configure Management Layer (ArgoCD)
+  hosts: k_management:&k_control
+  tags: argocd
+  become: true
+  roles:
+    - role: argocd

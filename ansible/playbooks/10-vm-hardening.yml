@@ -1,0 +1,18 @@
+# playbooks/10-vm-hardening.yml
+---
+# ==============================================================================
+# VM HARDENING LAYER
+# Target: Virtual Machines Only (Group: vm)
+# Purpose: Security, monitoring, user accounts, and disk mounts.
+#          Not applied to single-purpose LXC containers.
+# ==============================================================================
+
+- name: Apply Security and Monitoring Configuration
+  hosts: vm
+  tags: [vm]
+  become: true
+  roles:
+    - role: security # SSH Hardening, UFW, Fail2Ban
+    - role: monitoring # Node Exporter, QEMU Agent
+    - role: users # User creation, Git config, SSH Keys
+    - role: storage_setup # Mount additional disks (e.g., /dev/sdb -> /data/storage)
