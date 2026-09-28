@@ -1,4 +1,9 @@
-storage_setup_storage_mounts: >-
-  {{ storage_mounts | default([
-    { 'device': '/dev/sdb', 'path': '/data/storage', 'fstype': 'ext4' }
-  ]) }}
+# Data disks to format+mount. Provided per-host by the generated inventory
+# (from OpenTofu `additional_disks`). Each entry identifies its disk by the
+# stable Proxmox `interface` (resolved via /dev/disk/by-id), never by the
+# volatile in-guest sda/sdb name.
+#
+# Default is an empty list on purpose: a host with no explicit storage_mounts
+# is left alone. We never fall back to a hardcoded device name, because a
+# wrong guess can target the OS/root disk.
+storage_setup_storage_mounts: "{{ storage_mounts | default([]) }}"

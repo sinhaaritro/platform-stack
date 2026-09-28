@@ -60,6 +60,10 @@ resource "local_file" "ansible_inventory" {
               ansible_user     = try(local.host_index[host].user_account_username, "root")
               ansible_password = try(local.host_index[host].ansible_password, null)
             },
+            # Host-level data-disk mounts (only emitted when the host has any).
+            (length(try(local.host_index[host].storage_mounts, [])) > 0) ? {
+              storage_mounts = local.host_index[host].storage_mounts
+            } : {},
             # Merge in the variables for this specific group from the host's definition
             try(local.host_index[host].ansible_groups[group_name], {})
           )

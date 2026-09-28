@@ -219,6 +219,15 @@ locals {
       {
         ipv4_address          = try([for addr in flatten(module.proxmox_vms[name].vm_details.ipv4_addresses) : addr if addr != "127.0.0.1"][0], "IP_PENDING")
         user_account_username = vm.user_account_username
+        # Data disks for the Ansible storage_setup role. The device is
+        # identified by its stable Proxmox interface (by-id), never by the
+        # volatile in-guest sda/sdb name, so disk enumeration order cannot
+        # cause the role to target the wrong disk.
+        storage_mounts = [for d in coalesce(vm.additional_disks, []) : {
+          interface = d.interface
+          path      = try(d.mount_path, "/data/storage")
+          fstype    = try(d.fstype, "ext4")
+        }]
       }
     )],
     [for name, lxc in module.normalizer.final_lxc_list : merge(

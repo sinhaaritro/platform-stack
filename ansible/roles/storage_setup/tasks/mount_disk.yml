@@ -1,18 +1,39 @@
 ---
+- name: Resolve data disk device from stable by-id symlink
+  ansible.builtin.shell: "readlink -f /dev/disk/by-id/*_drive-{{ mount_item.interface }} 2>/dev/null | head -n1"
+  register: storage_setup_device_resolve
+  changed_when: false
+  failed_when: false
+  when: mount_item.interface is defined and mount_item.interface | length > 0
+
+- name: Fail if data disk interface does not resolve to a device
+  ansible.builtin.fail:
+    msg: "Data disk interface '{{ mount_item.interface }}' not found under /dev/disk/by-id on {{ inventory_hostname }} — refusing to touch any disk"
+  when:
+    - mount_item.interface is defined and mount_item.interface | length > 0
+    - storage_setup_device_resolve.stdout | default('') | trim | length == 0
+
+- name: Set resolved data disk device
+  ansible.builtin.set_fact:
+    storage_setup_device: >-
+      {{ (storage_setup_device_resolve.stdout | default('') | trim)
+         if (mount_item.interface is defined and mount_item.interface | length > 0)
+         else mount_item.device }}
+
 - name: Check disk device existence
   ansible.builtin.stat:
-    path: "{{ mount_item.device }}"
+    path: "{{ storage_setup_device }}"
   register: storage_setup_device_stat
 
 - name: Check if device is already mounted
-  ansible.builtin.command: "findmnt -rn -S {{ mount_item.device }} -o TARGET"
+  ansible.builtin.command: "findmnt -rn -S {{ storage_setup_device }} -o TARGET"
   register: storage_setup_mount_check
   failed_when: false
   changed_when: false
   when: storage_setup_device_stat.stat.exists
 
 - name: Get current filesystem type of device
-  ansible.builtin.command: "blkid -s TYPE -o value {{ mount_item.device }}"
+  ansible.builtin.command: "blkid -s TYPE -o value {{ storage_setup_device }}"
   register: storage_setup_current_fstype
   failed_when: false
   changed_when: false
@@ -49,7 +70,7 @@
     - storage_setup_current_fstype.stdout | default('') != (mount_item.fstype | default('ext4'))
 
 - name: Wipe existing partition table signatures
-  ansible.builtin.command: "wipefs -a {{ mount_item.device }}"
+  ansible.builtin.command: "wipefs -a {{ storage_setup_device }}"
   when:
     - storage_setup_device_stat.stat.exists
     - storage_setup_mount_check.stdout | default('') == ''
@@ -58,7 +79,7 @@
 - name: Create filesystem on device
   community.general.filesystem:
     fstype: "{{ mount_item.fstype | default('ext4') }}"
-    dev: "{{ mount_item.device }}"
+    dev: "{{ storage_setup_device }}"
     force: "{{ mount_item.force | default(omit) }}"
   when:
     - storage_setup_device_stat.stat.exists
@@ -75,7 +96,7 @@
 - name: Mount device to path
   ansible.posix.mount:
     path: "{{ mount_item.path }}"
-    src: "{{ mount_item.device }}"
+    src: "{{ storage_setup_device }}"
     fstype: "{{ mount_item.fstype | default('ext4') }}"
     state: mounted
   when: storage_setup_device_stat.stat.exists
