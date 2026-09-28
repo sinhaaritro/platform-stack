@@ -18,3 +18,27 @@
     state: present
   when: ansible_facts['os_family'] == "Alpine"
   tags: [git, packages]
+
+- name: Configure global Git user name
+  community.general.git_config:
+    name: user.name
+    value: "{{ git_user_name }}"
+    scope: global
+  environment:
+    HOME: "{{ git_user_home }}"
+  become: true
+  become_user: "{{ git_user }}"
+  when: git_user_name | length > 0
+  tags: [git, config]
+
+- name: Configure global Git user email
+  community.general.git_config:
+    name: user.email
+    value: "{{ git_user_email }}"
+    scope: global
+  environment:
+    HOME: "{{ git_user_home }}"
+  become: true
+  become_user: "{{ git_user }}"
+  when: git_user_email | length > 0
+  tags: [git, config]

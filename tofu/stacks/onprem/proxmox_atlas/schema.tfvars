@@ -323,7 +323,10 @@ resources = {
             "bun_version" = "latest"
           }
           "python" = {}
-          "git"    = {}
+          "git" = {
+            "git_user_name"  = "sinhaaritro"
+            "git_user_email" = "sinhaaritro@gmail.com"
+          }
         }
         vm_config = {
           ipv4_address = "192.168.0.40/24"

@@ -7,3 +7,11 @@ git_packages:
 # Alpine equivalents.
 git_packages_alpine:
   - git
+
+# Global Git identity. Leave blank to skip configuration.
+git_user_name: ""
+git_user_email: ""
+
+# User account whose global Git config is managed.
+git_user: "{{ ansible_user }}"
+git_user_home: "{{ user_home_dir | default('/home/' ~ git_user) }}"
