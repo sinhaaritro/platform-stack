@@ -26,7 +26,11 @@ resource "null_resource" "lxc_template_customizer" {
   triggers = {
     template_url = each.value.url
     content_hash = each.value.hash
-    file_state   = fileexists(each.value.target_path) ? "exists" : "missing"
+    script_hash  = sha256(templatefile("${path.module}/templates/customize_lxc_${contains(["debian", "ubuntu"], lower(each.value.os_type)) ? "debian" : "alpine"}.sh.tftpl", {
+      template_url    = each.value.url
+      cache_dir       = var.local_cache_dir
+      target_filename = each.value.filename
+    }))
   }
 
   provisioner "local-exec" {
