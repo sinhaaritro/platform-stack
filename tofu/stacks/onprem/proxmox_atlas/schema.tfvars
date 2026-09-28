@@ -67,6 +67,7 @@ resources = {
     enabled     = true
     type        = "vm"
     node_name   = "atlas"
+    on_boot     = true
     description = "Kubernets servers. Ubuntu 26.04."
     tags        = ["hyperion", "ansible", "ubuntu", "k3s", "k_management"]
     ansible_groups = {
@@ -105,14 +106,14 @@ resources = {
           cpu_cores    = 12
           memory_size  = 16384
           disk_size    = 32
-           additional_disks = [
-             {
-               interface    = "scsi1"
-               datastore_id = "WD4TB"
-               size         = 250
-               ssd          = true
-             }
-           ]
+          additional_disks = [
+            {
+              interface    = "scsi1"
+              datastore_id = "WD4TB"
+              size         = 250
+              ssd          = true
+            }
+          ]
         }
       },
       "hyperion-02" = {
@@ -154,6 +155,7 @@ resources = {
     enabled     = false
     type        = "vm"
     node_name   = "atlas"
+    on_boot     = true
     description = "Kubernets servers. Ubuntu 26.04."
     tags        = ["quanta", "ansible", "ubuntu", "k3s", "k_fleet_local", "k_quanta"]
     ansible_groups = {
@@ -232,6 +234,7 @@ resources = {
     enabled     = false
     type        = "vm"
     node_name   = "atlas"
+    on_boot     = true
     description = "Kubernets servers. Ubuntu 26.04."
     tags        = ["elysia", "ansible", "ubuntu", "k3s", "k_management"]
     ansible_groups = {
@@ -297,7 +300,7 @@ resources = {
       }
       "dev"    = {}
       "docker" = {}
-      "node"   = {
+      "node" = {
         "node_version" = "22"
         "bun_version"  = "latest"
       }
@@ -377,7 +380,7 @@ resources = {
     type            = "vm"
     node_name       = "atlas"
     description     = "Primary database servers. Ubuntu 26.04."
-    tags        = ["db", "ansible"]
+    tags            = ["db", "ansible"]
     cloud_init_user = "db_admins"
 
     vm_config = {
