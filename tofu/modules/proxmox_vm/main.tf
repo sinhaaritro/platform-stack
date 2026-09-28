@@ -20,6 +20,7 @@ resource "proxmox_virtual_environment_vm" "module_vm" {
   bios    = "ovmf"
   efi_disk {
     datastore_id      = var.disk_datastore_id
+    type              = "4m"
     pre_enrolled_keys = true
   }
   scsi_hardware = "virtio-scsi-pci"
@@ -136,6 +137,7 @@ resource "proxmox_virtual_environment_vm" "module_vm" {
 #   bios    = "ovmf"
 #   efi_disk {
 #     datastore_id      = "local-thin"
+#     type              = "4m"
 #     pre_enrolled_keys = true
 #   }
 #   scsi_hardware = "virtio-scsi-pci"
