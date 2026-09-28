@@ -1,0 +1,68 @@
+# tasks/main.yml
+---
+- name: Install nvm prerequisites (Debian)
+  ansible.builtin.apt:
+    name: "{{ node_packages }}"
+    state: present
+    update_cache: true
+  when: ansible_facts['os_family'] == "Debian"
+  tags: [node, packages]
+
+- name: Check if nvm is installed
+  ansible.builtin.stat:
+    path: "{{ node_nvm_dir }}/nvm.sh"
+  register: node_nvm_installed
+  become: true
+  become_user: "{{ node_user }}"
+  tags: [node, nvm]
+
+- name: Download nvm install script
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/nvm-sh/nvm/{{ node_nvm_version }}/install.sh"
+    dest: /tmp/nvm-install.sh
+    mode: "0755"
+  when: not node_nvm_installed.stat.exists
+  tags: [node, nvm]
+
+- name: Install nvm
+  ansible.builtin.shell: /tmp/nvm-install.sh
+  args:
+    executable: /bin/bash
+    chdir: "{{ node_user_home }}"
+  environment:
+    NVM_DIR: "{{ node_nvm_dir }}"
+  become: true
+  become_user: "{{ node_user }}"
+  when: not node_nvm_installed.stat.exists
+  changed_when: true
+  tags: [node, nvm]
+
+- name: Check for an installed Node.js runtime for version {{ node_version }}
+  ansible.builtin.shell: |
+    . "{{ node_nvm_dir }}/nvm.sh"
+    v=$(nvm version {{ node_version }})
+    [ "$v" != "N/A" ] && echo present || echo absent
+  args:
+    executable: /bin/bash
+  environment:
+    NVM_DIR: "{{ node_nvm_dir }}"
+  register: node_version_check
+  changed_when: false
+  become: true
+  become_user: "{{ node_user }}"
+  tags: [node, nvm]
+
+- name: Install Node.js via nvm for version {{ node_version }}
+  ansible.builtin.shell: |
+    . "{{ node_nvm_dir }}/nvm.sh"
+    nvm install {{ node_version }}
+    nvm alias default {{ node_version }}
+  args:
+    executable: /bin/bash
+  environment:
+    NVM_DIR: "{{ node_nvm_dir }}"
+  become: true
+  become_user: "{{ node_user }}"
+  when: "'absent' in node_version_check.stdout"
+  changed_when: true
+  tags: [node, nvm]

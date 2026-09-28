@@ -1,0 +1,86 @@
+# tasks/main.yml
+---
+- name: Install Bun prerequisites (Debian)
+  ansible.builtin.apt:
+    name: "{{ bun_packages }}"
+    state: present
+    update_cache: true
+  when: ansible_facts['os_family'] == "Debian"
+  tags: [bun, packages]
+
+- name: Install Bun prerequisites (Alpine)
+  community.general.apk:
+    name: "{{ bun_packages_alpine | default(bun_packages) }}"
+    state: present
+  when: ansible_facts['os_family'] == "Alpine"
+  tags: [bun, packages]
+
+- name: Resolve latest Bun release
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/oven-sh/bun/releases/latest
+    return_content: true
+  register: bun_latest_release
+  when: bun_version == "latest"
+  check_mode: false
+  tags: [bun]
+
+- name: Compute desired Bun version
+  ansible.builtin.set_fact:
+    bun_desired_version: >-
+      {{
+        (bun_latest_release.json.tag_name | regex_replace('^bun-v', ''))
+        if bun_version == 'latest'
+        else (bun_version | regex_replace('^v', ''))
+      }}
+  tags: [bun]
+
+- name: Check if Bun is installed
+  ansible.builtin.stat:
+    path: "{{ bun_install_dir }}/bun"
+  register: bun_bin
+  tags: [bun]
+
+- name: Get installed Bun version
+  ansible.builtin.command: "{{ bun_install_dir }}/bun --version"
+  register: bun_current_version
+  changed_when: false
+  failed_when: false
+  when: bun_bin.stat.exists
+  tags: [bun]
+
+- name: Install Bun
+  # Skip if the binary already exists at the desired version.
+  when: >
+    not bun_bin.stat.exists or
+    (bun_desired_version not in bun_current_version.stdout | default(''))
+  block:
+    - name: Create temporary directory for Bun
+      ansible.builtin.file:
+        path: /tmp/bun_install
+        state: directory
+        mode: "0755"
+      tags: [bun]
+
+    - name: Download and unarchive Bun
+      ansible.builtin.unarchive:
+        src: >-
+          https://github.com/oven-sh/bun/releases/download/bun-v{{ bun_desired_version }}/bun-linux-{{ bun_arch_map[ansible_facts['architecture']] }}.zip
+        dest: /tmp/bun_install
+        remote_src: true
+      tags: [bun]
+
+    - name: Install Bun binary to system path
+      ansible.builtin.copy:
+        src: "/tmp/bun_install/bun-linux-{{ bun_arch_map[ansible_facts['architecture']] }}/bun"
+        dest: "{{ bun_install_dir }}/bun"
+        mode: "0755"
+        owner: root
+        group: root
+        remote_src: true
+      tags: [bun]
+
+    - name: Cleanup temporary files
+      ansible.builtin.file:
+        path: /tmp/bun_install
+        state: absent
+      tags: [bun]

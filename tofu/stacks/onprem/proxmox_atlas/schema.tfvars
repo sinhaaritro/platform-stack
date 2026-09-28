@@ -300,10 +300,6 @@ resources = {
       }
       "dev"    = {}
       "docker" = {}
-      "node" = {
-        "node_version" = "22"
-        "bun_version"  = "latest"
-      }
     }
 
     vm_config = {
@@ -317,7 +313,18 @@ resources = {
     nodes = {
       "agora-01" = {
         vm_id           = 1040
+        tags            = ["node", "python", "bun", "git"]
         cloud_init_user = "dev"
+        ansible_groups = {
+          "node" = {
+            "node_version" = "26"
+          }
+          "bun" = {
+            "bun_version" = "latest"
+          }
+          "python" = {}
+          "git"    = {}
+        }
         vm_config = {
           ipv4_address = "192.168.0.40/24"
         }

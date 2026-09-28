@@ -1,0 +1,9 @@
+# defaults/main.yml
+---
+# Git packages installed on Debian-family systems.
+git_packages:
+  - git
+
+# Alpine equivalents.
+git_packages_alpine:
+  - git

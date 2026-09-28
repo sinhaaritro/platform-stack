@@ -1,0 +1,18 @@
+# defaults/main.yml
+---
+# Bun version to install. Use "latest" to resolve the newest GitHub release,
+# or pin an exact version (e.g. "1.1.38" or "v1.1.38").
+bun_version: "latest"
+
+# Where the Bun binary is installed.
+bun_install_dir: /usr/local/bin
+
+# Repository prerequisites (unzip is required to extract release assets).
+bun_packages:
+  - curl
+  - unzip
+
+# Architecture mapping for Bun release assets.
+bun_arch_map:
+  x86_64: "x64"
+  aarch64: "arm64"

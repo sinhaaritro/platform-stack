@@ -1,0 +1,23 @@
+# meta/main.yml
+---
+galaxy_info:
+  author: Aritro
+  role_name: git
+  namespace: internal
+  description: Installs the Git version control system.
+  company: None
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - git
+    - vcs
+    - development
+
+dependencies: []

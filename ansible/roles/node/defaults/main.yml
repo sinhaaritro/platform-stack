@@ -1,0 +1,18 @@
+# defaults/main.yml
+---
+# Node.js major version to install via nvm (e.g. "26", "22", or "lts/*").
+node_version: "26"
+
+# nvm release to install.
+node_nvm_version: "v0.40.8"
+
+# User account that owns the nvm installation.
+node_user: "{{ ansible_user }}"
+node_user_home: "{{ user_home_dir | default('/home/' ~ node_user) }}"
+node_nvm_dir: "{{ node_user_home }}/.nvm"
+
+# Prerequisites required by the nvm installer.
+node_packages:
+  - bash
+  - curl
+  - ca-certificates

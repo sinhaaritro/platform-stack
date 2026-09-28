@@ -57,16 +57,52 @@
     - role: docker
 
 # ==============================================================================
-# PLAY 3B: NODE.JS / BUN RUNTIME
-# Target: Hosts in the 'node' inventory group.
-# Purpose: Install Node.js LTS and Bun for application development.
+# PLAY 3B: NODE.JS RUNTIME
+# Target: Hosts tagged 'node'.
+# Purpose: Install the Node.js runtime for application development.
 # ==============================================================================
-- name: Install Node.js and Bun Runtime
+- name: Install Node.js Runtime
   hosts: node
   tags: [node]
   become: true
   roles:
     - role: node
+
+# ==============================================================================
+# PLAY 3C: BUN RUNTIME
+# Target: Hosts tagged 'bun'.
+# Purpose: Install the Bun JavaScript runtime and package manager.
+# ==============================================================================
+- name: Install Bun Runtime
+  hosts: bun
+  tags: [bun]
+  become: true
+  roles:
+    - role: bun
+
+# ==============================================================================
+# PLAY 3D: PYTHON RUNTIME
+# Target: Hosts tagged 'python'.
+# Purpose: Install Python 3, pip, and venv for application development.
+# ==============================================================================
+- name: Install Python Runtime
+  hosts: python
+  tags: [python]
+  become: true
+  roles:
+    - role: python
+
+# ==============================================================================
+# PLAY 3E: GIT
+# Target: Hosts tagged 'git'.
+# Purpose: Install the Git version control system.
+# ==============================================================================
+- name: Install Git
+  hosts: git
+  tags: [git]
+  become: true
+  roles:
+    - role: git
 
 # ==============================================================================
 # PLAY 4: DEV/TEST KUBERNETES (KIND)
