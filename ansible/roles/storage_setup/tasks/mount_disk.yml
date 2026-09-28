@@ -25,7 +25,9 @@
     fstype: "{{ mount_item.fstype | default('ext4') }}"
     dev: "{{ mount_item.device }}"
     force: "{{ mount_item.force | default(omit) }}"
-  when: storage_setup_device_stat.stat.exists
+  when:
+    - storage_setup_device_stat.stat.exists
+    - storage_setup_current_fstype.stdout | default('') != (mount_item.fstype | default('ext4'))
 
 - name: Create mount point directory
   ansible.builtin.file:
