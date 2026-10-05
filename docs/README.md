@@ -21,7 +21,7 @@ Each layer of the stack has dedicated documentation covering its tools, workflow
 | Layer | Document | Description |
 |---|---|---|
 | **Layer 1 — IaC** | [OpenTofu](./layers/tofu.md) | Proxmox VM/LXC provisioning, state management, CI/CD workflow |
-| **Layer 2 — Config** | [Ansible](./layers/ansible.md) | Server configuration, K8s cluster setup roles |
+| **Layer 2 — Config** | [Ansible](./layers/ansible.md) | 5-layer server configuration, role catalog, K8s cluster bootstrap, platform services |
 | **Layer 3 — Orchestration** | [Kubernetes](./layers/kubernetes.md) | Application deployment, Kustomize operations guide |
 
 ---
