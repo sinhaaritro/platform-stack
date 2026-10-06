@@ -115,3 +115,35 @@ This layout optimizes your **32GB RAM** and utilizes the two-disk model for stab
 | **RAM** | **28 GB** | 32 GB | **4 GB** | 🟢 Safe Buffer |
 | **CPU Threads** | **20 vCores** | 16 Threads | **-4** | 🟢 Healthy Over-provision |
 | **Total Disk** | **258 GB** | 481 GB | **223 GB** | 🟢 Safe (Thin) |
+
+---
+
+## 7. Proxmox Templates
+
+| ID | Name | OS | Description | Pool |
+| :--- | :--- | :--- | :--- | :--- |
+| **101** | **ubuntu-2404-template** | Ubuntu 24.04 | Standard Cloud-Init Template | `local` |
+| **102** | **ubuntu-2104-template** | Ubuntu 25.04 | Fast-track Template for testing | `local` |
+
+---
+
+## 8. Static Services & Management (VM / LXC)
+
+Current non-Kubernetes VMs and LXC containers provisioned on `atlas`.
+
+| ID | Name | Type | IP Address | OS | Description | Storage (Pool) |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **1010** | **hiking-bear** | VM | `192.168.0.10` | Ubuntu 24.04 | Primary Dev/Management Workstation | 20 GB (`local-thin`) |
+| **1099** | **sandbox-01** | VM | `192.168.0.99` | Ubuntu | Temporary Testing / Kind instance | 20 GB (`local-thin`) |
+| **2050** | **cf-tunnel** | LXC | `192.168.0.50` | Debian 12 | Cloudflare Zero Trust Gateway | 4 GB (`local`) |
+| **2051** | **adguard** | LXC | `192.168.0.51` | Debian 12 | Network-wide DNS & Ad Blocking | 1 GB (`local`) |
+
+---
+
+## 9. Legacy Clusters (Historical Context)
+
+> [!NOTE]
+> These clusters were part of the original prototype architecture and have been superseded by the "Clean Slate" clusters (`hyperion`, `quanta`, `elysia`) defined in §4 above.
+
+- **Cluster `ruth`** — Management & Heavy Apps. Provisioned for 5 Nodes (IPs `.20`–`.24`).
+- **Cluster `arr`** — Media Stack. Provisioned for 5 Nodes (IPs `.25`–`.29`).
