@@ -28,7 +28,25 @@ Scale the cert-manager Deployments (`cert-manager`, `cert-manager-cainjector`, `
    kubectl -n networking get pods -l app.kubernetes.io/instance=cert-manager
    ```
 
-> **Full cluster rebuild**: enable the maintenance component in Git **before** the cluster is rebuilt. Otherwise ArgoCD may deploy cert-manager before you can pause it, re-creating the race described above.
+4. **(Optional) Baseline — no certs were issued before the restore.** Confirm no ACME issuance is in flight (expected `0` on a fresh rebuild where Step 0 was done before cert-manager ever ran):
+   ```bash
+   kubectl get orders.acme.cert-manager.io -A --no-headers | wc -l
+   ```
+   If the count is non-zero, cert-manager was already issuing before it was paused. Delete the in-flight objects so that, after the restore, cert-manager **adopts the restored keypairs** instead of completing stale orders:
+   ```bash
+   kubectl delete orders.acme.cert-manager.io -A
+   kubectl delete certificaterequests.cert-manager.io -A
+   kubectl delete challenges.acme.cert-manager.io -A
+   ```
+
+> **Full cluster rebuild — DR ordering**: the uncomment/re-comment of the maintenance component is the whole trick. The full order is:
+>
+> 1. **Uncomment** the maintenance component in Git **before** the cluster is rebuilt (so cert-manager deploys at 0 replicas in its wave — ArgoCD's `WaitFor=Deployment/cert-manager` still passes at 0/0 replicas and does not block later waves).
+> 2. Let ArgoCD install the apps (waves 0 → 15). Velero (wave 2) is up before cert-manager (wave 3), and Velero has **no cert-manager dependency** (AWS BSL uses public TLS, the in-cluster SeaweedFS BSL is plain HTTP, and its creds come from SealedSecrets) — it starts, backs up and restores fine with zero certs present.
+> 3. Run the Velero ssl-certs restore (Steps 1–3 below) while cert-manager is still at 0 replicas.
+> 4. **Re-comment** the maintenance component (Step 4 below) only after the restore is `Completed`. cert-manager boots, sees the restored keypairs (dnsNames match) → `Ready=True`, **zero new LE orders**.
+>
+> If you do not enable it before the rebuild, ArgoCD may deploy cert-manager before you can pause it, re-creating the race described above.
 
 ---
 
@@ -70,6 +88,25 @@ To see the Errors
 kubectl get restore ssl-cert-restore -n backup -o json | python3 -c "import sys,json; d=json.load(sys.stdin); [print(json.dumps(v,indent=2)) for k,v in d.get('status',{}).items() if 'error' in k.lower() or 'warning' in k.lower()]"
 kubectl logs -n backup -l app.kubernetes.io/name=velero --tail=50 | grep -i "ssl-cert-restore"
 ```
+
+### 3a. (Optional) Verify no certs were issued before/after the restore
+
+Run this **after Step 3 shows `Completed`** and **before Step 4 (Resume)**. It confirms the pause held: zero outgoing Let's Encrypt calls were made while cert-manager was down and during the restore.
+
+```bash
+kubectl get orders.acme.cert-manager.io -A --no-headers | wc -l
+kubectl get certificaterequests.cert-manager.io -A --no-headers | wc -l
+kubectl get challenges.acme.cert-manager.io -A --no-headers | wc -l
+```
+**Expected**: all three are `0`.
+
+If any count is non-zero, issuance was in flight before the pause (or was re-triggered). Delete the in-flight objects so cert-manager adopts the restored keypairs on resume instead of completing stale orders:
+```bash
+kubectl delete orders.acme.cert-manager.io -A
+kubectl delete certificaterequests.cert-manager.io -A
+kubectl delete challenges.acme.cert-manager.io -A
+```
+Re-run the counts and confirm all `0` before continuing to Step 4.
 
 ### 4. Resume cert-manager
 
