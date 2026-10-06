@@ -146,7 +146,6 @@ Technical analysis, specifications, and architecture discussions.
 | Document | Description |
 |---|---|
 | [Cluster Configuration Analysis](./reference/cluster-configuration-analysis.md) | K8s cluster config analysis |
-| [Infrastructure Inventory](./reference/infrastructure-inventory.md) | Hardware and VM inventory |
-| [Resource Planning](./reference/resource-planning.md) | Compute and storage resource planning |
+| [Resource Planning](./reference/resource-planning.md) | Compute/storage resource planning, templates, static services, and legacy cluster context |
 | [SSH Agent Forwarding](./reference/ssh-agent-forwarding.md) | SSH agent forwarding chain details |
 | [Storage Architecture Discussion](./reference/storage-architecture-discussion.md) | Storage architecture design discussion |
