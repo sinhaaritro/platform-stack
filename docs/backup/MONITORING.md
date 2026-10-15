@@ -26,7 +26,7 @@
 | Month | App to Test | Template | Verification |
 |---|---|---|---|
 | Jan, May, Sep | Auth provider (e.g., Authentik) | Template C | DB row count, SSO login test |
-| Feb, Jun, Oct | Photo manager (e.g., Immich) | Template D | DB tables, spot-check photos on NFS |
+| Feb, Jun, Oct | Photo manager (e.g., Immich) | [restore-immich.md](../runbooks/restore-immich.md) (NAS-owned, not Velero) | DB dump present in `/data/backups`, spot-check photos on NAS |
 | Mar, Jul, Nov | Notes app (e.g., Obsidian) | Template B | File count, open a vault |
 | Apr, Aug, Dec | SSL Certificates | Template A | Cert validity, TLS handshake |
 
@@ -37,6 +37,8 @@
 ## Alerting Design
 
 The following PrometheusRules should be deployed to detect backup failures proactively:
+
+> **Scope:** These rules cover **Velero-managed** apps only (Authentik, Obsidian, SSL certs, and future schedules). Apps backed up outside Velero — e.g. Immich (NAS dataset + in-app DB dump) — are **not** covered by `velero_*` metrics and need their own checks (NAS ZFS snapshot/scrub status, offsite rclone job success, and the timestamp of the newest `/data/backups/*.sql.gz`).
 
 ### Alert Definitions
 

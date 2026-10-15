@@ -150,10 +150,11 @@ All schedules use a staggered daily window to avoid I/O contention:
 
 | Schedule Name | Cron (UTC) | IST Equivalent | Namespace | Label Selector | PVC Backup | Retention |
 |---|---|---|---|---|---|---|
-| `daily-immich` | `0 3 * * *` | 08:30 AM | `personal` | `app.kubernetes.io/instance: immich` | ✅ fs-backup | 14 days |
 | `daily-security` | `0 21 * * *` | 02:30 AM | `security` | None (full namespace) | ✅ fs-backup | 14 days |
 | `daily-obsidian` | `30 21 * * *` | 03:00 AM | `personal` | `app: obsidian` | ✅ fs-backup | 30 days |
 | `ssl-certs` | `30 21 * * 6` | 03:00 AM (Sun) | `*` (all) | `backuplabel.certificate: "true"` | ❌ Resources only | 60 days |
+
+> **Not every app uses Velero.** Immich provides its own in-app DB dump and stores all data on the NAS, so it has **no** Velero schedule. See [Immich — NAS-Owned Backup](./README.md#immich--nas-owned-backup-no-velero) and [`docs/runbooks/restore-immich.md`](../runbooks/restore-immich.md).
 
 > **Adding a new schedule:** Create a new Kustomize component under `velero/components/schedules/<app-name>/` with a `schedule.yaml` and `restore.yaml`. Add the component to the cluster overlay's `kustomization.yaml`.
 
@@ -179,7 +180,7 @@ The request auto-removes when done; the backup CR will not resurrect afterwards.
 
 ## rclone — Tier 4: NFS User Data
 
-> **Status:** 🟡 Semi-Active (Orchestration & sync are fully active using Longhorn RWX volumes; integration with physical NFS hardware is the final remaining task).
+> **Status:** 🟡 Semi-Active (orchestration & sync run against the NFS-backed `immich` PVC; the offsite job ships **disabled** (`suspend: true`, dummy destination) until a destination is chosen. The NAS itself can own the same sync via a TrueNAS Cloud Sync task — pick one owner, not both).
 
 ### Why Per-App rclone (Not Whole-NFS)
 
@@ -187,7 +188,7 @@ User data on NFS serves multiple apps with different criticality levels:
 
 | App | NFS Data | Criticality | Backup Need |
 |---|---|---|---|
-| Photo manager (e.g., Immich) | Photos, videos | 🔴 Critical (irreplaceable) | Monthly, 0 versions |
+| Photo manager (e.g., Immich) | Photos, videos + `backups/` DB dumps | 🔴 Critical (irreplaceable) | NAS-owned; optional offsite rclone (monthly) |
 | Media server (e.g., Jellyfin) | Movies, TV shows | 🟢 Low (re-downloadable) | None or weekly |
 | Notes app (e.g., Obsidian) | Markdown vaults | 🟠 High | Daily, many versions |
 | Download client | Torrents | 🟢 Low (re-downloadable) | None |
@@ -204,7 +205,7 @@ Each app that needs NFS backup runs an **rclone CronJob** in its own namespace:
 │                                                 │
 │  ┌──────────────┐    ┌──────────────────────┐   │
 │  │ App Pod      │    │ rclone CronJob       │   │
-│  │ (Immich)     │    │ Schedule: daily      │   │
+│  │ (app)        │    │ Schedule: daily      │   │
 │  │              │    │ Versions: 7          │   │
 │  │ NFS Mount ◄──┼────┤ NFS Mount (same)     │   │
 │  │ /data/photos │    │ Cloud: s3:bucket/app │   │
@@ -219,6 +220,8 @@ Each app that needs NFS backup runs an **rclone CronJob** in its own namespace:
 3.  rclone syncs the app's NFS subdirectory to a cloud S3 bucket with versioning.
 4.  Each app independently defines: schedule, version count, cloud destination, bandwidth limits.
 5.  Velero remains responsible for the app's K8s resources and Longhorn PVCs. rclone handles NFS only.
+
+> **Immich is the exception.** Immich provides its own in-app DB dump (written to `/data/backups/` on the NAS) and is intentionally **not** covered by a Velero schedule. Its restore mixes both planes — NAS-owned dataset restore plus the in-app DB dump — so it has a dedicated runbook: [`docs/runbooks/restore-immich.md`](../runbooks/restore-immich.md).
 
 ### rclone CronJob Template
 

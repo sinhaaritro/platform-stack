@@ -37,7 +37,7 @@ The ABC model maps each storage tier to three protection layers:
 | **Tier 1** — Proxmox VMs | Running VMs on SSD | ❌ Not applicable | ❌ Not applicable — IaC is the recovery path (Git) |
 | **Tier 2** — Longhorn PVCs | Live PVCs on K8s nodes | Velero → SeaweedFS S3 (local) | Velero → AWS S3 |
 | **Tier 3** — SeaweedFS | Observability blobs (logs, metrics) | ❌ Not backed up | ❌ Not backed up — ephemeral, replayable from agents |
-| **Tier 4** — NFS User Data | ZFS pool on HDD | ZFS snapshots (local) | Per-app rclone → Cloud S3 |
+| **Tier 4** — NFS User Data | ZFS pool on HDD (NAS) | ZFS snapshots (local, NAS-owned) | Per-app rclone → Cloud S3 |
 | **K8s Resources** | ArgoCD GitOps (live state) | Velero metadata → SeaweedFS | Velero metadata → AWS S3 |
 | **Secrets/Config** | SealedSecrets in Git | Velero captures decoded Secrets | Velero → AWS S3 |
 | **Git Repository** | GitHub (remote) | Local clone on dev machine | GitHub (inherently offsite) |
@@ -100,8 +100,8 @@ flowchart TD
 | Data | Classification | RPO | RTO | Recovery Method |
 |---|---|---|---|---|
 | Authentication DB (e.g., Authentik) | 🔴 Critical | 24h | 1h | Velero restore (DB dump from PVC) |
-| Photo/Video DB metadata (e.g., Immich) | 🟠 High | 24h | 4h | Velero restore (pg_dump hook) |
-| Photo/Video files on NFS (e.g., Immich) | 🔴 Critical | 24h | 8h | rclone restore from cloud |
+| Photo/Video DB metadata (e.g., Immich) | 🟠 High | 24h | 4h | Immich in-app DB dump in `/data/backups` (NAS); restore via Immich maintenance UI |
+| Photo/Video files on NFS (e.g., Immich) | 🔴 Critical | 24h | 8h | NAS ZFS snapshot (local) / rclone restore from cloud (offsite) |
 | User document vaults (e.g., Obsidian) | 🟠 High | 24h | 1h | Velero restore (PVC) |
 | SSL/TLS Certificates | 🟡 Medium | 24h | 30min | cert-manager re-issues, or Velero restore |
 | Observability data (logs, metrics) | 🟢 Low | N/A | N/A | Re-ingested from agents on rebuild |
@@ -111,6 +111,8 @@ flowchart TD
 > **RPO = 24 hours** for all workloads. All scheduled backups run daily. If the system fails at 01:59 AM and the last backup ran at 02:00 AM the previous day, the maximum data loss is ~24 hours.
 >
 > **RTO = 12 hours** for a full disaster recovery scenario (complete cluster rebuild from scratch). Individual app restores are significantly faster.
+>
+> **Single-app exception:** Immich is **not** backed up by Velero. Its dataset (media + in-app DB dumps) lives on the NAS and is protected by the NAS backup plan. See [Immich — NAS-Owned Backup](#immich--nas-owned-backup-no-velero).
 
 ---
 
@@ -134,6 +136,9 @@ The backup unit is the **application**, not the infrastructure. Each app's backu
 │    • Independent schedule & version count                │
 │    • Independent cloud destination                       │
 │                                                          │
+│  Some apps are self-backed-up (e.g., Immich) and are     │
+│  intentionally excluded from Velero - see below.         │
+│                                                          │
 │  NOT backed up:                                          │
 │    • The entire NFS share (too broad, no granularity)    │
 │    • SeaweedFS blobs (ephemeral, replayable)             │
@@ -141,14 +146,25 @@ The backup unit is the **application**, not the infrastructure. Each app's backu
 └──────────────────────────────────────────────────────────┘
 ```
 
+### Immich — NAS-Owned Backup (No Velero)
+
+Immich is the first app that provides its **own** backup mechanism, so Velero is not used for it:
+
+- **Media + in-app DB dumps live on the NAS.** The `immich` PVC is NFS-backed (RWX, mounted at `/data`) and holds `library/`, `upload/`, `profile/`, `thumbs/`, `encoded-video/`, and `backups/`. The NAS backup plan (local ZFS snapshots + offsite rclone) covers this whole folder — no cluster involvement required.
+- **The database is not on the NAS.** PostgreSQL runs on a Longhorn PVC (SSD). Because a rebuilt cluster always starts with an empty DB, the bridge is Immich's own dump in `/data/backups/` (produced daily by Immich v3, keep 14), restored through Immich's maintenance UI.
+- **No Velero schedule exists for Immich.** Its K8s state is recovered from Git; its data is recovered from the NAS dataset + the in-app DB dump.
+
+> Full procedure: [`docs/runbooks/restore-immich.md`](../runbooks/restore-immich.md).
+
 ### Backup Coverage Matrix
 
 | Component | Backed Up? | Tool | Destination | Schedule | Retention |
 |---|---|---|---|---|---|
 | K8s resources (per namespace) | ✅ | Velero | AWS S3 | Daily | 30 days (TTL) |
 | Longhorn PVCs (app data) | ✅ Per-schedule opt-in | Velero (fs-backup) | AWS S3 | Daily | 30 days (TTL) |
-| Database dumps | ✅ Pre-backup hooks | Velero | AWS S3 | Daily (triggered before Velero) | 30 days |
-| NFS user data (per-app) | 🟡 Semi-Active | rclone (CronJob) | Cloud S3 | Per-app policy | Per-app versions (NFS hardware integration pending) |
+| Database dumps (hook-based apps) | ✅ Pre-backup hooks | Velero | AWS S3 | Daily (triggered before Velero) | 30 days |
+| NFS user data (per-app) | 🟡 Semi-Active | rclone (CronJob) / NAS | Cloud S3 | Per-app policy | Per-app versions (offsite opt-in, disabled until destination set) |
+| Immich dataset (media + DB dumps) | ✅ NAS-owned | NAS ZFS + rclone | NAS local / Cloud S3 | NAS policy | Per NAS policy (Velero not used) |
 | ZFS snapshots | ✅ Local | ZFS (automated) | Local HDD pool | Daily | Per retention policy |
 | Proxmox VMs | ❌ Intentional | N/A | N/A | N/A | IaC rebuilds |
 | SeaweedFS data | ❌ Intentional | N/A | N/A | N/A | Replayable |
@@ -171,7 +187,7 @@ The backup unit is the **application**, not the infrastructure. Each app's backu
 |---|---|---|---|
 | 🔴 P0 | Deploy PrometheusRules for Velero alerting | Not started | Prometheus Operator deployed |
 | 🔴 P0 | Define and run first restore drill | Not started | This document (procedure) |
-| 🟠 P1 | Implement per-app rclone CronJobs for NFS data | Not started | Cloud S3 bucket + rclone config |
+| 🟠 P1 | Implement per-app rclone CronJobs for NFS data | Component built, disabled pending destination | Cloud S3 bucket + rclone config |
 | 🟠 P1 | Activate SeaweedFS BSL (dual-write schedules) | Not started | SSD capacity verification |
 | 🟡 P2 | Configure S3 Lifecycle policies (Standard → Glacier) | Not started | Cost analysis approval |
 | 🟡 P2 | Build automated restore drill CronJob | Not started | Manual drill validated first |
@@ -194,7 +210,8 @@ The backup unit is the **application**, not the infrastructure. Each app's backu
 |---|---|
 | [`docs/storage/ARCHITECTURE.md`](../storage/ARCHITECTURE.md) | Storage tier model — this backup doc protects those tiers |
 | [`docs/storage/LONGHORN.md`](../storage/LONGHORN.md) | Longhorn PVC details — Velero backs these up |
-| [`docs/storage/NFS.md`](../storage/NFS.md) | NFS user data — rclone backs this up |
+| [`docs/storage/NFS.md`](../storage/NFS.md) | NFS user data — rclone/NAS backs this up |
+| [`docs/runbooks/restore-immich.md`](../runbooks/restore-immich.md) | Immich-specific restore (NAS-owned, no Velero) — the authoritative flow for the single-app exception |
 | [`docs/storage/CAPACITY_PLANNING.md`](../storage/CAPACITY_PLANNING.md) | Storage budget — backup adds to the SSD-tier budget |
 | [`docs/storage/SEAWEEDFS.md`](../storage/SEAWEEDFS.md) | SeaweedFS — hosts the local BSL for Velero |
 | [`docs/secrets/`](../secrets/) | SealedSecrets — Velero repo password, rclone credentials |

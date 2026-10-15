@@ -11,9 +11,10 @@ Backup sizes are estimated per app, following the platform's percentage-based ca
 | App Type | Velero Backup Content | Estimated Raw Size | Kopia Dedup Ratio | Effective Size Per Backup |
 |---|---|---|---|---|
 | Auth provider (e.g., Authentik) | K8s resources + DB dump PVC | ~500 MB | ~2× dedup | ~250 MB |
-| Photo manager DB (e.g., Immich) | K8s resources + DB dump + config PVC | ~1-5 GB | ~2× dedup | ~0.5-2.5 GB |
 | Notes app (e.g., Obsidian) | K8s resources + config PVC | ~200 MB | ~3× dedup (text) | ~70 MB |
 | SSL Certificates | K8s Secrets only | ~5 MB | ~1× (small) | ~5 MB |
+
+> **Immich is excluded from this table.** It is **not** a Velero backup — its media and in-app DB dumps live on the NAS (`immich` PVC, NFS) and are sized by the NAS/offsite plan below, not by Velero/Kopia.
 
 > **Note:** Kopia (Velero's uploader) uses content-addressable deduplication. Daily incremental backups of mostly-unchanged PVCs are very efficient — only changed blocks are stored. The effective size per backup drops significantly after the first full backup.
 
@@ -28,6 +29,27 @@ Total backup storage = `effective_size_per_backup × retention_count`
 | 7 days | 7 backups | Dev/staging clusters |
 | 30 days (current) | 30 backups | Production (current default) |
 | 90 days | 90 backups | Compliance or regulated workloads |
+
+---
+
+## NAS-Owned Backup Size (Immich)
+
+Immich does not contribute to the Velero/Kopia numbers above. Its capacity footprint is:
+
+```
+NAS backup size = size of immich dataset on the NAS
+                  (upload/ + library/ + profile/ + backups/ ;
+                   thumbs/ and encoded-video/ are regenerable and excluded)
+```
+
+| Component | Where | Counts Toward |
+|---|---|---|
+| Media originals (`upload/`, `library/`) | NAS (`immich` PVC) | NAS capacity + offsite cloud (if enabled) |
+| `backups/` (in-app DB dumps) | NAS | NAS capacity (small; keep 14 dumps) |
+| `thumbs/`, `encoded-video/` | NAS | Regenerable — excluded from offsite copy |
+| PostgreSQL data | Longhorn (SSD) | SSD budget — **not** the NAS |
+
+> **Rule of thumb:** budget NAS backup space as **≈ the size of `upload/` + `library/`** (media dominates). The DB dumps in `backups/` are negligible. Offsite cost is the same figure at the chosen S3 tier (see below).
 
 ---
 
@@ -137,3 +159,4 @@ Use S3 Lifecycle rules to automatically transition older backups to cheaper tier
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | BSL configuration, S3 tier selection per cluster |
 | [MONITORING.md](./MONITORING.md) | Alerts that trigger when capacity thresholds are breached |
 | [`docs/storage/CAPACITY_PLANNING.md`](../storage/CAPACITY_PLANNING.md) | SSD-tier budget — backup BSL draws from this budget |
+| [`docs/runbooks/restore-immich.md`](../runbooks/restore-immich.md) | Immich restore (NAS-owned, no Velero) — sizing context for the NAS-owned section |

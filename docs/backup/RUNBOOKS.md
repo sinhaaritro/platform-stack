@@ -251,7 +251,7 @@ kubectl delete restore <APP>-restore -n backup
 
 **When to use:** App has a database that was dumped via a pre-backup hook (inline annotation) or a separate CronJob before Velero ran. The dump file lives on a Longhorn PVC.
 
-**Examples:** Immich (pg_dump inline hook → dump in PVC), Authentik (CronJob → dedicated backup PVC).
+**Examples:** Authentik (CronJob `pg_dump` → dedicated backup PVC).
 
 **Estimated time:** 30-60 minutes.
 
@@ -348,117 +348,48 @@ kubectl delete restore <APP>-restore -n backup
 
 ---
 
-## Template D: App with NFS User Data / Large Media Plane
+## Template D: App with NFS/NAS User Data
 
-**When to use:** App has both K8s state (Velero) AND large user data on NFS/Object Storage (rclone). The restore requires recovering both planes in a specific order to prevent resource locks and Longhorn storage exhaustion.
+**When to use:** App has large user data on NFS (the NAS) in addition to K8s state. The user-data half is a **NAS-owned** backup — it must be restorable **without Kubernetes**. Some apps also produce their own in-app backup (e.g., a DB dump) inside the NFS folder.
 
-**Examples:** Immich (DB on Longhorn + photos on NFS/RWX volume).
+**Examples:** Immich (media + in-app DB dump on the NAS; PostgreSQL lives on Longhorn — not the NAS).
 
 **Estimated time:** 1-8 hours (depends on media data volume).
 
+> **Principle:** never let a broken cluster drive a NAS/data restore. Restore the data half **on the NAS first**, then bring the cluster and app back.
+
 ```bash
-# 1. Enable maintenance mode (scale app to 0 to prevent conflicting writes)
-#    Option A: Via Git (ArgoCD-safe)
-#      Uncomment the maintenance component in the kustomization.yaml.
-#    Option B: Direct
-#      kubectl scale deploy <APP> -n <NAMESPACE> --replicas=0
+# 1. Decide the offsite owner (once)
+#    The offsite copy is performed either by the per-app rclone CronJob in-cluster
+#    or by a NAS-side sync (e.g. TrueNAS Cloud Sync task). Pick ONE owner — not both.
+#    If neither is enabled, offsite recovery is unavailable.
 
-# 2. Prepare the target namespace and Secrets
-kubectl create ns restore
-kubectl get secret <APP>-config -n <NAMESPACE> -o json | jq 'del(.metadata.ownerReferences, .metadata.uid, .metadata.resourceVersion, .metadata.creationTimestamp) | .metadata.namespace="restore"' | kubectl apply -f -
-kubectl get secret <APP>-db-credentials -n <NAMESPACE> -o json | jq 'del(.metadata.ownerReferences, .metadata.uid, .metadata.resourceVersion, .metadata.creationTimestamp) | .metadata.namespace="restore"' | kubectl apply -f -
+# 2. Restore the NAS dataset first — NO cluster required
+#    Rebuild the share on the NAS, then pull the dataset back from the offsite copy.
+#    (Exclude regenerable subfolders — e.g. Immich thumbs/ and encoded-video/.)
+rclone copy <REMOTE>:<BUCKET>/<APP> /mnt/data/<APP> \
+  --transfers 4 --checkers 8 --verbose
+chown -R 1000:1000 /mnt/data/<APP>
 
-# 3. Pre-create mock 1Gi PVCs in target 'restore' namespace
-#    ⚠️ WARNING: Crucial to prevent duplicate 50Gi allocations in Longhorn, which exhaust node disks.
-#    Replace placeholders with actual PVC names (e.g. immich-library).
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: <APP>-library
-  namespace: restore
-spec:
-  accessModes: [ "ReadWriteMany" ]
-  resources: { requests: { storage: 1Gi } }
-  storageClassName: longhorn
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: <APP>-machine-learning-cache
-  namespace: restore
-spec:
-  accessModes: [ "ReadWriteMany" ]
-  resources: { requests: { storage: 1Gi } }
-  storageClassName: longhorn
-EOF
+# 3. Bring the cluster up from Git and confirm the app PVC binds to the populated share
+kubectl -n <NAMESPACE> get pvc <PVC_NAME>
+kubectl -n <NAMESPACE> exec deploy/<APP> -- ls /data
 
-# 4. Trigger Velero restore (recovers DB PVC and uploader pod)
-kubectl apply -f restore.yaml
+# 4. Restore the application database
+#    If the DB is NOT on the NAS (e.g. Longhorn), recover it separately:
+#      - Apps with an in-app dump  -> use the app's own restore mechanism
+#        (e.g. Immich maintenance UI -> Restore database backup).
+#      - Apps using the Template C -> follow Template C's import steps.
+#    A rebuilt cluster always starts with an EMPTY database; the dump is the bridge.
 
-# 5. Re-create the database with correct ownership and extensions as superuser
-kubectl exec -i -n <DB_NAMESPACE> <DB_POD> -- psql -U postgres -c "DROP DATABASE IF EXISTS \"<DB_NAME>\";"
-kubectl exec -i -n <DB_NAMESPACE> <DB_POD> -- psql -U postgres -c "CREATE USER \"<DB_USER>\" WITH PASSWORD '\''<DB_PASSWORD>'\''" || echo "User exists"
-kubectl exec -i -n <DB_NAMESPACE> <DB_POD> -- psql -U postgres -c "CREATE DATABASE \"<DB_NAME>\" OWNER \"<DB_USER>\";"
-kubectl exec -i -n <DB_NAMESPACE> <DB_POD> -- psql -U postgres -d "<DB_NAME>" -c "CREATE EXTENSION IF NOT EXISTS vectors; GRANT ALL PRIVILEGES ON SCHEMA vectors TO \"<DB_USER>\"; CREATE EXTENSION IF NOT EXISTS cube; CREATE EXTENSION IF NOT EXISTS earthdistance;"
+# 5. Verify
+kubectl -n <NAMESPACE> get pods
+# Then app-level checks (log in, open media, confirm timeline/albums).
 
-# 6. Stream import DB dump, filtering out incompatible database creation lines
-#    a) Start a temp mount pod in 'restore' namespace
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Pod
-metadata: { name: restore-temp, namespace: restore }
-spec:
-  containers:
-  - name: utils, image: busybox, command: ["sleep", "3600"]
-    volumeMounts: [ { name: data, mountPath: /data } ]
-  volumes: [ { name: data, persistentVolumeClaim: { claimName: <APP>-db-backup } } ]
-EOF
-
-kubectl wait pod/restore-temp -n restore --for=condition=Ready --timeout=120s
-
-#    b) Stream SQL dump directly to DB pod
-kubectl exec -n restore restore-temp -- cat /data/<APP>-db.sql | \
-  sed -E '/^(DROP DATABASE|CREATE DATABASE|ALTER DATABASE|\\connect postgres)/Id' | \
-  kubectl exec -i -n <DB_NAMESPACE> <DB_POD> -- psql -U postgres -d <DB_NAME>
-
-# 7. Correct ownership of restored objects in the DB public schema to app user
-kubectl exec -i -n <DB_NAMESPACE> <DB_POD> -- psql -U postgres -d <DB_NAME> -c '
-DO $$
-DECLARE r RECORD;
-BEGIN
-    IF (SELECT pg_catalog.pg_get_userbyid(nspowner) FROM pg_catalog.pg_namespace WHERE nspname = '\''public'\'') = '\''postgres'\'' THEN
-        EXECUTE '\''ALTER SCHEMA public OWNER TO <DB_USER>'\'';
-    END IF;
-    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = '\''public'\'' AND (SELECT pg_catalog.pg_get_userbyid(relowner) FROM pg_catalog.pg_class WHERE relname = tablename AND relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = '\''public'\'')) = '\''postgres'\'') LOOP
-        EXECUTE '\''ALTER TABLE public.'\'' || quote_ident(r.tablename) || '\'' OWNER TO <DB_USER>'\'';
-    END LOOP;
-    FOR r IN (SELECT sequencename FROM pg_sequences WHERE schemaname = '\''public'\'' AND (SELECT pg_catalog.pg_get_userbyid(relowner) FROM pg_catalog.pg_class WHERE relname = sequencename AND relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = '\''public'\'')) = '\''postgres'\'') LOOP
-        EXECUTE '\''ALTER SEQUENCE public.'\'' || quote_ident(r.sequencename) || '\'' OWNER TO <DB_USER>'\'';
-    END LOOP;
-    FOR r IN (SELECT viewname FROM pg_views WHERE schemaname = '\''public'\'' AND (SELECT pg_catalog.pg_get_userbyid(relowner) FROM pg_catalog.pg_class WHERE relname = viewname AND relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = '\''public'\'')) = '\''postgres'\'') LOOP
-        EXECUTE '\''ALTER VIEW public.'\'' || quote_ident(r.viewname) || '\'' OWNER TO <DB_USER>'\'';
-    END LOOP;
-END$$;'
-
-# 8. Restore files via rclone to live PVC
-#    Run rclone copy from cloud bucket to the live app PVC:
-kubectl create job --from=cronjob/<APP>-rclone-backup <APP>-rclone-restore -n <NAMESPACE> --dry-run=client -o yaml \
-  | sed 's/rclone sync \/data/rclone copy/g; s/remote:backup-bucket\/<APP>/remote:backup-bucket\/<APP> \/data/g' \
-  | kubectl apply -f -
-
-kubectl wait --for=condition=complete job/<APP>-rclone-restore -n <NAMESPACE> --timeout=12h
-
-# 9. Disable maintenance mode (scale app to 1) and delete old pod to force migration
-#    Scale up deploy via Git/ArgoCD, then restart:
-kubectl delete pod -n <NAMESPACE> -l app.kubernetes.io/name=<APP>,app.kubernetes.io/component=server
-
-# 10. Cleanup
-kubectl delete pod restore-temp -n restore
-kubectl delete ns restore
-kubectl delete restore <APP>-restore -n backup
-kubectl delete job <APP>-rclone-restore -n <NAMESPACE>
+# 6. Cleanup any temporary restore jobs/pods created along the way
 ```
+
+> **Concrete worked example:** [`docs/runbooks/restore-immich.md`](../runbooks/restore-immich.md) — NAS-owned dataset restore + Immich in-app DB dump + maintenance-UI restore. There is **no Velero schedule for Immich**.
 
 ---
 
@@ -514,12 +445,13 @@ kubectl get bsl -n backup
 
 # 10. Restore critical apps first (priority order)
 #     a) Authentication — Template C
-#     b) Photo library DB — Template C
+#     b) Photo library — Immich runbook (NAS dataset + in-app DB dump; NOT Velero/Template C)
 #     c) Document vaults — Template B
 #     d) SSL certificates — Template A (or wait for cert-manager)
 
-# 11. Restore NFS data via rclone — Template D
-#     For each app with NFS data, run the rclone restore.
+# 11. Restore NFS data — Template D
+#     For each app with NFS data, restore the NAS dataset first, then the app.
+#     Immich: docs/runbooks/restore-immich.md
 
 # Phase 4: Verify (30 minutes)
 
@@ -546,3 +478,4 @@ kubectl get pods -A | grep -v Running | grep -v Completed
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Velero/rclone technical architecture |
 | [MONITORING.md](./MONITORING.md) | Periodic restore drills, alerting |
 | [CAPACITY_PLANNING.md](./CAPACITY_PLANNING.md) | Backup size estimation, cost model |
+| [`docs/runbooks/restore-immich.md`](../runbooks/restore-immich.md) | App-specific Immich restore (NAS-owned, no Velero) — concrete instance of Template D |
