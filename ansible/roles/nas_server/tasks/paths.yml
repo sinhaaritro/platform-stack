@@ -1,0 +1,32 @@
+---
+# tasks/paths.yml - platform-independent: ensure each share ROOT exists + owner.
+#
+# Creates only the exported base path (e.g. /WD4TB/shared). It deliberately does
+# NOT create version/app dirs (v1/, <namespace>/, <pvc>/) — those are app-owned
+# (the k8s provisioner creates them), so there is a single source of truth.
+
+- name: Ensure share root directories exist
+  ansible.builtin.file:
+    path: "{{ item.value.path }}"
+    state: directory
+    owner: "{{ storage.owner.uid | default(0) }}"
+    group: "{{ storage.owner.gid | default(0) }}"
+    mode: "{{ storage.owner.dir_mode | default('0775') }}"
+  loop: "{{ storage.exports | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }} -> {{ item.value.path }}"
+
+# Ownership is app-owned (apps create their own dirs), so grant the share GROUP
+# write on everything created under the root — regardless of which uid creates
+# it. Requires ZFS acltype=posixacl on the dataset (set via the pool props).
+- name: Grant the share group write on new items (default ACL)
+  ansible.posix.acl:
+    path: "{{ item.value.path }}"
+    default: true
+    etype: group
+    entity: "{{ storage.owner.gid | default(0) }}"
+    permissions: rwx
+    state: present
+  loop: "{{ storage.exports | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }} -> {{ item.value.path }}"

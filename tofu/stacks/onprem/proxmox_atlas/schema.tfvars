@@ -17,7 +17,8 @@ enable_debug = false
 
 # Target Proxmox Environment
 target_node      = "atlas"
-target_datastore = "WD1TB"
+target_datastore = "local-lvm"
+image_datastore  = "local"
 
 # Resource Definations
 # This map defines all the VMs to be created by this stack. The map key is
@@ -303,8 +304,8 @@ resources = {
     }
 
     vm_config = {
-      cpu_cores         = 2
-      memory_size       = 4096
+      cpu_cores         = 4
+      memory_size       = 8096
       disk_datastore_id = "local-lvm"
       os_version        = "26.04"
       disk_size         = 16
@@ -459,13 +460,20 @@ resources = {
     on_boot         = true
     cloud_init_user = "dev"
     ansible_groups = {
-      "nas" = {}
+      # NAS CLIENT config lives with the consumer. Mounts reference a share by
+      # (provider node + share id) and choose their own versioned `subpath`
+      # (v1/v2/…); the nas_client role resolves server+remote at runtime.
+      "nas" = {
+        nas_mounts = [
+          { provider = "atlas", share = "WD4TB", subpath = "v1", path = "/export/data", options = "hard,noatime,actimeo=2" }
+        ]
+      }
     }
 
     vm_config = {
       os_type           = "ubuntu"
       os_version        = "26.04"
-      disk_datastore_id = "WD1TB"
+      disk_datastore_id = "local-lvm"
       disk_size         = 8
       cpu_cores         = 1
       memory_size       = 1024
@@ -497,7 +505,7 @@ resources = {
     }
 
     lxc_config = {
-      template_datastore_id       = "WD1TB"
+      template_datastore_id       = "local"
       template_url                = "http://download.proxmox.com/images/system/alpine-3.24-default_20260714_amd64.tar.xz"
       template_checksum           = "9877b74de4c4878b70450502618f7b02952e792afdbc91f146f6cba507432dae516674d0bb3a306484d58edc722ff63db1ed3c4e5b0954fb2a2773ec8d8f33bd"
       template_checksum_algorithm = "sha512"
@@ -531,7 +539,7 @@ resources = {
     }
 
     lxc_config = {
-      template_datastore_id       = "WD1TB"
+      template_datastore_id       = "local"
       template_url                = "http://download.proxmox.com/images/system/alpine-3.24-default_20260714_amd64.tar.xz"
       template_checksum           = "9877b74de4c4878b70450502618f7b02952e792afdbc91f146f6cba507432dae516674d0bb3a306484d58edc722ff63db1ed3c4e5b0954fb2a2773ec8d8f33bd"
       template_checksum_algorithm = "sha512"
@@ -566,7 +574,7 @@ resources = {
     }
 
     lxc_config = {
-      template_datastore_id       = "WD1TB"
+      template_datastore_id       = "local"
       template_url                = "http://download.proxmox.com/images/system/alpine-3.24-default_20260714_amd64.tar.xz"
       template_checksum           = "9877b74de4c4878b70450502618f7b02952e792afdbc91f146f6cba507432dae516674d0bb3a306484d58edc722ff63db1ed3c4e5b0954fb2a2773ec8d8f33bd"
       template_checksum_algorithm = "sha512"
@@ -586,4 +594,147 @@ resources = {
       }
     }
   },
+}
+
+# -----------------------------------------------------------------------------
+# TOPOLOGY — physical hosts, clusters, and the NAS contract
+# -----------------------------------------------------------------------------
+# The single source of truth for the physical layer. OpenTofu does NOT create
+# or destroy these hosts — it normalizes them and emits them into the Ansible
+# inventory (connection details, groups, cluster role, per-concern config).
+#
+# SCOPE MODEL:
+#   clusters.<c>.*  → CLUSTER-scoped concerns, applied by `primary` ONLY and
+#                     inherited by the other members via the Proxmox cluster
+#                     API / /etc/pve (SDN VLANs, shared storage definitions,
+#                     firewall, replication).
+#   nodes.<n>.*     → NODE-local concerns, applied on that node itself (its own
+#                     disks, ZFS pools, mounts, exports, Samba, and future
+#                     per-node vlan/firewall/replication overrides).
+#
+# Adding a host, pool, share, or VLAN is a DATA change.
+# -----------------------------------------------------------------------------
+topology = {
+  # ── Clusters ───────────────────────────────────────────────────────────────
+  # `primary` applies the cluster-scoped concern keys below. `members` lists the
+  # nodes in the cluster. Scaffold: concern keys are present-but-unset until we
+  # implement each one. atlas is standalone for now; prometheus/godzilla later.
+  clusters = {
+    asgard = {
+      primary = "atlas"
+      members = ["atlas"]
+
+      # ── cluster-scoped concern scaffolds (applied by `primary` only) ──
+      # vlan        = { zones = {...}, vnets = {...} }   # Proxmox SDN → /etc/pve/sdn
+      # firewall    = {...}                              # cluster firewall rules
+      # replication = {...}                              # ZFS replication jobs
+      # (no cluster-level storage — storage is node-local, under nodes.<n>.storage)
+    }
+  }
+
+  # ── Nodes ──────────────────────────────────────────────────────────────────
+  # Each node carries one key per concern. `storage` holds the full, node-local
+  # storage config (pools, data disks, exports, Samba, Proxmox datastores,
+  # backup). Further concerns (vlan / firewall / replication) slot in as extra
+  # keys as they are implemented.
+  nodes = {
+    atlas = {
+      cluster      = "asgard"
+      ipv4_address = "192.168.0.2"
+      ansible_user = "root"
+      # No explicit `groups`: physical hosts are identified by the generated
+      # `proxmox_node` group, and the cluster primary by `proxmox_primary`.
+      # (Optional `groups = [...]` can still add extra membership per node.)
+
+      # ── node-local concern: storage ──
+      # Tofu's job here = make the pool and give access. No directory tree
+      # (tenants/PVCs) is declared — apps create their own dirs.
+      storage = {
+        backend = "proxmox"
+        owner = {
+          uid       = 1000
+          gid       = 1000
+          dir_mode  = "0775"
+          file_mode = "0664"
+        }
+        pools = [
+          {
+            name  = "WD4TB"
+            vdev  = "single"
+            disks = ["/dev/disk/by-id/ata-ST4000NM000B-2TF100_WX11QNR8"]
+            # NOTE: `recordsize` omitted — it is ZFS's default (128K). If you set
+            # it, use BYTES (e.g. 131072 / 1048576): ZFS reports recordsize in
+            # bytes, so "128K" would look like a perpetual (no-op) change.
+            props = { ashift = 12, compression = "on", xattr = "sa", acltype = "posixacl" }
+            datasets = [
+              { name = "shared", mountpoint = "/WD4TB/shared" }
+            ]
+          }
+        ]
+        # `by_id` names the FILESYSTEM device: the whole disk for a fresh,
+        # unpartitioned disk; the partition when it already carries one (WD1TB's
+        # ext4 lives on sdb1, per `lsblk -f`). NEVER point this at a whole disk
+        # that still has partitions.
+        data_disks = [
+          {
+            interface = "sdb"
+            by_id     = "/dev/disk/by-id/ata-WDC_WD10EZRX-00L4HB0_WD-WCC4J2501696-part1"
+            fstype    = "ext4"
+            path      = "/mnt/pve/WD1TB"
+          }
+        ]
+        # Access, keyed by share id. The share defines only the exported base
+        # path; the versioned segment (v1/v2/…) is a CLIENT concern — each app
+        # picks its own, so the server never manages the directory tree.
+        exports = {
+          WD4TB = {
+            pool    = "WD4TB"
+            path    = "/WD4TB/shared"
+            clients = "192.168.0.0/24"
+            options = "rw,sync,no_subtree_check,no_root_squash"
+          }
+          WD1TB = {
+            pool    = "WD1TB"
+            path    = "/mnt/pve/WD1TB/shared"
+            clients = "192.168.0.0/24"
+            options = "rw,sync,no_subtree_check,no_root_squash"
+          }
+        }
+        smb_user = { name = "smbuser", uid = 1000, gid = 1000 }
+        smb_shares = {
+          WD4TB = { path = "/WD4TB/shared" }
+          WD1TB = { path = "/mnt/pve/WD1TB/shared" }
+        }
+        proxmox_storages = [
+          { id = "WD4TB", type = "zfspool", pool = "WD4TB", content = "rootdir,images", nodes = ["atlas"] },
+          { id = "WD1TB", type = "dir", path = "/mnt/pve/WD1TB", is_mountpoint = 1, content = "rootdir,vztmpl,import,iso,images" }
+        ]
+        backup = {
+          snapshots = { enabled = false, schedule = "daily", keep = 7 }
+          scrub     = { enabled = false }
+          smart     = { enabled = true, selftests = false }
+          rclone = {
+            enabled          = true
+            remote           = "vault"
+            storage_class    = "DEEP_ARCHIVE"
+            healthchecks_url = ""
+            jobs = [
+              { name = "immich", mode = "sync", source = "/WD4TB/shared/v1/personal/immich", target = "v1/personal/immich", schedule = "monthly", max_delete = 100, storage_class = "DEEP_ARCHIVE", excludes = ["/thumbs/**", "/encoded-video/**"] },
+              { name = "obsidian", mode = "sync", source = "/WD4TB/shared/v1/personal/obsidian", target = "v1/personal/obsidian", schedule = "weekly", max_delete = 50, storage_class = "GLACIER_IR" },
+              # { name = "docs",     mode = "sync", source = "/WD4TB/shared/v1/personal/docs",     target = "v1/personal/docs",     schedule = "weekly",  max_delete = 50, storage_class = "GLACIER_IR" },
+              # { name = "projects", mode = "sync", source = "/WD4TB/shared/v1/personal/projects", target = "v1/personal/projects", schedule = "weekly",  max_delete = 50, storage_class = "DEEP_ARCHIVE" },
+              # { name = "media",    mode = "copy", source = "/WD4TB/shared/v1/personal/media",    target = "v1/personal/media",    schedule = "monthly", storage_class = "DEEP_ARCHIVE" }
+            ]
+          }
+        }
+      }
+
+      # ── other node-local concern scaffolds ──
+      # vlan        = {...}
+      # firewall    = {...}
+      # replication = {...}
+    }
+
+    # prometheus / godzilla slot in here later with their own `storage` blocks.
+  }
 }

@@ -1,0 +1,26 @@
+---
+# tasks/main.yml - nas_client: mount NAS shares (NFS) on a client host.
+#
+# Mounts are driven entirely by the inventory: the host's `nas_mounts` list
+# (provider + share refs) is resolved against each provider's `storage.exports`.
+
+- name: Install NFS client packages
+  ansible.builtin.include_tasks: install.yml
+
+- name: Assert this host declares NAS mounts
+  ansible.builtin.assert:
+    that:
+      - nas_mounts is defined
+      - nas_mounts | length > 0
+    fail_msg: >-
+      Host '{{ inventory_hostname }}' has no `nas_mounts`. Declare them on the
+      guest in schema.tfvars (ansible_groups -> nas -> nas_mounts) and re-apply
+      the proxmox_atlas stack.
+
+- name: Configure NFS client mounts
+  ansible.builtin.include_tasks: configure.yml
+
+# DESTRUCTIVE — GATED OFF BY DEFAULT.
+- name: Remove obsolete NAS server components (opt-in)
+  ansible.builtin.include_tasks: cleanup.yml
+  when: nas_client_purge_server | default(false) | bool

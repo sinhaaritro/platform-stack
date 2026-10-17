@@ -219,13 +219,51 @@ tasks:
       - sh: "! command -v git"
         msg: "Git is already installed."
 
+  # ---------------------------------------------------------------------------
+  # HOST-FIRST DR PHASES (see docs/runbooks/rebuild-from-scratch.md)
+  #   apply:node   -> step 1 (Tofu inventory) + step 2 (Ansible NAS node layer)
+  #   <restore the NAS data with rclone — manual, decoupled>
+  #   apply:guest  -> step 4 (Tofu guests)    + step 5 (Ansible guest layers)
+  # ---------------------------------------------------------------------------
+
+  apply:node:
+    desc: "DR step 1+2 — NODE phase: render the inventory (Tofu) then apply the NAS node layer (Ansible)."
+    summary: |
+      Runs `tofu:apply:node` (inventory-only; creates no guests) then
+      `ansible:apply:node` (ZFS pool + datasets + share roots + exports + Samba, and
+      registers the WD4TB datastore). Run this BEFORE restoring data and BEFORE
+      creating guests.
+      Usage: task apply:node STACK_NAME=proxmox_atlas
+    cmds:
+      - task: tofu:apply:node
+        vars: { STACK_NAME: "{{.STACK_NAME}}" }
+      - task: ansible:apply:node
+
+  apply:guest:
+    desc: "DR step 4+5 — GUEST phase: create the VMs/LXCs (Tofu) then apply the guest layers (Ansible)."
+    summary: |
+      Runs `tofu:apply:guest` (full apply; creates the VMs/LXCs) then
+      `ansible:apply:guest` (base/hardening/runtimes/k8s/services + NAS client).
+      Run this AFTER the NAS data has been restored.
+      Usage: task apply:guest STACK_NAME=proxmox_atlas
+    cmds:
+      - task: tofu:apply:guest
+        vars: { STACK_NAME: "{{.STACK_NAME}}" }
+      - task: ansible:apply:guest
+
   vm:build:
-    desc: "Completely build VMs and provision with Ansible (Smart Wait)"
+    desc: "GUEST phase on an existing host: full Tofu apply (creates VMs/LXCs) → wait for cloud-init → all Ansible layers."
+    summary: |
+      Convenience task for the guest phase when the host/NAS is already prepared.
+      On a FRESH host use the ordered DR flow instead:
+        task apply:node  →  <restore>  →  task apply:guest
+      (see docs/runbooks/rebuild-from-scratch.md).
+      Usage: task vm:build STACK_NAME=proxmox_atlas
     preconditions:
       - sh: 'test -n "{{.STACK_NAME}}"'
         msg: "Error: STACK_NAME is required. Usage: task vm:build STACK_NAME=<stack_name>"
     cmds:
-      - task: tofu:apply:approve
+      - task: tofu:apply:guest
         vars: { STACK_NAME: "{{.STACK_NAME}}" }
       - task: ansible:wait-ready
         vars: { INVENTORY_FILE: "inventory.d/{{.STACK_NAME}}.yml" }

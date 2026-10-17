@@ -25,13 +25,13 @@ resources = {
       block_public_access                = true
       noncurrent_version_expiration_days = 14
     }
-    # "homelab" = {
-    #   bucket_name                        = "aritro-homelab"
-    #   versioning                         = true
-    #   force_destroy                      = false
-    #   block_public_access                = true
-    #   noncurrent_version_expiration_days = 14
-    # }
+    "homelab" = {
+      bucket_name                        = "atlas-homelab"
+      versioning                         = true
+      force_destroy                      = false
+      block_public_access                = true
+      noncurrent_version_expiration_days = 14
+    }
   }
 
   # --- Managed IAM Groups ---
@@ -72,7 +72,9 @@ resources = {
               "arn:aws:s3:::hyperion-velero-backups",
               "arn:aws:s3:::hyperion-velero-backups/*",
               "arn:aws:s3:::hyperion-immich-file",
-              "arn:aws:s3:::hyperion-immich-file/*"
+              "arn:aws:s3:::hyperion-immich-file/*",
+              "arn:aws:s3:::atlas-homelab",
+              "arn:aws:s3:::atlas-homelab/*"
             ]
           }
         ]

@@ -1,0 +1,22 @@
+# meta/main.yml
+---
+galaxy_info:
+  author: Aritro
+  role_name: nas_server
+  namespace: internal
+  description: Realises a host-level NAS (ZFS pools, share roots, NFS exports, Samba) from the OpenTofu topology contract.
+  company: None
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - nas
+    - storage
+    - zfs
+    - nfs
+    - samba
+
+dependencies: []

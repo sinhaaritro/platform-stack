@@ -103,6 +103,38 @@ tasks:
       - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
       - eval "tofu apply -auto-approve -parallelism={{.PARALLELISM}} -var-file={{.CONFIG_FILE}} {{.TF_SECRET_ARGS}} {{.CLI_ARGS}}"
 
+  apply:node:
+    desc: "NODE phase (Tofu, inventory-only): renders ansible/inventory.d/<stack>.yml WITHOUT creating guests. DR step 1."
+    summary: |
+      Renders the Ansible inventory (NAS contract on the provider + nas_mounts on
+      clients) without creating any VM/LXC, so the host/node layer can run before
+      guests exist. Safe to run on an existing environment too (it only writes the
+      inventory file; it never touches guests).
+
+      This works because the inventory is built from the SCHEMA's static IPs, not
+      from created-guest outputs (see main.tf / local.unified_host_list).
+
+      Usage: task tofu:apply:node STACK_NAME=proxmox_atlas
+    dir: "{{.STACK_DIR}}"
+    deps: [init]
+    cmds:
+      - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
+      - eval "tofu apply -auto-approve -parallelism={{.PARALLELISM}} -var-file={{.CONFIG_FILE}} {{.TF_SECRET_ARGS}} -target=module.inventory {{.CLI_ARGS}}"
+
+  apply:guest:
+    desc: "GUEST phase (Tofu): full apply — creates the VMs/LXCs. DR step 4 (run the NODE phase first)."
+    summary: |
+      Full `tofu apply` on the stack: creates the VM/LXC resources and (re-)renders
+      the inventory. In the host-first DR flow, run this only AFTER the NODE phase
+      (`task apply:node`) has created the data pool/datastore the guest disks use.
+
+      Usage: task tofu:apply:guest STACK_NAME=proxmox_atlas
+    dir: "{{.STACK_DIR}}"
+    deps: [init]
+    cmds:
+      - 'test -n "$ANSIBLE_VAULT_PASSWORD" || (echo "Error: ANSIBLE_VAULT_PASSWORD environment variable is not set." && exit 1)'
+      - eval "tofu apply -auto-approve -parallelism={{.PARALLELISM}} -var-file={{.CONFIG_FILE}} {{.TF_SECRET_ARGS}} {{.CLI_ARGS}}"
+
   destroy:
     desc: "Destroys all infrastructure managed by the target stack."
     dir: "{{.STACK_DIR}}"

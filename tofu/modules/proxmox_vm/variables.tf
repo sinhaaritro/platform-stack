@@ -125,8 +125,8 @@ variable "user_account_keys" {
 }
 
 variable "ansible_groups" {
-  description = "Map of Ansible groups and vars to add this host to. Structure: { group_name = { var_name = val } }"
-  type        = map(map(string))
+  description = "Map of Ansible groups and vars to add this host to. Structure: { group_name = { var_name = val } }. Values may be nested (lists/maps) — passed through for inventory generation only."
+  type        = any
   default     = {}
 }
 

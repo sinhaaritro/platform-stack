@@ -1,0 +1,275 @@
+---
+# tasks/truenas.yml - TrueNAS backend, driven entirely through the REST API.
+#
+# Same `storage` contract as the Proxmox backend. No package installs, no file
+# templates: pools/datasets/users/shares/backup are realised via /api/v2.0.
+# Every create is guarded by a query (idempotent) and is non-destructive.
+#
+# NOTE: written against the TrueNAS SCALE REST API (/api/v2.0). Untested until a
+# TrueNAS appliance (zunesha) exists — endpoints/fields may need adjustment.
+
+- name: Assert the TrueNAS API is configured
+  ansible.builtin.assert:
+    that:
+      - nas_server_truenas_api_url | length > 0
+      - nas_server_truenas_api_key | length > 0
+    fail_msg: >-
+      nas_server (truenas backend): set nas_server_truenas_api_url and
+      nas_server_truenas_api_key (secret).
+
+- name: Build the TrueNAS API auth headers
+  ansible.builtin.set_fact:
+    nas_server_tn_headers:
+      Authorization: "Bearer {{ nas_server_truenas_api_key }}"
+      Content-Type: application/json
+  no_log: true
+
+# ── Pools (import existing / create missing; NEVER destroy) ────────────────────
+- name: Query existing pools
+  ansible.builtin.uri:
+    url: "{{ nas_server_truenas_api_url }}/pool"
+    headers: "{{ nas_server_tn_headers }}"
+    validate_certs: "{{ nas_server_truenas_validate_certs }}"
+    return_content: true
+    status_code: 200
+  register: nas_server_tn_pools
+  changed_when: false
+
+- name: Query importable (not imported) pools
+  ansible.builtin.uri:
+    url: "{{ nas_server_truenas_api_url }}/pool/import_find"
+    headers: "{{ nas_server_tn_headers }}"
+    validate_certs: "{{ nas_server_truenas_validate_certs }}"
+    return_content: true
+    status_code: 200
+  register: nas_server_tn_import_find
+  changed_when: false
+  failed_when: false
+
+- name: Import declared pools that exist but are not imported
+  ansible.builtin.uri:
+    url: "{{ nas_server_truenas_api_url }}/pool/import"
+    method: POST
+    headers: "{{ nas_server_tn_headers }}"
+    body_format: json
+    body:
+      name: "{{ item.name }}"
+    validate_certs: "{{ nas_server_truenas_validate_certs }}"
+    status_code: [200, 201]
+  loop: "{{ storage.pools | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - item.name not in (nas_server_tn_pools.json | map(attribute='name') | list)
+    - item.name in (nas_server_tn_import_find.json | default([]) | map(attribute='name') | list)
+
+- name: Create declared pools that are not imported and not importable
+  ansible.builtin.uri:
+    url: "{{ nas_server_truenas_api_url }}/pool"
+    method: POST
+    headers: "{{ nas_server_tn_headers }}"
+    body_format: json
+    body:
+      name: "{{ item.name }}"
+      topology:
+        data:
+          - type: "{{ nas_server_tn_vdev_type[item.vdev | default('single')] }}"
+            disks: "{{ item.disks }}"
+    validate_certs: "{{ nas_server_truenas_validate_certs }}"
+    status_code: [200, 201]
+  loop: "{{ storage.pools | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - nas_server_allow_pool_create | bool
+    - item.name not in (nas_server_tn_pools.json | map(attribute='name') | list)
+    - item.name not in (nas_server_tn_import_find.json | default([]) | map(attribute='name') | list)
+
+# ── Datasets ───────────────────────────────────────────────────────────────────
+- name: Query existing datasets
+  ansible.builtin.uri:
+    url: "{{ nas_server_truenas_api_url }}/pool/dataset"
+    headers: "{{ nas_server_tn_headers }}"
+    validate_certs: "{{ nas_server_truenas_validate_certs }}"
+    return_content: true
+    status_code: 200
+  register: nas_server_tn_datasets
+  changed_when: false
+
+- name: Create missing datasets
+  ansible.builtin.uri:
+    url: "{{ nas_server_truenas_api_url }}/pool/dataset"
+    method: POST
+    headers: "{{ nas_server_tn_headers }}"
+    body_format: json
+    body:
+      name: "{{ item.0.name }}/{{ item.1.name }}"
+      type: FILESYSTEM
+      compression: "{{ item.0.props.compression | default('LZ4') | upper }}"
+    validate_certs: "{{ nas_server_truenas_validate_certs }}"
+    status_code: [200, 201]
+  loop: "{{ storage.pools | default([]) | subelements('datasets', skip_missing=True) }}"
+  loop_control:
+    label: "{{ item.0.name }}/{{ item.1.name }}"
+  when: (item.0.name ~ '/' ~ item.1.name) not in (nas_server_tn_datasets.json | map(attribute='name') | list)
+
+# ── Accounts (share user) ──────────────────────────────────────────────────────
+- name: Query existing users
+  ansible.builtin.uri:
+    url: "{{ nas_server_truenas_api_url }}/user"
+    headers: "{{ nas_server_tn_headers }}"
+    validate_certs: "{{ nas_server_truenas_validate_certs }}"
+    return_content: true
+    status_code: 200
+  register: nas_server_tn_users
+  changed_when: false
+  when: storage.smb_user is defined
+
+- name: Create the share user
+  ansible.builtin.uri:
+    url: "{{ nas_server_truenas_api_url }}/user"
+    method: POST
+    headers: "{{ nas_server_tn_headers }}"
+    body_format: json
+    body:
+      username: "{{ storage.smb_user.name }}"
+      uid: "{{ storage.smb_user.uid }}"
+      group_create: true
+      shell: "/usr/sbin/nologin"
+      password_disabled: true
+    validate_certs: "{{ nas_server_truenas_validate_certs }}"
+    status_code: [200, 201]
+  when:
+    - storage.smb_user is defined
+    - storage.smb_user.name not in (nas_server_tn_users.json | map(attribute='username') | list)
+
+# ── NFS exports ────────────────────────────────────────────────────────────────
+- name: Query existing NFS exports
+  ansible.builtin.uri:
+    url: "{{ nas_server_truenas_api_url }}/sharing/nfs"
+    headers: "{{ nas_server_tn_headers }}"
+    validate_certs: "{{ nas_server_truenas_validate_certs }}"
+    return_content: true
+    status_code: 200
+  register: nas_server_tn_nfs
+  changed_when: false
+
+- name: Create missing NFS exports
+  ansible.builtin.uri:
+    url: "{{ nas_server_truenas_api_url }}/sharing/nfs"
+    method: POST
+    headers: "{{ nas_server_tn_headers }}"
+    body_format: json
+    body:
+      path: "{{ item.value.path }}"
+      networks: ["{{ item.value.clients }}"]
+      ro: false
+    validate_certs: "{{ nas_server_truenas_validate_certs }}"
+    status_code: [200, 201]
+  loop: "{{ storage.exports | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }} -> {{ item.value.path }}"
+  when: item.value.path not in (nas_server_tn_nfs.json | map(attribute='path') | list)
+
+# ── SMB shares ─────────────────────────────────────────────────────────────────
+- name: Query existing SMB shares
+  ansible.builtin.uri:
+    url: "{{ nas_server_truenas_api_url }}/sharing/smb"
+    headers: "{{ nas_server_tn_headers }}"
+    validate_certs: "{{ nas_server_truenas_validate_certs }}"
+    return_content: true
+    status_code: 200
+  register: nas_server_tn_smb
+  changed_when: false
+
+- name: Create missing SMB shares
+  ansible.builtin.uri:
+    url: "{{ nas_server_truenas_api_url }}/sharing/smb"
+    method: POST
+    headers: "{{ nas_server_tn_headers }}"
+    body_format: json
+    body:
+      name: "{{ item.key }}"
+      path: "{{ item.value.path }}"
+      purpose: DEFAULT_SHARE
+    validate_certs: "{{ nas_server_truenas_validate_certs }}"
+    status_code: [200, 201]
+  loop: "{{ storage.smb_shares | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: item.value.path not in (nas_server_tn_smb.json | map(attribute='path') | list)
+
+# ── Backup (snapshot tasks / scrub / SMART; toggles, minimal by default) ───────
+- name: Compute effective backup toggles
+  ansible.builtin.set_fact:
+    nas_server_tn_bk_snapshots: "{{ (storage.backup.snapshots.enabled | default(nas_server_snapshots_enabled)) | bool }}"
+    nas_server_tn_bk_scrub: "{{ (storage.backup.scrub.enabled | default(nas_server_scrub_schedule_enabled)) | bool }}"
+    nas_server_tn_bk_smart: "{{ (storage.backup.smart.enabled | default(nas_server_smart_monitoring)) | bool }}"
+
+- name: Query existing periodic snapshot tasks
+  ansible.builtin.uri:
+    url: "{{ nas_server_truenas_api_url }}/pool/snapshottask"
+    headers: "{{ nas_server_tn_headers }}"
+    validate_certs: "{{ nas_server_truenas_validate_certs }}"
+    return_content: true
+    status_code: 200
+  register: nas_server_tn_snaptasks
+  changed_when: false
+  when: nas_server_tn_bk_snapshots | bool
+
+- name: Create periodic snapshot tasks
+  ansible.builtin.uri:
+    url: "{{ nas_server_truenas_api_url }}/pool/snapshottask"
+    method: POST
+    headers: "{{ nas_server_tn_headers }}"
+    body_format: json
+    body:
+      dataset: "{{ item.name }}"
+      recursive: true
+      lifetime_value: "{{ storage.backup.snapshots.keep | default(nas_server_snapshots_keep) }}"
+      lifetime_unit: DAY
+      naming_schema: "auto-%Y-%m-%d_%H-%M"
+      schedule: { minute: "0", hour: "0", dom: "*", dow: "*" }
+    validate_certs: "{{ nas_server_truenas_validate_certs }}"
+    status_code: [200, 201]
+  loop: "{{ storage.pools | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - nas_server_tn_bk_snapshots | bool
+    - item.name not in (nas_server_tn_snaptasks.json | default([]) | map(attribute='dataset') | list)
+
+- name: Create pool scrub schedules
+  ansible.builtin.uri:
+    url: "{{ nas_server_truenas_api_url }}/pool/scrub"
+    method: POST
+    headers: "{{ nas_server_tn_headers }}"
+    body_format: json
+    body:
+      pool: "{{ item.name }}"
+      threshold: 35
+      schedule: { minute: "0", hour: "0", dom: "*", dow: "sun" }
+    validate_certs: "{{ nas_server_truenas_validate_certs }}"
+    status_code: [200, 201]
+  loop: "{{ storage.pools | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: nas_server_tn_bk_scrub | bool
+
+- name: Ensure the SMART service is running
+  ansible.builtin.uri:
+    url: "{{ nas_server_truenas_api_url }}/service/start"
+    method: POST
+    headers: "{{ nas_server_tn_headers }}"
+    body_format: json
+    body: { service: smartd }
+    validate_certs: "{{ nas_server_truenas_validate_certs }}"
+    status_code: [200]
+  when: nas_server_tn_bk_smart | bool
+
+# Offsite rclone on TrueNAS is NOT Cloud Sync (which would lose filename
+# encryption). Deferred — see nas-iac-codification-plan.md §7 / §9.4.
+- name: Offsite rclone (TrueNAS)
+  ansible.builtin.debug:
+    msg: "TrueNAS offsite rclone (container-based) is not implemented yet."
+  when: (storage.backup.rclone.enabled | default(false)) | bool

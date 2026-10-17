@@ -1,0 +1,57 @@
+# {{ ansible_managed }}
+#!/usr/bin/env bash
+# Offsite backup wrapper (per job): mount check -> rclone -> SHA-256 manifest -> healthchecks.
+set -euo pipefail
+
+JOB="${1:?usage: nas-server-rclone-backup.sh <job>}"
+RCLONE="/usr/bin/rclone"
+CONF="/root/.config/rclone/rclone.conf"
+REMOTE="{{ storage.backup.rclone.remote | default('vault') }}"
+HEALTHCHECKS="{{ storage.backup.rclone.healthchecks_url | default('') }}"
+LOGDIR="/var/log/rclone"
+mkdir -p "$LOGDIR"
+
+case "$JOB" in
+{% for j in storage.backup.rclone.jobs | default([]) %}
+  {{ j.name }})
+    SRC="{{ j.source }}"
+    DST="${REMOTE}:{{ j.target }}"
+    MODE="{{ j.mode | default('sync') }}"
+    MAXDELETE="{{ j.max_delete | default(0) }}"
+    STORAGE_CLASS="{{ j.storage_class | default(storage.backup.rclone.storage_class | default('DEEP_ARCHIVE')) }}"
+    EXCLUDES=({% for e in j.excludes | default([]) %}--exclude "{{ e }}" {% endfor %})
+    ;;
+{% endfor %}
+  *)
+    echo "unknown job: $JOB" >&2; exit 2;;
+esac
+
+# 1. Mount check — refuse if the source is missing (disk not mounted).
+if [ ! -d "$SRC" ]; then
+  echo "ERROR: source '$SRC' not present (disk mounted?) — aborting job '$JOB'" >&2
+  exit 3
+fi
+
+LOG="$LOGDIR/$JOB-$(date +%Y%m%d-%H%M%S).log"
+ARGS=(--config "$CONF" --log-level INFO --log-file "$LOG" --s3-storage-class "$STORAGE_CLASS")
+if [ "$MODE" = "sync" ] && [ "$MAXDELETE" != "0" ]; then
+  ARGS+=(--max-delete "$MAXDELETE")
+fi
+
+# 2. Run the transfer.
+if [ "$MODE" = "copy" ]; then
+  "$RCLONE" copy "$SRC" "$DST" "${EXCLUDES[@]}" "${ARGS[@]}"
+else
+  "$RCLONE" sync "$SRC" "$DST" "${EXCLUDES[@]}" "${ARGS[@]}"
+fi
+
+# 3. SHA-256 manifest: keep it locally and upload it for true verification.
+"$RCLONE" hashsum sha256 "$SRC" | sort > "$LOGDIR/$JOB.sha256"
+"$RCLONE" copyto "$LOGDIR/$JOB.sha256" "${REMOTE}:manifests/$JOB.sha256" --config "$CONF" --log-file "$LOG" || true
+
+# 4. healthchecks.io ping (optional).
+if [ -n "$HEALTHCHECKS" ]; then
+  curl -fsS -m 10 --retry 3 "$HEALTHCHECKS" >/dev/null || true
+fi
+
+echo "done: $JOB"

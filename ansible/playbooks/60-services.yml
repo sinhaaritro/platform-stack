@@ -1,9 +1,10 @@
-# playbooks/40-services.yml
+# playbooks/60-services.yml
 ---
 # ==============================================================================
-# PLATFORM SERVICES LAYER
-# Target: adguard, netbird, cloudflared, nas hosts.
-# Purpose: DNS, VPN, tunnel, and storage-client services.
+# PLATFORM SERVICES LAYER (guest-level)
+# Target: adguard, netbird, cloudflared, nas (client) hosts.
+# Purpose: DNS, VPN, tunnel, and storage-CLIENT services. The NAS server
+#          (node-local storage) lives in the node layer — 10-node.yml.
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
@@ -38,14 +39,15 @@
 
 # ------------------------------------------------------------------------------
 # STORAGE LAYER — NAS client (NFS mount)
-# Mounts the host export /WD4TB/shared/v1.
+# Mounts a host export (per-host `nas_mounts` / legacy vars). The server side
+# is in the node layer (10-node.yml) and runs first.
 # ------------------------------------------------------------------------------
 - name: Configure NAS client (NFS mount)
   hosts: nas
-  tags: nas
+  tags: nas_client
   become: true
   roles:
-    - role: nas
+    - role: nas_client
 
 # ==============================================================================
 # DISABLED / FUTURE LAYERS

@@ -1,0 +1,6 @@
+# {{ ansible_managed }}
+# Managed by Ansible (nas_server) from topology.nodes.<node>.storage.exports.
+# Do not edit by hand — changes are overwritten on the next run.
+{% for _id, e in storage.exports | default({}) | dictsort %}
+{{ e.path }} {{ e.clients }}({{ e.options }})
+{% endfor %}

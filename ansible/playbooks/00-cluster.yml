@@ -1,0 +1,18 @@
+# playbooks/00-cluster.yml
+---
+# ==============================================================================
+# CLUSTER LAYER — cluster-scoped configuration (Proxmox PRIMARY only).
+# Target: proxmox_primary.
+# Purpose: config that lives ONCE per cluster and is inherited by every member
+#          via the Proxmox cluster API / /etc/pve — SDN VLANs/VNets, shared
+#          storage *definitions*, firewall, replication (from
+#          `topology.clusters.<cluster>`, applied by `primary`).
+#
+# SCAFFOLD: no roles wired yet. Node-local work is in 10-node.yml; guest
+# (VM/LXC) work starts at 20-foundation.yml.
+# ==============================================================================
+- name: Cluster-scoped configuration (scaffold)
+  hosts: proxmox_primary
+  tags: cluster
+  gather_facts: false
+  tasks: []

@@ -135,7 +135,7 @@ tank/                          # Root pool
 
 ## Interim Architecture (Host-level NAS)
 
-Until TrueNAS hardware is available, user data is served directly from the **Proxmox host** (`atlas`, `192.168.0.2`): the kernel NFS server (`nfs-kernel-server`) and Samba (`smbd`) export `/WD4TB/shared/v1` straight off the `WD4TB` ZFS pool. No NAS VM is involved.
+Until TrueNAS hardware is available, user data is served directly from the **Proxmox host** (`atlas`, `192.168.0.2`): the kernel NFS server (`nfs-kernel-server`) and Samba (`smbd`) export the **parent** `/WD4TB/shared` (rw) straight off the `WD4TB` ZFS pool; each consumer mounts its own versioned subdir (`…/v1`). No NAS VM is involved. The host side is now **IaC** — see the `nas_server` role (§ [Host Setup Overview](#host-setup-overview)).
 
 ```mermaid
 ---
@@ -148,7 +148,7 @@ flowchart TD
   subgraph Diagram["Interim Architecture: Host-level NAS"]
     subgraph ProxmoxHost["Proxmox Host (atlas)"]
       ZPool["WD4TB ZFS Pool"]
-      Export["/WD4TB/shared/v1\n(exported via /etc/exports)"]
+      Export["/WD4TB/shared\n(exported rw via /etc/exports)"]
       NFSService["kernel nfsd"]
       SMBService["Samba (smbd)"]
     end
@@ -186,12 +186,12 @@ flowchart TD
 
 | Aspect | Details |
 |---|---|
-| **NFS server** | Proxmox host `atlas` (192.168.0.2), kernel `nfsd` (NFSv4), export `/WD4TB/shared/v1` via `/etc/exports` |
+| **NFS server** | Proxmox host `atlas` (192.168.0.2), kernel `nfsd` (NFSv4), export the parent `/WD4TB/shared` **rw** via `/etc/exports` |
 | **SMB** | Host `smbd` serves the same directory to desktop clients |
-| **Data layout version** | `/WD4TB/shared/v1` — the `v1` suffix is a deliberate **layout-versioning convention**: a future rework of the directory structure lives under `v2`, `v3`, … next to the old one, so consumers can migrate in place |
-| **Client VMs** | `oceanus` mounts `192.168.0.2:/WD4TB/shared/v1` at `/export/data` (Ansible role `nas`, fstab with `hard,noatime,actimeo=2`) |
+| **Data layout version** | The host exports the parent `/WD4TB/shared`; each **consumer** picks the version dir it mounts (`v1`, or `v2`/`v3` next to it, to migrate in place). The `v1` suffix is a deliberate **layout-versioning convention**, held on the client side |
+| **Client VMs** | `oceanus` mounts `192.168.0.2:/WD4TB/shared/v1` at `/export/data` (Ansible role `nas_client`; mounts declared per-host as `nas_mounts` and resolved against the provider's `storage.exports`, fstab with `hard,noatime,actimeo=2`) |
 | **In Kubernetes** | SC `nfs` → `nfs-subdir-external-provisioner` → one `v1/<namespace>/<PVC-name>` subdir per PVC under `/WD4TB/shared` |
-| **Provisioning** | Host config is manual (exports, SMB); `oceanus` is a thin client provisioned by OpenTofu + Ansible |
+| **Provisioning** | Host config is **IaC** — the `nas_server` role (target `proxmox_node`) realises pools/datasets, `/etc/exports` and Samba from each node's OpenTofu-generated `storage` var; `oceanus` mounts via the `nas_client` role |
 
 ### Why Not an LXC or a NAS VM?
 
@@ -216,8 +216,8 @@ The original plan ran **NFS-Ganesha inside an LXC container**. It was abandoned 
 
 ### Host Setup Overview
 
-1.  **Host (`atlas`)**: `WD4TB` ZFS pool → directory `/WD4TB/shared/v1`, exported in `/etc/exports` (`rw,no_subtree_check`), Samba share for desktop access. (Manual — documented here; not in GitOps.)
-2.  **Client VMs** (e.g., `oceanus`): Ansible role `nas` installs `nfs-common` and mounts `192.168.0.2:/WD4TB/shared/v1` at `/export/data` via fstab (`hard,noatime,actimeo=2`). The role also purges any stale NFS-server/Samba packages.
+1.  **Host (`atlas`)**: `WD4TB` ZFS pool → dataset `/WD4TB/shared`, exported **rw** in `/etc/exports` (parent, `no_subtree_check`), Samba share for desktop access. Managed by the `nas_server` role from the OpenTofu `topology.nodes.<node>.storage` config (no longer manual).
+2.  **Client VMs** (e.g., `oceanus`): Ansible role `nas_client` installs `nfs-common` and mounts each resolved `nas_mounts` entry (e.g. `192.168.0.2:/WD4TB/shared/v1` at `/export/data`, `hard,noatime,actimeo=2`) via fstab. Its destructive cleanup (purging stale NFS-server/Samba packages) is **opt-in** (`nas_client_purge_server`, default off).
 3.  **Deploy provisioner** in Kubernetes (see Dynamic Provisioning below).
 
 ---
@@ -485,6 +485,7 @@ The migration from the interim host-level NAS to TrueNAS is designed to be non-d
 | Document | Relationship |
 |---|---|
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | NFS's position as Tier 4 in the storage model |
+| [NAS_PLATFORM_MATRIX.md](./NAS_PLATFORM_MATRIX.md) | TrueNAS vs bare Proxmox — what each provides and how IaC realises it |
 | [LONGHORN.md](./LONGHORN.md) | Block storage — distinct from NFS. NFS does NOT flow through Longhorn |
 | [SEAWEEDFS.md](./SEAWEEDFS.md) | Object storage — distinct from NFS. SeaweedFS handles logs, not user data |
 | [CAPACITY_PLANNING.md](./CAPACITY_PLANNING.md) | HDD-tier sizing, ZFS overhead, growth projections |

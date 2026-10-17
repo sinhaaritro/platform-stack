@@ -89,6 +89,19 @@ tasks:
       - sh: 'test -n "{{.TAG}}"'
         msg: "You must provide a tag name. Usage: task apply:tag tag=<target_tag>"
 
+  # --- Disaggregated runs for the host-first DR order (see docs/runbooks/rebuild-from-scratch.md) ---
+  apply:node:
+    desc: "NODE phase — NAS storage only: pool/dataset/share roots/exports/Samba. Run BEFORE restoring data."
+    dir: "{{.USER_WORKING_DIR}}/ansible"
+    cmds:
+      - ansible-playbook -i {{.INVENTORY_FILE}} playbooks/10-node.yml {{.CLI_ARGS}}
+
+  apply:guest:
+    desc: "GUEST phase — base/hardening/runtimes/k8s/services (+ NAS client). Run AFTER restoring data."
+    dir: "{{.USER_WORKING_DIR}}/ansible"
+    cmds:
+      - ansible-playbook -i {{.INVENTORY_FILE}} {{.PLAYBOOK_FILE}} --skip-tags nas_server {{.CLI_ARGS}}
+
   lint:
     desc: "Runs ansible-lint to check for best practices and errors."
     dir: "{{.USER_WORKING_DIR}}/ansible"

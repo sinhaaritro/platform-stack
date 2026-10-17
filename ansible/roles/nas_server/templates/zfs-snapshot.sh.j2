@@ -1,0 +1,13 @@
+{{ ansible_managed }}
+#!/usr/bin/env bash
+# Managed by Ansible (nas_server). Periodic ZFS snapshots with pruning.
+set -euo pipefail
+
+KEEP={{ (storage.backup.snapshots.keep | default(nas_server_snapshots_keep)) | int }}
+STAMP=$(date +%Y%m%d%H%M%S)
+
+{% for pool in storage.pools | default([]) %}
+# --- {{ pool.name }} ---
+zfs snapshot -r {{ pool.name }}@auto-"$STAMP"
+zfs list -H -t snapshot -o name -s creation {{ pool.name }} | grep '@auto-' | head -n "-$KEEP" | xargs -r -n1 zfs destroy
+{% endfor %}

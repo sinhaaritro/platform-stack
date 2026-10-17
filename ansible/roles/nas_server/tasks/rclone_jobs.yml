@@ -1,0 +1,52 @@
+---
+# tasks/rclone_jobs.yml - install + enable the per-job systemd units.
+# Only reached when `storage.backup.rclone.enabled` is true (the caller block).
+
+- name: Install the rclone job service units
+  ansible.builtin.copy:
+    dest: "/etc/systemd/system/nas-server-rclone-{{ item.name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=nas_server offsite rclone backup - {{ item.name }}
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/sbin/nas-server-rclone-backup.sh {{ item.name }}
+  loop: "{{ storage.backup.rclone.jobs | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Install the rclone job timer units
+  ansible.builtin.copy:
+    dest: "/etc/systemd/system/nas-server-rclone-{{ item.name }}.timer"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=nas_server offsite rclone backup - {{ item.name }}
+
+      [Timer]
+      OnCalendar={{ item.schedule | default('weekly') }}
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+  loop: "{{ storage.backup.rclone.jobs | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Enable and start the rclone job timers
+  ansible.builtin.systemd:
+    name: "nas-server-rclone-{{ item.name }}.timer"
+    enabled: true
+    state: started
+    daemon_reload: true
+  loop: "{{ storage.backup.rclone.jobs | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"

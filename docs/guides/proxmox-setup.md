@@ -1,6 +1,7 @@
-# Proxmox VE API User & Token Setup Guide
+# Proxmox VE Setup Guide
 
-This guide describes how to configure an API user and token in Proxmox VE (PVE) to allow OpenTofu to automate the provisioning of VMs and containers, and how to integrate it with the `platform-stack` infrastructure.
+This guide covers the host-level Proxmox VE (PVE) setup that `platform-stack` assumes: creating the
+OpenTofu API user and token, and adding/declaring host storage disks (ZFS pools and plain data disks).
 
 ---
 
@@ -98,3 +99,125 @@ The OpenTofu stack expects the connection endpoint and authentication details in
    }
    ```
 3. Save and close the editor. The file will be automatically re-encrypted.
+
+---
+
+## 5. Storage — Adding New Disks
+
+Proxmox does not manage host disks for you. `platform-stack` declares them under
+`topology.nodes.<node>.storage` in [`tofu/stacks/onprem/proxmox_atlas/schema.tfvars`](../../tofu/stacks/onprem/proxmox_atlas/schema.tfvars),
+and the Ansible `nas_server` role realises them (pool/dataset, format, mount, export). Adding a disk is a
+**data change** — no script edits.
+
+There are two kinds of declared disk:
+
+| Kind | Config key | Use for |
+|---|---|---|
+| **ZFS pool member** | `storage.pools[].disks` | Integrity, checksums, snapshots — the default for NAS data |
+| **Plain (non-ZFS) disk** | `storage.data_disks[]` | Simple/fast volumes — an SSD scratch/cache disk, or a second bulk disk like `WD1TB` (formatted `ext4`) |
+
+> [!WARNING]
+> Never reference a disk by `sda`/`sdb` — enumeration order changes between boots. Always use
+> `/dev/disk/by-id/…`.
+
+### 5.1 Find the disk's stable ID
+
+The `by-id` path is a udev symlink of the form `bus-model_serial`. It is **independent of whatever
+filesystem already lives on the disk** — same path for a blank disk, exFAT, NTFS, or an old pool.
+
+```bash
+# whole disks only (drop -partN), with where each symlink points
+ls -l /dev/disk/by-id/ | grep -v part
+
+# resolve one device if you know its sdX
+udevadm info --query=property --name=/dev/sdc | grep -E '^ID_(BUS|MODEL|SERIAL)'
+
+# model + serial table for all disks (no sdX guessing)
+lsblk -d -o NAME,MODEL,SERIAL,SIZE,TYPE
+```
+
+Copy the full path, e.g. `/dev/disk/by-id/ata-WDC_WD10EZRX-00L4HB0_WD-WCC4J2501696`.
+Prefixes: `ata-…` (SATA/SAS), `nvme-…` (NVMe), `wwn-0x…` (also stable), `usb-…` (USB enclosures).
+
+### 5.2 Check what's on it (optional)
+
+The role creates/formats **only when the disk is blank**, unless you set `wipe = true` (§5.5). Inspect
+existing signatures without touching them:
+
+```bash
+wipefs -n /dev/disk/by-id/ata-…     # dry run: list detectable signatures
+lsblk -f /dev/sdX                   # FSTYPE / LABEL / UUID
+zdb -l /dev/sdX                     # any ZFS labels?
+```
+
+### 5.3 Add it to the config
+
+**A) New ZFS pool (its own vdev)**
+
+```hcl
+storage = {
+  # …
+  pools = [
+    {
+      name     = "HDD8TB"
+      vdev     = "single"                 # or mirror / raidz1 / raidz2 …
+      disks    = ["/dev/disk/by-id/ata-WDC_WD80EFAX-68LHPN0_JEKXXXXX"]
+      props    = { ashift = 12, compression = "on", recordsize = "1M" }
+      datasets = [{ name = "shared", mountpoint = "/HDD8TB/shared" }]
+    }
+  ]
+}
+```
+
+**B) Join an existing pool** (mirror/raidz) — append to that pool's list:
+
+```hcl
+disks = ["/dev/disk/by-id/ata-existing…", "/dev/disk/by-id/ata-NEW…"]
+```
+
+**C) Plain (non-ZFS) data disk** — an SSD for speed, or a second bulk HDD like `WD1TB`:
+
+```hcl
+storage = {
+  # …
+  data_disks = [
+    { interface = "sdb", by_id = "/dev/disk/by-id/ata-WDC_WD10EZRX-00L4HB0_WD-WCC4J2501696",
+      fstype = "ext4", path = "/mnt/pve/WD1TB" }
+  ]
+}
+```
+
+Optionally expose it to Proxmox as a datastore under `storage.proxmox_storages`.
+
+### 5.4 HDD vs SSD
+
+Same fields; only the ZFS `props` (and intended role) differ:
+
+| | HDD | SSD |
+|---|---|---|
+| `ashift` | `12` (4K) | `12` (occasionally `13`) |
+| `recordsize` | `1M` (bulk) | `16K`–`128K` |
+| Typical role | bulk/media pool | VM-disks pool, or a `special`/`cache` vdev |
+
+### 5.5 Clearing a disk you don't need (`wipe`)
+
+If the disk arrived pre-formatted (exFAT/NTFS) or holds an old pool and **you don't need its contents**,
+set `wipe = true` on that pool/disk:
+
+```hcl
+pools      = [{ name = "HDD8TB", vdev = "single", disks = ["/dev/disk/by-id/…"], wipe = true, props = { … } }]
+data_disks = [{ by_id = "/dev/disk/by-id/…", fstype = "ext4", path = "/mnt/pve/NEW", wipe = true }]
+```
+
+The role then runs `wipefs -a` (plus `zpool labelclear -f` if a ZFS label is found) on **only that
+by-id**, before creating/formatting. `wipe = false`/absent keeps the safe default: blank-only, never
+destructive. The OS/boot/LVM device is never in the declared list and is never touched.
+
+### 5.6 Verify
+
+```bash
+zpool status                 # pools + vdevs (shows the by-id form in use)
+zfs list                     # datasets + mountpoints
+lsblk -f                     # non-ZFS disks: FSTYPE + mountpoint
+findmnt /mnt/pve/WD1TB       # confirm a data disk mounted
+```

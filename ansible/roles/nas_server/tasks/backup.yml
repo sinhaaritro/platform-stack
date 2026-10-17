@@ -1,0 +1,172 @@
+---
+# tasks/backup.yml - snapshots / scrub / smartd / rclone.
+#
+# Minimal by default: SMART monitoring ON (monitor only), everything else OFF.
+# Per-node `storage.backup.<x>.enabled` overrides the role defaults.
+
+- name: Compute effective backup toggles
+  ansible.builtin.set_fact:
+    nas_server_bk_snapshots: "{{ (storage.backup.snapshots.enabled | default(nas_server_snapshots_enabled)) | bool }}"
+    nas_server_bk_scrub: "{{ (storage.backup.scrub.enabled | default(nas_server_scrub_schedule_enabled)) | bool }}"
+    nas_server_bk_smart: "{{ (storage.backup.smart.enabled | default(nas_server_smart_monitoring)) | bool }}"
+    nas_server_bk_rclone: "{{ (storage.backup.rclone.enabled | default(nas_server_offsite_rclone_enabled)) | bool }}"
+
+# ── SMART monitoring (default ON; monitor only, no self-tests) ─────────────────
+- name: Ensure smartmontools is present
+  ansible.builtin.apt:
+    name: smartmontools
+    state: present
+  when: nas_server_bk_smart | bool
+
+- name: Ensure smartd is enabled and running
+  ansible.builtin.service:
+    name: smartd
+    state: started
+    enabled: true
+  when: nas_server_bk_smart | bool
+
+# ── Periodic ZFS snapshots (default OFF) ───────────────────────────────────────
+- name: Periodic ZFS snapshots
+  when: nas_server_bk_snapshots | bool
+  block:
+    - name: Install the snapshot script
+      ansible.builtin.template:
+        src: zfs-snapshot.sh.j2
+        dest: /usr/local/sbin/nas-server-zfs-snapshot.sh
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Install the snapshot service unit
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/nas-server-zfs-snapshot.service
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=nas_server periodic ZFS snapshots
+
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/local/sbin/nas-server-zfs-snapshot.sh
+
+    - name: Install the snapshot timer unit
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/nas-server-zfs-snapshot.timer
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=nas_server periodic ZFS snapshots ({{ storage.backup.snapshots.schedule | default(nas_server_snapshots_schedule) }})
+
+          [Timer]
+          OnCalendar={{ storage.backup.snapshots.schedule | default(nas_server_snapshots_schedule) }}
+          Persistent=true
+
+          [Install]
+          WantedBy=timers.target
+
+    - name: Enable the snapshot timer
+      ansible.builtin.systemd:
+        name: nas-server-zfs-snapshot.timer
+        enabled: true
+        state: started
+        daemon_reload: true
+
+# ── Pool scrub schedule (default OFF) ──────────────────────────────────────────
+- name: Periodic pool scrub
+  when: nas_server_bk_scrub | bool
+  block:
+    - name: Install the scrub service unit
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/nas-server-zfs-scrub.service
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=nas_server periodic ZFS scrub
+
+          [Service]
+          Type=oneshot
+          {% for pool in storage.pools | default([]) %}
+          ExecStart=/sbin/zpool scrub {{ pool.name }}
+          {% endfor %}
+
+    - name: Install the scrub timer unit
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/nas-server-zfs-scrub.timer
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=nas_server periodic ZFS scrub
+
+          [Timer]
+          OnCalendar=monthly
+          Persistent=true
+
+          [Install]
+          WantedBy=timers.target
+
+    - name: Enable the scrub timer
+      ansible.builtin.systemd:
+        name: nas-server-zfs-scrub.timer
+        enabled: true
+        state: started
+        daemon_reload: true
+
+# ── Offsite rclone (default OFF) ───────────────────────────────────────────────
+- name: Offsite rclone backup (S3 + crypt)
+  when: nas_server_bk_rclone | bool
+  block:
+    - name: Assert the rclone crypt secret is provided
+      ansible.builtin.assert:
+        that:
+          - nas_server_rclone_crypt_password | length > 0
+        fail_msg: >-
+          rclone is enabled but nas_server_rclone_crypt_password is empty.
+          Provide it (and optionally _salt) via the vault-encrypted inventory.
+
+    - name: Ensure rclone is installed
+      ansible.builtin.apt:
+        name: rclone
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Ensure the rclone config directory exists
+      ansible.builtin.file:
+        path: /root/.config/rclone
+        state: directory
+        owner: root
+        group: root
+        mode: "0700"
+
+    - name: Obscure the crypt password
+      ansible.builtin.command: "rclone obscure {{ nas_server_rclone_crypt_password }}"
+      register: nas_server_rclone_obscured_pw
+      changed_when: false
+      no_log: true
+
+    - name: Obscure the crypt salt
+      ansible.builtin.command: "rclone obscure {{ nas_server_rclone_crypt_salt }}"
+      register: nas_server_rclone_obscured_salt
+      changed_when: false
+      no_log: true
+      when: nas_server_rclone_crypt_salt | length > 0
+
+    - name: Write rclone.conf
+      ansible.builtin.template:
+        src: rclone.conf.j2
+        dest: /root/.config/rclone/rclone.conf
+        owner: root
+        group: root
+        mode: "0600"
+      no_log: true
+
+    - name: Install the offsite backup wrapper script
+      ansible.builtin.template:
+        src: rclone-job.sh.j2
+        dest: /usr/local/sbin/nas-server-rclone-backup.sh
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Install and enable the per-job systemd units
+      ansible.builtin.include_tasks: rclone_jobs.yml

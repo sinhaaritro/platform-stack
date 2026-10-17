@@ -1,0 +1,33 @@
+# {{ ansible_managed }}
+# Managed by Ansible (nas_server) from topology.nodes.<node>.storage.
+# Do not edit by hand — changes are overwritten on the next run.
+[global]
+   workgroup = WORKGROUP
+   server string = {{ inventory_hostname }} NAS
+   security = user
+   map to guest = never
+   server signing = mandatory
+   oplocks = no
+   strict sync = yes
+   sync always = yes
+   disable spoolss = yes
+{% if storage.smb_shares | default({}) | length == 0 %}
+   # No shares declared.
+{% endif %}
+{% for _id, s in storage.smb_shares | default({}) | dictsort %}
+
+[{{ _id }}]
+   comment = {{ _id }} (managed by nas_server)
+   path = {{ s.path }}
+   browseable = yes
+   read only = no
+   create mask = 0664
+   directory mask = 0775
+{% if storage.smb_user is defined %}
+   valid users = {{ storage.smb_user.name }}
+{% endif %}
+   oplocks = no
+   level2 oplocks = no
+   strict sync = yes
+   sync always = yes
+{% endfor %}

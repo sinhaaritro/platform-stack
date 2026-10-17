@@ -1,0 +1,16 @@
+# playbooks/10-node.yml
+---
+# ==============================================================================
+# NODE LAYER — node-local configuration (per physical host).
+# Target: proxmox_node.
+# Purpose: realises each host's own concerns from `topology.nodes.<n>`, starting
+#          with `storage` (ZFS pools, datasets, share roots, NFS exports,
+#          Samba). Runs BEFORE the guest layers so storage exists before any
+#          VM/LXC tries to consume it. Cluster-wide work is in 00-cluster.yml.
+# ==============================================================================
+- name: Configure NAS server (node-local storage)
+  hosts: proxmox_node
+  tags: nas_server
+  become: true
+  roles:
+    - role: nas_server

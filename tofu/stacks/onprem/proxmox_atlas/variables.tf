@@ -74,8 +74,14 @@ variable "target_node" {
 }
 
 variable "target_datastore" {
-  description = "The datastore on the target node to use for image uploads."
+  description = "Default datastore for guest disks (VMs/LXCs) when a resource does not set its own."
   type        = string
+}
+
+variable "image_datastore" {
+  description = "Datastore for uploaded OS images (import) and LXC templates (vztmpl). Must be a 'dir' datastore that supports those content types (e.g. 'local')."
+  type        = string
+  default     = "local"
 }
 
 # -----------------------------------------------------------------------------
@@ -86,6 +92,44 @@ variable "target_datastore" {
 # TODO: Add hardware template
 variable "resources" {
   description = "A map of VM/LXC cluster definitions. Uses 'any' to allow heterogeneous ansible_groups per cluster — each cluster's ansible_groups map may have a completely different key/value structure. All defaults and validation are applied in the 'resource_normalizer' module."
+  type        = any
+  default     = {}
+}
+
+# -----------------------------------------------------------------------------
+# TOPOLOGY
+# -----------------------------------------------------------------------------
+# The physical layer: clusters, nodes, and the NAS contract. Normalized by the
+# `topology` module and emitted into the Ansible inventory. Shape (all optional):
+#
+#   topology = {
+#     clusters = { <name> = { primary, members, vlan?, firewall?, replication?, storage? } }
+#     nodes    = { <name> = { cluster, ipv4_address, ansible_user, groups,
+#                             storage?, vlan?, firewall?, replication? } }
+#     nas      = { provider, contract, clients }
+#   }
+#
+# Cluster-scoped concern keys are applied by `primary` ONLY; node-scoped concern
+# keys are applied on that node. Kept as `any` so the role — not the schema —
+# owns validation, matching "add a disk/node by changing data, not scripts".
+# -----------------------------------------------------------------------------
+variable "topology" {
+  description = "Physical topology: clusters, nodes, and the NAS contract. Normalized and emitted into the Ansible inventory."
+  type        = any
+  default     = {}
+}
+
+# -----------------------------------------------------------------------------
+# NAS RCLONE CRYPT SECRET (secret)
+# -----------------------------------------------------------------------------
+# The rclone crypt passphrase for the offsite `vault:` remote. SECRET — supply
+# it in schema.secret.tfvars (ansible-vault encrypted), NOT schema.tfvars. Tofu
+# bridges it into the (gitignored) Ansible inventory, like the AWS keys.
+#   nas_rclone_crypt = { password = "...", salt = "..." }
+# Losing this makes the offsite backups permanently unreadable.
+# -----------------------------------------------------------------------------
+variable "nas_rclone_crypt" {
+  description = "rclone crypt passphrase/salt for the offsite backup remote. SECRET — supply via schema.secret.tfvars."
   type        = any
   default     = {}
 }

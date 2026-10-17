@@ -105,30 +105,25 @@ The project is organized into a single monorepo that combines a data-driven appr
 ```
 /tofu/
 ├── modules/
-│   ├── proxmox_qemu_vm/       # Standardized module for creating a single Proxmox VM
-│   ├── proxmox_lxc_container/ # Standardized module for creating a single LXC container
-│   └── aws_ec2_instance/      # Standardized module for creating a single EC2 instance
+│   ├── ansible_inventory/          # Generates the Ansible inventory YAML from host lists
+│   ├── image_builder/              # Builds & customizes OS cloud images
+│   ├── lxc_template_customizer/    # Downloads & customizes LXC templates
+│   ├── proxmox_lxc/                # Standardized module for creating a single LXC container
+│   ├── proxmox_vm/                 # Standardized module for creating a single Proxmox VM
+│   ├── resource_normalizer/        # Normalizes tfvars into flat VM/LXC resource maps
+│   └── topology/                   # Normalizes the `topology` key (nodes/clusters) -> inventory host vars
 │
 └── stacks/
     ├── onprem/
-    │   ├── proxmox_server_A_gpu/    # STACK 1: Manages only Server A (with GPU)
-    │   │   ├── main.tf              # Logic to create resources from data (using for_each)
-    │   │   ├── variables.tf         # Defines the 'resource_groups' variable structure
-    │   │   ├── backend.tf           # S3 backend config for Server A's state file
-    │   │   └── schema.tfvars        # DATA file defining all VMs/LXCs on Server A
-    │   │
-    │   ├── proxmox_server_B_no_gpu/ # STACK 2: Manages only Server B (no GPU)
-    │   │   ├── main.tf              # Can be an identical copy of the other main.tf
-    │   │   ├── variables.tf         # Identical copy
-    │   │   ├── backend.tf           # S3 backend config for Server B's state file
-    │   │   └── schema.tfvars        # DATA file defining all VMs/LXCs on Server B
-    │
+    │   └── proxmox_atlas/          # On-prem VMs, LXCs, OS images + topology/NAS
+    │       ├── main.tf
+    │       ├── variables.tf
+    │       ├── schema.tfvars        # DATA: `resources` (VMs/LXCs) + `topology` (nodes/clusters/storage)
+    │       └── schema.secret.tfvars # Encrypted credentials (Vault)
     └── cloud/
-        └── aws_global/              # STACK 3: Manages all AWS resources
-            ├── main.tf              # Logic to create EC2, S3, etc. from data
-            ├── variables.tf
-            ├── backend.tf
-            └── resources.tfvars     # DATA file defining EC2 instances, S3 buckets, etc.
+        ├── aws_kyoto/              # AWS S3, DynamoDB, IAM
+        ├── cloudflare_alexandria/  # DNS, tunnels, Zero Trust
+        └── netbird_samarkand/      # NetBird mesh VPN
 ```
 
 

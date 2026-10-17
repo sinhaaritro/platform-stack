@@ -8,6 +8,8 @@ This document defines the internal network virtualization, subnet segmentation, 
 
 The homelab uses a layered network model: physical network interfaces are aggregated into Linux Bridges, which are managed via **Proxmox SDN (Software Defined Networking)** into isolated **Virtual Networks (VNets)** and 802.1q **VLANs**.
 
+> **IaC note:** SDN zones/VNets are declared under `topology.clusters.<cluster>.vlan` in the `proxmox_atlas` stack and applied by the cluster **primary** (`proxmox_primary`) — the host-level counterpart to the guest layers. Currently a scaffold (not yet implemented).
+
 ```mermaid
 flowchart TD
     subgraph PhysicalHardware["PHYSICAL HARDWARE LAYER"]

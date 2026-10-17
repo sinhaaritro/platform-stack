@@ -201,6 +201,8 @@ all:
   vars:
     aws_velero_access_key_id: "${aws_iam_access_key.velero.id}"
     aws_velero_secret_access_key: "${aws_iam_access_key.velero.secret}"
+    aws_region: "${var.aws_region}"
+    aws_homelab_bucket: "${try(local.s3_buckets["homelab"].bucket_name, "")}"
 EOT
 }
 

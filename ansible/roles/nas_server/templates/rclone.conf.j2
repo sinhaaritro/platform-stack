@@ -1,0 +1,24 @@
+# {{ ansible_managed }}
+# Offsite rclone config — generated from the inventory (aws_velero_* + region +
+# atlas-homelab bucket) and the crypt secret. Do not edit by hand.
+
+[aws]
+type = s3
+provider = AWS
+region = {{ aws_region | default('ap-southeast-1') }}
+access_key_id = {{ aws_velero_access_key_id }}
+secret_access_key = {{ aws_velero_secret_access_key }}
+# The bucket already exists (created by Tofu); skip rclone's existence check,
+# which otherwise attempts CreateBucket and fails (IllegalLocationConstraint).
+no_check_bucket = true
+storage_class = {{ storage.backup.rclone.storage_class | default('DEEP_ARCHIVE') }}
+
+[vault]
+type = crypt
+remote = aws:{{ aws_homelab_bucket }}
+filename_encryption = standard
+directory_name_encryption = true
+password = {{ nas_server_rclone_obscured_pw.stdout }}
+{% if nas_server_rclone_crypt_salt | length > 0 %}
+password2 = {{ nas_server_rclone_obscured_salt.stdout }}
+{% endif %}

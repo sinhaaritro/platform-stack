@@ -22,10 +22,10 @@ module "normalizer" {
 # Hypervisor independent. Outputs local qcow2 file paths.
 
 data "proxmox_files" "proxmox_files" {
-  # Get a list of exiting files present in the target datastore, to prevent
+  # Get a list of existing files present in the IMAGE datastore, to prevent
   # rebuilding images that already exist.
   node_name    = var.target_node
-  datastore_id = var.target_datastore
+  datastore_id = var.image_datastore
 }
 
 locals {
@@ -52,7 +52,7 @@ resource "proxmox_virtual_environment_file" "image_upload" {
   depends_on = [module.image_builder]
 
   node_name    = var.target_node
-  datastore_id = var.target_datastore
+  datastore_id = var.image_datastore
   content_type = "import"
 
   source_file {
@@ -97,7 +97,7 @@ locals {
   # Maps the composite builder key (e.g., "ubuntu-24.04") to the uploaded path on Proxmox datastore.
   image_import_paths = {
     for key, img in module.image_builder.built_images :
-    key => "${var.target_datastore}:import/${img.filename}"
+    key => "${var.image_datastore}:import/${img.filename}"
   }
 }
 
@@ -217,7 +217,12 @@ locals {
     [for name, vm in module.normalizer.final_vm_list : merge(
       vm,
       {
-        ipv4_address          = try([for addr in flatten(module.proxmox_vms[name].vm_details.ipv4_addresses) : addr if addr != "127.0.0.1"][0], "IP_PENDING")
+        # Static IP from the SCHEMA (CIDR stripped), NOT the guest's runtime IP.
+        # Reading `module.proxmox_vms[...]` here would make the inventory depend
+        # on guest creation, so a `tofu apply -target=module.inventory` (used as
+        # DR step 1, before any VM exists) could not run. Guests must therefore
+        # use static `ipv4_address` in the schema — they already do.
+        ipv4_address          = split("/", coalesce(vm.ipv4_address, "IP_PENDING"))[0]
         user_account_username = vm.user_account_username
         # Data disks for the Ansible storage_setup role. The device is
         # identified by its stable Proxmox interface (by-id), never by the
@@ -233,17 +238,39 @@ locals {
     [for name, lxc in module.normalizer.final_lxc_list : merge(
       lxc,
       {
-        ipv4_address          = try([for addr in flatten(module.proxmox_lxc[name].lxc_details.ipv4_addresses) : addr if addr != "127.0.0.1"][0], "IP_PENDING")
+        # Same as VMs above: schema static IP, keeps the inventory independent
+        # of guest creation.
+        ipv4_address          = split("/", coalesce(lxc.ipv4_address, "IP_PENDING"))[0]
         user_account_username = "root"
         ansible_password      = lxc.user_account_password
       }
-    )]
+    )],
+    # Physical hosts / clusters / NAS (topology layer). Inventory-only — no
+    # VM/LXC resources are created for them.
+    [for name, node in module.topology.final_node_list : node]
   )
+
+  # Platform-wide vars rendered under `all.vars`. The cluster scaffold is the
+  # only global; per-node `storage` and consumer `nas_mounts` ride on host vars.
+  all_global_vars = {
+    topology_clusters = module.topology.final_cluster_list
+    # Offsite rclone crypt secret — bridged from schema.secret.tfvars (vault).
+    nas_server_rclone_crypt_password = try(var.nas_rclone_crypt.password, "")
+    nas_server_rclone_crypt_salt     = try(var.nas_rclone_crypt.salt, "")
+  }
 }
+
+# ─── Step 6b: Topology (physical hosts, clusters, NAS) ───────────────────────
+module "topology" {
+  source   = "../../../modules/topology"
+  topology = var.topology
+}
+
 module "inventory" {
   source        = "../../../modules/ansible_inventory"
   stack_name    = "proxmox_atlas"
   host_list     = local.unified_host_list
+  global_vars   = local.all_global_vars
   inventory_dir = "${path.root}/../../../../ansible/inventory.d"
 }
 

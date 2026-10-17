@@ -71,7 +71,7 @@ SeaweedFS BSL storage = Σ (effective_app_backup × retention_days)
 
 ---
 
-## Cloud Storage Cost Model (AWS S3, ap-south-1 Mumbai)
+## Cloud Storage Cost Model (AWS S3, ap-southeast-1 Singapore)
 
 ### Storage Costs
 

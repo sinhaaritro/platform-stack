@@ -1,4 +1,4 @@
-# playbooks/10-vm-hardening.yml
+# playbooks/30-vm-hardening.yml
 ---
 # ==============================================================================
 # VM HARDENING LAYER

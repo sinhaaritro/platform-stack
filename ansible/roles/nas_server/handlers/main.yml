@@ -1,0 +1,14 @@
+---
+# handlers/main.yml - nas_server
+# Notified by the backend tasks once implemented (plan Part 3).
+
+- name: Reload NFS exports
+  ansible.builtin.command: exportfs -ra
+  changed_when: false
+  listen: reload nfs exports
+
+- name: Reload Samba
+  ansible.builtin.service:
+    name: smbd
+    state: reloaded
+  listen: reload samba

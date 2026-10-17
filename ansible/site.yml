@@ -2,25 +2,42 @@
 ---
 # Main entrypoint for the platform-stack project.
 #
-# Each infrastructure layer lives in its own playbook under playbooks/ and is
-# imported here in the order it must run. Importing keeps a single entrypoint
-# (task ansible:apply:all) while allowing a layer to be run on its own:
+# Each layer lives in its own playbook under playbooks/ and is imported here in
+# the order it must run. Layers are ordered CLUSTER -> NODE -> GUEST, so lower
+# layers (physical infrastructure) are ready before guests consume them:
 #
-#   ansible-playbook -i inventory.d playbooks/20-runtimes.yml
+#   00-cluster       cluster-scoped config, Proxmox primary only
+#   10-node          node-local config (physical hosts: storage/pools/exports)
+#   20-foundation    guest base OS
+#   30-vm-hardening  guest hardening (VMs)
+#   40-runtimes      guest language runtimes
+#   50-kubernetes    guest Kubernetes clusters
+#   60-services      guest platform services (+ NAS client)
+#
+# Importing keeps a single entrypoint (task ansible:apply:all) while allowing a
+# layer to be run on its own, e.g.:
+#
+#   ansible-playbook -i inventory.d playbooks/10-node.yml
 #
 # You can still narrow a full run with --limit/-l or --tags/-t.
 
+- name: Cluster Layer
+  import_playbook: playbooks/00-cluster.yml
+
+- name: Node Layer
+  import_playbook: playbooks/10-node.yml
+
 - name: Foundation Layer
-  import_playbook: playbooks/00-foundation.yml
+  import_playbook: playbooks/20-foundation.yml
 
 - name: VM Hardening Layer
-  import_playbook: playbooks/10-vm-hardening.yml
+  import_playbook: playbooks/30-vm-hardening.yml
 
 - name: Application Runtimes Layer
-  import_playbook: playbooks/20-runtimes.yml
+  import_playbook: playbooks/40-runtimes.yml
 
 - name: Kubernetes Layer
-  import_playbook: playbooks/30-kubernetes.yml
+  import_playbook: playbooks/50-kubernetes.yml
 
 - name: Platform Services Layer
-  import_playbook: playbooks/40-services.yml
+  import_playbook: playbooks/60-services.yml

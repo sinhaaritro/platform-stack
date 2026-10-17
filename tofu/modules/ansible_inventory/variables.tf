@@ -12,6 +12,12 @@ variable "host_list" {
   type        = any
 }
 
+variable "global_vars" {
+  description = "Variables rendered under 'all.vars' in the generated inventory. Intended for platform-wide values (e.g. topology_clusters). Nested structures are supported and emitted as JSON (valid YAML)."
+  type        = any
+  default     = {}
+}
+
 variable "inventory_dir" {
   description = "The directory path where the Ansible inventory file should be written."
   type        = string

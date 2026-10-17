@@ -1,0 +1,60 @@
+---
+# tasks/configure.yml - resolve `nas_mounts` refs into concrete NFS mounts.
+#
+# Each `nas_mounts` entry names a (provider, share) pair; the actual NFS source
+# is built from the provider's inventory vars:
+#   server = hostvars[provider].ansible_host
+#   remote = hostvars[provider].storage.exports[share].path (+ "/subpath")
+# Nothing is hardcoded — change the share on the provider or the ref on the
+# client and re-run.
+
+- name: Assert every mount references a resolvable provider + share
+  ansible.builtin.assert:
+    that:
+      - item.provider in hostvars
+      - item.share in (((hostvars[item.provider] | default({})).storage | default({})).exports | default({}))
+    fail_msg: >-
+      nas_client: cannot resolve mount '{{ item.provider }}:{{ item.share }}'.
+      `provider` must be an inventory host (e.g. a proxmox_node) that declares
+      `storage.exports.<share>`.
+  loop: "{{ nas_mounts }}"
+  loop_control:
+    label: "{{ item.provider }}:{{ item.share }}"
+
+- name: Build resolved mount specifications
+  ansible.builtin.set_fact:
+    nas_client_resolved_mounts: >-
+      {{
+        nas_client_resolved_mounts | default([]) + [{
+          'path': item.path,
+          'src': hostvars[item.provider].ansible_host ~ ':' ~
+                 hostvars[item.provider].storage.exports[item.share].path ~
+                 (('/' ~ item.subpath) if (item.subpath | default('') | length > 0) else ''),
+          'opts': item.options | default(nas_client_default_mount_options)
+        }]
+      }}
+  loop: "{{ nas_mounts }}"
+  loop_control:
+    label: "{{ item.provider }}:{{ item.share }}"
+
+- name: Ensure mount directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0777"
+  loop: "{{ nas_client_resolved_mounts }}"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Mount NAS shares
+  ansible.posix.mount:
+    path: "{{ item.path }}"
+    src: "{{ item.src }}"
+    fstype: nfs
+    opts: "{{ item.opts }}"
+    state: mounted
+  loop: "{{ nas_client_resolved_mounts }}"
+  loop_control:
+    label: "{{ item.path }} -> {{ item.src }}"

@@ -1,0 +1,220 @@
+---
+# tasks/proxmox.yml - Proxmox backend: realise the host-level NAS.
+#
+# Guardrails: disks are always referenced by /dev/disk/by-id; pools are
+# ensure-present / adopt / create and are NEVER destroyed; a device is only
+# wiped/formatted when it is blank, or when the contract sets `wipe: true`.
+
+# ── Packages ──────────────────────────────────────────────────────────────────
+- name: Ensure NAS server packages are present
+  ansible.builtin.apt:
+    name: "{{ nas_server_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+# ── ZFS pools (ensure-present / adopt / create; never destroy) ─────────────────
+- name: List currently imported ZFS pools
+  ansible.builtin.command: zpool list -H -o name
+  register: nas_server_zpools_present
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: List importable (not imported) ZFS pools
+  ansible.builtin.command: zpool import
+  register: nas_server_zpools_importable
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Adopt declared pools that exist but are not imported
+  ansible.builtin.command: "zpool import {{ item.name }}"
+  loop: "{{ storage.pools | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - item.name not in (nas_server_zpools_present.stdout_lines | default([]))
+    - ("'" ~ item.name ~ "'") in (nas_server_zpools_importable.stdout | default(''))
+  changed_when: true
+
+- name: Create declared pools that do not exist and are not importable
+  community.general.zpool:
+    name: "{{ item.name }}"
+    vdev: "{{ item.vdev | default('single') }}"
+    disks: "{{ item.disks }}"
+    state: present
+    force: "{{ item.wipe | default(false) }}"
+    properties: "{{ {'ashift': item.props.ashift} if (item.props.ashift is defined) else {} }}"
+  loop: "{{ storage.pools | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - nas_server_allow_pool_create | bool
+    - item.name not in (nas_server_zpools_present.stdout_lines | default([]))
+    - ("'" ~ item.name ~ "'") not in (nas_server_zpools_importable.stdout | default(''))
+
+# ── Datasets (compression/xattr/recordsize are dataset props) ──────────────────
+- name: Ensure datasets exist with their properties
+  community.general.zfs:
+    name: "{{ item.0.name }}/{{ item.1.name }}"
+    state: present
+    extra_zfs_properties: >-
+      {{ {'mountpoint': item.1.mountpoint}
+         | combine((item.0.props | default({})) | dict2items
+                   | rejectattr('key', 'equalto', 'ashift') | items2dict) }}
+  loop: "{{ storage.pools | default([]) | subelements('datasets', skip_missing=True) }}"
+  loop_control:
+    label: "{{ item.0.name }}/{{ item.1.name }}"
+
+# ── Non-ZFS data disks ─────────────────────────────────────────────────────────
+- name: Stat declared data-disk devices
+  ansible.builtin.stat:
+    path: "{{ item.by_id }}"
+  loop: "{{ storage.data_disks | default([]) }}"
+  loop_control:
+    label: "{{ item.by_id }}"
+  register: nas_server_dd_stat
+
+- name: Fail if a declared data disk is missing
+  ansible.builtin.fail:
+    msg: "Data disk '{{ item.item.by_id }}' not found on {{ inventory_hostname }} — refusing to continue."
+  loop: "{{ nas_server_dd_stat.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item.by_id }}"
+  when: not item.stat.exists
+
+# lsblk reports FSTYPE for the device AND its partitions, so a disk whose data
+# lives on a partition is correctly seen as NON-blank (never reformatted).
+- name: Read filesystems on declared data disks (device + any partitions)
+  ansible.builtin.command: "lsblk -no FSTYPE {{ item.by_id }}"
+  loop: "{{ storage.data_disks | default([]) }}"
+  loop_control:
+    label: "{{ item.by_id }}"
+  register: nas_server_dd_fs
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Wipe data-disk signatures when the contract sets wipe = true
+  ansible.builtin.command: "wipefs -a {{ item.item.by_id }}"
+  loop: "{{ nas_server_dd_fs.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item.by_id }}"
+  when: item.item.wipe | default(false) | bool
+  changed_when: true
+
+- name: Create a filesystem on blank (or wiped) data disks
+  community.general.filesystem:
+    fstype: "{{ item.item.fstype | default('ext4') }}"
+    dev: "{{ item.item.by_id }}"
+    force: "{{ item.item.wipe | default(false) }}"
+  loop: "{{ nas_server_dd_fs.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item.by_id }}"
+  when: (item.stdout | default('') | trim) == '' or (item.item.wipe | default(false) | bool)
+
+- name: Ensure data-disk mount points exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ storage.data_disks | default([]) }}"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Mount data disks
+  ansible.posix.mount:
+    path: "{{ item.path }}"
+    src: "{{ item.by_id }}"
+    fstype: "{{ item.fstype | default('ext4') }}"
+    state: mounted
+  loop: "{{ storage.data_disks | default([]) }}"
+  loop_control:
+    label: "{{ item.path }}"
+
+# ── NFS exports ────────────────────────────────────────────────────────────────
+- name: Render /etc/exports
+  ansible.builtin.template:
+    src: exports.j2
+    dest: /etc/exports
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload nfs exports
+
+- name: Ensure nfs-server is enabled and running
+  ansible.builtin.service:
+    name: nfs-server
+    state: started
+    enabled: true
+
+# ── Samba ──────────────────────────────────────────────────────────────────────
+- name: Ensure the Samba group exists
+  ansible.builtin.group:
+    name: "{{ storage.smb_user.name }}"
+    gid: "{{ storage.smb_user.gid }}"
+    state: present
+  when: storage.smb_user is defined
+
+- name: Ensure the Samba user exists
+  ansible.builtin.user:
+    name: "{{ storage.smb_user.name }}"
+    uid: "{{ storage.smb_user.uid }}"
+    group: "{{ storage.smb_user.name }}"
+    shell: /usr/sbin/nologin
+    create_home: false
+    state: present
+  when: storage.smb_user is defined
+
+- name: Set the Samba password when one is provided
+  ansible.builtin.command: "smbpasswd -s -a {{ storage.smb_user.name }}"
+  args:
+    stdin: "{{ storage.smb_user.password }}\n{{ storage.smb_user.password }}\n"
+  when:
+    - storage.smb_user is defined
+    - storage.smb_user.password is defined
+  no_log: true
+  changed_when: true
+
+- name: Render smb.conf
+  ansible.builtin.template:
+    src: smb.conf.j2
+    dest: /etc/samba/smb.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload samba
+
+- name: Ensure smbd is enabled and running
+  ansible.builtin.service:
+    name: smbd
+    state: started
+    enabled: true
+
+# ── Proxmox datastores (storage.cfg via pvesh) ─────────────────────────────────
+- name: Read existing Proxmox storage entries
+  ansible.builtin.command: pvesh get /storage --output-format json
+  register: nas_server_pve_storage
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Create missing Proxmox storage entries
+  ansible.builtin.command:
+    argv: >-
+      {{ ['pvesh', 'create', '/storage', '--storage', item.id, '--type', item.type]
+         + (['--pool', item.pool] if item.pool is defined else [])
+         + (['--path', item.path] if item.path is defined else [])
+         + (['--content', item.content] if item.content is defined else [])
+         + (['--nodes', (item.nodes | join(','))] if item.nodes is defined else [])
+         + (['--is_mountpoint', (item.is_mountpoint | string)] if item.is_mountpoint is defined else []) }}
+  loop: "{{ storage.proxmox_storages | default([]) }}"
+  loop_control:
+    label: "{{ item.id }}"
+  when: item.id not in (nas_server_pve_storage.stdout | default('[]') | from_json | map(attribute='storage') | list)
+  changed_when: true
+
+# ── Backup (snapshots/scrub/smart/rclone; toggles) ─────────────────────────────
+- name: Apply backup configuration
+  ansible.builtin.include_tasks: backup.yml

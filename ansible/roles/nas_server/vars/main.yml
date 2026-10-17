@@ -1,0 +1,14 @@
+---
+# vars/main.yml - role constants (implementation details, not host config).
+nas_server_packages:
+  - nfs-kernel-server
+  - samba
+  - acl # setfacl (default ACL on the share root)
+
+# Map the contract's `vdev` names to TrueNAS pool topology types.
+nas_server_tn_vdev_type:
+  single: STRIPE
+  mirror: MIRROR
+  raidz1: RAIDZ1
+  raidz2: RAIDZ2
+  raidz3: RAIDZ3

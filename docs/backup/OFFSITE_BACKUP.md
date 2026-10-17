@@ -23,7 +23,7 @@ _Written 15 Oct 2026. AWS pricing, storage-class rules, rclone flags and Immich 
 
 The offsite selection is **per-folder (app-wise), not whole-NAS**. A whole-NAS copy would push re-downloadable arr media into Deep Archive (slow, expensive) and can't apply different modes/frequencies per data set. This mirrors the "per-app rclone, not whole-NFS" principle in [ARCHITECTURE.md](./ARCHITECTURE.md#rclone--tier-4-nfs-user-data).
 
-All folders can live under a **single** `vault:` crypt remote with one top-level prefix each (`vault:immich`, `vault:obsidian`, …) — no need for multiple crypt remotes. Use **one job per folder whose policy differs**; group folders only when mode + frequency + exclusions are identical.
+All folders live under a **single** `vault:` crypt remote; each job's target mirrors the share tree (`vault:v1/personal/<app>`), so the bucket reproduces the NAS layout under one bucket — no need for multiple crypt remotes. Use **one job per folder whose policy differs**; group folders only when mode + frequency + exclusions are identical.
 
 | Data | Local folder (example) | Mode | Frequency |
 |---|---|---|---|
@@ -68,6 +68,17 @@ Local disk / NAS  ->  rclone (crypt: encrypts contents + filenames)  ->  S3 buck
 - Trade-off accepted: no chunk-level dedup and no snapshot history. S3 versioning provides the undo window instead.
 
 **Single owner.** The offsite job runs **once, from the NAS/Proxmox host** (a host-level cron/systemd timer running rclone). It is **not** run by an in-cluster CronJob. The in-cluster `immich-rclone-backup` component is retired (disabled/commented) so there is exactly one owner. When TrueNAS (or another NAS OS) is in place, the same sync can be moved to a NAS-native rclone/Cloud Sync task.
+
+**Where this lives (IaC).** The host side is the `nas_server` role (target `proxmox_node`). Its toggles come from `topology.nodes.<node>.storage.backup`, with minimal-by-default fallbacks:
+
+| Toggle | Default | Meaning |
+|---|---|---|
+| `snapshots.enabled` | `false` | local ZFS snapshots + prune (systemd timer) |
+| `scrub.enabled` | `false` | scheduled `zpool scrub` |
+| `smart.enabled` | `true` | `smartd` monitoring (no self-tests) |
+| `rclone.enabled` | `false` (now set `true`) | offsite rclone to the **`atlas-homelab`** bucket — implemented; per-job systemd timers (obsidian weekly, immich monthly) |
+
+The offsite `[aws]`/`[vault]` remote, per-app jobs and timers are written by `nas_server` from the inventory AWS vars (`aws_velero_*`, delivered by the `aws_kyoto` stack). One IAM user (`velero-backup`) covers both Velero and this offsite copy.
 
 ---
 
@@ -229,12 +240,13 @@ Don't keep these only on the NAS or Immich server.
 
 ## 13. Open items
 
+- [x] Local paths + schedules — **done**: `storage.backup.rclone.jobs` (obsidian weekly, immich monthly); sources `/WD4TB/shared/v1/personal/<app>`.
+- [x] Host-level systemd wrapper — **done**: `nas_server` installs a per-job wrapper (mount check → `--max-delete` → SHA-256 manifest) + systemd timers.
+- [x] SHA-256 manifest generation — **done** (uploaded to `vault:manifests/<job>.sha256`).
+- [x] Retire the in-cluster `immich-rclone-backup` — **done** (host is the single owner).
+- [ ] **Alerting** — the healthchecks.io ping is wired but unused; route backup status to the in-cluster stack (Alertmanager/Grafana) instead — see `planning/BACKLOG.md`.
 - [ ] Estimate the size of the rare-media set to forecast monthly cost.
 - [ ] Scope the arr stack later (what, if anything, within `/data/media` goes offsite).
-- [ ] Decide final local paths and cron times.
-- [ ] Stand up the host-level cron/systemd wrapper (mount check + `--max-delete` + healthchecks ping).
-- [ ] Retire the in-cluster `immich-rclone-backup` component so there is a single owner.
-- [ ] Add SHA-256 manifest generation to the job wrapper.
 - [ ] Do the first restore drill (request → wait → download → decrypt → verify).
 
 ---
@@ -247,14 +259,14 @@ Don't keep these only on the NAS or Immich server.
 [aws]
 type = s3
 provider = AWS
-region = <aws-region>
+region = ap-southeast-1
 access_key_id = <IAM key>
 secret_access_key = <IAM secret>
 storage_class = DEEP_ARCHIVE
 
 [vault]
 type = crypt
-remote = aws:<bucket-name>
+remote = aws:atlas-homelab
 filename_encryption = standard
 directory_name_encryption = true
 password = <set via rclone config>
@@ -266,38 +278,38 @@ password2 = <set via rclone config>
 ```bash
 # Immich (monthly): sync only the folders that matter
 for d in library upload profile backups; do
-  rclone sync /data/immich/$d vault:immich/$d \
+  rclone sync /WD4TB/shared/v1/personal/immich/$d vault:v1/personal/immich/$d \
     --exclude "/thumbs/**" --exclude "/encoded-video/**" \
     --max-delete 100 --log-file /var/log/rclone/immich-$d.log
 done
 
 # notes + docs + projects (weekly)
-rclone sync /data/obsidian vault:obsidian --max-delete 50
-rclone sync /data/docs     vault:docs     --max-delete 50
-for p in /data/projects/*; do
-  rclone sync "$p" "vault:projects/$(basename "$p")" \
+rclone sync /WD4TB/shared/v1/personal/obsidian vault:v1/personal/obsidian --max-delete 50
+rclone sync /WD4TB/shared/v1/personal/docs     vault:v1/personal/docs     --max-delete 50
+for p in /WD4TB/shared/v1/personal/projects/*; do
+  rclone sync "$p" "vault:v1/personal/projects/$(basename "$p")" \
     --exclude "**/DerivedDataCache/**" --exclude "**/Intermediate/**" \
     --max-delete 50
 done
 
 # videos + rare media + books (monthly, never delete remotely)
-rclone copy /data/home-videos vault:home-videos
-rclone copy /data/rare-media  vault:rare-media
-rclone copy /data/books       vault:books
+rclone copy /WD4TB/shared/v1/personal/home-videos vault:v1/personal/home-videos
+rclone copy /WD4TB/shared/v1/personal/rare-media  vault:v1/personal/rare-media
+rclone copy /WD4TB/shared/v1/personal/books       vault:v1/personal/books
 ```
 
 **Checks, verification and restore**
 
 ```bash
-rclone sync /data/obsidian vault:obsidian --dry-run     # preview
-rclone check /data/obsidian vault:obsidian --one-way    # existence + size
+rclone sync /WD4TB/shared/v1/personal/obsidian vault:v1/personal/obsidian --dry-run     # preview
+rclone check /WD4TB/shared/v1/personal/obsidian vault:v1/personal/obsidian --one-way    # existence + size
 rclone ncdu vault:                                      # browse backup (decrypted names)
 
 # plaintext hash manifest (true content verification)
-rclone hashsum sha256 /data/obsidian > /data/obsidian.sha256
-rclone copyto /data/obsidian.sha256 vault:manifests/obsidian.sha256
+rclone hashsum sha256 /WD4TB/shared/v1/personal/obsidian > /var/log/rclone/obsidian.sha256
+rclone copyto /var/log/rclone/obsidian.sha256 vault:manifests/obsidian.sha256
 
-rclone backend restore vault:obsidian -o priority=Bulk -o lifetime=14   # request restore
-rclone copy vault:obsidian /restore/obsidian            # after the wait
-rclone hashsum sha256 /restore/obsidian | diff - /data/obsidian.sha256  # verify
+rclone backend restore vault:v1/personal/obsidian -o priority=Bulk -o lifetime=14   # request restore
+rclone copy vault:v1/personal/obsidian /restore/obsidian            # after the wait
+rclone hashsum sha256 /restore/obsidian | diff - /var/log/rclone/obsidian.sha256  # verify
 ```

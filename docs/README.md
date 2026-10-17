@@ -75,6 +75,7 @@ How to write, structure, debug, and validate Kubernetes applications in this rep
 | [Architecture](./storage/ARCHITECTURE.md) | Detailed storage architecture |
 | [Longhorn](./storage/LONGHORN.md) | Longhorn-specific docs |
 | [NFS](./storage/NFS.md) | NFS configuration |
+| [NAS Platform Matrix](./storage/NAS_PLATFORM_MATRIX.md) | TrueNAS vs bare Proxmox — capability + IaC mapping |
 | [SeaweedFS](./storage/SEAWEEDFS.md) | SeaweedFS configuration |
 | [Capacity Planning](./storage/CAPACITY_PLANNING.md) | Storage capacity planning |
 
@@ -121,7 +122,7 @@ How-to guides for specific tasks and setup procedures.
 | [Cloudflare Setup](./guides/cloudflare-setup.md) | Cloudflare account, Zero Trust tunnel editing permissions, API tokens |
 | [NetBird Setup](./guides/netbird-setup.md) | NetBird PAT token generation and administration role setup |
 | [Oracle Setup](./guides/oracle-setup.md) | OCI Free Tier, tenant/user OCID retrieval, PEM API key generation |
-| [Proxmox Setup](./guides/proxmox-setup.md) | Proxmox administrative API user, unseparated token creation |
+| [Proxmox Setup](./guides/proxmox-setup.md) | Proxmox API user/token creation, and adding host storage disks (ZFS pools + plain data disks) |
 | [qBittorrent Proxy Setup](./guides/qbittorrent-proxy-setup.md) | Proxy configuration for qBittorrent |
 
 ---
@@ -132,6 +133,7 @@ Disaster recovery and restore procedures.
 
 | Runbook | Description |
 |---|---|
+| [Rebuild from Scratch](./runbooks/rebuild-from-scratch.md) | DR: rebuild the whole platform from Git + the offsite backup |
 | [Restore Authentik](./runbooks/restore-authentik.md) | Authentik database restore procedure |
 | [Restore Immich](./runbooks/restore-immich.md) | Immich hybrid restore (DB + media) |
 | [Restore Obsidian](./runbooks/restore-obsidian.md) | Obsidian data restore procedure |
@@ -146,6 +148,6 @@ Technical analysis, specifications, and architecture discussions.
 | Document | Description |
 |---|---|
 | [Cluster Configuration Analysis](./reference/cluster-configuration-analysis.md) | K8s cluster config analysis |
-| [Resource Planning](./reference/resource-planning.md) | Compute/storage resource planning, templates, static services, and legacy cluster context |
+| [Resource Planning — Atlas](./reference/resource-planning-atlas.md) | Proxmox `atlas` node: compute/storage planning, templates, static services, legacy cluster context |
 | [SSH Agent Forwarding](./reference/ssh-agent-forwarding.md) | SSH agent forwarding chain details |
 | [Storage Architecture Discussion](./reference/storage-architecture-discussion.md) | Storage architecture design discussion |

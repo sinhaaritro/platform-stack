@@ -1,9 +1,10 @@
 ---
-# tasks/cleanup.yml - Remove obsolete NAS server components
+# tasks/cleanup.yml - Remove obsolete NAS server components (DESTRUCTIVE).
+# Only ever included when `nas_client_purge_server` is true (see tasks/main.yml).
 
 - name: Remove NFS server and Samba packages
   ansible.builtin.apt:
-    name: "{{ nas_server_packages }}"
+    name: "{{ nas_client_server_packages }}"
     state: absent
     purge: true
 

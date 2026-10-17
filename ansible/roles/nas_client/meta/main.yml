@@ -1,0 +1,24 @@
+# meta/main.yml
+---
+galaxy_info:
+  author: Aritro
+  role_name: nas_client
+  namespace: internal
+  description: Mounts NAS shares (NFS) on client hosts.
+  company: None
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - nas
+    - nfs
+    - client
+    - storage
+
+dependencies: []

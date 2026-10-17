@@ -13,7 +13,9 @@ locals {
       for group_name in distinct(concat(
         try(host.tags, []),
         [try(host.app_key, null)],
-        [try(host.node_name, null)],
+        # NOTE: deliberately NOT grouped by `node_name` — we do not want a group
+        # per hypervisor/node name (e.g. an `atlas` group). Group by tags,
+        # app_key, type, and explicit ansible_groups instead.
         [try(host.type, null)],
         keys(try(host.ansible_groups, {}))
         )) : {
@@ -41,6 +43,9 @@ resource "local_file" "ansible_inventory" {
   # The 'content' is rendered from our template file.
   content = templatefile("${path.module}/templates/ansible_inventory.yml.tftpl", {
 
+    # Platform-wide variables rendered under 'all.vars' (e.g. the NAS contract).
+    global_vars = var.global_vars
+
     # This is the second phase of the render. This expression is evaluated
     # during the 'apply' phase, after the hosts have been created.
     inventory_data = {
@@ -64,6 +69,12 @@ resource "local_file" "ansible_inventory" {
             (length(try(local.host_index[host].storage_mounts, [])) > 0) ? {
               storage_mounts = local.host_index[host].storage_mounts
             } : {},
+            # Per-host SSH private key (only emitted for physical nodes that need it).
+            (try(local.host_index[host].ansible_ssh_private_key_file, null) != null) ? {
+              ansible_ssh_private_key_file = local.host_index[host].ansible_ssh_private_key_file
+            } : {},
+            # Arbitrary per-host vars (e.g. topology_cluster / topology_primary).
+            try(local.host_index[host].host_vars, {}),
             # Merge in the variables for this specific group from the host's definition
             try(local.host_index[host].ansible_groups[group_name], {})
           )

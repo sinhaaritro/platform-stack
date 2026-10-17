@@ -60,7 +60,7 @@ spec:
 | BSL Name | Provider | Destination | Role | Status |
 |---|---|---|---|---|
 | `default` | SeaweedFS (S3-compatible) | `velero` bucket on `seaweedfs-s3.storage.svc:8333` | **B** — Local fast backup | 🔜 Planned (configured, not targeted by schedules yet) |
-| `aws` | AWS S3 | `aritro-homelab-velero-backups` in `ap-south-1` | **C** — Cloud offsite | ✅ Active |
+| `aws` | AWS S3 | `hyperion-velero-backups` in `ap-southeast-1` | **C** — Cloud offsite | ✅ Active |
 
 **Current state:** All schedules target `storageLocation: aws` only. The SeaweedFS BSL is configured and ready but not yet used by any schedule.
 

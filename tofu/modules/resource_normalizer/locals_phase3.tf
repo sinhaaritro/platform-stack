@@ -20,7 +20,7 @@ locals {
       )
       description = coalesce(item.node_override.description, item.app_group.description)
       tags = sort(distinct(concat(
-        ["OpenTofu"],
+        ["opentofu"],
         coalesce(item.app_group.tags, []),
         coalesce(item.node_override.tags, [])
       )))
@@ -108,7 +108,7 @@ locals {
 
       node_name    = coalesce(item.node_override.node_name, item.app_group.node_name, var.target_node)
       description  = coalesce(item.node_override.description, item.app_group.description)
-      tags         = sort(distinct(concat(["OpenTofu"], coalesce(item.app_group.tags, []), coalesce(item.node_override.tags, []))))
+      tags         = sort(distinct(concat(["opentofu"], coalesce(item.app_group.tags, []), coalesce(item.node_override.tags, []))))
       on_boot      = coalesce(item.node_override.on_boot, item.app_group.on_boot)
       started      = coalesce(item.node_override.started, item.app_group.started)
       unprivileged = coalesce(item.node_override.lxc_config.unprivileged, item.app_group.lxc_config.unprivileged)
