@@ -66,7 +66,15 @@ resources = {
               "s3:ListBucket",
               "s3:GetBucketLocation",
               "s3:ListMultipartUploadParts",
-              "s3:AbortMultipartUpload"
+              "s3:AbortMultipartUpload",
+              # Versioned-bucket access. All these buckets have versioning on,
+              # so a read addressed by ?versionId= (e.g. rclone's post-upload
+              # verify HEAD, or restoring a specific object version) needs the
+              # *Version actions — plain s3:GetObject only covers the latest
+              # version and returns 403 Forbidden otherwise.
+              "s3:GetObjectVersion",
+              "s3:DeleteObjectVersion",
+              "s3:ListBucketVersions"
             ]
             Resource = [
               "arn:aws:s3:::hyperion-velero-backups",
