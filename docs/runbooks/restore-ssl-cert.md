@@ -55,8 +55,10 @@ Scale the cert-manager Deployments (`cert-manager`, `cert-manager-cainjector`, `
 ### 1. Identify Backup Name
 Find the latest backup name from the `ssl-certs` schedule:
 ```bash
-kubectl get backups.velero.io -n backup -l velero.io/schedule-name=ssl-certs --sort-by=.metadata.creationTimestamp
+kubectl get backups.velero.io -n backup -l velero.io/schedule-name=ssl-certs \
+  -o jsonpath='{range .items[*]}{.status.startTimestamp}{"  "}{.metadata.name}{"\n"}{end}' | sort | tail -1
 ```
+> **Do not sort on `.metadata.creationTimestamp`.** After a cluster rebuild Velero syncs the Backup objects *from object storage*, so their `creationTimestamp` is the sync time (all within minutes) and does not reflect the real backup order. Sort on `.status.startTimestamp`, or read the date embedded in the name (e.g. `ssl-certs-20261010213020` = `2026-10-10T21:30:20Z`).
 
 ### 2. Restore
 
@@ -108,6 +110,8 @@ kubectl delete challenges.acme.cert-manager.io -A
 ```
 Re-run the counts and confirm all `0` before continuing to Step 4.
 
+> This is the **pre-resume** check. It will legitimately become non-zero *after* Step 4 for any cert already past its renewal window — see Step 5.
+
 ### 4. Resume cert-manager
 
 **Only after Step 3 shows `Completed`**, remove the maintenance patch so cert-manager comes back up and reconciles the restored Secrets:
@@ -128,13 +132,19 @@ Confirm all restored certificates are in Ready state:
 kubectl get certificate -A -l backuplabel.certificate=true \
   -o custom-columns='NAMESPACE:.metadata.namespace,NAME:.metadata.name,READY:.status.conditions[?(@.type=="Ready")].status,REASON:.status.conditions[?(@.type=="Ready")].reason,NOT_AFTER:.status.notAfter'
 ```
-**Expected**: All show `READY: True` with the original `notAfter` timestamps (not freshly issued).
+**Expected**: All show `READY: True`. Most should carry the **original** `notAfter` (adopted from the restored keypair, not freshly issued).
 
-Confirm no new LE orders were created (should be 0):
-If 0, then cert-manager made zero outgoing calls to Let's Encrypt when the cluster came up.
+Confirm no *avoidable* new LE orders were created:
 ```bash
 kubectl get orders.acme.cert-manager.io -A --no-headers | wc -l
 ```
+**Expected**: `0` for certs that were not yet due for renewal. But any cert whose `renewalTime` had already passed while the cluster was down **will** renew on resume — this is correct cert-manager behaviour, not a restore failure. cert-manager renews at `notAfter - renewBefore` (default: 1/3 of the lifetime, i.e. ~day 60 of a 90-day cert), so restoring an old keypair cannot suppress a renewal that is already due. Find the ones that will issue:
+
+```bash
+kubectl get certificate -A -l backuplabel.certificate=true \
+  -o custom-columns='NS:.metadata.namespace,NAME:.metadata.name,RENEWAL:.status.renewalTime,NOT_AFTER:.status.notAfter'
+```
+Every cert with `RENEWAL` in the past will renew (orders go `pending → valid`, challenges show `DNS-01` propagation). If you instead see orders for certs whose `RENEWAL` is in the **future**, the restored keypair was not adopted (e.g. its Secret was missing) — investigate.
 
 ### 6. Verify TLS Is Served
 ```bash
