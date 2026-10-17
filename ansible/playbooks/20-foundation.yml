@@ -7,6 +7,22 @@
 #          plus interactive developer utilities.
 # ==============================================================================
 
+# Gate: after a `tofu apply` guests can be up but not yet accepting SSH (fresh
+# boot, or the Proxmox host still busy creating/destroying VMs on the same
+# bridge). Without this, the first task that actually opens a connection races
+# bring-up and Ansible drops the host as unreachable for the whole play.
+- name: Wait for guests to accept connections
+  hosts: vm:lxc
+  gather_facts: false # do not race the implicit fact gather against boot
+  become: false
+  tags: [base]
+  tasks:
+    - name: Wait for SSH to become available
+      ansible.builtin.wait_for_connection:
+        timeout: 900 # up to 15 min for a cold boot
+        delay: 5
+        sleep: 5
+
 - name: Apply Base Configuration
   hosts: vm:lxc
   tags: [base]

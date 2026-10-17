@@ -182,7 +182,7 @@ tasks:
     cmds:
       # The '--' is crucial. It tells Task to pass all subsequent arguments
       # directly to the command as {{.CLI_ARGS}}.
-      - tofu taint '{{.CLI_ARGS}}'
+      - tofu taint {{.CLI_ARGS}}
 
   # ---------------------------------------------------------------------------
   # SECRET MANAGEMENT (ANSIBLE VAULT)

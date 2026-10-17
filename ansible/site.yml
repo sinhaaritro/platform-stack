@@ -11,8 +11,8 @@
 #   20-foundation    guest base OS
 #   30-vm-hardening  guest hardening (VMs)
 #   40-runtimes      guest language runtimes
-#   50-kubernetes    guest Kubernetes clusters
-#   60-services      guest platform services (+ NAS client)
+#   50-services      guest platform services (+ NAS client)
+#   60-kubernetes    guest Kubernetes clusters
 #
 # Importing keeps a single entrypoint (task ansible:apply:all) while allowing a
 # layer to be run on its own, e.g.:
@@ -36,8 +36,8 @@
 - name: Application Runtimes Layer
   import_playbook: playbooks/40-runtimes.yml
 
-- name: Kubernetes Layer
-  import_playbook: playbooks/50-kubernetes.yml
-
 - name: Platform Services Layer
-  import_playbook: playbooks/60-services.yml
+  import_playbook: playbooks/50-services.yml
+
+- name: Kubernetes Layer
+  import_playbook: playbooks/60-kubernetes.yml

@@ -40,6 +40,9 @@ if [ ! -f "$IMAGE_FILE" ]; then
   # - Clean Cloud-Init logs
   VIRT_CMD="$VIRT_CMD --run-command 'mkdir -p /etc/systemd/system/multi-user.target.wants'"
   VIRT_CMD="$VIRT_CMD --run-command 'ln -sf /usr/lib/systemd/system/ssh.service /etc/systemd/system/multi-user.target.wants/ssh.service'"
+  # Enable the guest agent (installed above) so `qm agent` works on first boot,
+  # not just the package being present.
+  VIRT_CMD="$VIRT_CMD --run-command 'ln -sf /usr/lib/systemd/system/qemu-guest-agent.service /etc/systemd/system/multi-user.target.wants/qemu-guest-agent.service'"
   VIRT_CMD="$VIRT_CMD --timezone Asia/Kolkata"
   VIRT_CMD="$VIRT_CMD --run-command 'cloud-init clean --logs --seed'"
   VIRT_CMD="$VIRT_CMD --run-command 'truncate -s 0 /etc/machine-id'"
