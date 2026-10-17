@@ -3,3 +3,4 @@ kind: Component
 
 patches:
   - path: patch-scale-zero.yaml
+  - path: patch-webhook-failure-policy.yaml

@@ -1,0 +1,23 @@
+# While cert-manager is scaled to 0 for maintenance, its webhook Service has no
+# endpoints. With `failurePolicy: Fail` that makes every create/update of a
+# cert-manager.io / acme.cert-manager.io resource fail admission ("no endpoints
+# available for service cert-manager-webhook") — which blocks this app's own
+# sync and, in a DR, the Velero restore of Certificate objects.
+#
+# Flipping the webhooks to Ignore keeps admission working while the controller
+# is down, so nothing is issued but objects can still be created.
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: cert-manager-webhook
+webhooks:
+  - name: webhook.cert-manager.io
+    failurePolicy: Ignore
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: cert-manager-webhook
+webhooks:
+  - name: webhook.cert-manager.io
+    failurePolicy: Ignore
