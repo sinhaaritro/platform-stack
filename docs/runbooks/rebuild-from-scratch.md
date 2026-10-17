@@ -47,6 +47,10 @@ The combined form of two per-tool tasks (run them separately if you prefer):
 The share now exists (empty).
 
 ### 2. Restore the NAS data (rclone) — runs ON `atlas`; decoupled; hours–days
+> **Nothing to restore?** (first-time build, or no offsite data yet) — **skip this step** and
+> go straight to the GUEST phase (step 3). The NODE phase already created the (empty) share
+> root + `WD4TB` datastore, and the apps create their own `v1/…` dirs on mount.
+
 The `vault:` remote (`rclone.conf`) is written to `atlas` by the role in step 1, and the
 target `/WD4TB/shared/…` is `atlas`'s local pool — so run rclone **on the node** (trigger it
 from here over SSH; there is no point downloading to the control machine first).

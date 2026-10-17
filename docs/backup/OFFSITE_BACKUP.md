@@ -41,6 +41,7 @@ All folders live under a **single** `vault:` crypt remote; each job's target mir
 - Immich `thumbs/` and `encoded-video/`: Immich regenerates them.
 - Regenerable project caches (e.g. UE5 `DerivedDataCache`, Blender temp) — keep sources/assets, drop the caches.
 - Everything that lives in Kubernetes or on VMs (Velero's job).
+- **VM/LXC data disks that live on the NAS pool.** Proxmox attaches these as ZFS **zvols** (e.g. `WD4TB/vm-1050-disk-*`), which are *not* files under the exported share tree — so the folder-scoped rclone jobs never include them, and the NFS export (`/WD4TB/shared`) doesn't expose them. Co-locating guest disks on the NAS pool does **not** pull them into the offsite copy.
 
 > **arr stack — deferred.** Keep the arr stack as one item for now; don't split it into movies/TV/books or decide what within it is offsite. That scoping happens later, when we actually get to it.
 
