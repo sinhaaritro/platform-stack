@@ -75,28 +75,6 @@
         }
       ]
     },
-    "variables": {
-      "list": [
-        {
-          "name": "app",
-          "type": "query",
-          "datasource": {
-            "name": "prometheus"
-          },
-          "query": "label_values(kube_pod_info, namespace)",
-          "refresh": 2,
-          "sort": 1,
-          "multi": false,
-          "includeAll": false,
-          "current": {
-            "text": "immich",
-            "value": "immich"
-          },
-          "options": [],
-          "hide": 0
-        }
-      ]
-    },
     "elements": {
       "panel-1": {
         "kind": "Panel",

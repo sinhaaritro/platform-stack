@@ -4,4 +4,3 @@ kind: Component
 resources:
   - dashboard-node-exporter.yaml
   - dashboard-loki.yaml
-  - dashboard-seaweedfs.yaml
