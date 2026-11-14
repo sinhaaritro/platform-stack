@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immich-server
+spec:
+  template:
+    spec:
+      # The Immich server must fetch the OIDC discovery document from the
+      # public Authentik issuer URL. The pod's DNS does not resolve the
+      # *.dpdns.org / *.strawslabs.com names, so map them to the Traefik
+      # ingress VIP. Host/SNI stay the public names, so Authentik returns the
+      # public issuer and endpoints.
+      hostAliases:
+        - ip: "192.168.0.240"
+          hostnames:
+            - authentik.hyperion.aritrosinha.dpdns.org
+            - authentik-hyperion.strawslabs.com

@@ -12,3 +12,9 @@ configMapGenerator:
         argocd.argoproj.io/sync-wave: "-3"
 generatorOptions:
   disableNameSuffixHash: true
+
+patches:
+  - path: patch-hostaliases.yaml
+    target:
+      kind: Deployment
+      name: immich-server
