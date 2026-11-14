@@ -17,6 +17,12 @@ entries:
       # keeps Immich's stored oauthId valid.
       sub_mode: hashed_user_id
       include_claims_in_id_token: true
+      # Required: without explicit grant_types the provider stores {} and the
+      # authorize endpoint rejects the request with
+      # "Invalid grant_type for provider".
+      grant_types:
+        - authorization_code
+        - refresh_token
       authorization_flow:
         !Find [
           authentik_flows.flow,
