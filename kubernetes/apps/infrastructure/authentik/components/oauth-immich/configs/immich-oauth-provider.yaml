@@ -11,6 +11,12 @@ entries:
     attrs:
       client_id: !Env IMMICH_OAUTH_CLIENT_ID
       client_secret: !Env IMMICH_OAUTH_CLIENT_SECRET
+      client_type: confidential
+      # Stable across Authentik DB restores: the OAuth `sub` is a hash of the
+      # Authentik user UUID, so restoring Authentik (not rebuilding it fresh)
+      # keeps Immich's stored oauthId valid.
+      sub_mode: hashed_user_id
+      include_claims_in_id_token: true
       authorization_flow:
         !Find [
           authentik_flows.flow,
@@ -25,13 +31,20 @@ entries:
           authentik_flows.flow,
           [slug, default-provider-invalidation-flow],
         ]
+      # Both Immich hostnames serve the same instance, so both web origins
+      # must be accepted. /auth/login is the web callback; /user-settings is
+      # used when linking an existing account. Mobile uses the custom scheme.
       redirect_uris:
         - matching_mode: strict
           url: "app.immich:///oauth-callback"
         - matching_mode: strict
-          url: "https://immich.hyperion.example.com/auth/login"
+          url: "https://immich.hyperion.aritrosinha.dpdns.org/auth/login"
         - matching_mode: strict
-          url: "https://immich.hyperion.example.com/user-settings"
+          url: "https://immich.hyperion.aritrosinha.dpdns.org/user-settings"
+        - matching_mode: strict
+          url: "https://immich-hyperion.strawslabs.com/auth/login"
+        - matching_mode: strict
+          url: "https://immich-hyperion.strawslabs.com/user-settings"
       signing_key:
         !Find [
           authentik_crypto.certificatekeypair,
@@ -46,5 +59,5 @@ entries:
     attrs:
       name: Immich
       provider: !KeyOf immich-provider
-      meta_launch_url: "https://immich.hyperion.example.com/auth/login?autoLaunch=1"
+      meta_launch_url: "https://immich.hyperion.aritrosinha.dpdns.org/auth/login?autoLaunch=1"
       meta_icon: "https://raw.githubusercontent.com/immich-app/immich/main/docs/static/img/favicon.png"
