@@ -175,6 +175,7 @@
     "clientSecret": "{{ .IMMICH_OAUTH_CLIENT_SECRET }}",
     "defaultStorageQuota": null,
     "enabled": true,
+    "endSessionEndpoint": "https://authentik.hyperion.aritrosinha.dpdns.org/application/o/immich/end-session/?post_logout_redirect_uri=https%3A%2F%2Fimmich.hyperion.aritrosinha.dpdns.org%2Fauth%2Flogin",
     "issuerUrl": "https://authentik.hyperion.aritrosinha.dpdns.org/application/o/immich/.well-known/openid-configuration",
     "mobileOverrideEnabled": false,
     "mobileRedirectUri": "",
