@@ -10,4 +10,4 @@ spec:
       - security
     storageLocation: aws
     defaultVolumesToFsBackup: true
-    ttl: 744h0m0s # 31 daily copies (1 month)
+    ttl: 1080h0m0s # 45 daily copies (1.5 months)
