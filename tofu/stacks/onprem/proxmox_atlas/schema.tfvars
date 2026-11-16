@@ -106,7 +106,7 @@ resources = {
           ipv4_address = "192.168.0.50/24"
           cpu_cores    = 12
           memory_size  = 16384
-          disk_size    = 32
+          disk_size    = 64
           additional_disks = [
             {
               interface    = "scsi1"
@@ -123,6 +123,7 @@ resources = {
         cloud_init_user = "dev"
         vm_config = {
           ipv4_address = "192.168.0.51/24"
+          disk_size    = 64
           additional_disks = [
             {
               interface    = "scsi1"
