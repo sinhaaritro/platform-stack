@@ -16,6 +16,8 @@
 > kubectl -n security exec deploy/authentik-db-dump -- ls -lh /backup/authentik-db.sql
 > ```
 > If both exist, **skip Step 1** and go directly to Step 2, using the `security` job variant. If the PVC/dump is gone, start with Step 1.
+>
+> If the dump is stale, use the latest completed `daily-security` backup. If the database is already gone, do not try to run a new backup — it cannot dump a missing DB.
 
 ### 1. Full DR — restore the dump PVC from Velero (only if the live PVC is gone)
 

@@ -85,7 +85,7 @@ The dataset physically lives on the NAS, so restore it **on the NAS — no clust
 
 > **Run this on the Proxmox/NAS host `atlas` (`root@192.168.0.2`), not inside a pod.** The script lives at `/usr/local/sbin/nas-server-rclone-restore.sh` and uses `/root/.config/rclone/rclone.conf` plus the `/WD4TB/shared` ZFS/NFS export. This is why recovery still works when Kubernetes is down.
 
-1. Rebuild the NAS share (empty).
+1. Ensure the target share exists and is empty. If Argo has already recreated the `immich` PVC, use its directory as-is — no separate share rebuild is needed.
 2. **Thaw the archive copy, then pull the dataset back.** Thawing must target the `aws:` remote; the download goes through `vault:` so it is decrypted. The NAS role's wrapper does the whole cycle (request Bulk thaw → poll → copy → verify manifest):
    ```bash
    nas-server-rclone-restore.sh immich /WD4TB/shared/v1/personal/immich
@@ -99,9 +99,10 @@ The dataset physically lives on the NAS, so restore it **on the NAS — no clust
      --transfers 4 --checkers 8 --verbose
    ```
    This restores `upload/`, `library/`, `profile/`, `backups/`. `thumbs/` and `encoded-video/` are regenerable and not in the backup — Immich regenerates them.
-   > **Restore directly into the final dataset path** (`/WD4TB/shared/v1/personal/immich`), not a staging directory. In-place needs ~1× the data; a staging copy needs ~2× (old + restored), which will not fit on a nearly-full pool. The wrapper refuses to start if free space is insufficient: a populated/in-place destination needs 5 GiB of temp headroom; an empty destination needs ~110% of the remote dataset size. Stop Immich first; `rclone copy` merges/overwrites and never deletes newer local files.
+   > **Restore directly into the final dataset path** (`/WD4TB/shared/v1/personal/immich`), not a staging directory. In-place needs ~1× the data; a staging copy needs ~2× (old + restored), which will not fit on a nearly-full pool. The wrapper refuses to start if free space is insufficient: a populated/in-place destination needs 5 GiB of temp headroom; an empty destination needs ~110% of the remote dataset size. Stop Immich first **and pause the Argo controllers**; otherwise Argo recreates the Immich pods mid-copy. Resume Argo after the copy. `rclone copy` merges/overwrites and never deletes newer local files.
    > If a restore run is interrupted **after** the thaw finished, resume without waiting for AWS again: `SKIP_THAW=1 nas-server-rclone-restore.sh immich <dest>`.
    > The IAM policy must allow **`s3:RestoreObject`**. Without it every thaw request fails with `AccessDenied`, and Deep Archive objects cannot be downloaded at all. The thaw itself takes ~12 h (Standard) to ~48 h (Bulk).
+   > The copy is ~335 MB but can take ~10 minutes depending on S3/network; plan the RTO accordingly.
 <!-- CONFLICT-WITH-CURRENT-METHOD: manual in-cluster restore-job.yaml.
      Canonical restore: NAS-side nas-server-rclone-restore.sh (item 2 above).
      Remove this alternate path (and the immich-rclone-crypt Secret it needs)
@@ -167,6 +168,12 @@ Use the dump under `/data/backups/`. Immich v3 restores through its own maintena
 > kubectl -n personal logs deploy/immich-server -f | grep -A1 -i "maintenance mode"
 > ```
 > The token expires in ~4 hours.
+>
+> You can also enable/regenerate maintenance mode directly:
+> ```bash
+> kubectl -n personal exec deploy/immich-server -- /usr/src/app/server/bin/immich-admin enable-maintenance-mode
+> ```
+> It prints the `/maintenance?token=...` URL, and regenerates the token if maintenance mode is already enabled.
 
 **Pick the right file.** `restore-point-immich-db-backup-*.sql.gz` files are snapshots Immich takes *immediately before* each restore — they reflect the **current (often empty) DB**, not your data. Always pick `immich-db-backup-*.sql.gz`.
 
