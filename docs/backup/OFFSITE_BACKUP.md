@@ -68,7 +68,7 @@ Local disk / NAS  ->  rclone (crypt: encrypts contents + filenames)  ->  S3 buck
 - restic and Kopia were considered and rejected: they need to read their own index and pack files, which isn't possible on Deep Archive.
 - Trade-off accepted: no chunk-level dedup and no snapshot history. S3 versioning provides the undo window instead.
 
-**Single owner.** The offsite job runs **once, from the NAS/Proxmox host** (a host-level cron/systemd timer running rclone). It is **not** run by an in-cluster CronJob. The in-cluster `immich-rclone-backup` component is retired (disabled/commented) so there is exactly one owner. When TrueNAS (or another NAS OS) is in place, the same sync can be moved to a NAS-native rclone/Cloud Sync task.
+**Single owner.** The offsite job runs **once, from the NAS/Proxmox host** (a host-level cron/systemd timer running rclone). When TrueNAS (or another NAS OS) is in place, the same sync can be moved to a NAS-native rclone/Cloud Sync task.
 
 **Where this lives (IaC).** The host side is the `nas_server` role (target `proxmox_node`). Its toggles come from `topology.nodes.<node>.storage.backup`, with minimal-by-default fallbacks:
 
@@ -206,11 +206,26 @@ Immich keeps 14 DB dumps locally and rotates them. Under `sync` + bucket version
 
 > **RTO exception:** this offsite plane does **not** meet the platform's 12-hour RTO. Deep Archive retrieval is roughly **12 h (standard) to 48 h (bulk)**, and restoring multiple TB can take **1–2 weeks end to end**. That is an accepted exception for irreplaceable user data kept at the cheapest tier. The 12-hour RTO in [README.md](./README.md) still applies to cluster rebuild / Velero-managed restores, not to this cold offsite copy.
 
-1. Ask AWS to **restore** the needed objects from Deep Archive to a temporary readable state (rclone's `backend restore` command, bulk priority, with a lifetime of about 2 weeks). In recent rclone versions this works through the crypt remote. Otherwise target the encrypted path on the `aws:` remote. Verify on my installed version.
+1. **Thaw the archive copies.** `rclone backend restore` must target the **`aws:`** remote, not `vault:` — the crypt remote does not implement S3 backend commands (`command "restore" failed: command not found`). Because directory-name encryption hides the plaintext prefix, restore the whole bucket (it contains only this homelab's backups):
+   ```bash
+   rclone backend restore aws:atlas-homelab -o priority=Bulk -o lifetime=14
+   rclone backend restore-status aws:atlas-homelab   # rclone >= v1.69
+   ```
+   The IAM policy **must** include `s3:RestoreObject`; without it this fails with `AccessDenied` and no restore can be started.
 2. **Wait.** Standard retrieval takes roughly 12 hours and bulk up to about 48 hours (verify current AWS docs).
 3. `rclone copy` the restored data down from `vault:`. rclone decrypts as it goes.
 4. Verify against the stored SHA-256 manifest (§9).
 5. For Immich: restore the library folders and the latest DB dump from `backups/`, then follow Immich's own restore procedure ([`docs/runbooks/restore-immich.md`](../runbooks/restore-immich.md)).
+
+The NAS role installs a wrapper that performs steps 1–4 (thaw → poll → copy → manifest verify):
+
+```bash
+# Restore straight into the live dataset — in-place merge, no staging, no move.
+nas-server-rclone-restore.sh immich /WD4TB/shared/v1/personal/immich
+nas-server-rclone-restore.sh immich /WD4TB/shared/v1/personal/immich Standard  # faster, pricier
+```
+
+There is no zip and no staging step. Restoring into the live dataset is safe: `rclone copy` compares each file and overwrites changed ones, so it needs only a few GiB of temporary headroom — not 2× the dataset. That is what makes a 3 TB restore fit on a 4 TB drive. A restore into an **empty** directory is a full copy (~1×), and into a **populated staging** directory is ~2×; staging is only for side-by-side comparison and will not fit on a nearly-full pool.
 
 **Costs:** retrieval and data-transfer-out are billed per GB. For a multi-TB restore, check the AWS pricing calculator first.
 
@@ -244,7 +259,6 @@ Don't keep these only on the NAS or Immich server.
 - [x] Local paths + schedules — **done**: `storage.backup.rclone.jobs` (obsidian weekly, immich monthly); sources `/WD4TB/shared/v1/personal/<app>`.
 - [x] Host-level systemd wrapper — **done**: `nas_server` installs a per-job wrapper (mount check → `--max-delete` → SHA-256 manifest) + systemd timers.
 - [x] SHA-256 manifest generation — **done** (uploaded to `vault:manifests/<job>.sha256`).
-- [x] Retire the in-cluster `immich-rclone-backup` — **done** (host is the single owner).
 - [ ] **Alerting** — the healthchecks.io ping is wired but unused; route backup status to the in-cluster stack (Alertmanager/Grafana) instead — see `planning/BACKLOG.md`.
 - [ ] Estimate the size of the rare-media set to forecast monthly cost.
 - [ ] Scope the arr stack later (what, if anything, within `/data/media` goes offsite).
@@ -310,7 +324,9 @@ rclone ncdu vault:                                      # browse backup (decrypt
 rclone hashsum sha256 /WD4TB/shared/v1/personal/obsidian > /var/log/rclone/obsidian.sha256
 rclone copyto /var/log/rclone/obsidian.sha256 vault:manifests/obsidian.sha256
 
-rclone backend restore vault:v1/personal/obsidian -o priority=Bulk -o lifetime=14   # request restore
-rclone copy vault:v1/personal/obsidian /restore/obsidian            # after the wait
+# restore: thaw on the aws: remote (crypt does not support backend commands)
+rclone backend restore aws:atlas-homelab -o priority=Bulk -o lifetime=14
+rclone backend restore-status aws:atlas-homelab          # wait until no ongoing-request="true"
+rclone copy vault:v1/personal/obsidian /restore/obsidian # decrypts on the way down
 rclone hashsum sha256 /restore/obsidian | diff - /var/log/rclone/obsidian.sha256  # verify
 ```

@@ -36,49 +36,6 @@ Two independent halves. The **NAS half does not need Kubernetes** — never let 
 
 ---
 
-<!-- CONFLICT-WITH-CURRENT-METHOD: in-cluster rclone-backup CronJob.
-     Canonical method: NAS-owned rclone (upload + restore) + Immich's own DB restore.
-     Remove this entire section once both DR scenarios are verified with the NAS
-     method: (A) app/cluster lost, (B) NAS/HDD lost. -->
-> ⚠️ **IN CONFLICT WITH THE CURRENT METHOD — do not use; kept for reference only.**
-> Offsite backup is owned by the NAS (`nas-server-rclone-immich.timer`). The
-> in-cluster `rclone-backup` CronJob described below is retired and will be
-> removed once both DR scenarios are verified with the NAS method.
-
-## Legacy: enabling the in-cluster offsite backup (not used)
-
-The `rclone-backup` component ships **disabled** (`suspend: true`) with a dummy destination.
-
-1. Set the destination in `kubernetes/clusters/hyperion/immich/components/rclone-backup/kustomization.yaml`:
-   ```yaml
-   configMapGenerator:
-     - name: immich-backup-config
-       behavior: replace
-       literals:
-         - DESTINATION=aws:<bucket>/immich
-   ```
-2. Uncomment **both** lines in `kubernetes/clusters/hyperion/immich/kustomization.yaml`:
-   ```
-   - ../../../apps/services/immich/components/rclone-backup
-   - ./components/rclone-backup
-   ```
-3. Flip `suspend: true` → `false` in `kubernetes/apps/services/immich/components/rclone-backup/cronjob.yaml`.
-4. Sync ArgoCD. Verify:
-   ```bash
-   kubectl -n personal get cronjob immich-rclone-backup      # SUSPEND should be False
-   kubectl -n personal get secret immich-aws-creds           # creds decrypted
-   kubectl -n personal get cm immich-backup-config -o jsonpath='{.data.DESTINATION}'
-   ```
-5. Dry-run it once:
-   ```bash
-   kubectl -n personal create job --from=cronjob/immich-rclone-backup immich-rclone-backup-manual
-   kubectl -n personal logs -f job/immich-rclone-backup-manual
-   ```
-
-> This is the in-cluster option. It can equally be owned by the NAS itself (e.g. a TrueNAS Cloud Sync task on the share, which is rclone under the hood) — same destination, same restore commands below, but it also works when Kubernetes is down. Pick one owner; do not run both.
-
----
-
 ## 1. Restore the NAS dataset (from the S3 backup)
 
 The dataset physically lives on the NAS, so restore it **on the NAS — no cluster required**. Rebuild the share first; the cluster comes later.
@@ -103,27 +60,6 @@ The dataset physically lives on the NAS, so restore it **on the NAS — no clust
    > If a restore run is interrupted **after** the thaw finished, resume without waiting for AWS again: `SKIP_THAW=1 nas-server-rclone-restore.sh immich <dest>`.
    > The IAM policy must allow **`s3:RestoreObject`**. Without it every thaw request fails with `AccessDenied`, and Deep Archive objects cannot be downloaded at all. The thaw itself takes ~12 h (Standard) to ~48 h (Bulk).
    > The copy is ~335 MB but can take ~10 minutes depending on S3/network; plan the RTO accordingly.
-<!-- CONFLICT-WITH-CURRENT-METHOD: manual in-cluster restore-job.yaml.
-     Canonical restore: NAS-side nas-server-rclone-restore.sh (item 2 above).
-     Remove this alternate path (and the immich-rclone-crypt Secret it needs)
-     once both DR scenarios are verified with the NAS method. -->
-> ⚠️ **IN CONFLICT WITH THE CURRENT METHOD — redundant alternate path, kept for reference only.**
-> The canonical restore is the NAS-side wrapper in item 2. This in-cluster Job
-> is a second method; it will be removed once both DR scenarios are verified.
-
-3. **Alternate path — only if the cluster is already up** and the `immich` PVC is bindable: apply the manual Job. It thaws in an init container (may take hours) and then copies into `/data`:
-   ```bash
-   kubectl -n personal scale deploy/immich-server --replicas=0
-   kubectl apply -f kubernetes/apps/services/immich/components/rclone-backup/restore-job.yaml
-   kubectl -n personal logs -f job/immich-rclone-restore -c thaw
-   kubectl -n personal logs -f job/immich-rclone-restore -c rclone
-   kubectl -n personal delete job immich-rclone-restore
-   kubectl -n personal scale deploy/immich-server --replicas=1
-   ```
-   The Job requires the `immich-rclone-crypt` Secret (crypt password/salt) and `s3:RestoreObject`; it is **not** referenced by kustomize on purpose — ArgoCD must never auto-run it.
-
-> During a real NAS rebuild the Immich pods can't mount the `immich` PVC at all, so the Job is impossible — use the NAS-side copy.
-
 ---
 
 ## 2. Restore the app + database (from the app DB dump)

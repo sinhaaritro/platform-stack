@@ -360,8 +360,8 @@ kubectl delete restore <APP>-restore -n backup
 
 ```bash
 # 1. Decide the offsite owner (once)
-#    The offsite copy is performed either by the per-app rclone CronJob in-cluster
-#    or by a NAS-side sync (e.g. TrueNAS Cloud Sync task). Pick ONE owner — not both.
+#    The offsite copy is performed by NAS-owned rclone.
+#    Pick ONE owner — not both.
 #    If neither is enabled, offsite recovery is unavailable.
 
 # 2. Restore the NAS dataset first — NO cluster required

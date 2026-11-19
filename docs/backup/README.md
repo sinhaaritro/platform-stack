@@ -100,8 +100,8 @@ flowchart TD
 | Data | Classification | RPO | RTO | Recovery Method |
 |---|---|---|---|---|
 | Authentication DB (e.g., Authentik) | 🔴 Critical | 24h | 1h | Velero restore (DB dump from PVC) |
-| Photo/Video DB metadata (e.g., Immich) | 🟠 High | 24h | 4h | Immich in-app DB dump in `/data/backups` (NAS); restore via Immich maintenance UI |
-| Photo/Video files on NFS (e.g., Immich) | 🔴 Critical | 24h | 8h | NAS ZFS snapshot (local) / rclone restore from cloud (offsite) |
+| Photo/Video DB metadata (e.g., Immich) | 🟠 High | 24h (NAS intact) / ~1 month (offsite) | 4h + thaw (12–48h) | Immich in-app DB dump in `/data/backups` (NAS); restore via Immich maintenance UI, or from the offsite copy after a Deep Archive thaw |
+| Photo/Video files on NFS (e.g., Immich) | 🔴 Critical | ~1 month (offsite; ZFS snapshots currently off) | 8h + thaw (12–48h) | NAS ZFS snapshot (local, when enabled) / rclone restore from cloud (offsite, requires `s3:RestoreObject`) |
 | User document vaults (e.g., Obsidian) | 🟠 High | 24h | 1h | Velero restore (PVC) |
 | SSL/TLS Certificates | 🟡 Medium | 24h | 30min | cert-manager re-issues, or Velero restore |
 | Observability data (logs, metrics) | 🟢 Low | N/A | N/A | Re-ingested from agents on rebuild |
@@ -150,7 +150,7 @@ The backup unit is the **application**, not the infrastructure. Each app's backu
 
 Immich is the first app that provides its **own** backup mechanism, so Velero is not used for it:
 
-- **Media + in-app DB dumps live on the NAS.** The `immich` PVC is NFS-backed (RWX, mounted at `/data`) and holds `library/`, `upload/`, `profile/`, `thumbs/`, `encoded-video/`, and `backups/`. The NAS backup plan (local ZFS snapshots + offsite rclone) covers this whole folder — no cluster involvement required.
+- **Media + in-app DB dumps live on the NAS.** The `immich` PVC is NFS-backed (RWX, mounted at `/data`) and holds `library/`, `upload/`, `profile/`, `thumbs/`, `encoded-video/`, and `backups/`. The offsite rclone job (monthly) covers this folder; local ZFS snapshots are configured but **currently disabled** (`snapshots.enabled=false`).
 - **The database is not on the NAS.** PostgreSQL runs on a Longhorn PVC (SSD). Because a rebuilt cluster always starts with an empty DB, the bridge is Immich's own dump in `/data/backups/` (produced daily by Immich v3, keep 14), restored through Immich's maintenance UI.
 - **No Velero schedule exists for Immich.** Its K8s state is recovered from Git; its data is recovered from the NAS dataset + the in-app DB dump.
 
@@ -163,7 +163,7 @@ Immich is the first app that provides its **own** backup mechanism, so Velero is
 | K8s resources (per namespace) | ✅ | Velero | AWS S3 | Daily | 30 days (TTL) |
 | Longhorn PVCs (app data) | ✅ Per-schedule opt-in | Velero (fs-backup) | AWS S3 | Daily | 30 days (TTL) |
 | Database dumps (hook-based apps) | ✅ Pre-backup hooks | Velero | AWS S3 | Daily (triggered before Velero) | 30 days |
-| NFS user data (per-app) | 🟡 Semi-Active | rclone (CronJob) / NAS | Cloud S3 | Per-app policy | Per-app versions (offsite opt-in, disabled until destination set) |
+| NFS user data (per-app) | 🟢 Active | rclone on NAS | Cloud S3 | Per-app policy | Per-app versions |
 | Immich dataset (media + DB dumps) | ✅ NAS-owned | NAS ZFS + rclone | NAS local / Cloud S3 | NAS policy | Per NAS policy (Velero not used) |
 | ZFS snapshots | ✅ Local | ZFS (automated) | Local HDD pool | Daily | Per retention policy |
 | Proxmox VMs | ❌ Intentional | N/A | N/A | N/A | IaC rebuilds |
@@ -187,7 +187,6 @@ Immich is the first app that provides its **own** backup mechanism, so Velero is
 |---|---|---|---|
 | 🔴 P0 | Deploy PrometheusRules for Velero alerting | Not started | Prometheus Operator deployed |
 | 🔴 P0 | Define and run first restore drill | Not started | This document (procedure) |
-| 🟠 P1 | Implement per-app rclone CronJobs for NFS data | Component built, disabled pending destination | Cloud S3 bucket + rclone config |
 | 🟠 P1 | Activate SeaweedFS BSL (dual-write schedules) | Not started | SSD capacity verification |
 | 🟡 P2 | Configure S3 Lifecycle policies (Standard → Glacier) | Not started | Cost analysis approval |
 | 🟡 P2 | Build automated restore drill CronJob | Not started | Manual drill validated first |

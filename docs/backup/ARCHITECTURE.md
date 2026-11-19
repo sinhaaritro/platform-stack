@@ -180,7 +180,7 @@ The request auto-removes when done; the backup CR will not resurrect afterwards.
 
 ## rclone — Tier 4: NFS User Data
 
-> **Status:** 🟡 Semi-Active (orchestration & sync run against the NFS-backed `immich` PVC; the offsite job ships **disabled** (`suspend: true`, dummy destination) until a destination is chosen. The NAS itself can own the same sync via a TrueNAS Cloud Sync task — pick one owner, not both).
+> **Status (2026-11-19):** 🟢 Active on the NAS. Tier-4 user data (Immich, Obsidian) is backed up by the NAS-owned `nas_server` rclone timer. Kubernetes is not in the data path.
 
 ### Why Per-App rclone (Not Whole-NFS)
 
@@ -195,73 +195,17 @@ User data on NFS serves multiple apps with different criticality levels:
 
 Backing up the *entire* NFS share treats all data equally — wasting cloud storage on re-downloadable movies while under-protecting irreplaceable photos. Per-app rclone solves this.
 
-### Target Architecture
+### Target Architecture (NAS-owned)
 
-Each app that needs NFS backup runs an **rclone CronJob** in its own namespace:
+Offsite backups run on the NAS/Proxmox host (`atlas`), not in Kubernetes. The `nas_server` Ansible role installs:
 
-```
-┌─────────────────────────────────────────────────┐
-│ App Namespace (e.g., personal)                  │
-│                                                 │
-│  ┌──────────────┐    ┌──────────────────────┐   │
-│  │ App Pod      │    │ rclone CronJob       │   │
-│  │ (app)        │    │ Schedule: daily      │   │
-│  │              │    │ Versions: 7          │   │
-│  │ NFS Mount ◄──┼────┤ NFS Mount (same)     │   │
-│  │ /data/photos │    │ Cloud: s3:bucket/app │   │
-│  └──────────────┘    └──────────────────────┘   │
-└─────────────────────────────────────────────────┘
-```
+- `/usr/local/sbin/nas-server-rclone-backup.sh` and per-job systemd timers (`nas-server-rclone-<job>.timer`)
+- `/usr/local/sbin/nas-server-rclone-restore.sh` (thaw → poll → copy → verify)
+- `/root/.config/rclone/rclone.conf` with the `[aws]` S3 and `[vault]` crypt remotes
 
-**How it works:**
+Per-job policy (source, target, mode, schedule, storage class, excludes) comes from `topology.nodes.<node>.storage.backup.rclone.jobs`. The NAS is the single owner; do not run an in-cluster CronJob.
 
-1.  Each app that owns NFS data gets an **rclone Kustomize component** (e.g., `components/rclone-backup/`).
-2.  The component contains a CronJob that mounts the **same NFS path** as the app.
-3.  rclone syncs the app's NFS subdirectory to a cloud S3 bucket with versioning.
-4.  Each app independently defines: schedule, version count, cloud destination, bandwidth limits.
-5.  Velero remains responsible for the app's K8s resources and Longhorn PVCs. rclone handles NFS only.
-
-> **Immich is the exception.** Immich provides its own in-app DB dump (written to `/data/backups/` on the NAS) and is intentionally **not** covered by a Velero schedule. Its restore mixes both planes — NAS-owned dataset restore plus the in-app DB dump — so it has a dedicated runbook: [`docs/runbooks/restore-immich.md`](../runbooks/restore-immich.md).
-
-### rclone CronJob Template
-
-```yaml
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: <APP>-nfs-backup
-spec:
-  schedule: "<CRON>"
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          containers:
-            - name: rclone
-              image: rclone/rclone:latest
-              args:
-                - sync
-                - /data/<APP>/
-                - remote:backup-bucket/<APP>/
-                - --transfers=4
-                - --checkers=8
-                - --bwlimit=10M        # Limit bandwidth during backup
-                - --backup-dir=remote:backup-bucket/<APP>-versions/
-              volumeMounts:
-                - name: nfs-data
-                  mountPath: /data/<APP>
-                  readOnly: true        # Read-only — backup never modifies source
-                - name: rclone-config
-                  mountPath: /config/rclone
-          volumes:
-            - name: nfs-data
-              persistentVolumeClaim:
-                claimName: <APP>-user-data    # Same PVC the app uses
-            - name: rclone-config
-              secret:
-                secretName: <APP>-rclone-config
-          restartPolicy: OnFailure
-```
+> **Immich:** media and the in-app DB dumps live on the NAS. Offsite is NAS-owned rclone; the DB is restored through Immich's maintenance UI. See [`docs/runbooks/restore-immich.md`](../runbooks/restore-immich.md).
 
 ---
 
