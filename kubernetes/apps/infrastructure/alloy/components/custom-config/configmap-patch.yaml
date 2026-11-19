@@ -244,6 +244,40 @@ data:
       scrape_interval = "30s"
     }
 
+    // --- Immich ---
+    // Native Prometheus endpoint on the immich-server Service. Only the two
+    // metrics ports are scraped; port 2283 is the web app and has no metrics.
+    discovery.relabel "immich" {
+      targets = discovery.kubernetes.services.targets
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        regex = "personal"
+        action = "keep"
+      }
+      rule {
+        source_labels = ["__meta_kubernetes_service_name"]
+        regex = "immich-server"
+        action = "keep"
+      }
+      rule {
+        source_labels = ["__meta_kubernetes_service_port_name"]
+        regex = "metrics-api|metrics-ms"
+        action = "keep"
+      }
+      rule {
+        source_labels = ["__meta_kubernetes_service_port_name"]
+        target_label = "metrics_port"
+        action = "replace"
+      }
+    }
+
+    prometheus.scrape "immich" {
+      job_name   = "immich"
+      targets    = discovery.relabel.immich.output
+      forward_to = [prometheus.remote_write.mimir.receiver]
+      scrape_interval = "30s"
+    }
+
     // ============================================================
     // METRICS: Remote Write
     // ============================================================

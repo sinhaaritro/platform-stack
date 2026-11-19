@@ -4,3 +4,17 @@ kind: Component
 resources:
   - dashboard-node-exporter.yaml
   - dashboard-loki.yaml
+
+configMapGenerator:
+  # App-owned dashboards: defined here as reusable templates and consumed by
+  # clusters/hyperion/grafana/kustomization.yaml.
+  - name: grafana-dashboard-immich
+    namespace: monitoring
+    files:
+      - developer/D4-immich.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: "Developer"

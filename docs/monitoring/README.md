@@ -15,7 +15,7 @@ This is a single, unified Grafana deployment organized into **persona-based fold
 │  Alloy (DaemonSet)                                      │
 │  ├── Scrapes: node-exporter, velero, traefik,           │
 │  │   longhorn, seaweedfs, pg-exporter, valkey,          │
-│  │   couchdb, cert-manager, authentik, kyverno          │
+│  │   couchdb, cert-manager, authentik, kyverno, immich  │
 │  ├── Writes metrics → Mimir                             │
 │  └── Ships logs    → Loki                               │
 │                                                         │
@@ -117,7 +117,7 @@ Each Grafana folder maps to a **persona**. Access control is handled via **Authe
 
 ---
 
-### 📁 Developer (3 dashboards)
+### 📁 Developer (4 dashboards)
 
 > **Audience:** You wearing the developer hat. Application behavior. Logs. Debugging.
 > **Refresh:** 30s. Log search. Error investigation.
@@ -127,6 +127,7 @@ Each Grafana folder maps to a **persona**. Access control is handled via **Authe
 | D1 | **Application Health** | Per-app status for Immich, Obsidian, Copyparty, Podinfo | Pod status per app, API response time (via Traefik), error rate (5xx + app logs), storage usage per app PVC, restart history | [D1-application-health.md](developer/D1-application-health.md) |
 | D2 | **Log Explorer** | Centralized log search across all namespaces | Loki log panels with namespace/pod/container filters, error rate by namespace, log volume heatmap, pre-built queries for common patterns | [D2-log-explorer.md](developer/D2-log-explorer.md) |
 | D3 | **Security & Auth** | Authentik, Kyverno, sealed-secrets, external-secrets | Login rate/failed logins, active sessions, Kyverno policy violations, sealed-secrets controller health, external-secrets sync status | [D3-security-auth.md](developer/D3-security-auth.md) |
+| D4 | **Immich** | Immich-native pipeline health | Users, queue backlog, job success/failure, asset + ML repository latency, process resources, server/ML error logs. Scrapes `immich-server:8081` and `:8082`. | [D4-immich.md](developer/D4-immich.md) |
 
 ---
 
@@ -178,9 +179,10 @@ Each dashboard JSON includes links to related dashboards (internal) and external
 | P1 — Home — Public | E1 |
 | P2 — Home — Trusted | E1, D1 |
 | P3 — Home — Admin | E1, D1, D3 |
-| D1 — Application Health | S3, S4 |
+| D1 — Application Health | S3, S4, D4 |
 | D2 — Log Explorer | D3, S5 |
 | D3 — Security & Auth | D1, S3 |
+| D4 — Immich | D1, D2, S4, B1 |
 | B1 — PostgreSQL | S4, B2 |
 | B2 — Cache & Document Stores | B1, S4 |
 | E2 — Capacity & Trends | E1, S2, S4, B1, B2 |
@@ -201,6 +203,7 @@ We build Phase 1 first, then expand. Each module is a self-contained Grafana das
 | **Phase 4** | PostgreSQL | B1 | Medium | Deploy pg_exporter for PG14 + PG18 |
 | | Cache & Document Stores | B2 | Medium | Add Valkey + CouchDB metrics to Alloy |
 | **Phase 5** | Application Health | D1 | Medium | Depends on Traefik metrics (Phase 3) + Loki |
+| | Immich | D4 | Medium | Add Immich scrape to Alloy ✅, `IMMICH_HOST` fix ✅, alert rules in Mimir Ruler |
 | | Security & Auth | D3 | Medium | Add Authentik + Kyverno metrics to Alloy |
 | **Phase 6** | Log Explorer | D2 | Low | Loki already flowing ✅, this is a query-building exercise |
 | | Monitoring Self-Health | S5 | Low | Mimir meta-monitoring already configured ✅ |
@@ -228,6 +231,7 @@ We build Phase 1 first, then expand. Each module is a self-contained Grafana das
 | [dba/B2-cache-and-document-stores.md](dba/B2-cache-and-document-stores.md) | **B2** — Detailed panel-by-panel documentation, organized by tabs |
 | [developer/D1-application-health.md](developer/D1-application-health.md) | **D1** — Detailed panel-by-panel documentation, organized by tabs |
 | [developer/D3-security-auth.md](developer/D3-security-auth.md) | **D3** — Detailed panel-by-panel documentation, organized by tabs |
+| [developer/D4-immich.md](developer/D4-immich.md) | **D4** — Immich native metrics, queues, jobs, performance, logs |
 | [developer/D2-log-explorer.md](developer/D2-log-explorer.md) | **D2** — Detailed panel-by-panel documentation (single-screen sections) |
 | [sre/S5-monitoring-self-health.md](sre/S5-monitoring-self-health.md) | **S5** — Detailed panel-by-panel documentation, organized by tabs |
 | [executive/E2-capacity-and-trends.md](executive/E2-capacity-and-trends.md) | **E2** — Detailed panel-by-panel documentation (single-screen sections) |

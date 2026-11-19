@@ -32,7 +32,9 @@ Longhorn (PVC sizes per volume)
 ```
 
 > [!NOTE]
-> **No new scrape blocks needed.** D1 is a pure query-building exercise — it reuses metrics already flowing from [S2](../sre/CLUSTER_AND_NODE_HEALTH.md) (kube-state-metrics), [S3](../sre/NETWORKING.md) (Traefik), and [S4](../sre/STORAGE.md) (Longhorn). The only dependency is that those scrape blocks exist, which they do by this phase.
+> D1 needs no new scrape blocks — it reuses metrics already flowing from [S2](../sre/S2-cluster-and-node-health.md) (kube-state-metrics), [S3](../sre/S3-networking.md) (Traefik), and [S4](../sre/S4-storage.md) (Longhorn).
+>
+> **Exception — Immich:** since v3.4.2 the app exposes its own Prometheus endpoint on `:8081` and `:8082`. Those native metrics are **not** part of D1; they live in [D4 — Immich](D4-immich.md). D1 keeps the generic pod/Traefik/Longhorn rows for Immich.
 
 ---
 
@@ -109,5 +111,6 @@ Organized into **4 tabs**. The Grafana variable `$app` (dropdown: `immich`, `obs
 |--------|------|-------------|
 | [S3 — Networking & Ingress](../../sre/S3-networking.md) | Internal (dashboard) | Per-app error rate and latency reuse Traefik metrics from S3. |
 | [S4 — Storage](../../sre/S4-storage.md) | Internal (dashboard) | PVC usage per app tracked via Longhorn data from S4. |
+| [D4 — Immich](D4-immich.md) | Internal (dashboard) | Immich-native queues, jobs, repository latency, and logs. |
 
 **← Back to [Dashboard Catalog](../README.md#-developer-3-dashboards)** | **Next: [D2 — Log Explorer](D2-log-explorer.md)**
