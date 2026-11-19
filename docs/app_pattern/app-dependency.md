@@ -32,7 +32,7 @@ Here are all the locations where version specifications (Helm charts, container 
 | **Infra** | `alertmanager` | `alertmanager` | `https://prometheus-community.github.io/helm-charts` | `1.33.0` | [kustomization.yaml](file:///home/dev/platform-stack/kubernetes/apps/infrastructure/alertmanager/base/kustomization.yaml#L10) |
 | **Infra** | `prometheus-operator-crds` | `prometheus-operator-crds` | `https://prometheus-community.github.io/helm-charts` | `31.0.0` | [kustomization.yaml](file:///home/dev/platform-stack/kubernetes/apps/infrastructure/prometheus-operator-crds/base/kustomization.yaml#L8) |
 | **Infra** | `velero` | `velero` | `https://vmware-tanzu.github.io/helm-charts` | `12.0.0` | [kustomization.yaml](file:///home/dev/platform-stack/kubernetes/apps/infrastructure/velero/base/kustomization.yaml#L10) |
-| **Service**| `immich` | `immich` | `https://immich-app.github.io/immich-charts` | `0.10.3` | [kustomization.yaml](file:///home/dev/platform-stack/kubernetes/apps/services/immich/base/kustomization.yaml#L10) |
+| **Service**| `immich` | `immich` | `oci://ghcr.io/immich-app/immich-charts` | `0.13.4` | [kustomization.yaml](file:///home/dev/platform-stack/kubernetes/apps/services/immich/base/kustomization.yaml#L8) |
 | **Service**| `podinfo` | `podinfo` | `https://stefanprodan.github.io/podinfo` | `6.9.4` | [kustomization.yaml](file:///home/dev/platform-stack/kubernetes/apps/services/podinfo/base/kustomization.yaml#L8) |
 | **Service**| `copyparty` | `copyparty` | `oci://ghcr.io/ernail/charts` | `2.0.0` | [kustomization.yaml](file:///home/dev/platform-stack/kubernetes/apps/services/copyparty/base/kustomization.yaml#L10) |
 
@@ -44,8 +44,8 @@ Here are all the locations where version specifications (Helm charts, container 
 | `obsidian` | `lscr.io/linuxserver/obsidian:1.12.7` | Deployment Container | [deployment.yaml](file:///home/dev/platform-stack/kubernetes/apps/services/obsidian/base/deployment.yaml#L18) |
 | `authentik` | `postgres:14-alpine` | Init DB Job Container | [init-db-job.yaml](file:///home/dev/platform-stack/kubernetes/apps/infrastructure/authentik/components/init-db/init-db-job.yaml#L21) |
 | `authentik` | `postgres:14-alpine` | Backup CronJob Container | [cronjob.yaml](file:///home/dev/platform-stack/kubernetes/apps/infrastructure/authentik/components/backup-job/cronjob.yaml#L23) |
-| `immich` | `postgres:14-alpine` | Init DB Job Container | [init-db-job.yaml](file:///home/dev/platform-stack/kubernetes/apps/services/immich/components/init-db/init-db-job.yaml#L15) |
-| `immich` | `v1.114.0` | App Version override | [values.yaml](file:///home/dev/platform-stack/kubernetes/apps/services/immich/base/values.yaml#L2) |
+| `immich` | `postgres:18-alpine` | Init DB Job Container | [init-db-job.yaml](file:///home/dev/platform-stack/kubernetes/apps/services/immich/components/init-db/init-db-job.yaml#L15) |
+| `immich` | `v3.4.2` | App Version override | [values.yaml](file:///home/dev/platform-stack/kubernetes/apps/services/immich/base/values.yaml#L8) |
 | `loki` | `docker.io/grafana/loki:3.6.4` | Backend StatefulSet override | [backend-statefulset.yaml](file:///home/dev/platform-stack/kubernetes/apps/infrastructure/loki/components/enable-backend/backend-statefulset.yaml#L55) |
 | `loki` | `docker.io/kiwigrid/k8s-sidecar:1.30.9` | Sidecar Container override | [backend-statefulset.yaml](file:///home/dev/platform-stack/kubernetes/apps/infrastructure/loki/components/enable-backend/backend-statefulset.yaml#L101) |
 | `velero` | `velero/velero-plugin-for-aws:v1.13.1` | AWS S3 Plugin override | [values.yaml](file:///home/dev/platform-stack/kubernetes/apps/infrastructure/velero/base/values.yaml#L8) |

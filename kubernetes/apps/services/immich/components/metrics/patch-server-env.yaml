@@ -1,0 +1,16 @@
+# Immich derives the OpenTelemetry Prometheus exporter base URL from
+# IMMICH_HOST. The default "::" becomes "http://:::8081/", which is invalid,
+# so every scrape of /metrics is answered with 400 Bad Request.
+# 0.0.0.0 is a valid listen host for the exporter and the microservices worker.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immich-server
+spec:
+  template:
+    spec:
+      containers:
+        - name: main
+          env:
+            - name: IMMICH_HOST
+              value: "0.0.0.0"

@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+# The chart's ServiceMonitor (immich.metrics.enabled in base/values.yaml)
+# scrapes :8081 (API) and :8082 (microservices). Those endpoints only work
+# when IMMICH_HOST is a valid URL host, which is what this component fixes.
+patches:
+  - path: patch-server-env.yaml
+    target:
+      kind: Deployment
+      name: immich-server
