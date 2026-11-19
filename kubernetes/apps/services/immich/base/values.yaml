@@ -5,7 +5,7 @@ controllers:
         # DB and Redis credentials are injected by components/secrets
         env: {}
         image:
-          tag: v3.1.0
+          tag: v3.4.2
 
     initContainers:
       init-storage:
