@@ -3,7 +3,11 @@ controllers:
     containers:
       main:
         # DB and Redis credentials are injected by components/secrets
-        env: {}
+        env:
+          # Required for the Prometheus metrics endpoint. Immich defaults the
+          # listen host to "::", which the OTel Prometheus exporter turns into
+          # the invalid base URL "http://:::8081/", so every scrape returns 400.
+          IMMICH_HOST: "0.0.0.0"
         image:
           tag: v3.4.2
 
