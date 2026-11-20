@@ -44,7 +44,7 @@
       "immich"
     ],
     "time": {
-      "from": "now-6h",
+      "from": "now-24h",
       "to": "now"
     },
     "timeSettings": {
@@ -62,7 +62,7 @@
         "1d"
       ],
       "fiscalYearStartMonth": 0,
-      "from": "now-6h",
+      "from": "now-24h",
       "hideTimepicker": false,
       "timezone": "browser",
       "to": "now"
@@ -103,7 +103,7 @@
               "transformations": []
             }
           },
-          "description": "Total Immich users from immich_users_total.",
+          "description": "Total Immich users.",
           "id": 1,
           "links": [],
           "title": "Users",
@@ -181,7 +181,7 @@
               "transformations": []
             }
           },
-          "description": "Sum of in-flight jobs across every queue.",
+          "description": "In-flight jobs across every queue.",
           "id": 2,
           "links": [],
           "title": "Active Jobs",
@@ -210,7 +210,8 @@
                         "value": 100
                       }
                     ]
-                  }
+                  },
+                  "unit": "short"
                 },
                 "overrides": []
               },
@@ -254,7 +255,7 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "sum(increase({__name__=~\"immich_jobs_.+_failed\"}[15m])) or vector(0)",
+                        "expr": "sum({__name__=~\"immich_jobs_.+_failed_total\"}) or vector(0)",
                         "legendFormat": "Failures"
                       },
                       "version": "v0"
@@ -267,10 +268,10 @@
               "transformations": []
             }
           },
-          "description": "Failed jobs in the last 15 minutes, all queues.",
+          "description": "Cumulative failed jobs since the worker started.",
           "id": 3,
           "links": [],
-          "title": "Job Failures (15m)",
+          "title": "Job Failures",
           "vizConfig": {
             "group": "stat",
             "kind": "VizConfig",
@@ -292,7 +293,8 @@
                         "value": 1
                       }
                     ]
-                  }
+                  },
+                  "unit": "short"
                 },
                 "overrides": []
               },
@@ -349,7 +351,7 @@
               "transformations": []
             }
           },
-          "description": "1 = both Immich metrics ports are being scraped by Alloy.",
+          "description": "1 = both Immich metrics ports are being scraped.",
           "id": 4,
           "links": [],
           "title": "Metrics Target",
@@ -478,7 +480,7 @@
                       "mode": "off"
                     }
                   },
-                  "unit": "reqps"
+                  "unit": "short"
                 },
                 "overrides": []
               },
@@ -488,11 +490,14 @@
                   "multiLane": false
                 },
                 "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
+                  "calcs": [
+                    "lastNotNull",
+                    "max"
+                  ],
+                  "displayMode": "table",
                   "enableFacetedFilter": false,
                   "overflow": "ellipsis",
-                  "placement": "bottom",
+                  "placement": "right",
                   "showLegend": true
                 },
                 "tooltip": {
@@ -524,8 +529,9 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "sum by (queue) (label_replace(rate({__name__=~\"immich_queues_.+_started\"}[5m]), \"queue\", \"$1\", \"__name__\", \"immich_queues_(.+)_started\"))",
-                        "legendFormat": "{{queue}}"
+                        "expr": "sum by (job) (label_replace({__name__=~\"immich_jobs_.+_success_total\"}, \"job\", \"$1\", \"__name__\", \"immich_jobs_(.+)_success_total\"))",
+                        "format": "table",
+                        "instant": true
                       },
                       "version": "v0"
                     },
@@ -537,75 +543,48 @@
               "transformations": []
             }
           },
-          "description": "Job start rate per queue.",
+          "description": "Cumulative successful jobs per job type.",
           "id": 6,
           "links": [],
-          "title": "Jobs Started",
+          "title": "Job Successes",
           "vizConfig": {
-            "group": "timeseries",
+            "group": "table",
             "kind": "VizConfig",
             "spec": {
               "fieldConfig": {
                 "defaults": {
                   "color": {
-                    "mode": "palette-classic"
+                    "mode": "thresholds"
                   },
                   "custom": {
-                    "axisBorderShow": false,
-                    "axisCenteredZero": false,
-                    "axisColorMode": "text",
-                    "axisLabel": "",
-                    "axisPlacement": "auto",
-                    "barAlignment": 0,
-                    "barWidthFactor": 0.6,
-                    "drawStyle": "line",
-                    "fillOpacity": 10,
-                    "gradientMode": "scheme",
-                    "hideFrom": {
-                      "legend": false,
-                      "tooltip": false,
-                      "viz": false
+                    "align": "left",
+                    "cellOptions": {
+                      "type": "color-text"
                     },
-                    "insertNulls": false,
-                    "lineInterpolation": "linear",
-                    "lineWidth": 2,
-                    "pointSize": 5,
-                    "scaleDistribution": {
-                      "type": "linear"
+                    "footer": {
+                      "reducers": []
                     },
-                    "showPoints": "auto",
-                    "showValues": false,
-                    "spanNulls": true,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "thresholdsStyle": {
-                      "mode": "off"
-                    }
+                    "inspect": false
                   },
-                  "unit": "reqps"
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "red",
+                        "value": 0
+                      },
+                      {
+                        "color": "green",
+                        "value": 1
+                      }
+                    ]
+                  }
                 },
                 "overrides": []
               },
               "options": {
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "enableFacetedFilter": false,
-                  "overflow": "ellipsis",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
+                "cellHeight": "sm",
+                "showHeader": true
               }
             },
             "version": "13.1.0"
@@ -630,8 +609,9 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "sum by (job, result) (label_replace(label_replace(rate({__name__=~\"immich_jobs_.+_(success|failed|skipped)\"}[5m]), \"job\", \"$1\", \"__name__\", \"immich_jobs_(.+)_(success|failed|skipped)\"), \"result\", \"$2\", \"__name__\", \"immich_jobs_(.+)_(success|failed|skipped)\"))",
-                        "legendFormat": "{{job}} {{result}}"
+                        "expr": "sum by (job) (label_replace({__name__=~\"immich_jobs_.+_failed_total\"}, \"job\", \"$1\", \"__name__\", \"immich_jobs_(.+)_failed_total\"))",
+                        "format": "table",
+                        "instant": true
                       },
                       "version": "v0"
                     },
@@ -643,75 +623,48 @@
               "transformations": []
             }
           },
-          "description": "Success, failed and skipped job rates.",
+          "description": "Cumulative failed jobs per job type. Empty means no failures.",
           "id": 7,
           "links": [],
-          "title": "Job Results",
+          "title": "Job Failures",
           "vizConfig": {
-            "group": "timeseries",
+            "group": "table",
             "kind": "VizConfig",
             "spec": {
               "fieldConfig": {
                 "defaults": {
                   "color": {
-                    "mode": "palette-classic"
+                    "mode": "thresholds"
                   },
                   "custom": {
-                    "axisBorderShow": false,
-                    "axisCenteredZero": false,
-                    "axisColorMode": "text",
-                    "axisLabel": "",
-                    "axisPlacement": "auto",
-                    "barAlignment": 0,
-                    "barWidthFactor": 0.6,
-                    "drawStyle": "line",
-                    "fillOpacity": 10,
-                    "gradientMode": "scheme",
-                    "hideFrom": {
-                      "legend": false,
-                      "tooltip": false,
-                      "viz": false
+                    "align": "left",
+                    "cellOptions": {
+                      "type": "color-text"
                     },
-                    "insertNulls": false,
-                    "lineInterpolation": "linear",
-                    "lineWidth": 2,
-                    "pointSize": 5,
-                    "scaleDistribution": {
-                      "type": "linear"
+                    "footer": {
+                      "reducers": []
                     },
-                    "showPoints": "auto",
-                    "showValues": false,
-                    "spanNulls": true,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "thresholdsStyle": {
-                      "mode": "off"
-                    }
+                    "inspect": false
                   },
-                  "unit": "reqps"
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "red",
+                        "value": 0
+                      },
+                      {
+                        "color": "green",
+                        "value": 1
+                      }
+                    ]
+                  }
                 },
                 "overrides": []
               },
               "options": {
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "enableFacetedFilter": false,
-                  "overflow": "ellipsis",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
+                "cellHeight": "sm",
+                "showHeader": true
               }
             },
             "version": "13.1.0"
@@ -736,12 +689,50 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "histogram_quantile(0.95, sum by (le) (rate({__name__=~\"immich_asset_repository_.+_duration_bucket\"}[5m])))",
-                        "legendFormat": "p95"
+                        "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_asset_repository_get_file_samples_duration_bucket[1h]))) > 0) or vector(0)",
+                        "legendFormat": "get_file_samples"
                       },
                       "version": "v0"
                     },
                     "refId": "A"
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_asset_repository_get_time_bucket_duration_bucket[1h]))) > 0) or vector(0)",
+                        "legendFormat": "get_time_bucket"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "B"
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_asset_repository_get_time_buckets_duration_bucket[1h]))) > 0) or vector(0)",
+                        "legendFormat": "get_time_buckets"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "C"
                   }
                 }
               ],
@@ -749,7 +740,7 @@
               "transformations": []
             }
           },
-          "description": "p95 across all asset repository methods, in milliseconds.",
+          "description": "p95 per asset repository method, in milliseconds. 0 means the method was idle.",
           "id": 8,
           "links": [],
           "title": "Asset Repository Latency (p95)",
@@ -806,11 +797,14 @@
                   "multiLane": false
                 },
                 "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
+                  "calcs": [
+                    "lastNotNull",
+                    "mean"
+                  ],
+                  "displayMode": "table",
                   "enableFacetedFilter": false,
                   "overflow": "ellipsis",
-                  "placement": "bottom",
+                  "placement": "right",
                   "showLegend": true
                 },
                 "tooltip": {
@@ -842,12 +836,88 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "histogram_quantile(0.95, sum by (le) (rate({__name__=~\"immich_machine_learning_repository_.+_duration_bucket\"}[5m])))",
-                        "legendFormat": "p95"
+                        "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_machine_learning_repository_check_duration_bucket[1h]))) > 0) or vector(0)",
+                        "legendFormat": "check"
                       },
                       "version": "v0"
                     },
                     "refId": "A"
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_machine_learning_repository_setup_duration_bucket[1h]))) > 0) or vector(0)",
+                        "legendFormat": "setup"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "B"
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_machine_learning_repository_tick_duration_bucket[1h]))) > 0) or vector(0)",
+                        "legendFormat": "tick"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "C"
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_machine_learning_repository_set_healthy_duration_bucket[1h]))) > 0) or vector(0)",
+                        "legendFormat": "set_healthy"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "D"
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_machine_learning_repository_teardown_duration_bucket[1h]))) > 0) or vector(0)",
+                        "legendFormat": "teardown"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "E"
                   }
                 }
               ],
@@ -855,7 +925,7 @@
               "transformations": []
             }
           },
-          "description": "p95 across Immich machine-learning repository calls, in milliseconds.",
+          "description": "p95 per machine-learning repository method, in milliseconds. 0 means the method was idle.",
           "id": 9,
           "links": [],
           "title": "Machine Learning Latency (p95)",
@@ -912,11 +982,14 @@
                   "multiLane": false
                 },
                 "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
+                  "calcs": [
+                    "lastNotNull",
+                    "mean"
+                  ],
+                  "displayMode": "table",
                   "enableFacetedFilter": false,
                   "overflow": "ellipsis",
-                  "placement": "bottom",
+                  "placement": "right",
                   "showLegend": true
                 },
                 "tooltip": {
@@ -1067,10 +1140,10 @@
               "transformations": []
             }
           },
-          "description": "Immich server CPU usage in cores.",
+          "description": "Immich server CPU usage in cores (1 = one full core).",
           "id": 11,
           "links": [],
-          "title": "Process CPU (cores)",
+          "title": "Process CPU",
           "vizConfig": {
             "group": "timeseries",
             "kind": "VizConfig",
@@ -1114,7 +1187,7 @@
                       "mode": "off"
                     }
                   },
-                  "unit": "reqps"
+                  "unit": "short"
                 },
                 "overrides": []
               },
@@ -1161,7 +1234,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "{namespace=\"personal\",pod=~\"immich-server.*\"} |~ \"(?i)(error|fatal|unable to run job)\"",
+                        "expr": "{namespace=\"personal\",pod=~\"immich-server.*\"}",
                         "legendFormat": "",
                         "queryType": "range"
                       },
@@ -1175,10 +1248,10 @@
               "transformations": []
             }
           },
-          "description": "Immich server errors from Loki.",
+          "description": "All Immich server logs. Add |= \"(?i)error\" to filter.",
           "id": 12,
           "links": [],
-          "title": "Server Error Logs",
+          "title": "Server Logs",
           "vizConfig": {
             "group": "logs",
             "kind": "VizConfig",
@@ -1219,7 +1292,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "{namespace=\"personal\",pod=~\"immich-machine-learning.*\"} |~ \"(?i)(error|exception|traceback)\"",
+                        "expr": "{namespace=\"personal\",pod=~\"immich-machine-learning.*\"}",
                         "legendFormat": "",
                         "queryType": "range"
                       },
@@ -1233,10 +1306,10 @@
               "transformations": []
             }
           },
-          "description": "Immich ML errors from Loki.",
+          "description": "All Immich ML logs. Add |= \"(?i)error\" to filter.",
           "id": 13,
           "links": [],
-          "title": "Machine Learning Error Logs",
+          "title": "Machine Learning Logs",
           "vizConfig": {
             "group": "logs",
             "kind": "VizConfig",
@@ -1356,7 +1429,7 @@
                           "name": "panel-6"
                         },
                         "height": 10,
-                        "width": 24,
+                        "width": 12,
                         "x": 0,
                         "y": 10
                       }
@@ -1369,9 +1442,9 @@
                           "name": "panel-7"
                         },
                         "height": 10,
-                        "width": 24,
-                        "x": 0,
-                        "y": 20
+                        "width": 12,
+                        "x": 12,
+                        "y": 10
                       }
                     }
                   ]

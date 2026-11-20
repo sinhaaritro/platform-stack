@@ -5,6 +5,7 @@
 | **Folder** | Developer |
 | **Dashboard ID** | D4 |
 | **Refresh** | 30s |
+| **Default range** | 24h (logs are sparse on an idle instance) |
 | **Audience** | You wearing the developer hat — Immich pipeline health, queues, jobs, and logs |
 
 > **Purpose:** Immich is the only workload with a native Prometheus endpoint. D4 turns that data into a single view of the photo pipeline: how many users, which queues are backed up, whether jobs are failing, how slow the asset and machine-learning repositories are, and what the app is logging. D1 remains the generic per-app view; D4 is the deep dive.
@@ -31,8 +32,11 @@ immich-server / immich-machine-learning stdout
 > [!IMPORTANT]
 > Immich does **not** export HTTP or PostgreSQL instrumentation metrics. `http.server.request.duration` and `db.client.*` are not present. RED metrics for Immich continue to come from Traefik (D1/S3). Immich's own database work is visible only as `immich_*_repository_*_duration` histograms.
 
+> [!WARNING]
+> **Multi-metric regex queries break PromQL.** A selector like `{__name__=~"immich_asset_repository_.+_duration_bucket"}` matches several metrics whose labels are identical apart from `__name__`. Any function that drops `__name__` (`rate`, `increase`) then fails with `vector cannot contain metrics with the same labelset`. D4 therefore names one metric per query. Do not "simplify" these panels back into regex aggregations.
+
 > [!NOTE]
-> Queue and job metrics are created lazily — a series only exists after that queue/job has run since the last restart. Panels therefore select by name regex (`{__name__=~"immich_queues_.+_active"}`) instead of hard-coding metric names.
+> Queue and job metrics are created lazily — a series only exists after that queue/job has run since the last restart. Panels use `{__name__=~...}` only where no function drops `__name__` (gauges, `sum by (job)` with `label_replace`).
 
 ---
 
@@ -65,7 +69,7 @@ Organized into **4 tabs**.
 |-------|------|----------------|------------|-----------|
 | **Users** | Stat | `immich_users_total` | — | Instant confirmation that the instance is populated. |
 | **Active Jobs** | Stat | `sum({__name__=~"immich_queues_.+_active"}) or vector(0)` | <50 🟢, 50-100 🟡, >100 🔴 | Total in-flight work across all queues. |
-| **Job Failures (15m)** | Stat | `sum(increase({__name__=~"immich_jobs_.+_failed"}[15m])) or vector(0)` | 0 🟢, ≥1 🔴 | Any failed job deserves a look; these are usually unreadable files or ML errors. |
+| **Job Failures** | Stat | `sum({__name__=~"immich_jobs_.+_failed_total"}) or vector(0)` | 0 🟢, ≥1 🔴 | Cumulative failures since the worker started. |
 | **Metrics Target** | Stat | `max(up{job="immich"})` | 0 🔴, 1 🟢 | Catches the exact failure that hid for 33 days: an endpoint that returns 400 and is never scraped. |
 
 ### Tab 2: Queues & Jobs
@@ -73,26 +77,36 @@ Organized into **4 tabs**.
 | Panel | Type | Query | Rationale |
 |-------|------|-------|-----------|
 | **Queue Backlog** | Time series | `sum by (queue) (label_replace({__name__=~"immich_queues_.+_active"}, "queue", "$1", "__name__", "immich_queues_(.+)_active"))` | A flat high line means a worker is stuck or under-provisioned. |
-| **Jobs Started** | Time series | `sum by (queue) (label_replace(rate({__name__=~"immich_queues_.+_started"}[5m]), "queue", "$1", "__name__", "immich_queues_(.+)_started"))` | Throughput per queue, and a leading indicator that the backlog is draining. |
-| **Job Results** | Time series | `sum by (job, result) (label_replace(label_replace(rate({__name__=~"immich_jobs_.+_(success\|failed\|skipped)"}[5m]), "job", "$1", "__name__", "immich_jobs_(.+)_(success\|failed\|skipped)"), "result", "$2", "__name__", "immich_jobs_(.+)_(success\|failed\|skipped)"))` | Separates "slow" from "broken": a success rate that stops climbing while failures do is a real incident. |
+| **Job Successes** | Table (instant) | `sum by (job) (label_replace({__name__=~"immich_jobs_.+_success_total"}, "job", "$1", "__name__", "immich_jobs_(.+)_success_total"))` | Cumulative completions per job type — shows which pipelines are actually running. |
+| **Job Failures** | Table (instant) | `sum by (job) (label_replace({__name__=~"immich_jobs_.+_failed_total"}, "job", "$1", "__name__", "immich_jobs_(.+)_failed_total"))` | Cumulative failures per job type. Empty is good. |
+
+> There is no `immich_queues_*_started_total` series in practice, so the previous "Jobs Started" panel was removed.
 
 ### Tab 3: Performance
 
-| Panel | Type | Query | Rationale |
-|-------|------|-------|-----------|
-| **Asset Repository Latency (p95)** | Time series | `histogram_quantile(0.95, sum by (le) (rate({__name__=~"immich_asset_repository_.+_duration_bucket"}[5m])))` | Catches DB slow-downs before users complain about slow browsing. |
-| **Machine Learning Latency (p95)** | Time series | `histogram_quantile(0.95, sum by (le) (rate({__name__=~"immich_machine_learning_repository_.+_duration_bucket"}[5m])))` | ML is a separate pod; rising latency here usually means model reloads or CPU contention. |
-| **Process Memory** | Time series | `process_memory_usage{job="immich"}` | A steady climb that never drops is a leak. |
-| **Process CPU (cores)** | Time series | `rate(process_cpu_time_total{job="immich"}[5m])` | Correlate with job throughput; high CPU with no jobs means something is stuck. |
+Every query names one metric and falls back to `0` when the histogram has no recent samples:
+
+```promql
+(histogram_quantile(0.95, sum by (le) (rate(<metric>[1h]))) > 0) or vector(0)
+```
+
+| Panel | Queries (per metric) | Unit | Rationale |
+|-------|----------------------|------|-----------|
+| **Asset Repository Latency (p95)** | `immich_asset_repository_get_file_samples_*`, `..._get_time_bucket_*`, `..._get_time_buckets_*` | ms | Catches DB slow-downs before users complain about slow browsing. 0 = method idle. |
+| **Machine Learning Latency (p95)** | `immich_machine_learning_repository_{check,setup,tick,set_healthy,teardown}_*` | ms | ML is a separate pod; rising latency here usually means model reloads or CPU contention. |
+| **Process Memory** | `process_memory_usage{job="immich"}` | bytes | A steady climb that never drops is a leak. |
+| **Process CPU** | `rate(process_cpu_time_total{job="immich"}[5m])` | cores | Correlate with job throughput; high CPU with no jobs means something is stuck. |
 
 ### Tab 4: Logs
 
 | Panel | Type | Query (Loki) | Rationale |
 |-------|------|--------------|-----------|
-| **Server Error Logs** | Logs | `{namespace="personal",pod=~"immich-server.*"} \|= "(?i)(error\|fatal\|unable to run job)"` | Root-cause entry point when a panel above turns red. |
-| **Machine Learning Error Logs** | Logs | `{namespace="personal",pod=~"immich-machine-learning.*"} \|= "(?i)(error\|exception\|traceback)"` | ML failures don't show up in the server pod. |
+| **Server Logs** | Logs | `{namespace="personal",pod=~"immich-server.*"}` | All server output. Add `\|= "(?i)error"` to filter. |
+| **Machine Learning Logs** | Logs | `{namespace="personal",pod=~"immich-machine-learning.*"}` | ML failures don't show up in the server pod. |
 
 > Logs currently arrive with ANSI colour codes, so Loki labels `detected_level` as `unknown`. Until Alloy strips ANSI (or Immich switches to `IMMICH_LOG_FORMAT=json`), use text filters rather than a `level` label.
+>
+> Immich only logs on activity (jobs, websocket connects, errors). On an idle instance a 6h window can legitimately be empty, which is why the dashboard defaults to 24h.
 
 ---
 
@@ -101,10 +115,12 @@ Organized into **4 tabs**.
 | Alert Name | PromQL Condition | For | Severity | Description |
 |------------|------------------|-----|----------|-------------|
 | `ImmichMetricsDown` | `up{job="immich"} == 0` | 5m | **Critical** | Immich metrics are no longer being scraped — dashboards and pipeline alerts are blind. |
-| `ImmichJobFailures` | `sum(rate({__name__=~"immich_jobs_.+_failed"}[15m])) > 0` | 10m | **Warning** | Immich jobs are failing. |
+| `ImmichJobFailures` | `sum(rate({__name__=~"immich_jobs_.+_failed_total"}[15m])) > 0` | 10m | **Warning** | Immich jobs are failing. |
 | `ImmichQueueBacklog` | `max({__name__=~"immich_queues_.+_active"}) > 100` | 15m | **Warning** | A queue is backing up; check ML/server resources. |
-| `ImmichDatabaseBackupMissed` | `increase(immich_queues_backup_database_started[26h]) == 0` | 1h | **Warning** | The daily Immich DB dump did not run. |
+| `ImmichDatabaseBackupMissed` | `increase(immich_queues_backup_database_active[26h]) == 0` | 1h | **Warning** | The daily Immich DB dump did not run. |
 | `ImmichUserCountDrop` | `delta(immich_users_total[1h]) < 0` | 5m | **Warning** | User count decreased — possible data or auth issue. |
+
+> The `ImmichJobFailures` rule needs a single metric per job type because of the duplicate-labelset rule above. Generate one rule per job, or use `sum by (__name__)` with a gauge — not `rate` over a multi-name selector.
 
 ---
 
