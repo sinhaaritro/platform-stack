@@ -68,114 +68,7 @@
       "to": "now"
     },
     "title": "Immich",
-    "variables": [
-      {
-        "kind": "CustomVariable",
-        "spec": {
-          "name": "server_log_level",
-          "label": "Server Log Level",
-          "query": "All : .*, ERROR : (?i)error, WARN : (?i)warn, INFO/LOG : (?i)(info|log)",
-          "current": {
-            "text": "All",
-            "value": ".*"
-          },
-          "options": [
-            {
-              "selected": true,
-              "text": "All",
-              "value": ".*"
-            },
-            {
-              "selected": false,
-              "text": "ERROR",
-              "value": "(?i)error"
-            },
-            {
-              "selected": false,
-              "text": "WARN",
-              "value": "(?i)warn"
-            },
-            {
-              "selected": false,
-              "text": "INFO/LOG",
-              "value": "(?i)(info|log)"
-            }
-          ],
-          "multi": false,
-          "includeAll": false,
-          "hide": "dontHide",
-          "skipUrlSync": false,
-          "allowCustomValue": false
-        }
-      },
-      {
-        "kind": "TextVariable",
-        "spec": {
-          "name": "server_log_search",
-          "label": "Server Log Search",
-          "query": "",
-          "current": {
-            "text": "",
-            "value": ""
-          },
-          "hide": "dontHide",
-          "skipUrlSync": false
-        }
-      },
-      {
-        "kind": "CustomVariable",
-        "spec": {
-          "name": "ml_log_level",
-          "label": "ML Log Level",
-          "query": "All : .*, ERROR : (?i)error, WARN : (?i)warn, INFO/LOG : (?i)(info|log)",
-          "current": {
-            "text": "All",
-            "value": ".*"
-          },
-          "options": [
-            {
-              "selected": true,
-              "text": "All",
-              "value": ".*"
-            },
-            {
-              "selected": false,
-              "text": "ERROR",
-              "value": "(?i)error"
-            },
-            {
-              "selected": false,
-              "text": "WARN",
-              "value": "(?i)warn"
-            },
-            {
-              "selected": false,
-              "text": "INFO/LOG",
-              "value": "(?i)(info|log)"
-            }
-          ],
-          "multi": false,
-          "includeAll": false,
-          "hide": "dontHide",
-          "skipUrlSync": false,
-          "allowCustomValue": false
-        }
-      },
-      {
-        "kind": "TextVariable",
-        "spec": {
-          "name": "ml_log_search",
-          "label": "ML Log Search",
-          "query": "",
-          "current": {
-            "text": "",
-            "value": ""
-          },
-          "hide": "dontHide",
-          "skipUrlSync": false
-        }
-      }
-    ],
+    "variables": [],
     "elements": {
       "panel-1": {
         "kind": "Panel",
@@ -2330,33 +2223,169 @@
             "kind": "TabsLayoutTab",
             "spec": {
               "layout": {
-                "kind": "GridLayout",
+                "kind": "RowsLayout",
                 "spec": {
-                  "items": [
+                  "rows": [
                     {
-                      "kind": "GridLayoutItem",
+                      "kind": "RowsLayoutRow",
                       "spec": {
-                        "element": {
-                          "kind": "ElementReference",
-                          "name": "panel-12"
-                        },
-                        "height": 14,
-                        "width": 24,
-                        "x": 0,
-                        "y": 0
+                        "title": "Server Logs",
+                        "variables": [
+                          {
+                            "kind": "CustomVariable",
+                            "spec": {
+                              "name": "server_log_level",
+                              "label": "Server Log Level",
+                              "query": "All : .*, ERROR : (?i)error, WARN : (?i)warn, INFO/LOG : (?i)(info|log)",
+                              "current": {
+                                "text": "All",
+                                "value": ".*"
+                              },
+                              "options": [
+                                {
+                                  "selected": true,
+                                  "text": "All",
+                                  "value": ".*"
+                                },
+                                {
+                                  "selected": false,
+                                  "text": "ERROR",
+                                  "value": "(?i)error"
+                                },
+                                {
+                                  "selected": false,
+                                  "text": "WARN",
+                                  "value": "(?i)warn"
+                                },
+                                {
+                                  "selected": false,
+                                  "text": "INFO/LOG",
+                                  "value": "(?i)(info|log)"
+                                }
+                              ],
+                              "multi": false,
+                              "includeAll": false,
+                              "hide": "dontHide",
+                              "skipUrlSync": false,
+                              "allowCustomValue": false
+                            }
+                          },
+                          {
+                            "kind": "TextVariable",
+                            "spec": {
+                              "name": "server_log_search",
+                              "label": "Server Log Search",
+                              "query": "",
+                              "current": {
+                                "text": "",
+                                "value": ""
+                              },
+                              "hide": "dontHide",
+                              "skipUrlSync": false
+                            }
+                          }
+                        ],
+                        "layout": {
+                          "kind": "GridLayout",
+                          "spec": {
+                            "items": [
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "panel-12"
+                                  },
+                                  "height": 14,
+                                  "width": 24,
+                                  "x": 0,
+                                  "y": 0
+                                }
+                              }
+                            ]
+                          }
+                        }
                       }
                     },
                     {
-                      "kind": "GridLayoutItem",
+                      "kind": "RowsLayoutRow",
                       "spec": {
-                        "element": {
-                          "kind": "ElementReference",
-                          "name": "panel-13"
-                        },
-                        "height": 10,
-                        "width": 24,
-                        "x": 0,
-                        "y": 14
+                        "title": "Machine Learning Logs",
+                        "variables": [
+                          {
+                            "kind": "CustomVariable",
+                            "spec": {
+                              "name": "ml_log_level",
+                              "label": "ML Log Level",
+                              "query": "All : .*, ERROR : (?i)error, WARN : (?i)warn, INFO/LOG : (?i)(info|log)",
+                              "current": {
+                                "text": "All",
+                                "value": ".*"
+                              },
+                              "options": [
+                                {
+                                  "selected": true,
+                                  "text": "All",
+                                  "value": ".*"
+                                },
+                                {
+                                  "selected": false,
+                                  "text": "ERROR",
+                                  "value": "(?i)error"
+                                },
+                                {
+                                  "selected": false,
+                                  "text": "WARN",
+                                  "value": "(?i)warn"
+                                },
+                                {
+                                  "selected": false,
+                                  "text": "INFO/LOG",
+                                  "value": "(?i)(info|log)"
+                                }
+                              ],
+                              "multi": false,
+                              "includeAll": false,
+                              "hide": "dontHide",
+                              "skipUrlSync": false,
+                              "allowCustomValue": false
+                            }
+                          },
+                          {
+                            "kind": "TextVariable",
+                            "spec": {
+                              "name": "ml_log_search",
+                              "label": "ML Log Search",
+                              "query": "",
+                              "current": {
+                                "text": "",
+                                "value": ""
+                              },
+                              "hide": "dontHide",
+                              "skipUrlSync": false
+                            }
+                          }
+                        ],
+                        "layout": {
+                          "kind": "GridLayout",
+                          "spec": {
+                            "items": [
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "panel-13"
+                                  },
+                                  "height": 10,
+                                  "width": 24,
+                                  "x": 0,
+                                  "y": 0
+                                }
+                              }
+                            ]
+                          }
+                        }
                       }
                     }
                   ]
