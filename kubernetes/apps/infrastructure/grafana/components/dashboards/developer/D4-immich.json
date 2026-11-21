@@ -650,11 +650,11 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "red",
+                        "color": "green",
                         "value": 0
                       },
                       {
-                        "color": "green",
+                        "color": "red",
                         "value": 1
                       }
                     ]
