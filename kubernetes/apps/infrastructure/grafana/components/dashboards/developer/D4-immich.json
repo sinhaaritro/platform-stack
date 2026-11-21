@@ -31,7 +31,7 @@
         }
       }
     ],
-    "cursorSync": "Off",
+    "cursorSync": "Crosshair",
     "description": "Immich native metrics, queues, jobs, storage pipeline latency and logs",
     "editable": true,
     "links": [],
@@ -68,9 +68,61 @@
       "to": "now"
     },
     "title": "Immich",
-    "templating": {
-      "list": []
-    },
+    "variables": [
+      {
+        "kind": "CustomVariable",
+        "spec": {
+          "name": "log_level",
+          "label": "Log Level",
+          "query": "All : .*, ERROR : (?i)error, WARN : (?i)warn, INFO/LOG : (?i)(info|log)",
+          "current": {
+            "text": "All",
+            "value": ".*"
+          },
+          "options": [
+            {
+              "selected": true,
+              "text": "All",
+              "value": ".*"
+            },
+            {
+              "selected": false,
+              "text": "ERROR",
+              "value": "(?i)error"
+            },
+            {
+              "selected": false,
+              "text": "WARN",
+              "value": "(?i)warn"
+            },
+            {
+              "selected": false,
+              "text": "INFO/LOG",
+              "value": "(?i)(info|log)"
+            }
+          ],
+          "multi": false,
+          "includeAll": false,
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "TextVariable",
+        "spec": {
+          "name": "log_search",
+          "label": "Log Search",
+          "query": "",
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "hide": "dontHide",
+          "skipUrlSync": false
+        }
+      }
+    ],
     "elements": {
       "panel-1": {
         "kind": "Panel",
@@ -116,6 +168,7 @@
                   "color": {
                     "mode": "thresholds"
                   },
+                  "decimals": 0,
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -130,7 +183,7 @@
               },
               "options": {
                 "colorMode": "value",
-                "graphMode": "area",
+                "graphMode": "none",
                 "justifyMode": "auto",
                 "orientation": "auto",
                 "percentChangeColorMode": "standard",
@@ -194,6 +247,7 @@
                   "color": {
                     "mode": "thresholds"
                   },
+                  "decimals": 0,
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -268,10 +322,10 @@
               "transformations": []
             }
           },
-          "description": "Cumulative failed jobs since the worker started.",
+          "description": "Cumulative failed jobs since the worker started. Check the Queues & Jobs tab to see which job type failed.",
           "id": 3,
           "links": [],
-          "title": "Job Failures",
+          "title": "Job Failures (Since Restart)",
           "vizConfig": {
             "group": "stat",
             "kind": "VizConfig",
@@ -281,6 +335,7 @@
                   "color": {
                     "mode": "thresholds"
                   },
+                  "decimals": 0,
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -338,8 +393,8 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "max(up{job=\"immich\"})",
-                        "legendFormat": "Up"
+                        "expr": "sum(up{job=\"immich\"}) or vector(0)",
+                        "legendFormat": "Targets Up"
                       },
                       "version": "v0"
                     },
@@ -351,7 +406,7 @@
               "transformations": []
             }
           },
-          "description": "1 = both Immich metrics ports are being scraped.",
+          "description": "Prometheus scrape health for both Immich metrics ports (8081 API, 8082 Workers).",
           "id": 4,
           "links": [],
           "title": "Metrics Target",
@@ -364,6 +419,29 @@
                   "color": {
                     "mode": "thresholds"
                   },
+                  "decimals": 0,
+                  "mappings": [
+                    {
+                      "options": {
+                        "0": {
+                          "color": "red",
+                          "index": 0,
+                          "text": "Down (0/2)"
+                        },
+                        "1": {
+                          "color": "yellow",
+                          "index": 1,
+                          "text": "Degraded (1/2)"
+                        },
+                        "2": {
+                          "color": "green",
+                          "index": 2,
+                          "text": "All Up (2/2)"
+                        }
+                      },
+                      "type": "value"
+                    }
+                  ],
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -372,8 +450,12 @@
                         "value": 0
                       },
                       {
-                        "color": "green",
+                        "color": "yellow",
                         "value": 1
+                      },
+                      {
+                        "color": "green",
+                        "value": 2
                       }
                     ]
                   }
@@ -382,7 +464,7 @@
               },
               "options": {
                 "colorMode": "value",
-                "graphMode": "area",
+                "graphMode": "none",
                 "justifyMode": "auto",
                 "orientation": "auto",
                 "percentChangeColorMode": "standard",
@@ -452,11 +534,12 @@
                     "axisColorMode": "text",
                     "axisLabel": "",
                     "axisPlacement": "auto",
+                    "axisSoftMax": 10,
                     "barAlignment": 0,
                     "barWidthFactor": 0.6,
                     "drawStyle": "line",
                     "fillOpacity": 10,
-                    "gradientMode": "scheme",
+                    "gradientMode": "opacity",
                     "hideFrom": {
                       "legend": false,
                       "tooltip": false,
@@ -480,6 +563,8 @@
                       "mode": "off"
                     }
                   },
+                  "decimals": 0,
+                  "min": 0,
                   "unit": "short"
                 },
                 "overrides": []
@@ -502,8 +587,8 @@
                 },
                 "tooltip": {
                   "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
+                  "mode": "multi",
+                  "sort": "desc"
                 }
               }
             },
@@ -540,10 +625,27 @@
                 }
               ],
               "queryOptions": {},
-              "transformations": []
+              "transformations": [
+                {
+                  "kind": "Transformation",
+                  "group": "organize",
+                  "spec": {
+                    "options": {
+                      "excludeByName": {
+                        "Time": true
+                      },
+                      "indexByName": {},
+                      "renameByName": {
+                        "job": "Job Type",
+                        "Value": "Succeeded"
+                      }
+                    }
+                  }
+                }
+              ]
             }
           },
-          "description": "Cumulative successful jobs per job type.",
+          "description": "Cumulative successful jobs per job type, sorted by highest count.",
           "id": 6,
           "links": [],
           "title": "Job Successes",
@@ -553,38 +655,73 @@
             "spec": {
               "fieldConfig": {
                 "defaults": {
-                  "color": {
-                    "mode": "thresholds"
-                  },
                   "custom": {
                     "align": "left",
                     "cellOptions": {
-                      "type": "color-text"
+                      "type": "auto"
                     },
                     "footer": {
                       "reducers": []
                     },
                     "inspect": false
-                  },
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byType",
+                      "options": "number"
+                    },
+                    "properties": [
                       {
-                        "color": "red",
+                        "id": "decimals",
                         "value": 0
                       },
                       {
-                        "color": "green",
-                        "value": 1
+                        "id": "custom.align",
+                        "value": "right"
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-text"
+                        }
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "thresholds"
+                        }
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "red",
+                              "value": 0
+                            },
+                            {
+                              "color": "green",
+                              "value": 1
+                            }
+                          ]
+                        }
                       }
                     ]
                   }
-                },
-                "overrides": []
+                ]
               },
               "options": {
                 "cellHeight": "sm",
-                "showHeader": true
+                "showHeader": true,
+                "sortBy": [
+                  {
+                    "desc": true,
+                    "displayName": "Succeeded"
+                  }
+                ]
               }
             },
             "version": "13.1.0"
@@ -609,7 +746,7 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "sum by (job) (label_replace({__name__=~\"immich_jobs_.+_failed_total\"}, \"job\", \"$1\", \"__name__\", \"immich_jobs_(.+)_failed_total\"))",
+                        "expr": "sum by (job) (label_replace({__name__=~\"immich_jobs_.+_failed_total\"}, \"job\", \"$1\", \"__name__\", \"immich_jobs_(.+)_failed_total\")) > 0",
                         "format": "table",
                         "instant": true
                       },
@@ -620,10 +757,27 @@
                 }
               ],
               "queryOptions": {},
-              "transformations": []
+              "transformations": [
+                {
+                  "kind": "Transformation",
+                  "group": "organize",
+                  "spec": {
+                    "options": {
+                      "excludeByName": {
+                        "Time": true
+                      },
+                      "indexByName": {},
+                      "renameByName": {
+                        "job": "Job Type",
+                        "Value": "Failed"
+                      }
+                    }
+                  }
+                }
+              ]
             }
           },
-          "description": "Cumulative failed jobs per job type. Empty means no failures.",
+          "description": "Cumulative failed jobs per job type (only non-zero failures shown). Empty means healthy.",
           "id": 7,
           "links": [],
           "title": "Job Failures",
@@ -633,38 +787,73 @@
             "spec": {
               "fieldConfig": {
                 "defaults": {
-                  "color": {
-                    "mode": "thresholds"
-                  },
                   "custom": {
                     "align": "left",
                     "cellOptions": {
-                      "type": "color-text"
+                      "type": "auto"
                     },
                     "footer": {
                       "reducers": []
                     },
                     "inspect": false
-                  },
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byType",
+                      "options": "number"
+                    },
+                    "properties": [
                       {
-                        "color": "green",
+                        "id": "decimals",
                         "value": 0
                       },
                       {
-                        "color": "red",
-                        "value": 1
+                        "id": "custom.align",
+                        "value": "right"
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-text"
+                        }
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "thresholds"
+                        }
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green",
+                              "value": 0
+                            },
+                            {
+                              "color": "red",
+                              "value": 1
+                            }
+                          ]
+                        }
                       }
                     ]
                   }
-                },
-                "overrides": []
+                ]
               },
               "options": {
                 "cellHeight": "sm",
-                "showHeader": true
+                "showHeader": true,
+                "sortBy": [
+                  {
+                    "desc": true,
+                    "displayName": "Failed"
+                  }
+                ]
               }
             },
             "version": "13.1.0"
@@ -690,7 +879,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_asset_repository_get_file_samples_duration_bucket[1h]))) > 0) or vector(0)",
-                        "legendFormat": "get_file_samples"
+                        "legendFormat": "Get File Samples"
                       },
                       "version": "v0"
                     },
@@ -709,7 +898,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_asset_repository_get_time_bucket_duration_bucket[1h]))) > 0) or vector(0)",
-                        "legendFormat": "get_time_bucket"
+                        "legendFormat": "Get Time Bucket"
                       },
                       "version": "v0"
                     },
@@ -728,7 +917,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_asset_repository_get_time_buckets_duration_bucket[1h]))) > 0) or vector(0)",
-                        "legendFormat": "get_time_buckets"
+                        "legendFormat": "Get Time Buckets"
                       },
                       "version": "v0"
                     },
@@ -759,11 +948,12 @@
                     "axisColorMode": "text",
                     "axisLabel": "",
                     "axisPlacement": "auto",
+                    "axisSoftMax": 10,
                     "barAlignment": 0,
                     "barWidthFactor": 0.6,
                     "drawStyle": "line",
                     "fillOpacity": 10,
-                    "gradientMode": "scheme",
+                    "gradientMode": "opacity",
                     "hideFrom": {
                       "legend": false,
                       "tooltip": false,
@@ -787,6 +977,7 @@
                       "mode": "off"
                     }
                   },
+                  "min": 0,
                   "unit": "ms"
                 },
                 "overrides": []
@@ -799,7 +990,8 @@
                 "legend": {
                   "calcs": [
                     "lastNotNull",
-                    "mean"
+                    "mean",
+                    "max"
                   ],
                   "displayMode": "table",
                   "enableFacetedFilter": false,
@@ -809,8 +1001,8 @@
                 },
                 "tooltip": {
                   "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
+                  "mode": "multi",
+                  "sort": "desc"
                 }
               }
             },
@@ -837,7 +1029,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_machine_learning_repository_check_duration_bucket[1h]))) > 0) or vector(0)",
-                        "legendFormat": "check"
+                        "legendFormat": "Health Check"
                       },
                       "version": "v0"
                     },
@@ -856,7 +1048,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_machine_learning_repository_setup_duration_bucket[1h]))) > 0) or vector(0)",
-                        "legendFormat": "setup"
+                        "legendFormat": "Setup"
                       },
                       "version": "v0"
                     },
@@ -875,7 +1067,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_machine_learning_repository_tick_duration_bucket[1h]))) > 0) or vector(0)",
-                        "legendFormat": "tick"
+                        "legendFormat": "Tick"
                       },
                       "version": "v0"
                     },
@@ -894,7 +1086,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_machine_learning_repository_set_healthy_duration_bucket[1h]))) > 0) or vector(0)",
-                        "legendFormat": "set_healthy"
+                        "legendFormat": "Set Healthy"
                       },
                       "version": "v0"
                     },
@@ -913,7 +1105,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_machine_learning_repository_teardown_duration_bucket[1h]))) > 0) or vector(0)",
-                        "legendFormat": "teardown"
+                        "legendFormat": "Teardown"
                       },
                       "version": "v0"
                     },
@@ -948,7 +1140,7 @@
                     "barWidthFactor": 0.6,
                     "drawStyle": "line",
                     "fillOpacity": 10,
-                    "gradientMode": "scheme",
+                    "gradientMode": "opacity",
                     "hideFrom": {
                       "legend": false,
                       "tooltip": false,
@@ -972,6 +1164,7 @@
                       "mode": "off"
                     }
                   },
+                  "min": 0,
                   "unit": "ms"
                 },
                 "overrides": []
@@ -984,7 +1177,8 @@
                 "legend": {
                   "calcs": [
                     "lastNotNull",
-                    "mean"
+                    "mean",
+                    "max"
                   ],
                   "displayMode": "table",
                   "enableFacetedFilter": false,
@@ -994,8 +1188,8 @@
                 },
                 "tooltip": {
                   "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
+                  "mode": "multi",
+                  "sort": "desc"
                 }
               }
             },
@@ -1021,8 +1215,8 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "process_memory_usage{job=\"immich\"}",
-                        "legendFormat": "memory"
+                        "expr": "label_replace(label_replace(label_replace(process_memory_usage{job=\"immich\"}, \"target\", \"$1\", \"instance\", \"(.+)\"), \"target\", \"API (:8081)\", \"target\", \".*:8081$\"), \"target\", \"Workers (:8082)\", \"target\", \".*:8082$\")",
+                        "legendFormat": "{{target}}"
                       },
                       "version": "v0"
                     },
@@ -1034,7 +1228,7 @@
               "transformations": []
             }
           },
-          "description": "Immich server process memory usage.",
+          "description": "Immich process memory usage per scraped metrics port (8081 API, 8082 Workers; falls back to instance for other targets).",
           "id": 10,
           "links": [],
           "title": "Process Memory",
@@ -1057,7 +1251,7 @@
                     "barWidthFactor": 0.6,
                     "drawStyle": "line",
                     "fillOpacity": 10,
-                    "gradientMode": "scheme",
+                    "gradientMode": "opacity",
                     "hideFrom": {
                       "legend": false,
                       "tooltip": false,
@@ -1091,8 +1285,11 @@
                   "multiLane": false
                 },
                 "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
+                  "calcs": [
+                    "lastNotNull",
+                    "max"
+                  ],
+                  "displayMode": "table",
                   "enableFacetedFilter": false,
                   "overflow": "ellipsis",
                   "placement": "bottom",
@@ -1100,8 +1297,8 @@
                 },
                 "tooltip": {
                   "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
+                  "mode": "multi",
+                  "sort": "desc"
                 }
               }
             },
@@ -1127,12 +1324,31 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "rate(process_cpu_time_total{job=\"immich\"}[5m])",
-                        "legendFormat": "cores"
+                        "expr": "label_replace(label_replace(label_replace(sum by (instance) (rate(process_cpu_time_total{job=\"immich\"}[5m])), \"target\", \"$1\", \"instance\", \"(.+)\"), \"target\", \"API (:8081)\", \"target\", \".*:8081$\"), \"target\", \"Workers (:8082)\", \"target\", \".*:8082$\")",
+                        "legendFormat": "{{target}} (%)"
                       },
                       "version": "v0"
                     },
                     "refId": "A"
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "expr": "label_replace(label_replace(label_replace(sum by (instance) (rate(process_cpu_time_total{job=\"immich\"}[5m])) * 1000, \"target\", \"$1\", \"instance\", \"(.+)\"), \"target\", \"API (:8081)\", \"target\", \".*:8081$\"), \"target\", \"Workers (:8082)\", \"target\", \".*:8082$\")",
+                        "legendFormat": "{{target}} (mCores)"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "B"
                   }
                 }
               ],
@@ -1140,7 +1356,7 @@
               "transformations": []
             }
           },
-          "description": "Immich server CPU usage in cores (1 = one full core).",
+          "description": "Immich CPU usage per process (user + system combined). Shown in % of 1 core (left axis) and millicores (right axis).",
           "id": 11,
           "links": [],
           "title": "Process CPU",
@@ -1157,13 +1373,13 @@
                     "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
-                    "axisLabel": "",
-                    "axisPlacement": "auto",
+                    "axisLabel": "% of 1 core",
+                    "axisPlacement": "left",
                     "barAlignment": 0,
                     "barWidthFactor": 0.6,
                     "drawStyle": "line",
                     "fillOpacity": 10,
-                    "gradientMode": "scheme",
+                    "gradientMode": "opacity",
                     "hideFrom": {
                       "legend": false,
                       "tooltip": false,
@@ -1187,9 +1403,43 @@
                       "mode": "off"
                     }
                   },
-                  "unit": "short"
+                  "min": 0,
+                  "unit": "percentunit"
                 },
-                "overrides": []
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "B"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "suffix: mCores"
+                      },
+                      {
+                        "id": "custom.axisPlacement",
+                        "value": "right"
+                      },
+                      {
+                        "id": "custom.axisLabel",
+                        "value": "mCores"
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 0
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      },
+                      {
+                        "id": "custom.showPoints",
+                        "value": "never"
+                      }
+                    ]
+                  }
+                ]
               },
               "options": {
                 "annotations": {
@@ -1197,8 +1447,12 @@
                   "multiLane": false
                 },
                 "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
+                  "calcs": [
+                    "lastNotNull",
+                    "mean",
+                    "max"
+                  ],
+                  "displayMode": "table",
                   "enableFacetedFilter": false,
                   "overflow": "ellipsis",
                   "placement": "bottom",
@@ -1206,8 +1460,8 @@
                 },
                 "tooltip": {
                   "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
+                  "mode": "multi",
+                  "sort": "desc"
                 }
               }
             },
@@ -1234,7 +1488,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "{namespace=\"personal\",pod=~\"immich-server.*\"}",
+                        "expr": "{namespace=\"personal\",pod=~\"immich-server.*\"} | decolorize |~ \"$log_level\" |~ \"(?i)$log_search\"",
                         "legendFormat": "",
                         "queryType": "range"
                       },
@@ -1248,7 +1502,7 @@
               "transformations": []
             }
           },
-          "description": "All Immich server logs. Add |= \"(?i)error\" to filter.",
+          "description": "Immich server logs with ANSI codes stripped. Use Log Level and Log Search controls at the top to filter.",
           "id": 12,
           "links": [],
           "title": "Server Logs",
@@ -1262,11 +1516,11 @@
               "options": {
                 "dedupStrategy": "none",
                 "enableColorMapping": false,
-                "prettifyLogMessage": false,
+                "prettifyLogMessage": true,
                 "showCommonLabels": false,
                 "showTime": true,
                 "sortOrder": "Descending",
-                "wrapLogMessage": false
+                "wrapLogMessage": true
               }
             },
             "version": "13.1.0"
@@ -1292,7 +1546,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "{namespace=\"personal\",pod=~\"immich-machine-learning.*\"}",
+                        "expr": "{namespace=\"personal\",pod=~\"immich-machine-learning.*\"} | decolorize |~ \"$log_level\" |~ \"(?i)$log_search\"",
                         "legendFormat": "",
                         "queryType": "range"
                       },
@@ -1306,7 +1560,7 @@
               "transformations": []
             }
           },
-          "description": "All Immich ML logs. Add |= \"(?i)error\" to filter.",
+          "description": "Immich ML logs with ANSI codes stripped. Use Log Level and Log Search controls at the top to filter.",
           "id": 13,
           "links": [],
           "title": "Machine Learning Logs",
@@ -1320,11 +1574,11 @@
               "options": {
                 "dedupStrategy": "none",
                 "enableColorMapping": false,
-                "prettifyLogMessage": false,
+                "prettifyLogMessage": true,
                 "showCommonLabels": false,
                 "showTime": true,
                 "sortOrder": "Descending",
-                "wrapLogMessage": false
+                "wrapLogMessage": true
               }
             },
             "version": "13.1.0"
@@ -1532,7 +1786,7 @@
                           "kind": "ElementReference",
                           "name": "panel-12"
                         },
-                        "height": 10,
+                        "height": 14,
                         "width": 24,
                         "x": 0,
                         "y": 0
@@ -1548,7 +1802,7 @@
                         "height": 10,
                         "width": 24,
                         "x": 0,
-                        "y": 10
+                        "y": 14
                       }
                     }
                   ]
