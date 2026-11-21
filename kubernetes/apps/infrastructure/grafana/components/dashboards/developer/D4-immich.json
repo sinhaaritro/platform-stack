@@ -31,7 +31,7 @@
         }
       }
     ],
-    "cursorSync": "Crosshair",
+    "cursorSync": "Off",
     "description": "Immich native metrics, queues, jobs, storage pipeline latency and logs",
     "editable": true,
     "links": [],
@@ -68,61 +68,128 @@
       "to": "now"
     },
     "title": "Immich",
-    "variables": [
-      {
-        "kind": "CustomVariable",
-        "spec": {
-          "name": "log_level",
-          "label": "Log Level",
-          "query": "All : .*, ERROR : (?i)error, WARN : (?i)warn, INFO/LOG : (?i)(info|log)",
+    "templating": {
+      "list": [
+        {
+          "name": "server_level",
+          "type": "custom",
+          "query": ".*,error,warn,info,debug,trace,log",
           "current": {
             "text": "All",
             "value": ".*"
           },
           "options": [
             {
-              "selected": true,
               "text": "All",
-              "value": ".*"
+              "value": ".*",
+              "selected": true
             },
             {
-              "selected": false,
-              "text": "ERROR",
-              "value": "(?i)error"
+              "text": "error",
+              "value": "error",
+              "selected": false
             },
             {
-              "selected": false,
-              "text": "WARN",
-              "value": "(?i)warn"
+              "text": "warn",
+              "value": "warn",
+              "selected": false
             },
             {
-              "selected": false,
-              "text": "INFO/LOG",
-              "value": "(?i)(info|log)"
+              "text": "info",
+              "value": "info",
+              "selected": false
+            },
+            {
+              "text": "debug",
+              "value": "debug",
+              "selected": false
+            },
+            {
+              "text": "trace",
+              "value": "trace",
+              "selected": false
+            },
+            {
+              "text": "log",
+              "value": "log",
+              "selected": false
             }
           ],
-          "multi": false,
           "includeAll": false,
-          "hide": "dontHide",
-          "skipUrlSync": false,
-          "allowCustomValue": false
-        }
-      },
-      {
-        "kind": "TextVariable",
-        "spec": {
-          "name": "log_search",
-          "label": "Log Search",
-          "query": "",
+          "multi": false,
+          "hide": 0
+        },
+        {
+          "name": "server_filter",
+          "type": "textbox",
           "current": {
-            "text": "",
-            "value": ""
+            "text": ".*",
+            "value": ".*"
           },
-          "hide": "dontHide",
-          "skipUrlSync": false
+          "options": [],
+          "hide": 0
+        },
+        {
+          "name": "ml_level",
+          "type": "custom",
+          "query": ".*,error,warn,info,debug,trace,log",
+          "current": {
+            "text": "All",
+            "value": ".*"
+          },
+          "options": [
+            {
+              "text": "All",
+              "value": ".*",
+              "selected": true
+            },
+            {
+              "text": "error",
+              "value": "error",
+              "selected": false
+            },
+            {
+              "text": "warn",
+              "value": "warn",
+              "selected": false
+            },
+            {
+              "text": "info",
+              "value": "info",
+              "selected": false
+            },
+            {
+              "text": "debug",
+              "value": "debug",
+              "selected": false
+            },
+            {
+              "text": "trace",
+              "value": "trace",
+              "selected": false
+            },
+            {
+              "text": "log",
+              "value": "log",
+              "selected": false
+            }
+          ],
+          "includeAll": false,
+          "multi": false,
+          "hide": 0
+        },
+        {
+          "name": "ml_filter",
+          "type": "textbox",
+          "current": {
+            "text": ".*",
+            "value": ".*"
+          },
+          "options": [],
+          "hide": 0
         }
-      }
-    ],
+      ]
+    },
     "elements": {
       "panel-1": {
         "kind": "Panel",
@@ -168,7 +235,6 @@
                   "color": {
                     "mode": "thresholds"
                   },
-                  "decimals": 0,
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -183,7 +249,7 @@
               },
               "options": {
                 "colorMode": "value",
-                "graphMode": "none",
+                "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
                 "percentChangeColorMode": "standard",
@@ -247,7 +313,6 @@
                   "color": {
                     "mode": "thresholds"
                   },
-                  "decimals": 0,
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -322,10 +387,10 @@
               "transformations": []
             }
           },
-          "description": "Cumulative failed jobs since the worker started. Check the Queues & Jobs tab to see which job type failed.",
+          "description": "Cumulative failed jobs since the worker started.",
           "id": 3,
           "links": [],
-          "title": "Job Failures (Since Restart)",
+          "title": "Job Failures",
           "vizConfig": {
             "group": "stat",
             "kind": "VizConfig",
@@ -335,7 +400,6 @@
                   "color": {
                     "mode": "thresholds"
                   },
-                  "decimals": 0,
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -393,8 +457,8 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "sum(up{job=\"immich\"}) or vector(0)",
-                        "legendFormat": "Targets Up"
+                        "expr": "max(up{job=\"immich\"})",
+                        "legendFormat": "Up"
                       },
                       "version": "v0"
                     },
@@ -406,7 +470,7 @@
               "transformations": []
             }
           },
-          "description": "Prometheus scrape health for both Immich metrics ports (8081 API, 8082 Workers).",
+          "description": "1 = both Immich metrics ports are being scraped.",
           "id": 4,
           "links": [],
           "title": "Metrics Target",
@@ -419,29 +483,6 @@
                   "color": {
                     "mode": "thresholds"
                   },
-                  "decimals": 0,
-                  "mappings": [
-                    {
-                      "options": {
-                        "0": {
-                          "color": "red",
-                          "index": 0,
-                          "text": "Down (0/2)"
-                        },
-                        "1": {
-                          "color": "yellow",
-                          "index": 1,
-                          "text": "Degraded (1/2)"
-                        },
-                        "2": {
-                          "color": "green",
-                          "index": 2,
-                          "text": "All Up (2/2)"
-                        }
-                      },
-                      "type": "value"
-                    }
-                  ],
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -450,12 +491,8 @@
                         "value": 0
                       },
                       {
-                        "color": "yellow",
-                        "value": 1
-                      },
-                      {
                         "color": "green",
-                        "value": 2
+                        "value": 1
                       }
                     ]
                   }
@@ -464,7 +501,7 @@
               },
               "options": {
                 "colorMode": "value",
-                "graphMode": "none",
+                "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
                 "percentChangeColorMode": "standard",
@@ -534,12 +571,11 @@
                     "axisColorMode": "text",
                     "axisLabel": "",
                     "axisPlacement": "auto",
-                    "axisSoftMax": 10,
                     "barAlignment": 0,
                     "barWidthFactor": 0.6,
                     "drawStyle": "line",
                     "fillOpacity": 10,
-                    "gradientMode": "opacity",
+                    "gradientMode": "scheme",
                     "hideFrom": {
                       "legend": false,
                       "tooltip": false,
@@ -563,8 +599,6 @@
                       "mode": "off"
                     }
                   },
-                  "decimals": 0,
-                  "min": 0,
                   "unit": "short"
                 },
                 "overrides": []
@@ -587,8 +621,8 @@
                 },
                 "tooltip": {
                   "hideZeros": false,
-                  "mode": "multi",
-                  "sort": "desc"
+                  "mode": "single",
+                  "sort": "none"
                 }
               }
             },
@@ -625,27 +659,10 @@
                 }
               ],
               "queryOptions": {},
-              "transformations": [
-                {
-                  "kind": "Transformation",
-                  "group": "organize",
-                  "spec": {
-                    "options": {
-                      "excludeByName": {
-                        "Time": true
-                      },
-                      "indexByName": {},
-                      "renameByName": {
-                        "job": "Job Type",
-                        "Value": "Succeeded"
-                      }
-                    }
-                  }
-                }
-              ]
+              "transformations": []
             }
           },
-          "description": "Cumulative successful jobs per job type, sorted by highest count.",
+          "description": "Cumulative successful jobs per job type.",
           "id": 6,
           "links": [],
           "title": "Job Successes",
@@ -655,323 +672,38 @@
             "spec": {
               "fieldConfig": {
                 "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
                   "custom": {
                     "align": "left",
                     "cellOptions": {
-                      "type": "auto"
+                      "type": "color-text"
                     },
                     "footer": {
                       "reducers": []
                     },
                     "inspect": false
-                  }
-                },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byType",
-                      "options": "string"
-                    },
-                    "properties": [
-                      {
-                        "id": "mappings",
-                        "value": [
-                          {
-                            "type": "value",
-                            "options": {
-                              "version_check": {
-                                "text": "Version Check",
-                                "index": 0
-                              },
-                              "database_backup": {
-                                "text": "Database Backup",
-                                "index": 1
-                              },
-                              "integrity_checksum_files": {
-                                "text": "Integrity: Checksum Files",
-                                "index": 2
-                              },
-                              "integrity_missing_files": {
-                                "text": "Integrity: Missing Files",
-                                "index": 3
-                              },
-                              "integrity_missing_files_queue_all": {
-                                "text": "Integrity: Missing Files (Queue All)",
-                                "index": 4
-                              },
-                              "integrity_untracked_files": {
-                                "text": "Integrity: Untracked Files",
-                                "index": 5
-                              },
-                              "integrity_untracked_files_queue_all": {
-                                "text": "Integrity: Untracked Files (Queue All)",
-                                "index": 6
-                              },
-                              "library_delete_check": {
-                                "text": "Library: Delete Check",
-                                "index": 7
-                              },
-                              "library_delete": {
-                                "text": "Library: Delete",
-                                "index": 8
-                              },
-                              "library_scan_queue_all": {
-                                "text": "Library: Scan (Queue All)",
-                                "index": 9
-                              },
-                              "library_scan": {
-                                "text": "Library: Scan",
-                                "index": 10
-                              },
-                              "library_refresh_assets": {
-                                "text": "Library: Refresh Assets",
-                                "index": 11
-                              },
-                              "library_remove_asset": {
-                                "text": "Library: Remove Asset",
-                                "index": 12
-                              },
-                              "asset_delete": {
-                                "text": "Asset: Delete",
-                                "index": 13
-                              },
-                              "asset_delete_check": {
-                                "text": "Asset: Delete Check",
-                                "index": 14
-                              },
-                              "asset_delete_files": {
-                                "text": "Asset: Delete Files",
-                                "index": 15
-                              },
-                              "asset_empty_trash": {
-                                "text": "Asset: Empty Trash",
-                                "index": 16
-                              },
-                              "asset_extract_metadata": {
-                                "text": "Asset: Extract Metadata",
-                                "index": 17
-                              },
-                              "asset_extract_metadata_queue_all": {
-                                "text": "Asset: Extract Metadata (Queue All)",
-                                "index": 18
-                              },
-                              "asset_generate_thumbnails": {
-                                "text": "Asset: Generate Thumbnails",
-                                "index": 19
-                              },
-                              "asset_generate_thumbnails_queue_all": {
-                                "text": "Asset: Generate Thumbnails (Queue All)",
-                                "index": 20
-                              },
-                              "asset_edit_thumbnail_generation": {
-                                "text": "Asset: Edit Thumbnail Generation",
-                                "index": 21
-                              },
-                              "asset_encode_video": {
-                                "text": "Asset: Encode Video",
-                                "index": 22
-                              },
-                              "asset_encode_video_queue_all": {
-                                "text": "Asset: Encode Video (Queue All)",
-                                "index": 23
-                              },
-                              "asset_detect_faces": {
-                                "text": "Asset: Detect Faces",
-                                "index": 24
-                              },
-                              "asset_detect_faces_queue_all": {
-                                "text": "Asset: Detect Faces (Queue All)",
-                                "index": 25
-                              },
-                              "asset_detect_duplicates": {
-                                "text": "Asset: Detect Duplicates",
-                                "index": 26
-                              },
-                              "asset_detect_duplicates_queue_all": {
-                                "text": "Asset: Detect Duplicates (Queue All)",
-                                "index": 27
-                              },
-                              "smart_search": {
-                                "text": "Smart Search",
-                                "index": 28
-                              },
-                              "smart_search_queue_all": {
-                                "text": "Smart Search (Queue All)",
-                                "index": 29
-                              },
-                              "ocr": {
-                                "text": "OCR",
-                                "index": 30
-                              },
-                              "ocr_queue_all": {
-                                "text": "OCR (Queue All)",
-                                "index": 31
-                              },
-                              "facial_recognition": {
-                                "text": "Facial Recognition",
-                                "index": 32
-                              },
-                              "facial_recognition_queue_all": {
-                                "text": "Facial Recognition (Queue All)",
-                                "index": 33
-                              },
-                              "person_cleanup": {
-                                "text": "Person: Cleanup",
-                                "index": 34
-                              },
-                              "person_generate_thumbnail": {
-                                "text": "Person: Generate Thumbnail",
-                                "index": 35
-                              },
-                              "person_file_migration": {
-                                "text": "Person: File Migration",
-                                "index": 36
-                              },
-                              "sidecar_discovery": {
-                                "text": "Sidecar: Discovery",
-                                "index": 37
-                              },
-                              "sidecar_queue_all": {
-                                "text": "Sidecar: Sync (Queue All)",
-                                "index": 38
-                              },
-                              "sidecar_sync": {
-                                "text": "Sidecar: Sync",
-                                "index": 39
-                              },
-                              "sidecar_write": {
-                                "text": "Sidecar: Write",
-                                "index": 40
-                              },
-                              "storage_template_migration": {
-                                "text": "Storage Template: Migration",
-                                "index": 41
-                              },
-                              "storage_template_migration_single": {
-                                "text": "Storage Template: Migrate Single",
-                                "index": 42
-                              },
-                              "audit_log_cleanup": {
-                                "text": "Audit Log: Cleanup",
-                                "index": 43
-                              },
-                              "audit_table_cleanup": {
-                                "text": "Audit Table: Cleanup",
-                                "index": 44
-                              },
-                              "clean_old_audit_logs": {
-                                "text": "Cleanup: Old Audit Logs",
-                                "index": 45
-                              },
-                              "session_cleanup": {
-                                "text": "Session: Cleanup",
-                                "index": 46
-                              },
-                              "clean_old_session_tokens": {
-                                "text": "Cleanup: Old Session Tokens",
-                                "index": 47
-                              },
-                              "user_delete_check": {
-                                "text": "User: Delete Check",
-                                "index": 48
-                              },
-                              "user_deletion": {
-                                "text": "User: Deletion",
-                                "index": 49
-                              },
-                              "user_sync_usage": {
-                                "text": "User: Sync Usage",
-                                "index": 50
-                              },
-                              "memory_cleanup": {
-                                "text": "Memories: Cleanup",
-                                "index": 51
-                              },
-                              "memory_generate": {
-                                "text": "Memories: Generate",
-                                "index": 52
-                              },
-                              "notification_cleanup": {
-                                "text": "Notification: Cleanup",
-                                "index": 53
-                              },
-                              "email_notification": {
-                                "text": "Notification: Email",
-                                "index": 54
-                              },
-                              "search_index_assets": {
-                                "text": "Search: Index Assets",
-                                "index": 55
-                              },
-                              "search_index_faces": {
-                                "text": "Search: Index Faces",
-                                "index": 56
-                              },
-                              "search_index_albums": {
-                                "text": "Search: Index Albums",
-                                "index": 57
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    ]
                   },
-                  {
-                    "matcher": {
-                      "id": "byType",
-                      "options": "number"
-                    },
-                    "properties": [
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
                       {
-                        "id": "decimals",
+                        "color": "red",
                         "value": 0
                       },
                       {
-                        "id": "custom.align",
-                        "value": "right"
-                      },
-                      {
-                        "id": "custom.cellOptions",
-                        "value": {
-                          "type": "color-text"
-                        }
-                      },
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "thresholds"
-                        }
-                      },
-                      {
-                        "id": "thresholds",
-                        "value": {
-                          "mode": "absolute",
-                          "steps": [
-                            {
-                              "color": "red",
-                              "value": 0
-                            },
-                            {
-                              "color": "green",
-                              "value": 1
-                            }
-                          ]
-                        }
+                        "color": "green",
+                        "value": 1
                       }
                     ]
                   }
-                ]
+                },
+                "overrides": []
               },
               "options": {
                 "cellHeight": "sm",
-                "showHeader": true,
-                "sortBy": [
-                  {
-                    "desc": true,
-                    "displayName": "Succeeded"
-                  }
-                ]
+                "showHeader": true
               }
             },
             "version": "13.1.0"
@@ -996,7 +728,7 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "sum by (job) (label_replace({__name__=~\"immich_jobs_.+_failed_total\"}, \"job\", \"$1\", \"__name__\", \"immich_jobs_(.+)_failed_total\")) > 0",
+                        "expr": "sum by (job) (label_replace({__name__=~\"immich_jobs_.+_failed_total\"}, \"job\", \"$1\", \"__name__\", \"immich_jobs_(.+)_failed_total\"))",
                         "format": "table",
                         "instant": true
                       },
@@ -1007,27 +739,10 @@
                 }
               ],
               "queryOptions": {},
-              "transformations": [
-                {
-                  "kind": "Transformation",
-                  "group": "organize",
-                  "spec": {
-                    "options": {
-                      "excludeByName": {
-                        "Time": true
-                      },
-                      "indexByName": {},
-                      "renameByName": {
-                        "job": "Job Type",
-                        "Value": "Failed"
-                      }
-                    }
-                  }
-                }
-              ]
+              "transformations": []
             }
           },
-          "description": "Cumulative failed jobs per job type (only non-zero failures shown). Empty means healthy.",
+          "description": "Cumulative failed jobs per job type. Empty means no failures.",
           "id": 7,
           "links": [],
           "title": "Job Failures",
@@ -1037,323 +752,38 @@
             "spec": {
               "fieldConfig": {
                 "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
                   "custom": {
                     "align": "left",
                     "cellOptions": {
-                      "type": "auto"
+                      "type": "color-text"
                     },
                     "footer": {
                       "reducers": []
                     },
                     "inspect": false
-                  }
-                },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byType",
-                      "options": "string"
-                    },
-                    "properties": [
-                      {
-                        "id": "mappings",
-                        "value": [
-                          {
-                            "type": "value",
-                            "options": {
-                              "version_check": {
-                                "text": "Version Check",
-                                "index": 0
-                              },
-                              "database_backup": {
-                                "text": "Database Backup",
-                                "index": 1
-                              },
-                              "integrity_checksum_files": {
-                                "text": "Integrity: Checksum Files",
-                                "index": 2
-                              },
-                              "integrity_missing_files": {
-                                "text": "Integrity: Missing Files",
-                                "index": 3
-                              },
-                              "integrity_missing_files_queue_all": {
-                                "text": "Integrity: Missing Files (Queue All)",
-                                "index": 4
-                              },
-                              "integrity_untracked_files": {
-                                "text": "Integrity: Untracked Files",
-                                "index": 5
-                              },
-                              "integrity_untracked_files_queue_all": {
-                                "text": "Integrity: Untracked Files (Queue All)",
-                                "index": 6
-                              },
-                              "library_delete_check": {
-                                "text": "Library: Delete Check",
-                                "index": 7
-                              },
-                              "library_delete": {
-                                "text": "Library: Delete",
-                                "index": 8
-                              },
-                              "library_scan_queue_all": {
-                                "text": "Library: Scan (Queue All)",
-                                "index": 9
-                              },
-                              "library_scan": {
-                                "text": "Library: Scan",
-                                "index": 10
-                              },
-                              "library_refresh_assets": {
-                                "text": "Library: Refresh Assets",
-                                "index": 11
-                              },
-                              "library_remove_asset": {
-                                "text": "Library: Remove Asset",
-                                "index": 12
-                              },
-                              "asset_delete": {
-                                "text": "Asset: Delete",
-                                "index": 13
-                              },
-                              "asset_delete_check": {
-                                "text": "Asset: Delete Check",
-                                "index": 14
-                              },
-                              "asset_delete_files": {
-                                "text": "Asset: Delete Files",
-                                "index": 15
-                              },
-                              "asset_empty_trash": {
-                                "text": "Asset: Empty Trash",
-                                "index": 16
-                              },
-                              "asset_extract_metadata": {
-                                "text": "Asset: Extract Metadata",
-                                "index": 17
-                              },
-                              "asset_extract_metadata_queue_all": {
-                                "text": "Asset: Extract Metadata (Queue All)",
-                                "index": 18
-                              },
-                              "asset_generate_thumbnails": {
-                                "text": "Asset: Generate Thumbnails",
-                                "index": 19
-                              },
-                              "asset_generate_thumbnails_queue_all": {
-                                "text": "Asset: Generate Thumbnails (Queue All)",
-                                "index": 20
-                              },
-                              "asset_edit_thumbnail_generation": {
-                                "text": "Asset: Edit Thumbnail Generation",
-                                "index": 21
-                              },
-                              "asset_encode_video": {
-                                "text": "Asset: Encode Video",
-                                "index": 22
-                              },
-                              "asset_encode_video_queue_all": {
-                                "text": "Asset: Encode Video (Queue All)",
-                                "index": 23
-                              },
-                              "asset_detect_faces": {
-                                "text": "Asset: Detect Faces",
-                                "index": 24
-                              },
-                              "asset_detect_faces_queue_all": {
-                                "text": "Asset: Detect Faces (Queue All)",
-                                "index": 25
-                              },
-                              "asset_detect_duplicates": {
-                                "text": "Asset: Detect Duplicates",
-                                "index": 26
-                              },
-                              "asset_detect_duplicates_queue_all": {
-                                "text": "Asset: Detect Duplicates (Queue All)",
-                                "index": 27
-                              },
-                              "smart_search": {
-                                "text": "Smart Search",
-                                "index": 28
-                              },
-                              "smart_search_queue_all": {
-                                "text": "Smart Search (Queue All)",
-                                "index": 29
-                              },
-                              "ocr": {
-                                "text": "OCR",
-                                "index": 30
-                              },
-                              "ocr_queue_all": {
-                                "text": "OCR (Queue All)",
-                                "index": 31
-                              },
-                              "facial_recognition": {
-                                "text": "Facial Recognition",
-                                "index": 32
-                              },
-                              "facial_recognition_queue_all": {
-                                "text": "Facial Recognition (Queue All)",
-                                "index": 33
-                              },
-                              "person_cleanup": {
-                                "text": "Person: Cleanup",
-                                "index": 34
-                              },
-                              "person_generate_thumbnail": {
-                                "text": "Person: Generate Thumbnail",
-                                "index": 35
-                              },
-                              "person_file_migration": {
-                                "text": "Person: File Migration",
-                                "index": 36
-                              },
-                              "sidecar_discovery": {
-                                "text": "Sidecar: Discovery",
-                                "index": 37
-                              },
-                              "sidecar_queue_all": {
-                                "text": "Sidecar: Sync (Queue All)",
-                                "index": 38
-                              },
-                              "sidecar_sync": {
-                                "text": "Sidecar: Sync",
-                                "index": 39
-                              },
-                              "sidecar_write": {
-                                "text": "Sidecar: Write",
-                                "index": 40
-                              },
-                              "storage_template_migration": {
-                                "text": "Storage Template: Migration",
-                                "index": 41
-                              },
-                              "storage_template_migration_single": {
-                                "text": "Storage Template: Migrate Single",
-                                "index": 42
-                              },
-                              "audit_log_cleanup": {
-                                "text": "Audit Log: Cleanup",
-                                "index": 43
-                              },
-                              "audit_table_cleanup": {
-                                "text": "Audit Table: Cleanup",
-                                "index": 44
-                              },
-                              "clean_old_audit_logs": {
-                                "text": "Cleanup: Old Audit Logs",
-                                "index": 45
-                              },
-                              "session_cleanup": {
-                                "text": "Session: Cleanup",
-                                "index": 46
-                              },
-                              "clean_old_session_tokens": {
-                                "text": "Cleanup: Old Session Tokens",
-                                "index": 47
-                              },
-                              "user_delete_check": {
-                                "text": "User: Delete Check",
-                                "index": 48
-                              },
-                              "user_deletion": {
-                                "text": "User: Deletion",
-                                "index": 49
-                              },
-                              "user_sync_usage": {
-                                "text": "User: Sync Usage",
-                                "index": 50
-                              },
-                              "memory_cleanup": {
-                                "text": "Memories: Cleanup",
-                                "index": 51
-                              },
-                              "memory_generate": {
-                                "text": "Memories: Generate",
-                                "index": 52
-                              },
-                              "notification_cleanup": {
-                                "text": "Notification: Cleanup",
-                                "index": 53
-                              },
-                              "email_notification": {
-                                "text": "Notification: Email",
-                                "index": 54
-                              },
-                              "search_index_assets": {
-                                "text": "Search: Index Assets",
-                                "index": 55
-                              },
-                              "search_index_faces": {
-                                "text": "Search: Index Faces",
-                                "index": 56
-                              },
-                              "search_index_albums": {
-                                "text": "Search: Index Albums",
-                                "index": 57
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    ]
                   },
-                  {
-                    "matcher": {
-                      "id": "byType",
-                      "options": "number"
-                    },
-                    "properties": [
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
                       {
-                        "id": "decimals",
+                        "color": "red",
                         "value": 0
                       },
                       {
-                        "id": "custom.align",
-                        "value": "right"
-                      },
-                      {
-                        "id": "custom.cellOptions",
-                        "value": {
-                          "type": "color-text"
-                        }
-                      },
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "thresholds"
-                        }
-                      },
-                      {
-                        "id": "thresholds",
-                        "value": {
-                          "mode": "absolute",
-                          "steps": [
-                            {
-                              "color": "green",
-                              "value": 0
-                            },
-                            {
-                              "color": "red",
-                              "value": 1
-                            }
-                          ]
-                        }
+                        "color": "green",
+                        "value": 1
                       }
                     ]
                   }
-                ]
+                },
+                "overrides": []
               },
               "options": {
                 "cellHeight": "sm",
-                "showHeader": true,
-                "sortBy": [
-                  {
-                    "desc": true,
-                    "displayName": "Failed"
-                  }
-                ]
+                "showHeader": true
               }
             },
             "version": "13.1.0"
@@ -1379,7 +809,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_asset_repository_get_file_samples_duration_bucket[1h]))) > 0) or vector(0)",
-                        "legendFormat": "Get File Samples"
+                        "legendFormat": "get_file_samples"
                       },
                       "version": "v0"
                     },
@@ -1398,7 +828,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_asset_repository_get_time_bucket_duration_bucket[1h]))) > 0) or vector(0)",
-                        "legendFormat": "Get Time Bucket"
+                        "legendFormat": "get_time_bucket"
                       },
                       "version": "v0"
                     },
@@ -1417,7 +847,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_asset_repository_get_time_buckets_duration_bucket[1h]))) > 0) or vector(0)",
-                        "legendFormat": "Get Time Buckets"
+                        "legendFormat": "get_time_buckets"
                       },
                       "version": "v0"
                     },
@@ -1448,12 +878,11 @@
                     "axisColorMode": "text",
                     "axisLabel": "",
                     "axisPlacement": "auto",
-                    "axisSoftMax": 10,
                     "barAlignment": 0,
                     "barWidthFactor": 0.6,
                     "drawStyle": "line",
                     "fillOpacity": 10,
-                    "gradientMode": "opacity",
+                    "gradientMode": "scheme",
                     "hideFrom": {
                       "legend": false,
                       "tooltip": false,
@@ -1477,7 +906,6 @@
                       "mode": "off"
                     }
                   },
-                  "min": 0,
                   "unit": "ms"
                 },
                 "overrides": []
@@ -1490,19 +918,18 @@
                 "legend": {
                   "calcs": [
                     "lastNotNull",
-                    "mean",
-                    "max"
+                    "mean"
                   ],
                   "displayMode": "table",
                   "enableFacetedFilter": false,
                   "overflow": "ellipsis",
-                  "placement": "bottom",
+                  "placement": "right",
                   "showLegend": true
                 },
                 "tooltip": {
                   "hideZeros": false,
-                  "mode": "multi",
-                  "sort": "desc"
+                  "mode": "single",
+                  "sort": "none"
                 }
               }
             },
@@ -1529,7 +956,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_machine_learning_repository_check_duration_bucket[1h]))) > 0) or vector(0)",
-                        "legendFormat": "Health Check"
+                        "legendFormat": "check"
                       },
                       "version": "v0"
                     },
@@ -1548,7 +975,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_machine_learning_repository_setup_duration_bucket[1h]))) > 0) or vector(0)",
-                        "legendFormat": "Setup"
+                        "legendFormat": "setup"
                       },
                       "version": "v0"
                     },
@@ -1567,7 +994,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_machine_learning_repository_tick_duration_bucket[1h]))) > 0) or vector(0)",
-                        "legendFormat": "Tick"
+                        "legendFormat": "tick"
                       },
                       "version": "v0"
                     },
@@ -1586,7 +1013,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_machine_learning_repository_set_healthy_duration_bucket[1h]))) > 0) or vector(0)",
-                        "legendFormat": "Set Healthy"
+                        "legendFormat": "set_healthy"
                       },
                       "version": "v0"
                     },
@@ -1605,7 +1032,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "expr": "(histogram_quantile(0.95, sum by (le) (rate(immich_machine_learning_repository_teardown_duration_bucket[1h]))) > 0) or vector(0)",
-                        "legendFormat": "Teardown"
+                        "legendFormat": "teardown"
                       },
                       "version": "v0"
                     },
@@ -1640,7 +1067,7 @@
                     "barWidthFactor": 0.6,
                     "drawStyle": "line",
                     "fillOpacity": 10,
-                    "gradientMode": "opacity",
+                    "gradientMode": "scheme",
                     "hideFrom": {
                       "legend": false,
                       "tooltip": false,
@@ -1664,7 +1091,6 @@
                       "mode": "off"
                     }
                   },
-                  "min": 0,
                   "unit": "ms"
                 },
                 "overrides": []
@@ -1677,19 +1103,18 @@
                 "legend": {
                   "calcs": [
                     "lastNotNull",
-                    "mean",
-                    "max"
+                    "mean"
                   ],
                   "displayMode": "table",
                   "enableFacetedFilter": false,
                   "overflow": "ellipsis",
-                  "placement": "bottom",
+                  "placement": "right",
                   "showLegend": true
                 },
                 "tooltip": {
                   "hideZeros": false,
-                  "mode": "multi",
-                  "sort": "desc"
+                  "mode": "single",
+                  "sort": "none"
                 }
               }
             },
@@ -1715,8 +1140,8 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "label_replace(label_replace(label_replace(process_memory_usage{job=\"immich\"}, \"target\", \"$1\", \"instance\", \"(.+)\"), \"target\", \"API (:8081)\", \"target\", \".*:8081$\"), \"target\", \"Workers (:8082)\", \"target\", \".*:8082$\")",
-                        "legendFormat": "{{target}}"
+                        "expr": "process_memory_usage{job=\"immich\"}",
+                        "legendFormat": "memory"
                       },
                       "version": "v0"
                     },
@@ -1728,7 +1153,7 @@
               "transformations": []
             }
           },
-          "description": "Immich process memory usage per scraped metrics port (8081 API, 8082 Workers; falls back to instance for other targets).",
+          "description": "Immich server process memory usage.",
           "id": 10,
           "links": [],
           "title": "Process Memory",
@@ -1751,7 +1176,7 @@
                     "barWidthFactor": 0.6,
                     "drawStyle": "line",
                     "fillOpacity": 10,
-                    "gradientMode": "opacity",
+                    "gradientMode": "scheme",
                     "hideFrom": {
                       "legend": false,
                       "tooltip": false,
@@ -1785,12 +1210,8 @@
                   "multiLane": false
                 },
                 "legend": {
-                  "calcs": [
-                    "lastNotNull",
-                    "mean",
-                    "max"
-                  ],
-                  "displayMode": "table",
+                  "calcs": [],
+                  "displayMode": "list",
                   "enableFacetedFilter": false,
                   "overflow": "ellipsis",
                   "placement": "bottom",
@@ -1798,8 +1219,8 @@
                 },
                 "tooltip": {
                   "hideZeros": false,
-                  "mode": "multi",
-                  "sort": "desc"
+                  "mode": "single",
+                  "sort": "none"
                 }
               }
             },
@@ -1825,31 +1246,12 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "label_replace(label_replace(label_replace(sum by (instance) (rate(process_cpu_time_total{job=\"immich\"}[5m])), \"target\", \"$1\", \"instance\", \"(.+)\"), \"target\", \"API (:8081)\", \"target\", \".*:8081$\"), \"target\", \"Workers (:8082)\", \"target\", \".*:8082$\")",
-                        "legendFormat": "{{target}} (%)"
+                        "expr": "rate(process_cpu_time_total{job=\"immich\"}[5m])",
+                        "legendFormat": "cores"
                       },
                       "version": "v0"
                     },
                     "refId": "A"
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "hidden": false,
-                    "query": {
-                      "datasource": {
-                        "name": "prometheus"
-                      },
-                      "group": "prometheus",
-                      "kind": "DataQuery",
-                      "spec": {
-                        "expr": "label_replace(label_replace(label_replace(sum by (instance) (rate(process_cpu_time_total{job=\"immich\"}[5m])) * 1000, \"target\", \"$1\", \"instance\", \"(.+)\"), \"target\", \"API (:8081)\", \"target\", \".*:8081$\"), \"target\", \"Workers (:8082)\", \"target\", \".*:8082$\")",
-                        "legendFormat": "{{target}} (mCores)"
-                      },
-                      "version": "v0"
-                    },
-                    "refId": "B"
                   }
                 }
               ],
@@ -1857,7 +1259,7 @@
               "transformations": []
             }
           },
-          "description": "Immich CPU usage per process (user + system combined). Shown in % of 1 core (left axis) and millicores (right axis).",
+          "description": "Immich server CPU usage in cores (1 = one full core).",
           "id": 11,
           "links": [],
           "title": "Process CPU",
@@ -1874,13 +1276,13 @@
                     "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
-                    "axisLabel": "% of 1 core",
-                    "axisPlacement": "left",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
                     "barAlignment": 0,
                     "barWidthFactor": 0.6,
                     "drawStyle": "line",
                     "fillOpacity": 10,
-                    "gradientMode": "opacity",
+                    "gradientMode": "scheme",
                     "hideFrom": {
                       "legend": false,
                       "tooltip": false,
@@ -1904,43 +1306,9 @@
                       "mode": "off"
                     }
                   },
-                  "min": 0,
-                  "unit": "percentunit"
+                  "unit": "short"
                 },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byFrameRefID",
-                      "options": "B"
-                    },
-                    "properties": [
-                      {
-                        "id": "unit",
-                        "value": "suffix: mCores"
-                      },
-                      {
-                        "id": "custom.axisPlacement",
-                        "value": "right"
-                      },
-                      {
-                        "id": "custom.axisLabel",
-                        "value": "mCores"
-                      },
-                      {
-                        "id": "custom.lineWidth",
-                        "value": 0
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 0
-                      },
-                      {
-                        "id": "custom.showPoints",
-                        "value": "never"
-                      }
-                    ]
-                  }
-                ]
+                "overrides": []
               },
               "options": {
                 "annotations": {
@@ -1948,12 +1316,8 @@
                   "multiLane": false
                 },
                 "legend": {
-                  "calcs": [
-                    "lastNotNull",
-                    "mean",
-                    "max"
-                  ],
-                  "displayMode": "table",
+                  "calcs": [],
+                  "displayMode": "list",
                   "enableFacetedFilter": false,
                   "overflow": "ellipsis",
                   "placement": "bottom",
@@ -1961,8 +1325,8 @@
                 },
                 "tooltip": {
                   "hideZeros": false,
-                  "mode": "multi",
-                  "sort": "desc"
+                  "mode": "single",
+                  "sort": "none"
                 }
               }
             },
@@ -1989,7 +1353,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "{namespace=\"personal\",pod=~\"immich-server.*\"} | decolorize |~ \"$log_level\" |~ \"(?i)$log_search\"",
+                        "expr": "{namespace=\"personal\",pod=~\"immich-server.*\",level=~\"(?i)$server_level\"} |~ \"$server_filter\"",
                         "legendFormat": "",
                         "queryType": "range"
                       },
@@ -2003,7 +1367,7 @@
               "transformations": []
             }
           },
-          "description": "Immich server logs with ANSI codes stripped. Use Log Level and Log Search controls at the top to filter.",
+          "description": "Immich server logs. Filter independently with the Server level and Server filter controls.",
           "id": 12,
           "links": [],
           "title": "Server Logs",
@@ -2017,11 +1381,11 @@
               "options": {
                 "dedupStrategy": "none",
                 "enableColorMapping": false,
-                "prettifyLogMessage": true,
+                "prettifyLogMessage": false,
                 "showCommonLabels": false,
                 "showTime": true,
                 "sortOrder": "Descending",
-                "wrapLogMessage": true
+                "wrapLogMessage": false
               }
             },
             "version": "13.1.0"
@@ -2047,7 +1411,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "{namespace=\"personal\",pod=~\"immich-machine-learning.*\"} | decolorize |~ \"$log_level\" |~ \"(?i)$log_search\"",
+                        "expr": "{namespace=\"personal\",pod=~\"immich-machine-learning.*\",level=~\"(?i)$ml_level\"} |~ \"$ml_filter\"",
                         "legendFormat": "",
                         "queryType": "range"
                       },
@@ -2061,7 +1425,7 @@
               "transformations": []
             }
           },
-          "description": "Immich ML logs with ANSI codes stripped. Use Log Level and Log Search controls at the top to filter.",
+          "description": "Immich ML logs. Filter independently with the ML level and ML filter controls.",
           "id": 13,
           "links": [],
           "title": "Machine Learning Logs",
@@ -2075,11 +1439,11 @@
               "options": {
                 "dedupStrategy": "none",
                 "enableColorMapping": false,
-                "prettifyLogMessage": true,
+                "prettifyLogMessage": false,
                 "showCommonLabels": false,
                 "showTime": true,
                 "sortOrder": "Descending",
-                "wrapLogMessage": true
+                "wrapLogMessage": false
               }
             },
             "version": "13.1.0"
@@ -2170,7 +1534,7 @@
                           "kind": "ElementReference",
                           "name": "panel-5"
                         },
-                        "height": 13,
+                        "height": 10,
                         "width": 24,
                         "x": 0,
                         "y": 0
@@ -2183,10 +1547,10 @@
                           "kind": "ElementReference",
                           "name": "panel-6"
                         },
-                        "height": 14,
+                        "height": 10,
                         "width": 12,
                         "x": 0,
-                        "y": 13
+                        "y": 10
                       }
                     },
                     {
@@ -2196,10 +1560,10 @@
                           "kind": "ElementReference",
                           "name": "panel-7"
                         },
-                        "height": 14,
+                        "height": 10,
                         "width": 12,
                         "x": 12,
-                        "y": 13
+                        "y": 10
                       }
                     }
                   ]
@@ -2222,7 +1586,7 @@
                           "kind": "ElementReference",
                           "name": "panel-8"
                         },
-                        "height": 15,
+                        "height": 10,
                         "width": 12,
                         "x": 0,
                         "y": 0
@@ -2235,7 +1599,7 @@
                           "kind": "ElementReference",
                           "name": "panel-9"
                         },
-                        "height": 15,
+                        "height": 10,
                         "width": 12,
                         "x": 12,
                         "y": 0
@@ -2248,10 +1612,10 @@
                           "kind": "ElementReference",
                           "name": "panel-10"
                         },
-                        "height": 15,
+                        "height": 10,
                         "width": 12,
                         "x": 0,
-                        "y": 15
+                        "y": 10
                       }
                     },
                     {
@@ -2261,10 +1625,10 @@
                           "kind": "ElementReference",
                           "name": "panel-11"
                         },
-                        "height": 15,
+                        "height": 10,
                         "width": 12,
                         "x": 12,
-                        "y": 15
+                        "y": 10
                       }
                     }
                   ]
@@ -2287,7 +1651,7 @@
                           "kind": "ElementReference",
                           "name": "panel-12"
                         },
-                        "height": 14,
+                        "height": 10,
                         "width": 24,
                         "x": 0,
                         "y": 0
@@ -2303,7 +1667,7 @@
                         "height": 10,
                         "width": 24,
                         "x": 0,
-                        "y": 14
+                        "y": 10
                       }
                     }
                   ]

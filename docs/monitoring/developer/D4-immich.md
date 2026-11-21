@@ -99,14 +99,51 @@ Every query names one metric and falls back to `0` when the histogram has no rec
 
 ### Tab 4: Logs
 
-| Panel | Type | Query (Loki) | Rationale |
-|-------|------|--------------|-----------|
-| **Server Logs** | Logs | `{namespace="personal",pod=~"immich-server.*"}` | All server output. Add `\|= "(?i)error"` to filter. |
-| **Machine Learning Logs** | Logs | `{namespace="personal",pod=~"immich-machine-learning.*"}` | ML failures don't show up in the server pod. |
+Each panel has its **own** level dropdown and text filter. The controls are dashboard variables, but they are scoped per panel — changing one does not affect the other.
 
-> Logs currently arrive with ANSI colour codes, so Loki labels `detected_level` as `unknown`. Until Alloy strips ANSI (or Immich switches to `IMMICH_LOG_FORMAT=json`), use text filters rather than a `level` label.
->
+| Panel | Level control | Text control | Query (Loki) |
+|-------|---------------|--------------|--------------|
+| **Server Logs** | `$server_level` | `$server_filter` | `{namespace="personal",pod=~"immich-server.*",level=~"(?i)$server_level"} \|~ "$server_filter"` |
+| **Machine Learning Logs** | `$ml_level` | `$ml_filter` | `{namespace="personal",pod=~"immich-machine-learning.*",level=~"(?i)$ml_level"} \|~ "$ml_filter"` |
+
+Defaults are `All` / `.*`, so both panels show everything. The level dropdown is case-insensitive (`error`, `warn`, `info`, `debug`, `trace`, `log`); the text box is a regex line filter (`ENOENT`, `thumbnail`, `(?i)timeout`, …).
+
 > Immich only logs on activity (jobs, websocket connects, errors). On an idle instance a 6h window can legitimately be empty, which is why the dashboard defaults to 24h.
+
+---
+
+## Log normalisation (Alloy)
+
+Alloy now runs every pod log line through a `loki.process` pipeline before writing to Loki:
+
+```alloy
+loki.process "pod_logs" {
+  forward_to = [loki.write.default.receiver]
+
+  // 1. strip ANSI colour escapes
+  stage.replace {
+    expression = "\\x1b\\[[0-9;]*[A-Za-z]"
+    replace    = ""
+  }
+
+  // 2. extract a level token (NestJS LOG/ERROR, uvicorn INFO, ...)
+  stage.regex {
+    expression = "(?i)\\b(?P<level>trace|verbose|debug|info|log|warn|warning|error|fatal)\\b"
+  }
+
+  // 3. expose it as the `level` stream label
+  stage.labels {
+    values = { level = "level" }
+  }
+}
+```
+
+Consequences:
+
+- The Logs panels no longer show `unk` — lines carry a real `level` label.
+- Stack-trace continuation lines (`at async …`, `Error: …`) still have no level of their own; they are matched by the text filter and remain part of the same stream.
+- This is **not** the same as `IMMICH_LOG_FORMAT=json`. The app still emits console text; only Alloy normalises it.
+- Old entries written before this change have no `level` label. They remain visible with `All` but will not match a specific level until they age out.
 
 ---
 
