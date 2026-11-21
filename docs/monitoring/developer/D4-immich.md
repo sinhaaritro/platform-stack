@@ -101,12 +101,12 @@ Every query names one metric and falls back to `0` when the histogram has no rec
 
 Each panel has its **own** level dropdown and text filter. The controls are dashboard variables, but they are scoped per panel — changing one does not affect the other.
 
-| Panel | Level control | Text control | Query (Loki) |
-|-------|---------------|--------------|--------------|
-| **Server Logs** | `$server_level` | `$server_filter` | `{namespace="personal",pod=~"immich-server.*",level=~"(?i)$server_level"} \|~ "$server_filter"` |
-| **Machine Learning Logs** | `$ml_level` | `$ml_filter` | `{namespace="personal",pod=~"immich-machine-learning.*",level=~"(?i)$ml_level"} \|~ "$ml_filter"` |
+| Panel | Level control | Search control | Query (Loki) |
+|-------|---------------|----------------|--------------|
+| **Server Logs** | `$server_log_level` | `$server_log_search` | `{namespace="personal",pod=~"immich-server.*"} \| decolorize \|~ "$server_log_level" \|~ "(?i)$server_log_search"` |
+| **Machine Learning Logs** | `$ml_log_level` | `$ml_log_search` | `{namespace="personal",pod=~"immich-machine-learning.*"} \| decolorize \|~ "$ml_log_level" \|~ "(?i)$ml_log_search"` |
 
-Defaults are `All` / `.*`, so both panels show everything. The level dropdown is case-insensitive (`error`, `warn`, `info`, `debug`, `trace`, `log`); the text box is a regex line filter (`ENOENT`, `thumbnail`, `(?i)timeout`, …).
+Both default to `All` / empty, so the panels show everything. Each block has its own pair of controls, so filtering the server logs does not touch the ML panel. `| decolorize` strips ANSI at query time, which keeps the level filter readable on older entries.
 
 > Immich only logs on activity (jobs, websocket connects, errors). On an idle instance a 6h window can legitimately be empty, which is why the dashboard defaults to 24h.
 
@@ -140,10 +140,10 @@ loki.process "pod_logs" {
 
 Consequences:
 
-- The Logs panels no longer show `unk` — lines carry a real `level` label.
+- Alloy strips ANSI and attaches a real `level` label, so Loki can classify most lines instead of returning `unknown`. The D4 log panels still filter with a level regex plus `| decolorize`, which also works for entries stored before this change.
 - Stack-trace continuation lines (`at async …`, `Error: …`) still have no level of their own; they are matched by the text filter and remain part of the same stream.
 - This is **not** the same as `IMMICH_LOG_FORMAT=json`. The app still emits console text; only Alloy normalises it.
-- Old entries written before this change have no `level` label. They remain visible with `All` but will not match a specific level until they age out.
+- Old entries written before this change have no `level` label. The panels keep working on them because they filter the decolorized line text, not the label.
 
 ---
 
