@@ -10,9 +10,23 @@ components:
   - ../../../apps/infrastructure/grafana/components/datasource-loki
   - ../../../apps/infrastructure/grafana/components/datasource-mimir
   - ../../../apps/infrastructure/grafana/components/datasource-alertmanager
-  - ../../../apps/infrastructure/grafana/components/dashboards
   - ../../../apps/infrastructure/grafana/components/resource-limits
   - ../../../apps/infrastructure/grafana/components/probes
   - ./components/ingress
-  - ./components/dashboards
+  - ../../../apps/infrastructure/grafana/components/dashboards/executive/e1-platform-overview
+  - ../../../apps/infrastructure/grafana/components/dashboards/executive/e2-capacity-and-trends
+  - ../../../apps/infrastructure/grafana/components/dashboards/sre/s1-backup-and-disaster-recovery
+  - ../../../apps/infrastructure/grafana/components/dashboards/sre/s2-cluster-and-node-health
+  - ../../../apps/infrastructure/grafana/components/dashboards/sre/s3-networking
+  - ../../../apps/infrastructure/grafana/components/dashboards/sre/s4-storage
+  - ../../../apps/infrastructure/grafana/components/dashboards/sre/s5-monitoring-self-health
+  - ../../../apps/infrastructure/grafana/components/dashboards/sre/s6-external-infrastructure
+  - ../../../apps/infrastructure/grafana/components/dashboards/developer/d1-application-health
+  - ../../../apps/infrastructure/grafana/components/dashboards/developer/d2-log-explorer
+  - ../../../apps/infrastructure/grafana/components/dashboards/developer/d3-security-auth
+  - ../../../apps/infrastructure/grafana/components/dashboards/developer/d4-immich
+  - ../../../apps/infrastructure/grafana/components/dashboards/dba/b1-postgresql
+  - ../../../apps/infrastructure/grafana/components/dashboards/dba/b2-cache-and-document-stores
+  - ../../../apps/infrastructure/grafana/components/dashboards/platform/node-exporter
+  - ../../../apps/infrastructure/grafana/components/dashboards/platform/loki
   # - ../../../apps/infrastructure/grafana/components/maintenance

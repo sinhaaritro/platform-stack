@@ -1,17 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 
-resources:
-  - dashboard-node-exporter.yaml
-  - dashboard-loki.yaml
-
 configMapGenerator:
-  # App-owned dashboards: defined here as reusable templates and consumed by
-  # clusters/hyperion/grafana/kustomization.yaml.
-  - name: grafana-dashboard-immich
+  - name: grafana-dashboard-log-explorer
     namespace: monitoring
     files:
-      - developer/D4-immich.json
+      - D2-log-explorer.json
     options:
       disableNameSuffixHash: true
       labels:

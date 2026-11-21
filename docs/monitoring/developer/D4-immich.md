@@ -103,10 +103,12 @@ Each panel has its **own** level dropdown and text filter. The controls are dash
 
 | Panel | Level control | Search control | Query (Loki) |
 |-------|---------------|----------------|--------------|
-| **Server Logs** | `$server_log_level` | `$server_log_search` | `{namespace="personal",pod=~"immich-server.*"} \| decolorize \|~ "$server_log_level" \|~ "(?i)$server_log_search"` |
-| **Machine Learning Logs** | `$ml_log_level` | `$ml_log_search` | `{namespace="personal",pod=~"immich-machine-learning.*"} \| decolorize \|~ "$ml_log_level" \|~ "(?i)$ml_log_search"` |
+| **Server Logs** | `$server_log_level` | `$server_log_search` | `{namespace="$namespace",pod=~"immich-server.*"} \| decolorize \|~ "$server_log_level" \|~ "(?i)$server_log_search"` |
+| **Machine Learning Logs** | `$ml_log_level` | `$ml_log_search` | `{namespace="$namespace",pod=~"immich-machine-learning.*"} \| decolorize \|~ "$ml_log_level" \|~ "(?i)$ml_log_search"` |
 
 Both default to `All` / empty, so the panels show everything. Each block has its own pair of controls, so filtering the server logs does not touch the ML panel. `| decolorize` strips ANSI at query time, which keeps the level filter readable on older entries.
+
+The namespace comes from the dashboard-level `$namespace` query variable (`label_values(kube_pod_info, namespace)`), so the template is not tied to `personal`. The default selection is `personal`; change it at runtime on a cluster that names the namespace differently.
 
 > Immich only logs on activity (jobs, websocket connects, errors). On an idle instance a 6h window can legitimately be empty, which is why the dashboard defaults to 24h.
 

@@ -9,8 +9,9 @@ components:
   - ../../../apps/infrastructure/grafana/components/storage-longhorn
   - ../../../apps/infrastructure/grafana/components/datasource-loki
   - ../../../apps/infrastructure/grafana/components/datasource-mimir
-  - ../../../apps/infrastructure/grafana/components/dashboards
   - ../../../apps/infrastructure/grafana/components/datasource-alertmanager
+  - ../../../apps/infrastructure/grafana/components/dashboards/developer/d2-log-explorer
+  - ../../../apps/infrastructure/grafana/components/dashboards/sre/s5-monitoring-self-health
   - ../../../apps/infrastructure/grafana/components/resource-limits
   - ../../../apps/infrastructure/grafana/components/ingress
   # - ../../../apps/infrastructure/grafana/components/maintenance

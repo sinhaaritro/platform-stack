@@ -68,7 +68,40 @@
       "to": "now"
     },
     "title": "Immich",
-    "variables": [],
+    "variables": [
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "namespace",
+          "label": "Namespace",
+          "query": {
+            "kind": "DataQuery",
+            "group": "prometheus",
+            "version": "v0",
+            "datasource": {
+              "name": "prometheus"
+            },
+            "spec": {
+              "expr": "label_values(kube_pod_info, namespace)"
+            }
+          },
+          "current": {
+            "text": "personal",
+            "value": "personal"
+          },
+          "definition": "label_values(kube_pod_info, namespace)",
+          "hide": "dontHide",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "regex": "",
+          "sort": "disabled",
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": true
+        }
+      }
+    ],
     "elements": {
       "panel-1": {
         "kind": "Panel",
@@ -1935,7 +1968,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "{namespace=\"personal\",pod=~\"immich-server.*\"} | decolorize |~ \"$server_log_level\" |~ \"(?i)$server_log_search\"",
+                        "expr": "{namespace=\"$namespace\",pod=~\"immich-server.*\"} | decolorize |~ \"$server_log_level\" |~ \"(?i)$server_log_search\"",
                         "legendFormat": "",
                         "queryType": "range"
                       },
@@ -1993,7 +2026,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "{namespace=\"personal\",pod=~\"immich-machine-learning.*\"} | decolorize |~ \"$ml_log_level\" |~ \"(?i)$ml_log_search\"",
+                        "expr": "{namespace=\"$namespace\",pod=~\"immich-machine-learning.*\"} | decolorize |~ \"$ml_log_level\" |~ \"(?i)$ml_log_search\"",
                         "legendFormat": "",
                         "queryType": "range"
                       },
